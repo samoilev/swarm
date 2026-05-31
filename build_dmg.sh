@@ -7,7 +7,7 @@ set -e
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="Родословная Студия"
 BUNDLE_ID="com.familytreestudio.app"
-VERSION="1.0.0"
+VERSION="1.1.0"
 BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
 BINARY="$BUILD_DIR/FamilyTreeStudio"
 RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeStudio.bundle"
