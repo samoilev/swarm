@@ -64,7 +64,7 @@ struct PlacesDatabase {
         }
         
         var result: [(name: String, nameLower: String, region: String, country: String)] = []
-        result.reserveCapacity(230000)
+        result.reserveCapacity(460000)
         
         for line in data.split(separator: "\n") {
             let parts = line.split(separator: "\t", maxSplits: 2, omittingEmptySubsequences: false)

@@ -179,11 +179,11 @@ struct GEDCOMParser {
             } else if level == 2 {
                 switch (context, tag) {
                 case ("BIRT", "DATE"):
-                    birthDate = value
+                    birthDate = FamilyDate.normalize(value)
                 case ("BIRT", "PLAC"):
                     birthPlace = value
                 case ("DEAT", "DATE"):
-                    deathDate = value
+                    deathDate = FamilyDate.normalize(value)
                 case ("DEAT", "PLAC"):
                     deathPlace = value
                 case ("BURI", "PLAC"):
@@ -263,7 +263,7 @@ struct GEDCOMParser {
             } else if level == 2 {
                 switch (context, tag) {
                 case ("MARR", "DATE"):
-                    marriageDate = value
+                    marriageDate = FamilyDate.normalize(value)
                 case ("MARR", "PLAC"):
                     marriagePlace = value
                 default: break

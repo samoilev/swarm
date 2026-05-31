@@ -6,12 +6,14 @@ struct TreeCanvasView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     var highlightedIds: Set<UUID> = []
+    var lineageLabels: [UUID: String] = [:]
+    @Binding var fitRequest: Int
     
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
     private let spouseGap: CGFloat = 30
     private let siblingGap: CGFloat = 40
-    private let familyGap: CGFloat = 80
+    private let familyGap: CGFloat = 40
     private let vGapTB: CGFloat = 110
     private let vGapLR: CGFloat = 150
     private let pad: CGFloat = 60
@@ -44,11 +46,13 @@ struct TreeCanvasView: View {
                 ForEach(layout.nodes, id: \.person.id) { node in
                     let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
                     let isSelected = selectedPerson?.id == node.person.id
+                    let label = lineageLabels[node.person.id]
                     PersonCardView(
                         person: node.person,
                         isSelected: isSelected,
                         isHome: tree.homePersonId == node.person.id,
-                        isHighlighted: highlightedIds.contains(node.person.id)
+                        isHighlighted: highlightedIds.contains(node.person.id),
+                        lineageLabel: label
                     )
                     .equatable()
                     .opacity(dimmed ? 0.3 : 1.0)
@@ -59,7 +63,6 @@ struct TreeCanvasView: View {
                 }
             }
             .frame(width: layout.totalWidth, height: layout.totalHeight)
-            .drawingGroup()
             .scaleEffect(zoom, anchor: .topLeading)
             .offset(x: panOffset.width, y: panOffset.height)
             .gesture(
@@ -86,7 +89,49 @@ struct TreeCanvasView: View {
             )
             .onAppear { magnifyStart = zoom }
             .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
+            .onChange(of: tree.layoutVersion) { _, _ in
+                panOffset = .zero
+                dragStart = .zero
+            }
+            .onChange(of: fitRequest) { _, _ in
+                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+            }
             .clipped()
+            .background {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedPerson = nil
+                    }
+            }
+        }
+    }
+    
+    // MARK: - Fit to Screen
+    
+    private func fitToScreen(viewSize: CGSize, treeWidth: CGFloat, treeHeight: CGFloat) {
+        guard treeWidth > 0, treeHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
+        
+        let margin: CGFloat = 20
+        let availW = viewSize.width - margin * 2
+        let availH = viewSize.height - margin * 2
+        
+        let scaleW = availW / treeWidth
+        let scaleH = availH / treeHeight
+        let newZoom = min(min(scaleW, scaleH), 1.6) // don't exceed max zoom
+        let clampedZoom = max(0.2, newZoom)
+        
+        // Center the tree in the viewport
+        let scaledW = treeWidth * clampedZoom
+        let scaledH = treeHeight * clampedZoom
+        let offsetX = (viewSize.width - scaledW) / 2
+        let offsetY = (viewSize.height - scaledH) / 2
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoom = clampedZoom
+            panOffset = CGSize(width: offsetX, height: offsetY)
+            dragStart = CGSize(width: offsetX, height: offsetY)
+            magnifyStart = clampedZoom
         }
     }
     
@@ -265,7 +310,107 @@ struct TreeCanvasView: View {
         }
         
         // Build layout trees starting from the topmost generation
+        // Separate into left side (partner 1's lineage) and right side (partner 2's lineage)
+        // to prevent family lines from interleaving
+        
+        // Trace ancestors to determine which "side" each person belongs to
+        var side: [UUID: Int] = [:] // 0 = left (partner1), 1 = right (partner2), 2 = shared/children
+        
+        func traceAncestors(from personId: UUID, sideValue: Int) {
+            guard side[personId] == nil else { return }
+            side[personId] = sideValue
+            if let parentUnion = idx.childOf[personId] {
+                for pid in parentUnion.partnerIds {
+                    traceAncestors(from: pid, sideValue: sideValue)
+                }
+                // Siblings also belong to same side
+                for sibId in parentUnion.childrenIds where sibId != personId {
+                    if side[sibId] == nil { side[sibId] = sideValue }
+                }
+            }
+        }
+        
+        if let rootUnion = tree.rootUnion {
+            if let p1id = rootUnion.partner1Id {
+                side[p1id] = 0
+                traceAncestors(from: p1id, sideValue: 0)
+            }
+            if let p2id = rootUnion.partner2Id {
+                side[p2id] = 1
+                traceAncestors(from: p2id, sideValue: 1)
+            }
+            // Children of root union are shared — trace their spouses to appropriate side
+            for childId in rootUnion.childrenIds {
+                if side[childId] == nil { side[childId] = 2 }
+                // Each child's spouse's ancestors go to the opposite side of that child
+                for childUnion in idx.unionsOf[childId] ?? [] {
+                    for spouseId in childUnion.partnerIds where spouseId != childId {
+                        if side[spouseId] == nil {
+                            // Spouse's ancestry traced to whichever side hasn't claimed them
+                            let spouseSide = (side[childId] == 0) ? 1 : 0
+                            traceAncestors(from: spouseId, sideValue: spouseSide)
+                        }
+                    }
+                }
+            }
+        }
+        
+        // For deeper descendants, propagate side affinity
+        func propagateSide(_ personId: UUID, sideValue: Int) {
+            for union in idx.unionsOf[personId] ?? [] {
+                for childId in union.childrenIds {
+                    if side[childId] == nil {
+                        side[childId] = sideValue
+                        propagateSide(childId, sideValue: sideValue)
+                    }
+                }
+                for spouseId in union.partnerIds where spouseId != personId {
+                    if side[spouseId] == nil {
+                        let spouseSide = (sideValue == 0) ? 1 : 0
+                        side[spouseId] = spouseSide
+                        traceAncestors(from: spouseId, sideValue: spouseSide)
+                        propagateSide(spouseId, sideValue: spouseSide)
+                    }
+                }
+            }
+        }
+        
+        if let rootUnion = tree.rootUnion {
+            if let p1id = rootUnion.partner1Id { propagateSide(p1id, sideValue: 0) }
+            if let p2id = rootUnion.partner2Id { propagateSide(p2id, sideValue: 1) }
+            for childId in rootUnion.childrenIds {
+                propagateSide(childId, sideValue: side[childId] ?? 2)
+            }
+        }
+        
+        // Build layout trees: left side first, then right side
         let maxDepthVal = depths.values.max() ?? 0
+        
+        // Build left side (partner 1's ancestry)
+        for gen in 0...maxDepthVal {
+            let peopleAtGen = tree.people
+                .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil && (side[$0.id] ?? 2) == 0 }
+                .sorted { ($0.id.uuidString) < ($1.id.uuidString) }
+            for person in peopleAtGen {
+                if let node = buildLayoutNode(person.id) {
+                    rootNodes.append(node)
+                }
+            }
+        }
+        
+        // Build right side (partner 2's ancestry)
+        for gen in 0...maxDepthVal {
+            let peopleAtGen = tree.people
+                .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil && (side[$0.id] ?? 2) == 1 }
+                .sorted { ($0.id.uuidString) < ($1.id.uuidString) }
+            for person in peopleAtGen {
+                if let node = buildLayoutNode(person.id) {
+                    rootNodes.append(node)
+                }
+            }
+        }
+        
+        // Build any remaining (shared/unassigned)
         for gen in 0...maxDepthVal {
             let peopleAtGen = tree.people
                 .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil }
@@ -284,7 +429,6 @@ struct TreeCanvasView: View {
             if v.children.isEmpty {
                 // Leaf: place next to left sibling
                 if let ls = v.leftSibling {
-                    // Use max of distance and half-widths to account for variable node widths
                     let sep = (ls.width + v.width) / 2 + minSep
                     v.x = ls.x + sep
                 } else {
@@ -403,12 +547,25 @@ struct TreeCanvasView: View {
             let d = depths[v.personId] ?? depth
             positions[v.personId] = (finalX, d)
             
-            // Place inline spouse offset from person center
+            // Place inline spouse centered within node width
             if let sid = v.spouseId {
-                let offset = (nodeWidth + spouseGap) / 2
-                // Person goes left, spouse goes right of the node center
-                positions[v.personId] = (finalX - offset, d)
-                positions[sid] = (finalX + offset, d)
+                let halfOffset = (nodeWidth + spouseGap) / 2
+                // Determine which side to place the spouse:
+                // If person has a right sibling, spouse goes LEFT
+                // If person has no right sibling (rightmost or only), spouse goes RIGHT
+                let hasRightSibling = v.parent.map { p in
+                    p.children.last !== v
+                } ?? false
+                
+                if hasRightSibling {
+                    // Spouse on the left, person on the right
+                    positions[sid] = (finalX - halfOffset, d)
+                    positions[v.personId] = (finalX + halfOffset, d)
+                } else {
+                    // Person on the left, spouse on the right
+                    positions[v.personId] = (finalX - halfOffset, d)
+                    positions[sid] = (finalX + halfOffset, d)
+                }
             }
             
             for child in v.children {
@@ -517,7 +674,8 @@ struct TreeCanvasView: View {
                     let parentDepth = placements[validPartners[0]]!.depth
                     let parentBottom = CGFloat(parentDepth) * genStep + pad + cardH
                     let childTop = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
-                    let busY = (parentBottom + childTop) / 2
+                    // Route bus in the gap between parent and children (1/3 from parent)
+                    let busY = parentBottom + (childTop - parentBottom) * 0.35
                     
                     // Vertical drop from couple center to bus
                     segments.append(LinkSegment(from: CGPoint(x: ax, y: parentBottom), to: CGPoint(x: ax, y: busY)))
@@ -535,7 +693,7 @@ struct TreeCanvasView: View {
                     let parentDepth = placements[validPartners[0]]!.depth
                     let parentRight = CGFloat(parentDepth) * genStep + pad + cardW
                     let childLeft = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
-                    let busX = (parentRight + childLeft) / 2
+                    let busX = parentRight + (childLeft - parentRight) * 0.35
                     
                     segments.append(LinkSegment(from: CGPoint(x: parentRight, y: ay), to: CGPoint(x: busX, y: ay)))
                     let childYs = kids.compactMap { placements[$0]?.bc }.map { $0 + bShift }
@@ -577,6 +735,7 @@ struct PersonCardView: View, Equatable {
     var isSelected: Bool = false
     var isHome: Bool = false
     var isHighlighted: Bool = false
+    var lineageLabel: String? = nil
     
     static func == (lhs: PersonCardView, rhs: PersonCardView) -> Bool {
         lhs.person.id == rhs.person.id &&
@@ -586,7 +745,24 @@ struct PersonCardView: View, Equatable {
         lhs.person.lifespan == rhs.person.lifespan &&
         lhs.isSelected == rhs.isSelected &&
         lhs.isHome == rhs.isHome &&
-        lhs.isHighlighted == rhs.isHighlighted
+        lhs.isHighlighted == rhs.isHighlighted &&
+        lhs.lineageLabel == rhs.lineageLabel
+    }
+    
+    private var cardBackground: Color {
+        switch person.sex {
+        case .male: return SepiaTheme.cardBgMale
+        case .female: return SepiaTheme.cardBgFemale
+        case .unknown: return SepiaTheme.cardBg
+        }
+    }
+    
+    private var cardBorder: Color {
+        switch person.sex {
+        case .male: return SepiaTheme.cardLineMale
+        case .female: return SepiaTheme.cardLineFemale
+        case .unknown: return SepiaTheme.cardLine
+        }
     }
     
     var body: some View {
@@ -638,12 +814,25 @@ struct PersonCardView: View, Equatable {
             .padding(.bottom, 8)
         }
         .frame(width: 210, height: 90)
-        .background(isHighlighted ? SepiaTheme.accent.opacity(0.08) : SepiaTheme.cardBg)
+        .background(isHighlighted ? SepiaTheme.accent.opacity(0.08) : cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(isSelected ? SepiaTheme.accent : (isHighlighted ? SepiaTheme.accent2 : SepiaTheme.cardLine), lineWidth: isSelected ? 2 : (isHighlighted ? 1.5 : 1))
+                .strokeBorder(isSelected ? SepiaTheme.accent : (isHighlighted ? SepiaTheme.accent2 : cardBorder), lineWidth: isSelected ? 2 : (isHighlighted ? 1.5 : 1))
         )
         .clipShape(RoundedRectangle(cornerRadius: 4))
         .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
+        .overlay(alignment: .topTrailing) {
+            if let label = lineageLabel {
+                Text(label)
+                    .font(SepiaTheme.ui(size: 9))
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(SepiaTheme.accent.opacity(0.85))
+                    .clipShape(RoundedRectangle(cornerRadius: 3))
+                    .offset(x: -4, y: 4)
+            }
+        }
     }
 }

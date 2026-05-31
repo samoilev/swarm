@@ -67,14 +67,14 @@ struct GEDCOMSerializer {
             // Birth
             if p.birthDate != nil || p.birthPlace != nil {
                 lines.append("1 BIRT")
-                if let d = p.birthDate { lines.append("2 DATE \(d.uppercased())") }
+                if let d = p.birthDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = p.birthPlace { lines.append("2 PLAC \(pl)") }
             }
             
             // Death
             if !p.isLiving {
                 lines.append("1 DEAT")
-                if let d = p.deathDate { lines.append("2 DATE \(d.uppercased())") }
+                if let d = p.deathDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = p.deathPlace { lines.append("2 PLAC \(pl)") }
             }
             
@@ -154,7 +154,7 @@ struct GEDCOMSerializer {
             // Marriage
             if u.marriageDate != nil || u.marriagePlace != nil {
                 lines.append("1 MARR")
-                if let d = u.marriageDate { lines.append("2 DATE \(d.uppercased())") }
+                if let d = u.marriageDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = u.marriagePlace { lines.append("2 PLAC \(pl)") }
             }
             

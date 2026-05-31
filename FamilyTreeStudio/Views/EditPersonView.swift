@@ -78,7 +78,7 @@ struct EditPersonView: View {
                         }.padding(.bottom, 12)
                         
                         SectionHeader(title: "Рождение")
-                        SepiaTextField(label: "ДАТА", text: $birthDate, placeholder: "напр. 4 фев 1841").padding(.bottom, 8)
+                        SepiaTextField(label: "ДАТА", text: $birthDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
                         PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
@@ -87,7 +87,7 @@ struct EditPersonView: View {
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
                         
                         if !isLiving {
-                            SepiaTextField(label: "ДАТА", text: $deathDate, placeholder: "напр. 19 ноя 1903").padding(.bottom, 8)
+                            SepiaTextField(label: "ДАТА", text: $deathDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 12)
                         }
@@ -135,7 +135,9 @@ struct EditPersonView: View {
             if let m = parents.mother { relEditRow("Мать", m) { removeParent(m) } }
             ForEach(spouses, id: \.id) { s in relEditRow("Супруг", s) { removeSpouse(s) } }
             ForEach(children, id: \.id) { c in relEditRow("Ребёнок", c) { removeChild(c) } }
-            ForEach(siblings, id: \.id) { s in relEditRow("Брат/сестра", s) { removeSibling(s) } }
+            ForEach(siblings, id: \.id) { s in
+                relEditRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s) { removeSibling(s) }
+            }
             
             if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
                 Text("Родственные связи не заданы")
@@ -158,7 +160,7 @@ struct EditPersonView: View {
                 .font(SepiaTheme.body(size: 13))
                 
                 if addRelType != .none {
-                    Picker("Кому:", selection: $addRelPersonId) {
+                    Picker("Кто:", selection: $addRelPersonId) {
                         Text("Выбрать…").tag(nil as UUID?)
                         ForEach(availablePeople, id: \.id) { p in
                             Text(p.fullName).tag(p.id as UUID?)
@@ -219,6 +221,7 @@ struct EditPersonView: View {
                 break
             }
         }
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
     }
@@ -235,6 +238,7 @@ struct EditPersonView: View {
                 break
             }
         }
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
     }
@@ -249,6 +253,7 @@ struct EditPersonView: View {
                 break
             }
         }
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
     }
@@ -260,6 +265,7 @@ struct EditPersonView: View {
                 break
             }
         }
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
     }
@@ -315,6 +321,7 @@ struct EditPersonView: View {
         
         addRelType = .none
         addRelPersonId = nil
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
     }
@@ -419,9 +426,9 @@ struct EditPersonView: View {
         person.surname = surname
         person.maidenName = maidenName.isEmpty ? nil : maidenName
         person.sex = sex
-        person.birthDate = birthDate.isEmpty ? nil : birthDate
+        person.birthDate = birthDate.isEmpty ? nil : FamilyDate.normalize(birthDate)
         person.birthPlace = birthPlace.isEmpty ? nil : birthPlace
-        person.deathDate = isLiving ? nil : (deathDate.isEmpty ? nil : deathDate)
+        person.deathDate = isLiving ? nil : (deathDate.isEmpty ? nil : FamilyDate.normalize(deathDate))
         person.deathPlace = isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace)
         person.isLiving = isLiving
         person.burialPlace = burialPlace.isEmpty ? nil : burialPlace
@@ -430,6 +437,7 @@ struct EditPersonView: View {
         person.notes = notes.isEmpty ? nil : notes
         person.photoData = photoData
         person.updatedAt = Date()
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
         dismiss()

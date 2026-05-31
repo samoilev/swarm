@@ -75,7 +75,7 @@ struct AddPersonView: View {
                         }.padding(.bottom, 12)
                         
                         SectionHeader(title: "Рождение")
-                        SepiaTextField(label: "ДАТА", text: $birthDate, placeholder: "напр. 4 фев 1841").padding(.bottom, 8)
+                        SepiaTextField(label: "ДАТА", text: $birthDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
                         PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
@@ -84,7 +84,7 @@ struct AddPersonView: View {
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
                         
                         if !isLiving {
-                            SepiaTextField(label: "ДАТА", text: $deathDate, placeholder: "напр. 19 ноя 1903").padding(.bottom, 8)
+                            SepiaTextField(label: "ДАТА", text: $deathDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 12)
                         }
@@ -99,7 +99,7 @@ struct AddPersonView: View {
                         }.pickerStyle(.menu).font(SepiaTheme.body(size: 13)).padding(.bottom, 8)
                         
                         if relType != .none && !tree.people.isEmpty {
-                            Picker("Кому:", selection: $relatedPersonId) {
+                            Picker("Кто:", selection: $relatedPersonId) {
                                 Text("Выбрать…").tag(nil as UUID?)
                                 ForEach(tree.people, id: \.id) { p in Text(p.fullName).tag(p.id as UUID?) }
                             }.pickerStyle(.menu).font(SepiaTheme.body(size: 13))
@@ -129,9 +129,9 @@ struct AddPersonView: View {
             patronymic: patronymic.isEmpty ? nil : patronymic,
             surname: surname,
             maidenName: maidenName.isEmpty ? nil : maidenName, sex: sex,
-            birthDate: birthDate.isEmpty ? nil : birthDate,
+            birthDate: birthDate.isEmpty ? nil : FamilyDate.normalize(birthDate),
             birthPlace: birthPlace.isEmpty ? nil : birthPlace,
-            deathDate: isLiving ? nil : (deathDate.isEmpty ? nil : deathDate),
+            deathDate: isLiving ? nil : (deathDate.isEmpty ? nil : FamilyDate.normalize(deathDate)),
             deathPlace: isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace),
             isLiving: isLiving,
             burialPlace: burialPlace.isEmpty ? nil : burialPlace,
@@ -145,8 +145,17 @@ struct AddPersonView: View {
         if let rpid = relatedPersonId, relType != .none {
             switch relType {
             case .spouse:
-                let u = Union(partner1Id: rpid, partner2Id: person.id)
-                tree.unions.append(u)
+                // Check: already spouses
+                if !tree.unions.contains(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.contains(person.id) }) {
+                    // If rpid has a union with children but no second partner, add as partner
+                    if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.count == 1 }) {
+                        if existing.partner1Id == nil { existing.partner1Id = person.id }
+                        else if existing.partner2Id == nil { existing.partner2Id = person.id }
+                    } else {
+                        let u = Union(partner1Id: rpid, partner2Id: person.id)
+                        tree.unions.append(u)
+                    }
+                }
             case .child:
                 if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) }) {
                     existing.childrenIds.append(person.id)
@@ -173,6 +182,7 @@ struct AddPersonView: View {
             }
         }
         
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
         onAdded(person)

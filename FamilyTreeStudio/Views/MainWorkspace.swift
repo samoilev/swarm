@@ -15,9 +15,12 @@ struct MainWorkspace: View {
     @State private var showRelationshipSheet = false
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
+    @State private var lineageLabels: [UUID: String] = [:]
     @State private var inspectorWidth: CGFloat = 320
     @State private var showDeleteConfirm = false
     @State private var personToDelete: Person?
+    @State private var fitRequest: Int = 0
+    @State private var fanLevels: Int = 4
     
     enum ViewMode: String { case tree, fan }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
@@ -34,9 +37,9 @@ struct MainWorkspace: View {
                         SepiaTheme.paper
                         
                         if viewMode == .tree {
-                            TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, highlightedIds: highlightedBranch)
+                            TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest)
                         } else {
-                            FanChartView(tree: tree, zoom: zoom, selectedPerson: $selectedPerson)
+                            FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
                         }
                         
                         // Status bar
@@ -112,6 +115,18 @@ struct MainWorkspace: View {
             }
         }
         .frame(minWidth: 900, minHeight: 600)
+        .onChange(of: selectedPerson?.id) { _, newId in
+            if let newId, let person = tree.people.first(where: { $0.id == newId }) {
+                let idx = FamilyIndex(tree: tree)
+                let calc = LineageCalculator(index: idx)
+                let result = calc.compute(for: person)
+                highlightedBranch = result.ids
+                lineageLabels = result.labels
+            } else {
+                highlightedBranch = []
+                lineageLabels = [:]
+            }
+        }
     }
     
     private var toolbar: some View {
@@ -171,6 +186,29 @@ struct MainWorkspace: View {
                 }
             }
             
+            if viewMode == .fan {
+                HStack(spacing: 3) {
+                    Button { if fanLevels > 2 { fanLevels -= 1 } } label: {
+                        Image(systemName: "minus")
+                    }
+                    .buttonStyle(SepiaIconButtonStyle())
+                    .disabled(fanLevels <= 2)
+                    Text("\(fanLevels)")
+                        .font(SepiaTheme.ui(size: 10))
+                        .foregroundColor(SepiaTheme.ink)
+                        .frame(width: 14)
+                    Button { if fanLevels < 8 { fanLevels += 1 } } label: {
+                        Image(systemName: "plus")
+                    }
+                    .buttonStyle(SepiaIconButtonStyle())
+                    .disabled(fanLevels >= 8)
+                    Text("ур.")
+                        .font(SepiaTheme.ui(size: 10))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                }
+                .help("Количество поколений")
+            }
+            
             // Zoom
             HStack(spacing: 3) {
                 Button { zoom = max(0.25, zoom - 0.1) } label: { Image(systemName: "minus") }
@@ -183,22 +221,18 @@ struct MainWorkspace: View {
                 Button { zoom = min(1.6, zoom + 0.1) } label: { Image(systemName: "plus") }
                     .buttonStyle(SepiaIconButtonStyle())
                     .help("Увеличить масштаб")
-                Button { zoom = 0.85 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
                     .buttonStyle(SepiaIconButtonStyle())
-                    .help("Вписать в экран")
+                    .help("Центрировать и вписать дерево")
+                Button { tree.optimizeRoot(); fitRequest += 1 } label: { Image(systemName: "arrow.triangle.2.circlepath") }
+                    .buttonStyle(SepiaIconButtonStyle())
+                    .help("Обновить расположение дерева")
             }
             
             Spacer()
             
             // Actions
             HStack(spacing: 6) {
-                Button { toggleBranchHighlight() } label: { Image(systemName: "point.topleft.down.to.point.bottomright.curvepath") }
-                    .buttonStyle(SepiaButtonStyle(isActive: !highlightedBranch.isEmpty))
-                    .disabled(selectedPerson == nil)
-                    .help("Подсветить ветку выбранной персоны")
-                Button { showRelationshipSheet = true } label: { Image(systemName: "person.2.wave.2") }
-                    .buttonStyle(SepiaButtonStyle())
-                    .help("Определить степень родства между двумя персонами")
                 Button { showAddSheet = true } label: { Image(systemName: "plus") }
                     .buttonStyle(SepiaButtonStyle())
                     .help("Добавить новую персону в дерево")
@@ -247,61 +281,12 @@ struct MainWorkspace: View {
         highlightedBranch = []
         personToDelete = nil
         
+        tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()
         showToast("Удалён: \(name)")
     }
     
-    private func toggleBranchHighlight() {
-        guard let person = selectedPerson else { highlightedBranch = []; return }
-        if !highlightedBranch.isEmpty {
-            highlightedBranch = []
-            return
-        }
-        guard let homeId = tree.homePersonId else { return }
-        highlightedBranch = computePath(from: homeId, to: person.id)
-    }
-    
-    private func computePath(from startId: UUID, to targetId: UUID) -> Set<UUID> {
-        let idx = FamilyIndex(tree: tree)
-        var visited = Set<UUID>()
-        
-        func dfs(_ current: UUID) -> [UUID]? {
-            if current == targetId { return [current] }
-            if visited.contains(current) { return nil }
-            visited.insert(current)
-            
-            // Go through children
-            let unions = idx.unionsOf[current] ?? []
-            for union in unions {
-                for childId in union.childrenIds {
-                    if let path = dfs(childId) { return [current] + path }
-                }
-                // Also check spouse (to reach via spouse's lineage)
-                for pid in union.partnerIds where pid != current {
-                    if let path = dfs(pid) { return [current] + path }
-                }
-            }
-            
-            // Go through parents
-            if let parentUnion = idx.childOf[current] {
-                for pid in parentUnion.partnerIds {
-                    if let path = dfs(pid) { return [current] + path }
-                }
-                // Check siblings
-                for sibId in parentUnion.childrenIds where sibId != current {
-                    if let path = dfs(sibId) { return [current] + path }
-                }
-            }
-            
-            return nil
-        }
-        
-        if let path = dfs(startId) {
-            return Set(path)
-        }
-        return Set([startId, targetId])
-    }
     
     private func showToast(_ message: String) {
         toastMessage = message
