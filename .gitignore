@@ -1,0 +1,12 @@
+.build/
+.swiftpm/
+dist/
+*.o
+*.d
+*.swp
+*~
+.DS_Store
+xcuserdata/
+DerivedData/
+generate_icon.py
+FamilyTreeStudio/Resources/AppIcon_preview.png
