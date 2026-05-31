@@ -95,38 +95,27 @@ final class Person: Identifiable, Codable, Hashable {
     }
     
     var lifespan: String {
-        let birth = yearFrom(birthDate)
-        let death = yearFrom(deathDate)
-        if birth.isEmpty && death.isEmpty { return "" }
+        let birthComp = FamilyDate.parse(birthDate)
+        let deathComp = FamilyDate.parse(deathDate)
+        let birthStr = birthComp.year.map(String.init) ?? ""
+        let deathStr = deathComp.year.map(String.init) ?? ""
+        
+        if birthStr.isEmpty && deathStr.isEmpty { return "" }
+        
         if !isLiving && deathDate != nil {
-            let age = ageString(birthYear: birth, deathYear: death)
-            let base = "\(birth.isEmpty ? "?" : birth)–\(death.isEmpty ? "?" : death)"
-            return age.isEmpty ? base : "\(base) (\(age))"
+            let base = "\(birthStr.isEmpty ? "?" : birthStr)–\(deathStr.isEmpty ? "?" : deathStr)"
+            if let result = FamilyDate.calculateAge(birth: birthDate, death: deathDate) {
+                let approx = result.approximate ? "~" : ""
+                return "\(base) (\(approx)\(result.years))"
+            }
+            return base
         }
-        if !birth.isEmpty {
-            let age = ageString(birthYear: birth, deathYear: nil)
-            return age.isEmpty ? "р. \(birth)" : "р. \(birth) (\(age))"
-        }
-        return ""
-    }
-    
-    private func ageString(birthYear: String, deathYear: String?) -> String {
-        guard let by = Int(birthYear) else { return "" }
-        let endYear: Int
-        if let dy = deathYear, let d = Int(dy) {
-            endYear = d
-        } else {
-            endYear = Calendar.current.component(.year, from: Date())
-        }
-        let age = endYear - by
-        guard age >= 0 && age < 200 else { return "" }
-        return "\(age)"
-    }
-    
-    private func yearFrom(_ dateStr: String?) -> String {
-        guard let dateStr = dateStr else { return "" }
-        if let range = dateStr.range(of: #"\b\d{4}\b"#, options: .regularExpression) {
-            return String(dateStr[range])
+        if !birthStr.isEmpty {
+            if let result = FamilyDate.calculateAge(birth: birthDate, death: nil) {
+                let approx = result.approximate ? "~" : ""
+                return "р. \(birthStr) (\(approx)\(result.years))"
+            }
+            return "р. \(birthStr)"
         }
         return ""
     }

@@ -36,12 +36,17 @@ struct FamilyIndex {
         var mother: Person? = nil
         for pid in union.partnerIds {
             guard let p = byId[pid] else { continue }
-            if p.sex == .male { father = p }
-            else if p.sex == .female { mother = p }
+            if p.sex == .male && father == nil { father = p }
+            else if p.sex == .female && mother == nil { mother = p }
+            else if father == nil { father = p }
+            else if mother == nil { mother = p }
         }
-        if father == nil && mother == nil {
-            if let p1id = union.partner1Id { father = byId[p1id] }
-            if let p2id = union.partner2Id { mother = byId[p2id] }
+        // Fallback to partner order if sex-based assignment didn't fill both
+        if father == nil, let p1id = union.partner1Id, let p = byId[p1id], p.id != mother?.id {
+            father = p
+        }
+        if mother == nil, let p2id = union.partner2Id, let p = byId[p2id], p.id != father?.id {
+            mother = p
         }
         return (father, mother)
     }

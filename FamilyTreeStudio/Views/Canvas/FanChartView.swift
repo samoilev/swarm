@@ -2,34 +2,88 @@ import SwiftUI
 
 struct FanChartView: View {
     let tree: FamilyTree
-    let zoom: CGFloat
+    @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
-    
-    private let maxGen = 5
+    @Binding var fitRequest: Int
+    @Binding var maxGen: Int
     private let rootR: CGFloat = 78
     private let ringW: CGFloat = 92
     private let sweep: Double = 180
     
+    @State private var panOffset: CGSize = .zero
+    @State private var dragStart: CGSize = .zero
+    @State private var magnifyStart: CGFloat = 1.0
+    
     var body: some View {
-        GeometryReader { _ in
+        GeometryReader { geo in
             let layout = computeFan()
             
-            ScrollView([.horizontal, .vertical], showsIndicators: true) {
-                ZStack {
-                    // Wedges
-                    ForEach(layout.wedges) { wedge in
-                        FanWedgeShape(wedge: wedge, cx: layout.cx, cy: layout.cy, isSelected: selectedPerson?.id == wedge.personId, isHome: tree.homePersonId == wedge.personId)
-                            .onTapGesture {
-                                if let pid = wedge.personId, let p = tree.person(byId: pid) {
-                                    withAnimation(.easeInOut(duration: 0.15)) { selectedPerson = p }
-                                }
+            ZStack {
+                // Wedges
+                ForEach(layout.wedges) { wedge in
+                    FanWedgeShape(wedge: wedge, cx: layout.cx, cy: layout.cy, isSelected: selectedPerson?.id == wedge.personId, isHome: tree.homePersonId == wedge.personId)
+                        .onTapGesture {
+                            if let pid = wedge.personId, let p = tree.person(byId: pid) {
+                                withAnimation(.easeInOut(duration: 0.15)) { selectedPerson = p }
                             }
-                    }
+                        }
                 }
-                .frame(width: layout.width, height: layout.height)
-                .scaleEffect(zoom, anchor: .topLeading)
-                .frame(width: layout.width * zoom, height: layout.height * zoom)
             }
+            .frame(width: layout.width, height: layout.height)
+            .scaleEffect(zoom, anchor: .topLeading)
+            .offset(x: panOffset.width, y: panOffset.height)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        panOffset = CGSize(
+                            width: dragStart.width + value.translation.width,
+                            height: dragStart.height + value.translation.height
+                        )
+                    }
+                    .onEnded { _ in dragStart = panOffset }
+            )
+            .gesture(
+                MagnifyGesture()
+                    .onChanged { value in
+                        zoom = min(2.0, max(0.2, magnifyStart * value.magnification))
+                    }
+                    .onEnded { _ in magnifyStart = zoom }
+            )
+            .onAppear {
+                magnifyStart = zoom
+                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+            }
+            .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
+            .onChange(of: maxGen) { _, _ in
+                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+            }
+            .onChange(of: fitRequest) { _, _ in
+                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+            }
+            .clipped()
+            .background {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { selectedPerson = nil }
+            }
+        }
+    }
+    
+    private func fitToScreen(viewSize: CGSize, chartWidth: CGFloat, chartHeight: CGFloat) {
+        guard chartWidth > 0, chartHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
+        let margin: CGFloat = 20
+        let scaleW = (viewSize.width - margin * 2) / chartWidth
+        let scaleH = (viewSize.height - margin * 2) / chartHeight
+        let newZoom = max(0.2, min(min(scaleW, scaleH), 1.6))
+        let scaledW = chartWidth * newZoom
+        let scaledH = chartHeight * newZoom
+        let offsetX = (viewSize.width - scaledW) / 2
+        let offsetY = (viewSize.height - scaledH) / 2
+        withAnimation(.easeInOut(duration: 0.3)) {
+            zoom = newZoom
+            panOffset = CGSize(width: offsetX, height: offsetY)
+            dragStart = CGSize(width: offsetX, height: offsetY)
+            magnifyStart = newZoom
         }
     }
     
@@ -183,10 +237,19 @@ struct FanWedgeShape: View {
                 .stroke(SepiaTheme.fanLine, lineWidth: 1)
             if let person = wedge.person {
                 VStack(spacing: 2) {
-                    Text(person.givenNames).font(SepiaTheme.display(size: 12)).fontWeight(.semibold)
-                    Text(person.surname).font(SepiaTheme.display(size: 12))
+                    Text(person.displaySurname.uppercased())
+                        .font(SepiaTheme.ui(size: 8.5))
+                        .tracking(1.0)
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                    Text(personFullGivenName(person))
+                        .font(SepiaTheme.display(size: 13))
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
                     if !person.lifespan.isEmpty {
-                        Text(person.lifespan).font(SepiaTheme.body(size: 9)).foregroundColor(SepiaTheme.inkSoft)
+                        Text(person.lifespan)
+                            .font(SepiaTheme.body(size: 9))
+                            .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
                 .foregroundColor(SepiaTheme.ink)
@@ -205,10 +268,19 @@ struct FanWedgeShape: View {
                 .stroke(SepiaTheme.fanLine, lineWidth: 1)
             if let person = wedge.person {
                 VStack(spacing: 2) {
-                    Text(person.givenNames).font(SepiaTheme.display(size: 12)).fontWeight(.semibold)
-                    Text(person.surname).font(SepiaTheme.display(size: 12))
+                    Text(person.displaySurname.uppercased())
+                        .font(SepiaTheme.ui(size: 8.5))
+                        .tracking(1.0)
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                    Text(personFullGivenName(person))
+                        .font(SepiaTheme.display(size: 13))
+                        .fontWeight(.semibold)
+                        .lineLimit(1)
                     if !person.lifespan.isEmpty {
-                        Text(person.lifespan).font(SepiaTheme.body(size: 9)).foregroundColor(SepiaTheme.inkSoft)
+                        Text(person.lifespan)
+                            .font(SepiaTheme.body(size: 9))
+                            .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
                 .foregroundColor(SepiaTheme.ink)
@@ -232,14 +304,68 @@ struct FanWedgeShape: View {
                 let tx = cx + midR * CGFloat(cos(midA * .pi / 180))
                 let ty = cy - midR * CGFloat(sin(midA * .pi / 180))
                 
-                Text("\(person.surname) \(person.yearFrom)")
-                    .font(SepiaTheme.ui(size: max(8, 11 - CGFloat(wedge.gen))))
-                    .foregroundColor(SepiaTheme.ink)
+                // Available arc length determines text detail level
+                let arcSpan = wedge.aEnd - wedge.aStart
+                let arcLen = midR * CGFloat(arcSpan * .pi / 180)
+                
+                wedgeText(person: person, arcLen: arcLen, gen: wedge.gen)
                     .rotationEffect(textAngle(midA))
                     .position(x: tx, y: ty)
-                    .lineLimit(1)
             }
         }
+    }
+    
+    @ViewBuilder
+    private func wedgeText(person: Person, arcLen: CGFloat, gen: Int) -> some View {
+        let fontSize = max(7.5, 11 - CGFloat(gen) * 0.8)
+        
+        if arcLen > 140 {
+            // Large: "Фамилия И.О." + year
+            VStack(spacing: 1) {
+                Text(personShortName(person))
+                    .font(SepiaTheme.ui(size: fontSize))
+                    .fontWeight(.medium)
+                    .foregroundColor(SepiaTheme.ink)
+                    .lineLimit(1)
+                if !person.yearFrom.isEmpty {
+                    Text(person.yearFrom)
+                        .font(SepiaTheme.body(size: max(6.5, fontSize - 2)))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                }
+            }
+        } else if arcLen > 60 {
+            // Medium: "Фамилия И.О."
+            Text(personShortName(person))
+                .font(SepiaTheme.ui(size: max(7, fontSize - 0.5)))
+                .foregroundColor(SepiaTheme.ink)
+                .lineLimit(1)
+        } else {
+            // Minimal: "Фам. И."
+            Text(personMinimalName(person))
+                .font(SepiaTheme.ui(size: max(7, fontSize - 1)))
+                .foregroundColor(SepiaTheme.ink)
+                .lineLimit(1)
+        }
+    }
+    
+    private func personFullGivenName(_ person: Person) -> String {
+        [person.givenNames, person.patronymic ?? ""]
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+    
+    private func personShortName(_ person: Person) -> String {
+        let surname = person.displaySurname
+        let givenInitial = person.givenNames.first.map { "\($0)." } ?? ""
+        let patronInitial = (person.patronymic ?? "").first.map { "\($0)." } ?? ""
+        return "\(surname) \(givenInitial)\(patronInitial)".trimmingCharacters(in: .whitespaces)
+    }
+    
+    private func personMinimalName(_ person: Person) -> String {
+        let surname = person.displaySurname
+        let initial = person.givenNames.first.map { "\($0)." } ?? ""
+        return "\(surname) \(initial)".trimmingCharacters(in: .whitespaces)
     }
     
     private var fillColor: Color {

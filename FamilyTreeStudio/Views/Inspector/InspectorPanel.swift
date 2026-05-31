@@ -85,7 +85,8 @@ struct InspectorPanel: View {
                     .font(SepiaTheme.display(size: 19))
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
-                    .lineLimit(2)
+                    .lineLimit(3)
+                    .fixedSize(horizontal: false, vertical: true)
                 if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                     Text("урожд. \(maiden)")
                         .font(SepiaTheme.body(size: 12.5))
@@ -96,30 +97,43 @@ struct InspectorPanel: View {
                     .font(SepiaTheme.body(size: 13))
                     .foregroundColor(SepiaTheme.inkSoft)
             }
-            Spacer()
-            if let onDelete = onDelete {
-                Button { onDelete(person) } label: {
-                    Image(systemName: "trash").font(.system(size: 12)).foregroundColor(.red.opacity(0.7))
-                        .frame(width: 28, height: 28)
+            .frame(minWidth: 120, alignment: .leading)
+            
+            Spacer(minLength: 4)
+            
+            VStack(spacing: 4) {
+                if let onDelete = onDelete {
+                    Button { onDelete(person) } label: {
+                        Image(systemName: "trash").font(.system(size: 12)).foregroundColor(.red.opacity(0.7))
+                            .frame(width: 30, height: 30)
+                            .background(SepiaTheme.cardBg)
+                            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Удалить")
+                }
+                if let onEdit = onEdit {
+                    Button { onEdit(person) } label: {
+                        Image(systemName: "pencil").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
+                            .frame(width: 30, height: 30)
+                            .background(SepiaTheme.cardBg)
+                            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Редактировать")
+                }
+                Button { self.person = nil } label: {
+                    Image(systemName: "xmark").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
+                        .frame(width: 30, height: 30)
+                        .background(SepiaTheme.cardBg)
+                        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .help("Удалить")
+                .help("Закрыть")
             }
-            if let onEdit = onEdit {
-                Button { onEdit(person) } label: {
-                    Image(systemName: "pencil").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
-                        .frame(width: 28, height: 28)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-            }
-            Button { self.person = nil } label: {
-                Image(systemName: "xmark").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
-                    .frame(width: 28, height: 28)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
         }
         .padding(16)
     }
@@ -181,13 +195,17 @@ struct InspectorPanel: View {
             let parents = idx.parentsOf(p)
             let spouses = idx.spousesOf(p)
             let children = idx.childrenOf(p)
+            let siblings = idx.siblingsOf(p)
             
             if let f = parents.father { relRow("Отец", f) }
             if let m = parents.mother { relRow("Мать", m) }
             ForEach(spouses, id: \.id) { s in relRow("Супруг", s) }
             ForEach(children, id: \.id) { c in relRow("Ребёнок", c) }
+            ForEach(siblings, id: \.id) { s in
+                relRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s)
+            }
             
-            if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty {
+            if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
                 Text("Родственные не указаны").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
             }
         }
