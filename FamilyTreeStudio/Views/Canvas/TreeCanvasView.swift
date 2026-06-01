@@ -5,15 +5,17 @@ struct TreeCanvasView: View {
     let direction: MainWorkspace.TreeDirection
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
+    @Binding var secondaryPerson: Person?
     var highlightedIds: Set<UUID> = []
     var lineageLabels: [UUID: String] = [:]
     @Binding var fitRequest: Int
+    var showPhotos: Bool = false
     
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
     private let spouseGap: CGFloat = 30
     private let siblingGap: CGFloat = 40
-    private let familyGap: CGFloat = 40
+    private let familyGap: CGFloat = 60
     private let vGapTB: CGFloat = 110
     private let vGapLR: CGFloat = 150
     private let pad: CGFloat = 60
@@ -45,20 +47,36 @@ struct TreeCanvasView: View {
                 // Cards
                 ForEach(layout.nodes, id: \.person.id) { node in
                     let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
-                    let isSelected = selectedPerson?.id == node.person.id
+                    let isPrimary = selectedPerson?.id == node.person.id
+                    let isSecondary = secondaryPerson?.id == node.person.id
                     let label = lineageLabels[node.person.id]
                     PersonCardView(
                         person: node.person,
-                        isSelected: isSelected,
+                        isSelected: isPrimary,
+                        isSecondarySelected: isSecondary,
                         isHome: tree.homePersonId == node.person.id,
                         isHighlighted: highlightedIds.contains(node.person.id),
-                        lineageLabel: label
+                        lineageLabel: label,
+                        showPhoto: showPhotos
                     )
                     .equatable()
                     .opacity(dimmed ? 0.3 : 1.0)
                     .position(x: node.x + cardW / 2, y: node.y + cardH / 2)
                     .onTapGesture {
-                        selectedPerson = node.person
+                        if NSEvent.modifierFlags.contains(.command) {
+                            // CMD+click: set as secondary (max 2)
+                            if selectedPerson == nil {
+                                selectedPerson = node.person
+                            } else if node.person.id == selectedPerson?.id {
+                                // Clicking primary again with CMD — ignore
+                            } else {
+                                secondaryPerson = node.person
+                            }
+                        } else {
+                            // Normal click: set as primary, clear secondary
+                            secondaryPerson = nil
+                            selectedPerson = node.person
+                        }
                     }
                 }
             }
@@ -87,22 +105,45 @@ struct TreeCanvasView: View {
                         magnifyStart = zoom
                     }
             )
-            .onAppear { magnifyStart = zoom }
+            .onAppear {
+                magnifyStart = zoom
+                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+            }
             .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
             .onChange(of: tree.layoutVersion) { _, _ in
-                panOffset = .zero
-                dragStart = .zero
+                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .clipped()
             .background {
-                Color.clear
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedPerson = nil
+                // Dot grid background (Miro-style)
+                Canvas { ctx, size in
+                    let spacing: CGFloat = 20 * zoom
+                    let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
+                    let offsetX = panOffset.width.truncatingRemainder(dividingBy: spacing)
+                    let offsetY = panOffset.height.truncatingRemainder(dividingBy: spacing)
+                    
+                    let cols = Int(size.width / spacing) + 2
+                    let rows = Int(size.height / spacing) + 2
+                    
+                    for col in 0...cols {
+                        for row in 0...rows {
+                            let x = CGFloat(col) * spacing + offsetX
+                            let y = CGFloat(row) * spacing + offsetY
+                            guard x >= -dotRadius, x <= size.width + dotRadius,
+                                  y >= -dotRadius, y <= size.height + dotRadius else { continue }
+                            let rect = CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2)
+                            ctx.fill(Circle().path(in: rect), with: .color(SepiaTheme.ink.opacity(0.06)))
+                        }
                     }
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedPerson = nil
+                    secondaryPerson = nil
+                }
             }
         }
     }
@@ -252,6 +293,16 @@ struct TreeCanvasView: View {
         
         func hasParentsInTree(_ pid: UUID) -> Bool { idx.childOf[pid] != nil }
         
+        func hasSpouseOnOtherSide(_ personId: UUID, mySide: Int) -> Bool {
+            for union in idx.unionsOf[personId] ?? [] {
+                for spouseId in union.partnerIds where spouseId != personId {
+                    let spouseSide = side[spouseId] ?? 2
+                    if spouseSide != mySide && spouseSide != 2 { return true }
+                }
+            }
+            return false
+        }
+        
         var builtNodes: [UUID: LayoutNode] = [:]
         var rootNodes: [LayoutNode] = []
         
@@ -294,6 +345,16 @@ struct TreeCanvasView: View {
             var seen = Set<UUID>()
             childIds = childIds.filter { seen.insert($0).inserted }
             
+            // Reorder: children who have a spouse on the "right side" go last (rightmost)
+            // so they are adjacent to the right-side tree and don't cause overlap
+            childIds.sort { c1, c2 in
+                let c1HasRightSpouse = hasSpouseOnOtherSide(c1, mySide: side[personId] ?? 2)
+                let c2HasRightSpouse = hasSpouseOnOtherSide(c2, mySide: side[personId] ?? 2)
+                if c1HasRightSpouse && !c2HasRightSpouse { return false } // c1 goes last
+                if !c1HasRightSpouse && c2HasRightSpouse { return true }  // c2 goes last
+                return false // preserve order
+            }
+            
             // Build child layout nodes recursively
             for cid in childIds {
                 if let childNode = buildLayoutNode(cid) {
@@ -332,11 +393,9 @@ struct TreeCanvasView: View {
         
         if let rootUnion = tree.rootUnion {
             if let p1id = rootUnion.partner1Id {
-                side[p1id] = 0
                 traceAncestors(from: p1id, sideValue: 0)
             }
             if let p2id = rootUnion.partner2Id {
-                side[p2id] = 1
                 traceAncestors(from: p2id, sideValue: 1)
             }
             // Children of root union are shared — trace their spouses to appropriate side
@@ -610,6 +669,58 @@ struct TreeCanvasView: View {
             globalOffset = maxX
         }
         
+        // ─── Post-process: Center children between cross-tree parents ───
+        // When both parents have their own ancestry (separate layout trees),
+        // shift the child subtree so it's centered between its two parents.
+        for union in tree.unions {
+            let validPartners = union.partnerIds.filter { placements[$0] != nil }
+            guard validPartners.count == 2 else { continue }
+            let kids = union.childrenIds.filter { placements[$0] != nil }
+            guard !kids.isEmpty else { continue }
+            
+            // Only adjust if parents are in different sides
+            let s0 = side[validPartners[0]] ?? 2
+            let s1 = side[validPartners[1]] ?? 2
+            guard s0 != s1 || (s0 == 2 && s1 == 2 && validPartners.count == 2) else { continue }
+            // Only if no inline spouse (both have parents)
+            guard hasParentsInTree(validPartners[0]) && hasParentsInTree(validPartners[1]) else { continue }
+            
+            let parentMid = (placements[validPartners[0]]!.bc + placements[validPartners[1]]!.bc) / 2
+            
+            // Find current midpoint of children
+            let childBcs = kids.compactMap { placements[$0]?.bc }
+            let childMid = (childBcs.min()! + childBcs.max()!) / 2
+            let shift = parentMid - childMid
+            
+            guard abs(shift) > 1 else { continue }
+            
+            // Shift all descendants of these children
+            func shiftSubtree(_ personId: UUID, by delta: CGFloat) {
+                guard var pl = placements[personId] else { return }
+                pl.bc += delta
+                placements[personId] = pl
+                // Shift inline spouse too
+                if let node = builtNodes[personId], let sid = node.spouseId {
+                    if var spl = placements[sid] {
+                        spl.bc += delta
+                        placements[sid] = spl
+                    }
+                }
+                // Shift descendants
+                for u in idx.unionsOf[personId] ?? [] {
+                    for cid in u.childrenIds where cid != personId {
+                        if let cpl = placements[cid], cpl.depth > pl.depth {
+                            shiftSubtree(cid, by: delta)
+                        }
+                    }
+                }
+            }
+            
+            for kid in kids {
+                shiftSubtree(kid, by: shift)
+            }
+        }
+        
         // ─── STEP 5: Convert to screen coordinates ───
         
         var nodes: [TreeNode] = []
@@ -733,9 +844,11 @@ struct TreeLayout: Equatable { let nodes: [TreeNode]; let links: [TreeLink]; let
 struct PersonCardView: View, Equatable {
     let person: Person
     var isSelected: Bool = false
+    var isSecondarySelected: Bool = false
     var isHome: Bool = false
     var isHighlighted: Bool = false
     var lineageLabel: String? = nil
+    var showPhoto: Bool = false
     
     static func == (lhs: PersonCardView, rhs: PersonCardView) -> Bool {
         lhs.person.id == rhs.person.id &&
@@ -744,9 +857,11 @@ struct PersonCardView: View, Equatable {
         lhs.person.maidenName == rhs.person.maidenName &&
         lhs.person.lifespan == rhs.person.lifespan &&
         lhs.isSelected == rhs.isSelected &&
+        lhs.isSecondarySelected == rhs.isSecondarySelected &&
         lhs.isHome == rhs.isHome &&
         lhs.isHighlighted == rhs.isHighlighted &&
-        lhs.lineageLabel == rhs.lineageLabel
+        lhs.lineageLabel == rhs.lineageLabel &&
+        lhs.showPhoto == rhs.showPhoto
     }
     
     private var cardBackground: Color {
@@ -766,61 +881,86 @@ struct PersonCardView: View, Equatable {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 0) {
-                HStack(spacing: 4) {
-                    Text(person.displaySurname.uppercased())
-                        .font(SepiaTheme.ui(size: 8.5))
-                        .tracking(1.2)
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-                    if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
-                        Text("(\(maiden.uppercased()))")
-                            .font(SepiaTheme.ui(size: 7.5))
-                            .tracking(0.8)
-                            .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
+        HStack(spacing: 0) {
+            if showPhoto {
+                if let data = person.photoData, let nsImage = NSImage(data: data) {
+                    Image(nsImage: nsImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 54, height: 88)
+                        .clipped()
+                } else {
+                    ZStack {
+                        Rectangle().fill(SepiaTheme.cardLine.opacity(0.2))
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 20))
+                            .foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
+                    }
+                    .frame(width: 54, height: 88)
+                }
+            }
+            
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    HStack(spacing: 4) {
+                        Text(person.displaySurname.uppercased())
+                            .font(SepiaTheme.ui(size: 8.5))
+                            .tracking(1.2)
+                            .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(1)
+                        if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
+                            Text("(\(maiden.uppercased()))")
+                                .font(SepiaTheme.ui(size: 7.5))
+                                .tracking(0.8)
+                                .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
+                                .lineLimit(1)
+                        }
+                    }
+                    Spacer(minLength: 4)
+                    if isHome {
+                        Circle().fill(SepiaTheme.accent).frame(width: 6, height: 6)
                     }
                 }
-                Spacer(minLength: 4)
-                if isHome {
-                    Circle().fill(SepiaTheme.accent).frame(width: 6, height: 6)
+                .padding(.horizontal, 10)
+                .padding(.top, 7)
+                .padding(.bottom, 4)
+                
+                Divider().overlay(SepiaTheme.cardRule)
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    let nameDisplay = [person.givenNames, person.patronymic ?? ""]
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " ")
+                    Text(nameDisplay.isEmpty ? "Неизвестно" : nameDisplay)
+                        .font(SepiaTheme.display(size: 14))
+                        .fontWeight(.semibold)
+                        .foregroundColor(SepiaTheme.ink)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.85)
+                    if !person.lifespan.isEmpty {
+                        Text(person.lifespan)
+                            .font(SepiaTheme.body(size: 11))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                    }
                 }
+                .padding(.horizontal, 10)
+                .padding(.top, 6)
+                .padding(.bottom, 8)
             }
-            .padding(.horizontal, 10)
-            .padding(.top, 7)
-            .padding(.bottom, 4)
-            
-            Divider().overlay(SepiaTheme.cardRule)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                let nameDisplay = [person.givenNames, person.patronymic ?? ""]
-                    .filter { !$0.isEmpty }
-                    .joined(separator: " ")
-                Text(nameDisplay.isEmpty ? "Неизвестно" : nameDisplay)
-                    .font(SepiaTheme.display(size: 14))
-                    .fontWeight(.semibold)
-                    .foregroundColor(SepiaTheme.ink)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
-                if !person.lifespan.isEmpty {
-                    Text(person.lifespan)
-                        .font(SepiaTheme.body(size: 11))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                }
-            }
-            .padding(.horizontal, 10)
-            .padding(.top, 6)
-            .padding(.bottom, 8)
         }
         .frame(width: 210, height: 90)
         .background(isHighlighted ? SepiaTheme.accent.opacity(0.08) : cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(isSelected ? SepiaTheme.accent : (isHighlighted ? SepiaTheme.accent2 : cardBorder), lineWidth: isSelected ? 2 : (isHighlighted ? 1.5 : 1))
+                .strokeBorder(
+                    isSelected ? SepiaTheme.accent :
+                    isSecondarySelected ? SepiaTheme.accent :
+                    (isHighlighted ? SepiaTheme.accent2 : cardBorder),
+                    lineWidth: (isSelected || isSecondarySelected) ? 3 : (isHighlighted ? 1.5 : 1)
+                )
         )
         .clipShape(RoundedRectangle(cornerRadius: 4))
-        .shadow(color: .black.opacity(0.06), radius: 2, y: 1)
+        .shadow(color: (isSelected || isSecondarySelected) ? SepiaTheme.accent.opacity(0.3) : .black.opacity(0.06), radius: (isSelected || isSecondarySelected) ? 4 : 2, y: 1)
         .overlay(alignment: .topTrailing) {
             if let label = lineageLabel {
                 Text(label)

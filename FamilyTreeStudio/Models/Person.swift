@@ -26,6 +26,12 @@ final class Person: Identifiable, Codable, Hashable {
     
     var photoData: Data?
     
+    // Cached coordinates for map pins
+    var birthLat: Double?
+    var birthLon: Double?
+    var deathLat: Double?
+    var deathLon: Double?
+    
     var createdAt: Date
     var updatedAt: Date
     
@@ -129,6 +135,7 @@ final class Person: Identifiable, Codable, Hashable {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving
         case burialPlace, occupation, education, notes, sources, photoData
+        case birthLat, birthLon, deathLat, deathLon
         case createdAt, updatedAt
     }
     
@@ -151,6 +158,10 @@ final class Person: Identifiable, Codable, Hashable {
         notes = try c.decodeIfPresent(String.self, forKey: .notes)
         sources = try c.decode([String].self, forKey: .sources)
         photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
+        birthLat = try c.decodeIfPresent(Double.self, forKey: .birthLat)
+        birthLon = try c.decodeIfPresent(Double.self, forKey: .birthLon)
+        deathLat = try c.decodeIfPresent(Double.self, forKey: .deathLat)
+        deathLon = try c.decodeIfPresent(Double.self, forKey: .deathLon)
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
     }
@@ -174,6 +185,10 @@ final class Person: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(notes, forKey: .notes)
         try c.encode(sources, forKey: .sources)
         try c.encodeIfPresent(photoData, forKey: .photoData)
+        try c.encodeIfPresent(birthLat, forKey: .birthLat)
+        try c.encodeIfPresent(birthLon, forKey: .birthLon)
+        try c.encodeIfPresent(deathLat, forKey: .deathLat)
+        try c.encodeIfPresent(deathLon, forKey: .deathLon)
         try c.encode(createdAt, forKey: .createdAt)
         try c.encode(updatedAt, forKey: .updatedAt)
     }

@@ -8,6 +8,7 @@ struct MainWorkspace: View {
     @State private var viewMode: ViewMode = .tree
     @State private var direction: TreeDirection = .topDown
     @State private var selectedPerson: Person?
+    @State private var secondaryPerson: Person?
     @State private var zoom: CGFloat = 0.85
     @State private var showExportModal = false
     @State private var showAddSheet = false
@@ -21,8 +22,9 @@ struct MainWorkspace: View {
     @State private var personToDelete: Person?
     @State private var fitRequest: Int = 0
     @State private var fanLevels: Int = 4
+    @State private var showPhotos: Bool = false
     
-    enum ViewMode: String { case tree, fan }
+    enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
     
     var body: some View {
@@ -37,28 +39,11 @@ struct MainWorkspace: View {
                         SepiaTheme.paper
                         
                         if viewMode == .tree {
-                            TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest)
-                        } else {
+                            TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
+                        } else if viewMode == .fan {
                             FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
-                        }
-                        
-                        // Status bar
-                        VStack {
-                            Spacer()
-                            HStack(spacing: 8) {
-                                Circle().fill(SepiaTheme.accent).frame(width: 8, height: 8)
-                                Text("Домашний")
-                                    .font(SepiaTheme.ui(size: 11))
-                                    .foregroundColor(SepiaTheme.inkSoft)
-                                Text("·").foregroundColor(SepiaTheme.inkSoft)
-                                Text(viewMode == .fan ? "Нажмите на сектор для просмотра" : "Тяните для перемещения · колёсико для масштаба")
-                                    .font(SepiaTheme.ui(size: 11))
-                                    .foregroundColor(SepiaTheme.inkSoft)
-                                Spacer()
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 10)
-                            .background(SepiaTheme.toolbarBg.opacity(0.9))
+                        } else {
+                            MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                         }
                     }
                     
@@ -115,17 +100,33 @@ struct MainWorkspace: View {
             }
         }
         .frame(minWidth: 900, minHeight: 600)
-        .onChange(of: selectedPerson?.id) { _, newId in
-            if let newId, let person = tree.people.first(where: { $0.id == newId }) {
-                let idx = FamilyIndex(tree: tree)
-                let calc = LineageCalculator(index: idx)
-                let result = calc.compute(for: person)
+        .onChange(of: selectedPerson?.id) { _, _ in recomputeHighlight() }
+        .onChange(of: secondaryPerson?.id) { _, _ in recomputeHighlight() }
+    }
+    
+    private func recomputeHighlight() {
+        let idx = FamilyIndex(tree: tree)
+        
+        if let primary = selectedPerson, let secondary = secondaryPerson {
+            // Dual selection: find path between the two
+            let finder = RelationshipPathFinder(index: idx)
+            if let result = finder.findPath(from: primary.id, to: secondary.id) {
                 highlightedBranch = result.ids
                 lineageLabels = result.labels
             } else {
-                highlightedBranch = []
-                lineageLabels = [:]
+                // No path found — just highlight both
+                highlightedBranch = [primary.id, secondary.id]
+                lineageLabels = [primary.id: "①", secondary.id: "②"]
             }
+        } else if let person = selectedPerson {
+            // Single selection: show lineage as before
+            let calc = LineageCalculator(index: idx)
+            let result = calc.compute(for: person)
+            highlightedBranch = result.ids
+            lineageLabels = result.labels
+        } else {
+            highlightedBranch = []
+            lineageLabels = [:]
         }
     }
     
@@ -169,6 +170,12 @@ struct MainWorkspace: View {
                 }
                 .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
                 .help("Круговая диаграмма предков")
+                
+                Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .map } } label: {
+                    Image(systemName: "map")
+                }
+                .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
+                .help("Карта мест жизни")
             }
             
             if viewMode == .tree {
@@ -184,6 +191,14 @@ struct MainWorkspace: View {
                     .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
                     .help("Слева направо")
                 }
+            }
+            
+            if viewMode == .tree {
+                Button { showPhotos.toggle() } label: {
+                    Image(systemName: showPhotos ? "person.crop.square.fill" : "person.crop.square")
+                }
+                .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
+                .help(showPhotos ? "Скрыть фотографии" : "Показать фотографии")
             }
             
             if viewMode == .fan {
@@ -241,7 +256,7 @@ struct MainWorkspace: View {
                     .disabled(selectedPerson == nil)
                     .help("Редактировать выбранную персону")
                 Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
-                    .buttonStyle(SepiaButtonStyle(isActive: true))
+                    .buttonStyle(SepiaButtonStyle())
                     .help("Экспорт дерева в PDF, PNG или GEDCOM")
             }
         }
