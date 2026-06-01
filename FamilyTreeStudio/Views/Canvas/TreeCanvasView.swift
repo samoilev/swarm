@@ -13,12 +13,13 @@ struct TreeCanvasView: View {
     
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
-    private let spouseGap: CGFloat = 30
-    private let siblingGap: CGFloat = 40
-    private let familyGap: CGFloat = 60
+    private let spouseGap: CGFloat = 30   // gap between partners within a couple (kept tight)
+    private let siblingGap: CGFloat = 110  // gap between separate couples / branches (wide, for visual separation)
+    private let familyGap: CGFloat = 140   // gap between unrelated families / disconnected roots
     private let vGapTB: CGFloat = 110
     private let vGapLR: CGFloat = 150
     private let pad: CGFloat = 60
+    private let busFraction: CGFloat = 0.5 // where every parent→children trunk sits within the generation gap
     
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
@@ -249,17 +250,19 @@ struct TreeCanvasView: View {
             for (key, val) in depths { depths[key] = val - minDepthVal }
         }
         
-        // ─── STEP 2: Build a logical layout tree (LayoutNode) ───
-        // Each LayoutNode represents a "family unit": a person (+ optional inline spouse)
-        // with children as sub-nodes. This converts the graph into a proper tree
-        // suitable for the Buchheim algorithm.
-        
+        // ─── STEP 2: Build a couple-anchored ancestor tree (LayoutNode) ───
+        // Each LayoutNode is a "couple unit": the two partners drawn adjacently,
+        // plus each partner's siblings on their outer side. The unit's tidy-tree
+        // children are the ancestor units of each partner (drawn in the band above,
+        // their generation given by the depths map). Because married partners are
+        // always adjacent and subtrees never interleave, marriage lines stay short
+        // and connectors don't cross between branches.
+
         class LayoutNode {
-            let personId: UUID
-            var spouseId: UUID? // inline spouse (placed adjacent, no parents in tree)
+            var memberIds: [UUID] = []   // people on this row, left → right
             var children: [LayoutNode] = []
             var parent: LayoutNode?
-            
+
             // Buchheim state
             var x: CGFloat = 0
             var mod: CGFloat = 0
@@ -268,222 +271,143 @@ struct TreeCanvasView: View {
             var thread: LayoutNode?
             var ancestor: LayoutNode?
             var number: Int = 1 // 1-based index among siblings
-            
-            // Width of this node (1 card or 2 cards + spouse gap)
-            var width: CGFloat
-            
-            init(personId: UUID, nodeWidth: CGFloat, spouseGap: CGFloat) {
-                self.personId = personId
-                self.width = nodeWidth
-                self.ancestor = nil // set to self after init
-            }
-            
+
+            var width: CGFloat = 0
+
+            init() { self.ancestor = nil }
+
             var leftSibling: LayoutNode? {
                 guard let p = parent else { return nil }
-                let idx = number - 1 // 0-based
-                return idx > 0 ? p.children[idx - 1] : nil
+                let i = number - 1 // 0-based
+                return i > 0 ? p.children[i - 1] : nil
             }
-            
+
             var leftmostSibling: LayoutNode? {
                 guard let p = parent else { return nil }
                 let first = p.children[0]
                 return first === self ? nil : first
             }
         }
-        
-        func hasParentsInTree(_ pid: UUID) -> Bool { idx.childOf[pid] != nil }
-        
-        func hasSpouseOnOtherSide(_ personId: UUID, mySide: Int) -> Bool {
-            for union in idx.unionsOf[personId] ?? [] {
-                for spouseId in union.partnerIds where spouseId != personId {
-                    let spouseSide = side[spouseId] ?? 2
-                    if spouseSide != mySide && spouseSide != 2 { return true }
-                }
-            }
-            return false
+
+        let memberGap = spouseGap // gap between adjacent cards within a unit
+
+        // Parent/sibling lookups that merge across split GEDCOM families
+        // (a person's father and mother can be recorded in separate partial unions).
+        func parentUnionsOf(_ pid: UUID) -> [Union] {
+            tree.unions.filter { $0.childrenIds.contains(pid) }
         }
-        
-        var builtNodes: [UUID: LayoutNode] = [:]
+        func mergedParents(_ pid: UUID) -> (father: UUID?, mother: UUID?) {
+            var father: UUID? = nil
+            var mother: UUID? = nil
+            for u in parentUnionsOf(pid) {
+                for ppid in u.partnerIds {
+                    guard let p = idx.byId[ppid] else { continue }
+                    if p.sex == .male { if father == nil { father = ppid } }
+                    else if p.sex == .female { if mother == nil { mother = ppid } }
+                    else if father == nil { father = ppid }
+                    else if mother == nil { mother = ppid }
+                }
+            }
+            return (father, mother)
+        }
+        func mergedSiblings(_ pid: UUID) -> [UUID] {
+            var seen = Set<UUID>([pid])
+            var result: [UUID] = []
+            for u in parentUnionsOf(pid) {
+                for c in u.childrenIds where !seen.contains(c) {
+                    seen.insert(c)
+                    result.append(c)
+                }
+            }
+            return result
+        }
+
+        var placedPersons = Set<UUID>()
         var rootNodes: [LayoutNode] = []
-        
-        // Recursive: build layout node for a person and their descendants
-        func buildLayoutNode(_ personId: UUID) -> LayoutNode? {
-            if builtNodes[personId] != nil { return nil } // already placed
-            let node = LayoutNode(personId: personId, nodeWidth: nodeWidth, spouseGap: spouseGap)
+
+        // Build a unit anchored on `leftId` (and optional `rightId` partner).
+        // Recurses upward into each anchor's ancestry.
+        func buildUnit(_ leftId: UUID, _ rightId: UUID?) -> LayoutNode {
+            let node = LayoutNode()
             node.ancestor = node
-            builtNodes[personId] = node
-            
-            let depth = depths[personId] ?? 0
-            let unions = idx.unionsOf[personId] ?? []
-            
-            // Find inline spouse (no own parents → placed next to this person)
-            var inlineSpouseId: UUID? = nil
-            for union in unions {
-                if let sid = union.partnerIds.first(where: { $0 != personId && builtNodes[$0] == nil && !hasParentsInTree($0) }) {
-                    inlineSpouseId = sid
-                    builtNodes[sid] = node // mark as placed (part of this node)
-                    break
-                }
+
+            // Members: [left's siblings][left][right][right's siblings]
+            var members: [UUID] = []
+            let leftSibs = mergedSiblings(leftId).filter { $0 != rightId && !placedPersons.contains($0) }
+            members.append(contentsOf: leftSibs)
+            members.append(leftId)
+            if let rightId { members.append(rightId) }
+            if let rightId {
+                let rightSibs = mergedSiblings(rightId).filter { $0 != leftId && !placedPersons.contains($0) }
+                members.append(contentsOf: rightSibs)
             }
-            node.spouseId = inlineSpouseId
-            node.width = inlineSpouseId != nil ? (nodeWidth * 2 + spouseGap) : nodeWidth
-            
-            // Collect all children across all unions of this person (and inline spouse)
-            var childIds: [UUID] = []
-            for union in unions {
-                let kids = union.childrenIds.filter { builtNodes[$0] == nil && depths[$0] == depth + 1 }
-                childIds.append(contentsOf: kids)
-            }
-            // Also check unions of inline spouse
-            if let sid = inlineSpouseId {
-                for union in idx.unionsOf[sid] ?? [] {
-                    let kids = union.childrenIds.filter { builtNodes[$0] == nil && depths[$0] == depth + 1 }
-                    childIds.append(contentsOf: kids)
-                }
-            }
-            // Deduplicate while preserving order
+            // Deduplicate, mark placed
             var seen = Set<UUID>()
-            childIds = childIds.filter { seen.insert($0).inserted }
-            
-            // Reorder: children who have a spouse on the "right side" go last (rightmost)
-            // so they are adjacent to the right-side tree and don't cause overlap
-            childIds.sort { c1, c2 in
-                let c1HasRightSpouse = hasSpouseOnOtherSide(c1, mySide: side[personId] ?? 2)
-                let c2HasRightSpouse = hasSpouseOnOtherSide(c2, mySide: side[personId] ?? 2)
-                if c1HasRightSpouse && !c2HasRightSpouse { return false } // c1 goes last
-                if !c1HasRightSpouse && c2HasRightSpouse { return true }  // c2 goes last
-                return false // preserve order
+            members = members.filter { seen.insert($0).inserted && idx.byId[$0] != nil }
+            for m in members { placedPersons.insert(m) }
+            node.memberIds = members
+            let n = max(members.count, 1)
+            node.width = CGFloat(n) * nodeWidth + CGFloat(n - 1) * memberGap
+
+            // Ancestor fans (tidy-tree children), one per anchor partner.
+            func ancestorUnit(of pid: UUID) -> LayoutNode? {
+                let (f, m) = mergedParents(pid)
+                let fOpen = (f != nil && !placedPersons.contains(f!)) ? f : nil
+                let mOpen = (m != nil && !placedPersons.contains(m!)) ? m : nil
+                if fOpen == nil && mOpen == nil { return nil }
+                // Father on the left, mother on the right
+                if let fOpen { return buildUnit(fOpen, mOpen) }
+                return buildUnit(mOpen!, nil)
             }
-            
-            // Build child layout nodes recursively
-            for cid in childIds {
-                if let childNode = buildLayoutNode(cid) {
-                    childNode.parent = node
-                    node.children.append(childNode)
-                }
-            }
-            // Assign sibling numbers
-            for (i, child) in node.children.enumerated() {
-                child.number = i + 1
-            }
-            
+
+            var kids: [LayoutNode] = []
+            if let fan = ancestorUnit(of: leftId) { kids.append(fan) }
+            if let rightId, let fan = ancestorUnit(of: rightId) { kids.append(fan) }
+            for (i, k) in kids.enumerated() { k.parent = node; k.number = i + 1 }
+            node.children = kids
             return node
         }
-        
-        // Build layout trees starting from the topmost generation
-        // Separate into left side (partner 1's lineage) and right side (partner 2's lineage)
-        // to prevent family lines from interleaving
-        
-        // Trace ancestors to determine which "side" each person belongs to
-        var side: [UUID: Int] = [:] // 0 = left (partner1), 1 = right (partner2), 2 = shared/children
-        
-        func traceAncestors(from personId: UUID, sideValue: Int) {
-            guard side[personId] == nil else { return }
-            side[personId] = sideValue
-            if let parentUnion = idx.childOf[personId] {
-                for pid in parentUnion.partnerIds {
-                    traceAncestors(from: pid, sideValue: sideValue)
+
+        // Anchor: the home person's marriage (else the root union, else first person).
+        func anchorCouple() -> (UUID, UUID?)? {
+            func unionPartner(_ pid: UUID) -> UUID? {
+                for u in idx.unionsOf[pid] ?? [] {
+                    if let other = u.partnerIds.first(where: { $0 != pid }) { return other }
                 }
-                // Siblings also belong to same side
-                for sibId in parentUnion.childrenIds where sibId != personId {
-                    if side[sibId] == nil { side[sibId] = sideValue }
-                }
+                return nil
             }
+            if let homeId = tree.homePersonId, idx.byId[homeId] != nil {
+                let partner = unionPartner(homeId)
+                // Order male-left / female-right for stable orientation
+                if let partner, idx.byId[homeId]?.sex == .female, idx.byId[partner]?.sex == .male {
+                    return (partner, homeId)
+                }
+                return (homeId, partner)
+            }
+            if let ru = tree.rootUnion, let p1 = ru.partner1Id { return (p1, ru.partner2Id) }
+            if let first = tree.people.first { return (first.id, nil) }
+            return nil
         }
-        
-        if let rootUnion = tree.rootUnion {
-            if let p1id = rootUnion.partner1Id {
-                traceAncestors(from: p1id, sideValue: 0)
-            }
-            if let p2id = rootUnion.partner2Id {
-                traceAncestors(from: p2id, sideValue: 1)
-            }
-            // Children of root union are shared — trace their spouses to appropriate side
-            for childId in rootUnion.childrenIds {
-                if side[childId] == nil { side[childId] = 2 }
-                // Each child's spouse's ancestors go to the opposite side of that child
-                for childUnion in idx.unionsOf[childId] ?? [] {
-                    for spouseId in childUnion.partnerIds where spouseId != childId {
-                        if side[spouseId] == nil {
-                            // Spouse's ancestry traced to whichever side hasn't claimed them
-                            let spouseSide = (side[childId] == 0) ? 1 : 0
-                            traceAncestors(from: spouseId, sideValue: spouseSide)
-                        }
-                    }
-                }
-            }
+
+        if let (l, r) = anchorCouple() {
+            rootNodes.append(buildUnit(l, r))
         }
-        
-        // For deeper descendants, propagate side affinity
-        func propagateSide(_ personId: UUID, sideValue: Int) {
-            for union in idx.unionsOf[personId] ?? [] {
-                for childId in union.childrenIds {
-                    if side[childId] == nil {
-                        side[childId] = sideValue
-                        propagateSide(childId, sideValue: sideValue)
-                    }
-                }
-                for spouseId in union.partnerIds where spouseId != personId {
-                    if side[spouseId] == nil {
-                        let spouseSide = (sideValue == 0) ? 1 : 0
-                        side[spouseId] = spouseSide
-                        traceAncestors(from: spouseId, sideValue: spouseSide)
-                        propagateSide(spouseId, sideValue: spouseSide)
-                    }
-                }
-            }
+
+        // Any remaining people (disconnected components / descendants not on the
+        // ancestor closure) become their own root units, placed beside the main tree.
+        for person in tree.people where !placedPersons.contains(person.id) {
+            let partner = (idx.unionsOf[person.id] ?? []).compactMap { u in
+                u.partnerIds.first(where: { $0 != person.id && !placedPersons.contains($0) })
+            }.first
+            rootNodes.append(buildUnit(person.id, partner))
         }
-        
-        if let rootUnion = tree.rootUnion {
-            if let p1id = rootUnion.partner1Id { propagateSide(p1id, sideValue: 0) }
-            if let p2id = rootUnion.partner2Id { propagateSide(p2id, sideValue: 1) }
-            for childId in rootUnion.childrenIds {
-                propagateSide(childId, sideValue: side[childId] ?? 2)
-            }
-        }
-        
-        // Build layout trees: left side first, then right side
+
         let maxDepthVal = depths.values.max() ?? 0
-        
-        // Build left side (partner 1's ancestry)
-        for gen in 0...maxDepthVal {
-            let peopleAtGen = tree.people
-                .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil && (side[$0.id] ?? 2) == 0 }
-                .sorted { ($0.id.uuidString) < ($1.id.uuidString) }
-            for person in peopleAtGen {
-                if let node = buildLayoutNode(person.id) {
-                    rootNodes.append(node)
-                }
-            }
-        }
-        
-        // Build right side (partner 2's ancestry)
-        for gen in 0...maxDepthVal {
-            let peopleAtGen = tree.people
-                .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil && (side[$0.id] ?? 2) == 1 }
-                .sorted { ($0.id.uuidString) < ($1.id.uuidString) }
-            for person in peopleAtGen {
-                if let node = buildLayoutNode(person.id) {
-                    rootNodes.append(node)
-                }
-            }
-        }
-        
-        // Build any remaining (shared/unassigned)
-        for gen in 0...maxDepthVal {
-            let peopleAtGen = tree.people
-                .filter { depths[$0.id] == gen && builtNodes[$0.id] == nil }
-                .sorted { ($0.id.uuidString) < ($1.id.uuidString) }
-            for person in peopleAtGen {
-                if let node = buildLayoutNode(person.id) {
-                    rootNodes.append(node)
-                }
-            }
-        }
-        
+        _ = maxDepthVal
+
         // ─── STEP 3: Buchheim first walk (post-order) ───
         // Assigns preliminary x and mod values
-        
+
         func firstWalk(_ v: LayoutNode) {
             if v.children.isEmpty {
                 // Leaf: place next to left sibling
@@ -602,31 +526,14 @@ struct TreeCanvasView: View {
         // ─── STEP 4: Second walk (pre-order) — apply mod accumulator ───
         
         func secondWalk(_ v: LayoutNode, modSum: CGFloat, depth: Int, positions: inout [UUID: (bc: CGFloat, depth: Int)]) {
-            let finalX = v.x + modSum
-            let d = depths[v.personId] ?? depth
-            positions[v.personId] = (finalX, d)
-            
-            // Place inline spouse centered within node width
-            if let sid = v.spouseId {
-                let halfOffset = (nodeWidth + spouseGap) / 2
-                // Determine which side to place the spouse:
-                // If person has a right sibling, spouse goes LEFT
-                // If person has no right sibling (rightmost or only), spouse goes RIGHT
-                let hasRightSibling = v.parent.map { p in
-                    p.children.last !== v
-                } ?? false
-                
-                if hasRightSibling {
-                    // Spouse on the left, person on the right
-                    positions[sid] = (finalX - halfOffset, d)
-                    positions[v.personId] = (finalX + halfOffset, d)
-                } else {
-                    // Person on the left, spouse on the right
-                    positions[v.personId] = (finalX - halfOffset, d)
-                    positions[sid] = (finalX + halfOffset, d)
-                }
+            let centerX = v.x + modSum
+            // Lay out this unit's members left → right, centered on centerX.
+            var cursor = centerX - v.width / 2 + nodeWidth / 2
+            for m in v.memberIds {
+                let d = depths[m] ?? depth
+                positions[m] = (cursor, d)
+                cursor += nodeWidth + memberGap
             }
-            
             for child in v.children {
                 secondWalk(child, modSum: modSum + v.mod, depth: depth + 1, positions: &positions)
             }
@@ -668,59 +575,7 @@ struct TreeCanvasView: View {
             findMax(root, modSum: treeShift)
             globalOffset = maxX
         }
-        
-        // ─── Post-process: Center children between cross-tree parents ───
-        // When both parents have their own ancestry (separate layout trees),
-        // shift the child subtree so it's centered between its two parents.
-        for union in tree.unions {
-            let validPartners = union.partnerIds.filter { placements[$0] != nil }
-            guard validPartners.count == 2 else { continue }
-            let kids = union.childrenIds.filter { placements[$0] != nil }
-            guard !kids.isEmpty else { continue }
-            
-            // Only adjust if parents are in different sides
-            let s0 = side[validPartners[0]] ?? 2
-            let s1 = side[validPartners[1]] ?? 2
-            guard s0 != s1 || (s0 == 2 && s1 == 2 && validPartners.count == 2) else { continue }
-            // Only if no inline spouse (both have parents)
-            guard hasParentsInTree(validPartners[0]) && hasParentsInTree(validPartners[1]) else { continue }
-            
-            let parentMid = (placements[validPartners[0]]!.bc + placements[validPartners[1]]!.bc) / 2
-            
-            // Find current midpoint of children
-            let childBcs = kids.compactMap { placements[$0]?.bc }
-            let childMid = (childBcs.min()! + childBcs.max()!) / 2
-            let shift = parentMid - childMid
-            
-            guard abs(shift) > 1 else { continue }
-            
-            // Shift all descendants of these children
-            func shiftSubtree(_ personId: UUID, by delta: CGFloat) {
-                guard var pl = placements[personId] else { return }
-                pl.bc += delta
-                placements[personId] = pl
-                // Shift inline spouse too
-                if let node = builtNodes[personId], let sid = node.spouseId {
-                    if var spl = placements[sid] {
-                        spl.bc += delta
-                        placements[sid] = spl
-                    }
-                }
-                // Shift descendants
-                for u in idx.unionsOf[personId] ?? [] {
-                    for cid in u.childrenIds where cid != personId {
-                        if let cpl = placements[cid], cpl.depth > pl.depth {
-                            shiftSubtree(cid, by: delta)
-                        }
-                    }
-                }
-            }
-            
-            for kid in kids {
-                shiftSubtree(kid, by: shift)
-            }
-        }
-        
+
         // ─── STEP 5: Convert to screen coordinates ───
         
         var nodes: [TreeNode] = []
@@ -754,68 +609,98 @@ struct TreeCanvasView: View {
         // ─── STEP 6: Build connector lines ───
         
         var links: [TreeLink] = []
+
+        // ── Marriage lines ──
         for union in tree.unions {
             let validPartners = union.partnerIds.filter { placements[$0] != nil }
-            
-            // Marriage line
-            if validPartners.count == 2 {
-                guard let pl1 = placements[validPartners[0]], let pl2 = placements[validPartners[1]] else { continue }
-                var segments: [LinkSegment] = []
-                if direction == .topDown {
-                    let y = CGFloat(pl1.depth) * genStep + pad + cardH / 2
-                    let x1 = min(pl1.bc, pl2.bc) + bShift + cardW / 2
-                    let x2 = max(pl1.bc, pl2.bc) + bShift - cardW / 2
-                    segments.append(LinkSegment(from: CGPoint(x: x1, y: y), to: CGPoint(x: x2, y: y)))
-                } else {
-                    let x = CGFloat(pl1.depth) * genStep + pad + cardW / 2
-                    let y1 = min(pl1.bc, pl2.bc) + bShift + cardH / 2
-                    let y2 = max(pl1.bc, pl2.bc) + bShift - cardH / 2
-                    segments.append(LinkSegment(from: CGPoint(x: x, y: y1), to: CGPoint(x: x, y: y2)))
-                }
-                links.append(TreeLink(id: "marriage-\(union.id)", segments: segments, personIds: Set(validPartners)))
+            guard validPartners.count == 2 else { continue }
+            guard let pl1 = placements[validPartners[0]], let pl2 = placements[validPartners[1]] else { continue }
+            var segments: [LinkSegment] = []
+            if direction == .topDown {
+                let y = CGFloat(pl1.depth) * genStep + pad + cardH / 2
+                let x1 = min(pl1.bc, pl2.bc) + bShift + cardW / 2
+                let x2 = max(pl1.bc, pl2.bc) + bShift - cardW / 2
+                segments.append(LinkSegment(from: CGPoint(x: x1, y: y), to: CGPoint(x: x2, y: y)))
+            } else {
+                let x = CGFloat(pl1.depth) * genStep + pad + cardW / 2
+                let y1 = min(pl1.bc, pl2.bc) + bShift + cardH / 2
+                let y2 = max(pl1.bc, pl2.bc) + bShift - cardH / 2
+                segments.append(LinkSegment(from: CGPoint(x: x, y: y1), to: CGPoint(x: x, y: y2)))
             }
-            
-            // Child connectors (T-junction)
+            links.append(TreeLink(id: "marriage-\(union.id)", segments: segments, personIds: Set(validPartners)))
+        }
+
+        // ── Child connectors (uniform routing) ──
+        //
+        // The trunk ("bus") that links a couple to their children runs across the
+        // gap between two generations. Every trunk sits at the same fraction
+        // (busFraction) of its gap, giving all connectors one consistent shape.
+        struct ChildBus {
+            let id: String
+            let depth: Int            // parent generation index
+            let ax: CGFloat           // parent-side stem position (cross-axis)
+            let childCoords: [CGFloat] // child stem positions (cross-axis)
+            let lo: CGFloat           // trunk span min (cross-axis)
+            let hi: CGFloat           // trunk span max (cross-axis)
+            let parentEdge: CGFloat   // main-axis: bottom/right edge of parents
+            let childEdge: CGFloat    // main-axis: top/left edge of children
+            let personIds: Set<UUID>
+        }
+
+        var buses: [ChildBus] = []
+        for union in tree.unions {
+            let validPartners = union.partnerIds.filter { placements[$0] != nil }
             let kids = union.childrenIds.filter { placements[$0] != nil }
-            if !kids.isEmpty && !validPartners.isEmpty {
-                var segments: [LinkSegment] = []
-                if direction == .topDown {
-                    let parentBcs = validPartners.compactMap { placements[$0]?.bc }
-                    let ax = parentBcs.reduce(0, +) / CGFloat(parentBcs.count) + bShift
-                    let parentDepth = placements[validPartners[0]]!.depth
-                    let parentBottom = CGFloat(parentDepth) * genStep + pad + cardH
-                    let childTop = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
-                    // Route bus in the gap between parent and children (1/3 from parent)
-                    let busY = parentBottom + (childTop - parentBottom) * 0.35
-                    
-                    // Vertical drop from couple center to bus
-                    segments.append(LinkSegment(from: CGPoint(x: ax, y: parentBottom), to: CGPoint(x: ax, y: busY)))
-                    // Horizontal bus
-                    let childXs = kids.compactMap { placements[$0]?.bc }.map { $0 + bShift }
-                    let allXs = childXs + [ax]
-                    segments.append(LinkSegment(from: CGPoint(x: allXs.min()!, y: busY), to: CGPoint(x: allXs.max()!, y: busY)))
-                    // Drops to each child
-                    for cx in childXs {
-                        segments.append(LinkSegment(from: CGPoint(x: cx, y: busY), to: CGPoint(x: cx, y: childTop)))
-                    }
-                } else {
-                    let parentBcs = validPartners.compactMap { placements[$0]?.bc }
-                    let ay = parentBcs.reduce(0, +) / CGFloat(parentBcs.count) + bShift
-                    let parentDepth = placements[validPartners[0]]!.depth
-                    let parentRight = CGFloat(parentDepth) * genStep + pad + cardW
-                    let childLeft = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
-                    let busX = parentRight + (childLeft - parentRight) * 0.35
-                    
-                    segments.append(LinkSegment(from: CGPoint(x: parentRight, y: ay), to: CGPoint(x: busX, y: ay)))
-                    let childYs = kids.compactMap { placements[$0]?.bc }.map { $0 + bShift }
-                    let allYs = childYs + [ay]
-                    segments.append(LinkSegment(from: CGPoint(x: busX, y: allYs.min()!), to: CGPoint(x: busX, y: allYs.max()!)))
-                    for cy in childYs {
-                        segments.append(LinkSegment(from: CGPoint(x: busX, y: cy), to: CGPoint(x: childLeft, y: cy)))
-                    }
-                }
-                links.append(TreeLink(id: "children-\(union.id)", segments: segments, personIds: Set(validPartners + kids)))
+            guard !kids.isEmpty, !validPartners.isEmpty else { continue }
+
+            let parentBcs = validPartners.compactMap { placements[$0]?.bc }
+            let ax = parentBcs.reduce(0, +) / CGFloat(parentBcs.count) + bShift
+            let depth = placements[validPartners[0]]!.depth
+            let childCoords = kids.compactMap { placements[$0]?.bc }.map { $0 + bShift }
+            let span = childCoords + [ax]
+
+            let parentEdge: CGFloat
+            let childEdge: CGFloat
+            if direction == .topDown {
+                parentEdge = CGFloat(depth) * genStep + pad + cardH
+                childEdge = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
+            } else {
+                parentEdge = CGFloat(depth) * genStep + pad + cardW
+                childEdge = kids.compactMap { placements[$0]?.depth }.map { CGFloat($0) * genStep + pad }.min()!
             }
+
+            buses.append(ChildBus(
+                id: "children-\(union.id)", depth: depth, ax: ax, childCoords: childCoords,
+                lo: span.min()!, hi: span.max()!, parentEdge: parentEdge, childEdge: childEdge,
+                personIds: Set(validPartners + kids)
+            ))
+        }
+
+        for bus in buses {
+            // Uniform routing: every trunk sits at the same fraction of its
+            // inter-generation gap. Because partners are adjacent and Buchheim
+            // keeps subtrees from interleaving, trunks at the same height never
+            // overlap — so all connectors share one consistent shape.
+            let busPos = bus.parentEdge + (bus.childEdge - bus.parentEdge) * busFraction
+
+            var segments: [LinkSegment] = []
+            if direction == .topDown {
+                // Stem from couple centre down to the trunk.
+                segments.append(LinkSegment(from: CGPoint(x: bus.ax, y: bus.parentEdge), to: CGPoint(x: bus.ax, y: busPos)))
+                // Horizontal trunk.
+                segments.append(LinkSegment(from: CGPoint(x: bus.lo, y: busPos), to: CGPoint(x: bus.hi, y: busPos)))
+                // Drops to each child.
+                for cx in bus.childCoords {
+                    segments.append(LinkSegment(from: CGPoint(x: cx, y: busPos), to: CGPoint(x: cx, y: bus.childEdge)))
+                }
+            } else {
+                segments.append(LinkSegment(from: CGPoint(x: bus.parentEdge, y: bus.ax), to: CGPoint(x: busPos, y: bus.ax)))
+                segments.append(LinkSegment(from: CGPoint(x: busPos, y: bus.lo), to: CGPoint(x: busPos, y: bus.hi)))
+                for cy in bus.childCoords {
+                    segments.append(LinkSegment(from: CGPoint(x: busPos, y: cy), to: CGPoint(x: bus.childEdge, y: cy)))
+                }
+            }
+            links.append(TreeLink(id: bus.id, segments: segments, personIds: bus.personIds))
         }
         
         let totalWidth = direction == .topDown ? (maxB - minB) + 2 * pad : CGFloat(maxDepth) * genStep + cardW + 2 * pad
