@@ -9,7 +9,7 @@ let package = Package(
             name: "FamilyTreeStudio",
             path: "FamilyTreeStudio",
             exclude: ["Assets.xcassets", "FamilyTreeStudio.entitlements"],
-            resources: [.copy("Resources/places.tsv"), .copy("Resources/AppIcon.icns")]
+            resources: [.copy("Resources/places.tsv"), .copy("Resources/geonames_ussr.tsv"), .copy("Resources/AppIcon.icns")]
         )
     ]
 )
