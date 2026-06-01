@@ -81,7 +81,7 @@ struct InspectorPanel: View {
             }
             
             VStack(alignment: .leading, spacing: 2) {
-                Text(person.fullName)
+                Text(person.listName)
                     .font(SepiaTheme.display(size: 19))
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
@@ -216,7 +216,7 @@ struct InspectorPanel: View {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 60, alignment: .leading)
-            Button(p.fullName) { self.person = p }
+            Button(p.listName) { self.person = p }
                 .buttonStyle(.plain)
                 .font(SepiaTheme.body(size: 13.5))
                 .foregroundColor(SepiaTheme.ink)

@@ -24,12 +24,14 @@ struct AddPersonView: View {
     @State private var relType: RelType = .none
     @State private var relatedPersonId: UUID?
     
+    // Action-based, from the perspective of the NEW person being added.
+    // "Кто" selects the existing person who plays the named role.
     enum RelType: String, CaseIterable {
-        case none = "Нет (отдельно)"
-        case child = "Ребёнок…"
-        case parent = "Родитель…"
-        case spouse = "Супруг/а…"
-        case sibling = "Брат/сестра…"
+        case none = "Без связи"
+        case parent = "Добавить родителя"
+        case spouse = "Добавить супруга/у"
+        case child = "Добавить ребёнка"
+        case sibling = "Добавить брата/сестру"
     }
     
     var body: some View {
@@ -57,9 +59,9 @@ struct AddPersonView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         SectionHeader(title: "Личность")
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ИМЕНА", text: $givenNames, placeholder: "напр. Иван")
-                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                             SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
+                            SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
+                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                         }.padding(.bottom, 12)
                         
                         HStack(spacing: 12) {
@@ -91,13 +93,14 @@ struct AddPersonView: View {
                         
                         SectionHeader(title: "Жизнь")
                         SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
-                        SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 12)
-                        
+                        SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
+                        SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
+
                         SectionHeader(title: "Родство")
-                        Picker("Связать как:", selection: $relType) {
+                        Picker("", selection: $relType) {
                             ForEach(RelType.allCases, id: \.rawValue) { t in Text(t.rawValue).tag(t) }
-                        }.pickerStyle(.menu).font(SepiaTheme.body(size: 13)).padding(.bottom, 8)
-                        
+                        }.labelsHidden().pickerStyle(.menu).font(SepiaTheme.body(size: 13)).padding(.bottom, 8)
+
                         if relType != .none && !tree.people.isEmpty {
                             Picker("Кто:", selection: $relatedPersonId) {
                                 Text("Выбрать…").tag(nil as UUID?)
@@ -142,12 +145,14 @@ struct AddPersonView: View {
         
         tree.people.append(person)
         
+        // Links are interpreted from the new person's perspective:
+        // the picked person (rpid) plays the named role relative to `person`.
         if let rpid = relatedPersonId, relType != .none {
             switch relType {
             case .spouse:
-                // Check: already spouses
+                // rpid becomes the new person's spouse
                 if !tree.unions.contains(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.contains(person.id) }) {
-                    // If rpid has a union with children but no second partner, add as partner
+                    // If rpid has a one-partner union (e.g. with children), join it; else new union
                     if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.count == 1 }) {
                         if existing.partner1Id == nil { existing.partner1Id = person.id }
                         else if existing.partner2Id == nil { existing.partner2Id = person.id }
@@ -157,21 +162,26 @@ struct AddPersonView: View {
                     }
                 }
             case .child:
+                // rpid becomes the new person's CHILD → new person is the parent.
+                if let existing = tree.unions.first(where: { $0.childrenIds.contains(rpid) }) {
+                    // rpid already has a parent union → add new person as the co-parent
+                    if existing.partner1Id == nil { existing.partner1Id = person.id }
+                    else if existing.partner2Id == nil { existing.partner2Id = person.id }
+                    else { existing.childrenIds.append(rpid) } // fallback: shouldn't happen
+                } else {
+                    let u = Union(partner1Id: person.id, childrenIds: [rpid])
+                    tree.unions.append(u)
+                }
+            case .parent:
+                // rpid becomes the new person's PARENT → new person is the child.
                 if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) }) {
                     existing.childrenIds.append(person.id)
                 } else {
                     let u = Union(partner1Id: rpid, childrenIds: [person.id])
                     tree.unions.append(u)
                 }
-            case .parent:
-                if let existing = tree.unions.first(where: { $0.childrenIds.contains(rpid) }) {
-                    if existing.partner1Id == nil { existing.partner1Id = person.id }
-                    else if existing.partner2Id == nil { existing.partner2Id = person.id }
-                } else {
-                    let u = Union(partner1Id: person.id, childrenIds: [rpid])
-                    tree.unions.append(u)
-                }
             case .sibling:
+                // new person and rpid share parents → add new person to rpid's parent union
                 if let existing = tree.unions.first(where: { $0.childrenIds.contains(rpid) }) {
                     existing.childrenIds.append(person.id)
                 } else {
