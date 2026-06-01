@@ -80,7 +80,7 @@ struct MainWorkspace: View {
         .sheet(isPresented: $showAddSheet) {
             AddPersonView(tree: tree, store: store) { newPerson in
                 selectedPerson = newPerson
-                showToast("Добавлен: \(newPerson.fullName)")
+                showToast("Добавлен: \(newPerson.listName)")
             }
         }
         .sheet(isPresented: $showEditSheet) {
@@ -96,7 +96,7 @@ struct MainWorkspace: View {
             Button("Удалить", role: .destructive) { deletePerson() }
         } message: {
             if let p = personToDelete {
-                Text("«\(p.fullName)» будет удалена из дерева. Все связи с этой персоной будут разорваны. Это действие нельзя отменить.")
+                Text("«\(p.listName)» будет удалена из дерева. Все связи с этой персоной будут разорваны. Это действие нельзя отменить.")
             }
         }
         .frame(minWidth: 900, minHeight: 600)
@@ -268,7 +268,7 @@ struct MainWorkspace: View {
     
     private func deletePerson() {
         guard let person = personToDelete else { return }
-        let name = person.fullName
+        let name = person.listName
         
         // Remove from all unions
         for union in tree.unions {

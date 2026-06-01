@@ -72,7 +72,7 @@ struct RelationshipView: View {
         .onAppear {
             if let p = preselectedPerson {
                 personA = p
-                searchA = p.fullName
+                searchA = p.listName
             }
         }
     }

@@ -60,9 +60,9 @@ struct EditPersonView: View {
                         
                         SectionHeader(title: "Личность")
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ИМЕНА", text: $givenNames, placeholder: "напр. Иван")
-                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                             SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
+                            SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
+                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                         }.padding(.bottom, 12)
                         
                         HStack(spacing: 12) {
@@ -95,7 +95,7 @@ struct EditPersonView: View {
                         SectionHeader(title: "Жизнь")
                         SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
-                        SepiaTextField(label: "ЗАМЕТКИ", text: $notes, placeholder: "—").padding(.bottom, 12)
+                        SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
                         
                         relationshipsEditor
                     }
@@ -191,7 +191,7 @@ struct EditPersonView: View {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 80, alignment: .leading)
-            Text(p.fullName)
+            Text(p.listName)
                 .font(SepiaTheme.body(size: 13.5))
                 .foregroundColor(SepiaTheme.ink)
             Spacer()

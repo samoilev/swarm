@@ -66,7 +66,7 @@ struct PDFExporter {
             ctx.setLineWidth(0.5)
             ctx.stroke(cardRect)
             
-            let name = NSAttributedString(string: p.fullName, attributes: nameAttr2)
+            let name = NSAttributedString(string: p.listName, attributes: nameAttr2)
             let ns = name.size()
             name.draw(at: NSPoint(x: x - ns.width / 2, y: y - 4))
             
@@ -134,7 +134,7 @@ struct PNGExporter {
             ctx.setLineWidth(1)
             ctx.stroke(cardRect)
             
-            let name = NSAttributedString(string: p.fullName, attributes: nameAttr)
+            let name = NSAttributedString(string: p.listName, attributes: nameAttr)
             let ns = name.size()
             name.draw(at: NSPoint(x: x - ns.width / 2, y: y))
         }

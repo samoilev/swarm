@@ -249,7 +249,7 @@ struct MapChartView: View {
             if let coord = birthCoord {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
-                    personName: person.fullName,
+                    personName: person.listName,
                     placeName: person.birthPlace ?? "",
                     eventType: .birth,
                     coordinate: coord
@@ -258,7 +258,7 @@ struct MapChartView: View {
             if let coord = deathCoord {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
-                    personName: person.fullName,
+                    personName: person.listName,
                     placeName: person.deathPlace ?? "",
                     eventType: .death,
                     coordinate: coord
@@ -311,7 +311,7 @@ struct MapChartView: View {
                     
                     let ann = PersonMapAnnotation(
                         personId: person.id,
-                        personName: person.fullName,
+                        personName: person.listName,
                         placeName: eventType == .birth ? (person.birthPlace ?? "") : (person.deathPlace ?? ""),
                         eventType: eventType,
                         coordinate: coord

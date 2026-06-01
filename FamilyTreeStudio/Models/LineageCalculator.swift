@@ -62,7 +62,7 @@ struct LineageCalculator {
             let childSpouses = index.spousesOf(child)
             for spouse in childSpouses {
                 ids.insert(spouse.id)
-                labels[spouse.id] = childSpouseLabel(generation: generation, sex: spouse.sex)
+                labels[spouse.id] = childSpouseLabel(generation: generation, spouseSex: spouse.sex, descendantSex: child.sex)
             }
             
             computeDescendants(personId: child.id, generation: generation + 1, ids: &ids, labels: &labels)
@@ -101,12 +101,28 @@ struct LineageCalculator {
         }
     }
     
-    private func childSpouseLabel(generation: Int, sex: Person.Sex) -> String {
+    /// Label for the spouse of a descendant. Generation 1 keeps the traditional
+    /// Зять/Невестка; deeper generations are qualified by whom they married,
+    /// e.g. the husband of a granddaughter → «Муж внучки».
+    private func childSpouseLabel(generation: Int, spouseSex: Person.Sex, descendantSex: Person.Sex) -> String {
+        if generation == 1 {
+            return spouseSex == .female ? "Невестка" : "Зять"
+        }
+        let prefix = spouseSex == .female ? "Жена" : "Муж"
+        return "\(prefix) \(descendantGenitive(generation: generation, sex: descendantSex))"
+    }
+
+    /// Genitive form of a descendant term, for building spouse labels.
+    private func descendantGenitive(generation: Int, sex: Person.Sex) -> String {
+        let isF = sex == .female
         switch generation {
-        case 1:
-            return sex == .female ? "Невестка" : "Зять"
+        case 1: return isF ? "дочери" : "сына"
+        case 2: return isF ? "внучки" : "внука"
+        case 3: return isF ? "правнучки" : "правнука"
+        case 4: return isF ? "праправнучки" : "праправнука"
         default:
-            return sex == .female ? "Жена" : "Муж"
+            let prefix = String(repeating: "пра", count: generation - 1)
+            return isF ? "\(prefix)внучки" : "\(prefix)внука"
         }
     }
 }

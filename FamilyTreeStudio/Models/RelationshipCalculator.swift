@@ -22,28 +22,43 @@ struct RelationshipCalculator {
         guard personA.id != personB.id else {
             return RelationshipResult(name: "Это тот же человек", path: [personA.id], description: "")
         }
-        
-        // Find path using BFS in family graph
+
+        // Direct spouse — must be checked before anything else.
+        if idx.spousesOf(personA).contains(where: { $0.id == personB.id }) {
+            return RelationshipResult(name: personB.sex == .male ? "Муж" : "Жена",
+                                      path: [personA.id, personB.id], description: "")
+        }
+
+        // Find path using BFS in family graph (used for the description / highlight)
         guard let path = findPath(from: personA.id, to: personB.id) else {
             return RelationshipResult(name: "Связь не найдена", path: [], description: "Эти люди не связаны в дереве")
         }
-        
-        // Determine relationship via common ancestor approach
-        let (upA, upB) = findCommonAncestorDistances(from: personA.id, to: personB.id)
-        
-        if let (up, down) = upA.flatMap({ a in upB.map({ b in (a, b) }) }) {
-            let name = nameRelationship(stepsUp: up, stepsDown: down, from: personA, to: personB)
+
+        // Blood relationship via lowest common ancestor.
+        if let blood = bloodRelationship(from: personA, to: personB) {
             let desc = buildDescription(from: personA, to: personB, path: path)
-            return RelationshipResult(name: name, path: path, description: desc)
+            return RelationshipResult(name: blood.name, path: path, description: desc)
         }
-        
-        // Check in-law / spouse-based relationships
+
+        // Otherwise an in-law / spouse-based relationship.
         if let result = checkInLawRelationship(from: personA, to: personB, path: path) {
             return result
         }
-        
+
         let desc = buildDescription(from: personA, to: personB, path: path)
         return RelationshipResult(name: "Родственник", path: path, description: desc)
+    }
+
+    /// Blood relationship only (via lowest common ancestor); nil if no common ancestor.
+    /// Kept separate so in-law detection can use it without re-entering in-law logic.
+    private func bloodRelationship(from personA: Person, to personB: Person) -> RelationshipResult? {
+        if personA.id == personB.id {
+            return RelationshipResult(name: "Это тот же человек", path: [personA.id], description: "")
+        }
+        let (upA, upB) = findCommonAncestorDistances(from: personA.id, to: personB.id)
+        guard let up = upA, let down = upB else { return nil }
+        let name = nameRelationship(stepsUp: up, stepsDown: down, from: personA, to: personB)
+        return RelationshipResult(name: name, path: [], description: "")
     }
     
     // MARK: - Path Finding (BFS)
@@ -217,28 +232,26 @@ struct RelationshipCalculator {
         
         // Check if B is spouse of a blood relative of A
         let spousesOfB = idx.spousesOf(personB)
-        for spouseOfB in spousesOfB {
-            if let bloodRel = relationship(from: personA, to: spouseOfB) {
-                let inLawName = inLawName(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB)
-                if let name = inLawName {
+        for spouseOfB in spousesOfB where spouseOfB.id != personA.id {
+            if let bloodRel = bloodRelationship(from: personA, to: spouseOfB) {
+                if let name = inLawName(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB) {
                     let desc = buildDescription(from: personA, to: personB, path: path)
                     return RelationshipResult(name: name, path: path, description: desc)
                 }
             }
         }
-        
+
         // Check if A's spouse is blood relative of B
         let spousesOfA = idx.spousesOf(personA)
-        for spouseOfA in spousesOfA {
-            if let bloodRel = relationship(from: spouseOfA, to: personB) {
-                let name = inLawViaMySpouse(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB)
-                if let n = name {
+        for spouseOfA in spousesOfA where spouseOfA.id != personB.id {
+            if let bloodRel = bloodRelationship(from: spouseOfA, to: personB) {
+                if let n = inLawViaMySpouse(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB) {
                     let desc = buildDescription(from: personA, to: personB, path: path)
                     return RelationshipResult(name: n, path: path, description: desc)
                 }
             }
         }
-        
+
         return nil
     }
     
@@ -288,7 +301,7 @@ struct RelationshipCalculator {
     
     private func buildDescription(from personA: Person, to personB: Person, path: [UUID]) -> String {
         guard path.count > 2 else { return "" }
-        let names = path.compactMap { idx.byId[$0]?.fullName }
+        let names = path.compactMap { idx.byId[$0]?.listName }
         return "Через: " + names.dropFirst().dropLast().joined(separator: " → ")
     }
 }

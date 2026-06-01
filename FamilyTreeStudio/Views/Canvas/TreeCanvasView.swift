@@ -20,70 +20,109 @@ struct TreeCanvasView: View {
     private let vGapLR: CGFloat = 150
     private let pad: CGFloat = 60
     private let busFraction: CGFloat = 0.5 // where every parent→children trunk sits within the generation gap
-    
+    private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
+
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var magnifyStart: CGFloat = 1.0
+    @State private var panAtMagnifyStart: CGSize = .zero
+    @State private var isMagnifying = false
     
     var body: some View {
         GeometryReader { geo in
             let layout = computeLayout()
-            
+
             ZStack(alignment: .topLeading) {
-                // Connectors
+                // Dot grid background (Miro-style) — fills the viewport, tap to deselect
                 Canvas { ctx, size in
-                    for link in layout.links {
-                        var path = Path()
-                        for seg in link.segments {
-                            path.move(to: seg.from)
-                            path.addLine(to: seg.to)
+                    let spacing: CGFloat = 20 * zoom
+                    let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
+                    let offsetX = panOffset.width.truncatingRemainder(dividingBy: spacing)
+                    let offsetY = panOffset.height.truncatingRemainder(dividingBy: spacing)
+
+                    let cols = Int(size.width / spacing) + 2
+                    let rows = Int(size.height / spacing) + 2
+
+                    for col in 0...cols {
+                        for row in 0...rows {
+                            let x = CGFloat(col) * spacing + offsetX
+                            let y = CGFloat(row) * spacing + offsetY
+                            guard x >= -dotRadius, x <= size.width + dotRadius,
+                                  y >= -dotRadius, y <= size.height + dotRadius else { continue }
+                            let rect = CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2)
+                            ctx.fill(Circle().path(in: rect), with: .color(SepiaTheme.ink.opacity(0.06)))
                         }
-                        let isHighlighted = !highlightedIds.isEmpty && link.personIds.allSatisfy { highlightedIds.contains($0) }
-                        let color = highlightedIds.isEmpty ? SepiaTheme.line : (isHighlighted ? SepiaTheme.accent : SepiaTheme.line.opacity(0.25))
-                        ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
                     }
                 }
-                .frame(width: layout.totalWidth, height: layout.totalHeight)
-                
-                // Cards
-                ForEach(layout.nodes, id: \.person.id) { node in
-                    let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
-                    let isPrimary = selectedPerson?.id == node.person.id
-                    let isSecondary = secondaryPerson?.id == node.person.id
-                    let label = lineageLabels[node.person.id]
-                    PersonCardView(
-                        person: node.person,
-                        isSelected: isPrimary,
-                        isSecondarySelected: isSecondary,
-                        isHome: tree.homePersonId == node.person.id,
-                        isHighlighted: highlightedIds.contains(node.person.id),
-                        lineageLabel: label,
-                        showPhoto: showPhotos
-                    )
-                    .equatable()
-                    .opacity(dimmed ? 0.3 : 1.0)
-                    .position(x: node.x + cardW / 2, y: node.y + cardH / 2)
-                    .onTapGesture {
-                        if NSEvent.modifierFlags.contains(.command) {
-                            // CMD+click: set as secondary (max 2)
-                            if selectedPerson == nil {
-                                selectedPerson = node.person
-                            } else if node.person.id == selectedPerson?.id {
-                                // Clicking primary again with CMD — ignore
-                            } else {
-                                secondaryPerson = node.person
+                .frame(width: geo.size.width, height: geo.size.height)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedPerson = nil
+                    secondaryPerson = nil
+                }
+
+                // Tree content — may be larger than the viewport; the outer
+                // frame+clip below keeps it from overflowing onto the toolbar
+                // (which would otherwise swallow toolbar button clicks).
+                ZStack(alignment: .topLeading) {
+                    // Connectors
+                    Canvas { ctx, size in
+                        for link in layout.links {
+                            var path = Path()
+                            for seg in link.segments {
+                                path.move(to: seg.from)
+                                path.addLine(to: seg.to)
                             }
-                        } else {
-                            // Normal click: set as primary, clear secondary
-                            secondaryPerson = nil
-                            selectedPerson = node.person
+                            let isHighlighted = !highlightedIds.isEmpty && link.personIds.allSatisfy { highlightedIds.contains($0) }
+                            let color = highlightedIds.isEmpty ? SepiaTheme.line : (isHighlighted ? SepiaTheme.accent : SepiaTheme.line.opacity(0.25))
+                            ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
+                        }
+                    }
+                    .frame(width: layout.totalWidth, height: layout.totalHeight)
+
+                    // Cards
+                    ForEach(layout.nodes, id: \.person.id) { node in
+                        let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
+                        let isPrimary = selectedPerson?.id == node.person.id
+                        let isSecondary = secondaryPerson?.id == node.person.id
+                        let label = lineageLabels[node.person.id]
+                        PersonCardView(
+                            person: node.person,
+                            isSelected: isPrimary,
+                            isSecondarySelected: isSecondary,
+                            isHome: tree.homePersonId == node.person.id,
+                            isHighlighted: highlightedIds.contains(node.person.id),
+                            lineageLabel: label,
+                            showPhoto: showPhotos
+                        )
+                        .equatable()
+                        .opacity(dimmed ? 0.3 : 1.0)
+                        .position(x: node.x + cardW / 2, y: node.y + cardH / 2)
+                        .onTapGesture {
+                            if NSEvent.modifierFlags.contains(.command) {
+                                // CMD+click: set as secondary (max 2)
+                                if selectedPerson == nil {
+                                    selectedPerson = node.person
+                                } else if node.person.id == selectedPerson?.id {
+                                    // Clicking primary again with CMD — ignore
+                                } else {
+                                    secondaryPerson = node.person
+                                }
+                            } else {
+                                // Normal click: set as primary, clear secondary
+                                secondaryPerson = nil
+                                selectedPerson = node.person
+                            }
                         }
                     }
                 }
+                .frame(width: layout.totalWidth, height: layout.totalHeight, alignment: .topLeading)
+                .scaleEffect(zoom, anchor: .topLeading)
+                .offset(x: panOffset.width, y: panOffset.height)
             }
-            .frame(width: layout.totalWidth, height: layout.totalHeight)
-            .scaleEffect(zoom, anchor: .topLeading)
-            .offset(x: panOffset.width, y: panOffset.height)
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            .contentShape(Rectangle())
+            .clipped()
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -99,52 +138,44 @@ struct TreeCanvasView: View {
             .gesture(
                 MagnifyGesture()
                     .onChanged { value in
-                        let newZoom = magnifyStart * value.magnification
-                        zoom = min(2.0, max(0.2, newZoom))
+                        // Capture the zoom/pan baseline once at the start of the
+                        // gesture. (value.magnification is cumulative from the
+                        // gesture's start, so the baseline must NOT move mid-pinch
+                        // — otherwise the zoom compounds and feels hypersensitive.)
+                        if !isMagnifying {
+                            isMagnifying = true
+                            magnifyStart = zoom
+                            panAtMagnifyStart = panOffset
+                        }
+                        // Soften the response for a gentle, map-like feel.
+                        let damped = 1 + (value.magnification - 1) * zoomSensitivity
+                        let newZoom = min(2.0, max(0.2, magnifyStart * damped))
+                        // Zoom about the viewport centre so the content doesn't
+                        // lurch toward a corner (the scaleEffect anchor is topLeading).
+                        let ratio = newZoom / magnifyStart
+                        let cx = geo.size.width / 2
+                        let cy = geo.size.height / 2
+                        panOffset = CGSize(
+                            width: cx - (cx - panAtMagnifyStart.width) * ratio,
+                            height: cy - (cy - panAtMagnifyStart.height) * ratio
+                        )
+                        zoom = newZoom
                     }
                     .onEnded { _ in
+                        isMagnifying = false
                         magnifyStart = zoom
+                        dragStart = panOffset
                     }
             )
             .onAppear {
                 magnifyStart = zoom
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
-            .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
             .onChange(of: tree.layoutVersion) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
-            }
-            .clipped()
-            .background {
-                // Dot grid background (Miro-style)
-                Canvas { ctx, size in
-                    let spacing: CGFloat = 20 * zoom
-                    let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
-                    let offsetX = panOffset.width.truncatingRemainder(dividingBy: spacing)
-                    let offsetY = panOffset.height.truncatingRemainder(dividingBy: spacing)
-                    
-                    let cols = Int(size.width / spacing) + 2
-                    let rows = Int(size.height / spacing) + 2
-                    
-                    for col in 0...cols {
-                        for row in 0...rows {
-                            let x = CGFloat(col) * spacing + offsetX
-                            let y = CGFloat(row) * spacing + offsetY
-                            guard x >= -dotRadius, x <= size.width + dotRadius,
-                                  y >= -dotRadius, y <= size.height + dotRadius else { continue }
-                            let rect = CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2)
-                            ctx.fill(Circle().path(in: rect), with: .color(SepiaTheme.ink.opacity(0.06)))
-                        }
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedPerson = nil
-                    secondaryPerson = nil
-                }
             }
         }
     }

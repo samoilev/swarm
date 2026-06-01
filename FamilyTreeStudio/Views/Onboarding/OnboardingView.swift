@@ -147,6 +147,68 @@ struct SepiaTextField: View {
     }
 }
 
+/// Multiline freeform notes field with a draggable bottom edge to resize vertically.
+struct SepiaNotesField: View {
+    let label: String
+    @Binding var text: String
+    var placeholder: String = ""
+    @State private var height: CGFloat = 90
+    @State private var heightAtDragStart: CGFloat = 90
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(SepiaTheme.ui(size: 9.5))
+                .tracking(1.5)
+                .foregroundColor(SepiaTheme.inkSoft)
+
+            ZStack(alignment: .topLeading) {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color(hex: "f5eed8"))
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(SepiaTheme.fieldLine, lineWidth: 1))
+
+                if text.isEmpty && !placeholder.isEmpty {
+                    Text(placeholder)
+                        .font(SepiaTheme.body(size: 15))
+                        .foregroundColor(SepiaTheme.inkSoft.opacity(0.45))
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 9)
+                        .allowsHitTesting(false)
+                }
+
+                TextEditor(text: $text)
+                    .font(SepiaTheme.body(size: 15))
+                    .foregroundColor(SepiaTheme.ink)
+                    .scrollContentBackground(.hidden)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 3)
+            }
+            .frame(height: height)
+            .overlay(alignment: .bottom) {
+                // Drag handle along the bottom edge
+                ZStack {
+                    Capsule()
+                        .fill(SepiaTheme.inkSoft.opacity(0.35))
+                        .frame(width: 28, height: 3)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 12)
+                .contentShape(Rectangle())
+                .onHover { hovering in
+                    if hovering { NSCursor.resizeUpDown.set() } else { NSCursor.arrow.set() }
+                }
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            height = min(420, max(60, heightAtDragStart + value.translation.height))
+                        }
+                        .onEnded { _ in heightAtDragStart = height }
+                )
+            }
+        }
+    }
+}
+
 /// Date field that only accepts ДД.ММ.ГГГГ, ММ.ГГГГ, or ГГГГ
 struct SepiaDateField: View {
     let label: String
