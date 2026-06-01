@@ -20,7 +20,11 @@ struct FamilyTreeStudioApp: App {
                 .preferredColorScheme(.light)
                 .onAppear {
                     NSApplication.shared.activate(ignoringOtherApps: true)
-                    NSApplication.shared.windows.first?.makeKeyAndOrderFront(nil)
+                    if let window = NSApplication.shared.windows.first {
+                        window.makeKeyAndOrderFront(nil)
+                        window.backgroundColor = NSColor(red: 0.91, green: 0.88, blue: 0.77, alpha: 1.0) // matches SepiaTheme.toolbarBg
+                        window.titlebarAppearsTransparent = true
+                    }
                 }
         }
         .windowStyle(.titleBar)

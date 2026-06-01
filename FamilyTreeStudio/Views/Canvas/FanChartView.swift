@@ -29,7 +29,8 @@ struct FanChartView: View {
                         }
                 }
             }
-            .frame(width: layout.width, height: layout.height)
+            .frame(width: layout.width, height: layout.height, alignment: .topLeading)
+            .fixedSize()
             .scaleEffect(zoom, anchor: .topLeading)
             .offset(x: panOffset.width, y: panOffset.height)
             .gesture(
@@ -51,22 +52,29 @@ struct FanChartView: View {
             )
             .onAppear {
                 magnifyStart = zoom
-                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                }
             }
             .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
             .onChange(of: maxGen) { _, _ in
-                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                }
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
             }
-            .clipped()
+            .onChange(of: geo.size) { _, newSize in
+                fitToScreen(viewSize: newSize, chartWidth: layout.width, chartHeight: layout.height)
+            }
             .background {
                 Color.clear
                     .contentShape(Rectangle())
                     .onTapGesture { selectedPerson = nil }
             }
         }
+        .clipped()
     }
     
     private func fitToScreen(viewSize: CGSize, chartWidth: CGFloat, chartHeight: CGFloat) {
@@ -185,7 +193,7 @@ struct FanChartView: View {
         let cx = outerR + 80
         let hasSpouse = spouseId != nil
         let cy = hasSpouse ? outerR + 80 : outerR + 80
-        let totalH = hasSpouse ? 2 * outerR + 160 : outerR + 120
+        let totalH = hasSpouse ? 2 * outerR + 160 : outerR + 160
         return FanData(wedges: wedges, cx: cx, cy: cy, width: 2 * outerR + 160, height: totalH)
     }
 }

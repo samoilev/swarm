@@ -146,3 +146,99 @@ struct SepiaTextField: View {
         }
     }
 }
+
+/// Date field that only accepts ДД.ММ.ГГГГ, ММ.ГГГГ, or ГГГГ
+struct SepiaDateField: View {
+    let label: String
+    @Binding var text: String
+    var placeholder: String = "ДД.ММ.ГГГГ"
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(SepiaTheme.ui(size: 9.5))
+                .tracking(1.5)
+                .foregroundColor(SepiaTheme.inkSoft)
+            TextField(placeholder, text: $text)
+                .textFieldStyle(.roundedBorder)
+                .font(SepiaTheme.body(size: 15))
+                .foregroundColor(SepiaTheme.ink)
+                .colorMultiply(Color(hex: "f5eed8"))
+                .onChange(of: text) { _, newValue in
+                    let filtered = filterDateInput(newValue)
+                    if filtered != newValue {
+                        text = filtered
+                    }
+                }
+            if !text.isEmpty && !isValidDateFormat(text) {
+                Text("Формат: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ")
+                    .font(SepiaTheme.ui(size: 9))
+                    .foregroundColor(.red.opacity(0.8))
+            }
+        }
+    }
+    
+    /// Allow only digits and dots, auto-insert dots, limit length
+    private func filterDateInput(_ input: String) -> String {
+        // Remove anything that's not a digit or dot
+        var cleaned = String(input.filter { $0.isNumber || $0 == "." })
+        
+        // Remove leading dots
+        while cleaned.hasPrefix(".") {
+            cleaned.removeFirst()
+        }
+        
+        // Remove consecutive dots
+        while cleaned.contains("..") {
+            cleaned = cleaned.replacingOccurrences(of: "..", with: ".")
+        }
+        
+        // Limit: max 10 chars (DD.MM.YYYY)
+        if cleaned.count > 10 {
+            cleaned = String(cleaned.prefix(10))
+        }
+        
+        // Limit to max 2 dots
+        let dots = cleaned.filter { $0 == "." }
+        if dots.count > 2 {
+            // Keep only up to second dot
+            var dotCount = 0
+            var result = ""
+            for ch in cleaned {
+                if ch == "." {
+                    dotCount += 1
+                    if dotCount > 2 { break }
+                }
+                result.append(ch)
+            }
+            cleaned = result
+        }
+        
+        return cleaned
+    }
+    
+    private func isValidDateFormat(_ input: String) -> Bool {
+        let str = input.trimmingCharacters(in: .whitespaces)
+        if str.isEmpty { return true }
+        
+        // ГГГГ
+        if str.range(of: #"^\d{4}$"#, options: .regularExpression) != nil { return true }
+        // ММ.ГГГГ
+        if str.range(of: #"^\d{1,2}\.\d{4}$"#, options: .regularExpression) != nil {
+            let parts = str.components(separatedBy: ".")
+            if let m = Int(parts[0]), m >= 1, m <= 12 { return true }
+        }
+        // ДД.ММ.ГГГГ
+        if str.range(of: #"^\d{1,2}\.\d{1,2}\.\d{4}$"#, options: .regularExpression) != nil {
+            let parts = str.components(separatedBy: ".")
+            if let d = Int(parts[0]), let m = Int(parts[1]), d >= 1, d <= 31, m >= 1, m <= 12 { return true }
+        }
+        // Partial input (still typing)
+        if str.range(of: #"^\d{1,2}\.?$"#, options: .regularExpression) != nil { return true }
+        if str.range(of: #"^\d{1,2}\.\d{1,2}\.?$"#, options: .regularExpression) != nil { return true }
+        if str.range(of: #"^\d{1,2}\.\d{1,4}$"#, options: .regularExpression) != nil { return true }
+        if str.range(of: #"^\d{1,4}$"#, options: .regularExpression) != nil { return true }
+        
+        return false
+    }
+}

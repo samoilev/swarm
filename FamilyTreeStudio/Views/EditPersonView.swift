@@ -78,7 +78,7 @@ struct EditPersonView: View {
                         }.padding(.bottom, 12)
                         
                         SectionHeader(title: "Рождение")
-                        SepiaTextField(label: "ДАТА", text: $birthDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
+                        SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
                         PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
@@ -87,7 +87,7 @@ struct EditPersonView: View {
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
                         
                         if !isLiving {
-                            SepiaTextField(label: "ДАТА", text: $deathDate, placeholder: "ДД.ММ.ГГГГ").padding(.bottom, 8)
+                            SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 12)
                         }
