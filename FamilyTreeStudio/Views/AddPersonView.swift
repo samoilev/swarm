@@ -101,7 +101,7 @@ struct AddPersonView: View {
                         if relType != .none && !tree.people.isEmpty {
                             Picker("Кто:", selection: $relatedPersonId) {
                                 Text("Выбрать…").tag(nil as UUID?)
-                                ForEach(tree.people, id: \.id) { p in Text(p.fullName).tag(p.id as UUID?) }
+                                ForEach(tree.people.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }, id: \.id) { p in Text(p.listName).tag(p.id as UUID?) }
                             }.pickerStyle(.menu).font(SepiaTheme.body(size: 13))
                         }
                     }

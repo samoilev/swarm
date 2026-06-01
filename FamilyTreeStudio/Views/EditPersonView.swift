@@ -163,7 +163,7 @@ struct EditPersonView: View {
                     Picker("Кто:", selection: $addRelPersonId) {
                         Text("Выбрать…").tag(nil as UUID?)
                         ForEach(availablePeople, id: \.id) { p in
-                            Text(p.fullName).tag(p.id as UUID?)
+                            Text(p.listName).tag(p.id as UUID?)
                         }
                     }
                     .pickerStyle(.menu)
@@ -181,7 +181,9 @@ struct EditPersonView: View {
     }
     
     private var availablePeople: [Person] {
-        tree.people.filter { $0.id != person.id }
+        tree.people
+            .filter { $0.id != person.id }
+            .sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
     
     private func relEditRow(_ tag: String, _ p: Person, onRemove: @escaping () -> Void) -> some View {

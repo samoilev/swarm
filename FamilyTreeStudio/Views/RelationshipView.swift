@@ -86,7 +86,7 @@ struct RelationshipView: View {
             
             if let person = selected.wrappedValue {
                 HStack {
-                    Text(person.fullName)
+                    Text(person.listName)
                         .font(SepiaTheme.body(size: 14))
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
@@ -119,11 +119,11 @@ struct RelationshipView: View {
                                 ForEach(filtered.prefix(8), id: \.id) { person in
                                     Button {
                                         selected.wrappedValue = person
-                                        search.wrappedValue = person.fullName
+                                        search.wrappedValue = person.listName
                                         result = nil
                                     } label: {
                                         HStack {
-                                            Text(person.fullName)
+                                            Text(person.listName)
                                                 .font(SepiaTheme.body(size: 13))
                                                 .foregroundColor(SepiaTheme.ink)
                                             Spacer()
@@ -162,7 +162,7 @@ struct RelationshipView: View {
             person.fullName.lowercased().contains(q) ||
             person.surname.lowercased().contains(q) ||
             person.givenNames.lowercased().contains(q)
-        }
+        }.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
     
     private func resultView(_ result: RelationshipCalculator.RelationshipResult) -> some View {

@@ -95,6 +95,13 @@ final class Person: Identifiable, Codable, Hashable {
             .compactMap { $0 }
             .joined(separator: " ")
     }
+
+    /// Имя в формате «Фамилия Имя Отчество» — для списков и сортировки по алфавиту.
+    var listName: String {
+        [surname.isEmpty ? nil : surname, givenNames.isEmpty ? nil : givenNames, patronymic]
+            .compactMap { $0 }
+            .joined(separator: " ")
+    }
     
     var displaySurname: String {
         surname.isEmpty ? (maidenName ?? "") : surname
