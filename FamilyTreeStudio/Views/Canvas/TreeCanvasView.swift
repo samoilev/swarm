@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct TreeCanvasView: View {
     let tree: FamilyTree
@@ -21,6 +22,7 @@ struct TreeCanvasView: View {
     private let pad: CGFloat = 60
     private let busFraction: CGFloat = 0.5 // where every parent→children trunk sits within the generation gap
     private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
+    private let wheelZoomSensitivity: CGFloat = 0.05 // mouse-wheel zoom step per scroll unit (soft)
 
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
@@ -123,6 +125,22 @@ struct TreeCanvasView: View {
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .contentShape(Rectangle())
             .clipped()
+            .background(
+                // Mouse-wheel / scroll zoom, soft and anchored to the cursor.
+                ScrollWheelZoom { deltaY, location in
+                    var factor = 1 + deltaY * wheelZoomSensitivity
+                    factor = min(1.25, max(0.8, factor))
+                    let newZoom = min(2.0, max(0.2, zoom * factor))
+                    guard newZoom != zoom else { return }
+                    let ratio = newZoom / zoom
+                    panOffset = CGSize(
+                        width: location.x - (location.x - panOffset.width) * ratio,
+                        height: location.y - (location.y - panOffset.height) * ratio
+                    )
+                    zoom = newZoom
+                    dragStart = panOffset
+                }
+            )
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -756,6 +774,56 @@ struct TreeLink: Identifiable, Equatable {
 }
 struct LinkSegment: Equatable { let from: CGPoint; let to: CGPoint }
 struct TreeLayout: Equatable { let nodes: [TreeNode]; let links: [TreeLink]; let totalWidth: CGFloat; let totalHeight: CGFloat }
+
+/// Reports mouse-wheel / scroll-wheel events over the canvas as a zoom delta.
+/// It installs a local scroll-wheel event monitor and keeps itself transparent
+/// to mouse clicks (`hitTest` returns nil), so card taps and dragging to pan are
+/// untouched — only scrolling while the cursor is over the canvas is consumed.
+struct ScrollWheelZoom: NSViewRepresentable {
+    let onScroll: (_ deltaY: CGFloat, _ location: CGPoint) -> Void
+
+    func makeNSView(context: Context) -> CatcherView {
+        let v = CatcherView()
+        v.onScroll = onScroll
+        return v
+    }
+
+    func updateNSView(_ nsView: CatcherView, context: Context) {
+        nsView.onScroll = onScroll
+    }
+
+    final class CatcherView: NSView {
+        var onScroll: ((CGFloat, CGPoint) -> Void)?
+        private var monitor: Any?
+
+        override var isFlipped: Bool { true } // top-left origin to match SwiftUI
+        override func hitTest(_ point: NSPoint) -> NSView? { nil } // pass clicks through
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if window != nil {
+                if monitor == nil {
+                    monitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { [weak self] event in
+                        guard let self, let w = self.window, event.window === w else { return event }
+                        let locView = self.convert(event.locationInWindow, from: nil)
+                        guard self.bounds.contains(locView) else { return event }
+                        let dy = event.hasPreciseScrollingDeltas ? event.scrollingDeltaY : event.deltaY
+                        if dy != 0 {
+                            self.onScroll?(dy, locView)
+                            return nil // consume: we turned it into a zoom
+                        }
+                        return event
+                    }
+                }
+            } else if let m = monitor {
+                NSEvent.removeMonitor(m)
+                monitor = nil
+            }
+        }
+
+        deinit { if let m = monitor { NSEvent.removeMonitor(m) } }
+    }
+}
 
 struct PersonCardView: View, Equatable {
     let person: Person
