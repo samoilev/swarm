@@ -46,9 +46,13 @@ struct MapChartView: View {
         }
         .onAppear {
             lastZoom = zoom
-            computeAnnotations()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                fitToAnnotations()
+            // Wait for the GeoNames DB so known places resolve locally instead of
+            // all falling through to CLGeocoder (rate-limited).
+            GeocodingService.shared.whenReady {
+                computeAnnotations()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    fitToAnnotations()
+                }
             }
         }
         .onChange(of: tree.layoutVersion) { _, _ in

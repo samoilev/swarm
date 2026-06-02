@@ -13,7 +13,13 @@ struct GEDCOMParser {
     }
     
     static func parse(from url: URL) throws -> ParsedTree {
-        let content = try String(contentsOf: url, encoding: .utf8)
+        let raw = try Data(contentsOf: url)
+        // GEDCOM files in the wild are often Windows-1251 (common for Russian
+        // genealogy) or UTF-16, not UTF-8 — fall back instead of failing the import.
+        let content = String(data: raw, encoding: .utf8)
+            ?? String(data: raw, encoding: .windowsCP1251)
+            ?? String(data: raw, encoding: .utf16)
+            ?? String(decoding: raw, as: UTF8.self)
         return parse(gedcom: content, mediaFolder: url.deletingLastPathComponent().appendingPathComponent("Media"))
     }
     

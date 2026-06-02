@@ -29,10 +29,13 @@ struct TreeCanvasView: View {
     @State private var magnifyStart: CGFloat = 1.0
     @State private var panAtMagnifyStart: CGSize = .zero
     @State private var isMagnifying = false
-    
+    // Layout only depends on tree structure + direction, so cache it and recompute
+    // only when those change — body re-runs on every pan/zoom frame otherwise.
+    @State private var cachedLayout: TreeLayout?
+
     var body: some View {
         GeometryReader { geo in
-            let layout = computeLayout()
+            let layout = cachedLayout ?? computeLayout()
 
             ZStack(alignment: .topLeading) {
                 // Dot grid background (Miro-style) — fills the viewport, tap to deselect
@@ -187,10 +190,18 @@ struct TreeCanvasView: View {
             )
             .onAppear {
                 magnifyStart = zoom
+                if cachedLayout == nil { cachedLayout = computeLayout() }
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: tree.layoutVersion) { _, _ in
-                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+                let l = computeLayout()
+                cachedLayout = l
+                fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
+            }
+            .onChange(of: direction) { _, _ in
+                let l = computeLayout()
+                cachedLayout = l
+                fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
@@ -340,36 +351,11 @@ struct TreeCanvasView: View {
 
         let memberGap = spouseGap // gap between adjacent cards within a unit
 
-        // Parent/sibling lookups that merge across split GEDCOM families
-        // (a person's father and mother can be recorded in separate partial unions).
-        func parentUnionsOf(_ pid: UUID) -> [Union] {
-            tree.unions.filter { $0.childrenIds.contains(pid) }
-        }
-        func mergedParents(_ pid: UUID) -> (father: UUID?, mother: UUID?) {
-            var father: UUID? = nil
-            var mother: UUID? = nil
-            for u in parentUnionsOf(pid) {
-                for ppid in u.partnerIds {
-                    guard let p = idx.byId[ppid] else { continue }
-                    if p.sex == .male { if father == nil { father = ppid } }
-                    else if p.sex == .female { if mother == nil { mother = ppid } }
-                    else if father == nil { father = ppid }
-                    else if mother == nil { mother = ppid }
-                }
-            }
-            return (father, mother)
-        }
-        func mergedSiblings(_ pid: UUID) -> [UUID] {
-            var seen = Set<UUID>([pid])
-            var result: [UUID] = []
-            for u in parentUnionsOf(pid) {
-                for c in u.childrenIds where !seen.contains(c) {
-                    seen.insert(c)
-                    result.append(c)
-                }
-            }
-            return result
-        }
+        // Parent/sibling lookups merge across split GEDCOM families (a person's
+        // father and mother can be in separate FAM records). Backed by the
+        // precomputed FamilyIndex maps — O(1) per call instead of scanning unions.
+        func mergedParents(_ pid: UUID) -> (father: UUID?, mother: UUID?) { idx.mergedParentIds(pid) }
+        func mergedSiblings(_ pid: UUID) -> [UUID] { idx.mergedSiblingIds(pid) }
 
         var placedPersons = Set<UUID>()
         var rootNodes: [LayoutNode] = []
@@ -801,6 +787,9 @@ struct ScrollWheelZoom: NSViewRepresentable {
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
+            // Always clear any existing monitor first so view recycling / window
+            // changes can't leave duplicate monitors installed.
+            if let m = monitor { NSEvent.removeMonitor(m); monitor = nil }
             if window != nil {
                 if monitor == nil {
                     monitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { [weak self] event in

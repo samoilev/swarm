@@ -8,12 +8,32 @@ class GeocodingService {
     
     private var cache: [String: CLLocationCoordinate2D] = [:]
     private let geocoder = CLGeocoder()
-    
+
     /// GeoNames-sourced coordinates loaded from bundled TSV (name\tlat\tlon)
-    private let knownPlaces: [String: CLLocationCoordinate2D]
-    
+    private var knownPlaces: [String: CLLocationCoordinate2D] = [:]
+    private(set) var isReady = false
+    private var readyCallbacks: [() -> Void] = []
+
     init() {
-        knownPlaces = Self.loadGeoNames()
+        // ~252k rows — load off the main thread so opening the map never hangs.
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let loaded = Self.loadGeoNames()
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.knownPlaces = loaded
+                self.isReady = true
+                let callbacks = self.readyCallbacks
+                self.readyCallbacks = []
+                callbacks.forEach { $0() }
+            }
+        }
+    }
+
+    /// Runs `run` once the GeoNames DB is loaded (immediately if already loaded).
+    /// Callers that geocode in bulk should gate on this to avoid hitting CLGeocoder
+    /// for places that are actually in the (not-yet-loaded) database.
+    func whenReady(_ run: @escaping () -> Void) {
+        if isReady { run() } else { readyCallbacks.append(run) }
     }
     
     private static func loadGeoNames() -> [String: CLLocationCoordinate2D] {

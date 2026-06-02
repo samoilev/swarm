@@ -156,8 +156,7 @@ struct RelationshipView: View {
         guard !query.isEmpty else { return [] }
         let q = query.lowercased()
         return tree.people.filter { person in
-            person.id != excluding?.id &&
-            person.id != personA?.id || person.id != personB?.id
+            person.id != excluding?.id && person.id != personA?.id && person.id != personB?.id
         }.filter { person in
             person.fullName.lowercased().contains(q) ||
             person.surname.lowercased().contains(q) ||

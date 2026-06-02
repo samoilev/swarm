@@ -12,7 +12,7 @@ struct MainWorkspace: View {
     @State private var zoom: CGFloat = 0.85
     @State private var showExportModal = false
     @State private var showAddSheet = false
-    @State private var showEditSheet = false
+    @State private var editingPerson: Person?
     @State private var showRelationshipSheet = false
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
@@ -49,7 +49,7 @@ struct MainWorkspace: View {
                     
                     if selectedPerson != nil {
                         InspectorPanel(person: $selectedPerson, tree: tree, width: $inspectorWidth, onEdit: { person in
-                            showEditSheet = true
+                            editingPerson = person
                         }, onDelete: { person in
                             personToDelete = person
                             showDeleteConfirm = true
@@ -83,10 +83,8 @@ struct MainWorkspace: View {
                 showToast("Добавлен: \(newPerson.listName)")
             }
         }
-        .sheet(isPresented: $showEditSheet) {
-            if let person = selectedPerson {
-                EditPersonView(person: person, tree: tree, store: store)
-            }
+        .sheet(item: $editingPerson) { person in
+            EditPersonView(person: person, tree: tree, store: store)
         }
         .sheet(isPresented: $showRelationshipSheet) {
             RelationshipView(tree: tree, isPresented: $showRelationshipSheet, preselectedPerson: selectedPerson)
@@ -138,132 +136,194 @@ struct MainWorkspace: View {
             }
             .buttonStyle(SepiaIconButtonStyle())
             .help("Вернуться к списку деревьев")
-            
-            VStack(alignment: .leading, spacing: 1) {
-                Text(tree.name.isEmpty ? "Дерево" : tree.name)
-                    .font(SepiaTheme.display(size: 16))
-                    .fontWeight(.semibold)
-                    .foregroundColor(SepiaTheme.ink)
-                    .lineLimit(1)
-                if let sub = tree.subtitle, !sub.isEmpty {
-                    Text(sub.uppercased())
-                        .font(SepiaTheme.ui(size: 9))
-                        .tracking(1.5)
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-                }
-            }
-            .frame(maxWidth: 160, alignment: .leading)
-            
+
+            titleBlock
+
             Divider().frame(height: 26).overlay(SepiaTheme.toolbarLine)
-            
-            // View mode
-            HStack(spacing: 4) {
-                Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .tree } } label: {
-                    Image(systemName: "rectangle.connected.to.line.below")
-                }
-                .buttonStyle(SepiaButtonStyle(isActive: viewMode == .tree))
-                .help("Древовидная схема")
-                
-                Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .fan } } label: {
-                    Image(systemName: "chart.pie")
-                }
-                .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
-                .help("Круговая диаграмма предков")
-                
-                Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .map } } label: {
-                    Image(systemName: "map")
-                }
-                .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
-                .help("Карта мест жизни")
+
+            // The view/direction/zoom controls collapse into a native "…" menu
+            // when the window is too narrow to show them all (instead of clipping).
+            ViewThatFits(in: .horizontal) {
+                fullControls
+                compactControls
             }
-            
-            if viewMode == .tree {
-                HStack(spacing: 4) {
-                    Button { withAnimation { direction = .topDown } } label: {
-                        Image(systemName: "arrow.down")
-                    }
-                    .buttonStyle(SepiaButtonStyle(isActive: direction == .topDown))
-                    .help("Сверху вниз")
-                    Button { withAnimation { direction = .leftRight } } label: {
-                        Image(systemName: "arrow.right")
-                    }
-                    .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
-                    .help("Слева направо")
-                }
-            }
-            
-            if viewMode == .tree {
-                Button { showPhotos.toggle() } label: {
-                    Image(systemName: showPhotos ? "person.crop.square.fill" : "person.crop.square")
-                }
-                .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
-                .help(showPhotos ? "Скрыть фотографии" : "Показать фотографии")
-            }
-            
-            if viewMode == .fan {
-                HStack(spacing: 3) {
-                    Button { if fanLevels > 2 { fanLevels -= 1 } } label: {
-                        Image(systemName: "minus")
-                    }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .disabled(fanLevels <= 2)
-                    Text("\(fanLevels)")
-                        .font(SepiaTheme.ui(size: 10))
-                        .foregroundColor(SepiaTheme.ink)
-                        .frame(width: 14)
-                    Button { if fanLevels < 8 { fanLevels += 1 } } label: {
-                        Image(systemName: "plus")
-                    }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .disabled(fanLevels >= 8)
-                    Text("ур.")
-                        .font(SepiaTheme.ui(size: 10))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                }
-                .help("Количество поколений")
-            }
-            
-            // Zoom
-            HStack(spacing: 3) {
-                Button { zoom = max(0.25, zoom - 0.1) } label: { Image(systemName: "minus") }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .help("Уменьшить масштаб")
-                Text("\(Int(zoom * 100))%")
-                    .font(SepiaTheme.ui(size: 10))
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .frame(width: 34)
-                Button { zoom = min(1.6, zoom + 0.1) } label: { Image(systemName: "plus") }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .help("Увеличить масштаб")
-                Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .help("Центрировать и вписать дерево")
-                Button { tree.optimizeRoot(); fitRequest += 1 } label: { Image(systemName: "arrow.triangle.2.circlepath") }
-                    .buttonStyle(SepiaIconButtonStyle())
-                    .help("Обновить расположение дерева")
-            }
-            
-            Spacer()
-            
-            // Actions
-            HStack(spacing: 6) {
-                Button { showAddSheet = true } label: { Image(systemName: "plus") }
-                    .buttonStyle(SepiaButtonStyle())
-                    .help("Добавить новую персону в дерево")
-                Button { showEditSheet = true } label: { Image(systemName: "pencil") }
-                    .buttonStyle(SepiaButtonStyle())
-                    .disabled(selectedPerson == nil)
-                    .help("Редактировать выбранную персону")
-                Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
-                    .buttonStyle(SepiaButtonStyle())
-                    .help("Экспорт дерева в PDF, PNG или GEDCOM")
-            }
+
+            Spacer(minLength: 8)
+
+            actionButtons
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
         .background(SepiaTheme.toolbarBg)
         .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.toolbarLine).frame(height: 1) }
+    }
+
+    private var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            Text(tree.name.isEmpty ? "Дерево" : tree.name)
+                .font(SepiaTheme.display(size: 16))
+                .fontWeight(.semibold)
+                .foregroundColor(SepiaTheme.ink)
+                .lineLimit(1)
+            if let sub = tree.subtitle, !sub.isEmpty {
+                Text(sub.uppercased())
+                    .font(SepiaTheme.ui(size: 9))
+                    .tracking(1.5)
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .lineLimit(1)
+            }
+        }
+        .frame(maxWidth: 160, alignment: .leading)
+    }
+
+    // Wide layout: everything inline.
+    private var fullControls: some View {
+        HStack(spacing: 8) {
+            viewModeControls
+            if viewMode == .tree {
+                directionControls
+                photosControl
+            }
+            if viewMode == .fan {
+                fanLevelControls
+            }
+            zoomControls
+        }
+    }
+
+    // Narrow layout: keep zoom inline, fold the rest into a native menu.
+    private var compactControls: some View {
+        HStack(spacing: 8) {
+            zoomControls
+            overflowMenu
+        }
+    }
+
+    private var viewModeControls: some View {
+        HStack(spacing: 4) {
+            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .tree } } label: {
+                Image(systemName: "rectangle.connected.to.line.below")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .tree))
+            .help("Древовидная схема")
+
+            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .fan } } label: {
+                Image(systemName: "chart.pie")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
+            .help("Круговая диаграмма предков")
+
+            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .map } } label: {
+                Image(systemName: "map")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
+            .help("Карта мест жизни")
+        }
+    }
+
+    private var directionControls: some View {
+        HStack(spacing: 4) {
+            Button { withAnimation { direction = .topDown } } label: {
+                Image(systemName: "arrow.down")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: direction == .topDown))
+            .help("Сверху вниз")
+            Button { withAnimation { direction = .leftRight } } label: {
+                Image(systemName: "arrow.right")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
+            .help("Слева направо")
+        }
+    }
+
+    private var photosControl: some View {
+        Button { showPhotos.toggle() } label: {
+            Image(systemName: showPhotos ? "person.crop.square.fill" : "person.crop.square")
+        }
+        .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
+        .help(showPhotos ? "Скрыть фотографии" : "Показать фотографии")
+    }
+
+    private var fanLevelControls: some View {
+        HStack(spacing: 3) {
+            RepeatButton(action: { if fanLevels > 2 { fanLevels -= 1 } }) { Image(systemName: "minus") }
+                .disabled(fanLevels <= 2)
+            Text("\(fanLevels)")
+                .font(SepiaTheme.ui(size: 10))
+                .foregroundColor(SepiaTheme.ink)
+                .frame(width: 14)
+            RepeatButton(action: { if fanLevels < 8 { fanLevels += 1 } }) { Image(systemName: "plus") }
+                .disabled(fanLevels >= 8)
+            Text("ур.")
+                .font(SepiaTheme.ui(size: 10))
+                .foregroundColor(SepiaTheme.inkSoft)
+        }
+        .help("Количество поколений")
+    }
+
+    private var zoomControls: some View {
+        HStack(spacing: 3) {
+            RepeatButton(action: { zoom = max(0.25, zoom - 0.1) }) { Image(systemName: "minus") }
+                .help("Уменьшить масштаб")
+            Text("\(Int(zoom * 100))%")
+                .font(SepiaTheme.ui(size: 10))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .frame(width: 34)
+            RepeatButton(action: { zoom = min(1.6, zoom + 0.1) }) { Image(systemName: "plus") }
+                .help("Увеличить масштаб")
+            Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
+                .buttonStyle(SepiaIconButtonStyle())
+                .help("Центрировать и вписать дерево")
+            Button { tree.optimizeRoot(); fitRequest += 1 } label: { Image(systemName: "arrow.triangle.2.circlepath") }
+                .buttonStyle(SepiaIconButtonStyle())
+                .help("Обновить расположение дерева")
+        }
+    }
+
+    private var overflowMenu: some View {
+        Menu {
+            Picker("Вид", selection: $viewMode) {
+                Label("Дерево", systemImage: "rectangle.connected.to.line.below").tag(ViewMode.tree)
+                Label("Веер предков", systemImage: "chart.pie").tag(ViewMode.fan)
+                Label("Карта", systemImage: "map").tag(ViewMode.map)
+            }
+            if viewMode == .tree {
+                Picker("Направление", selection: $direction) {
+                    Label("Сверху вниз", systemImage: "arrow.down").tag(TreeDirection.topDown)
+                    Label("Слева направо", systemImage: "arrow.right").tag(TreeDirection.leftRight)
+                }
+                Toggle("Фотографии", isOn: $showPhotos)
+            }
+            if viewMode == .fan {
+                Stepper("Поколений: \(fanLevels)", value: $fanLevels, in: 2...8)
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .frame(width: 30, height: 30)
+                .foregroundColor(SepiaTheme.ink)
+                .background(SepiaTheme.btnBg)
+                .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+                .clipShape(RoundedRectangle(cornerRadius: 7))
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help("Ещё")
+    }
+
+    private var actionButtons: some View {
+        HStack(spacing: 6) {
+            Button { showAddSheet = true } label: { Image(systemName: "plus") }
+                .buttonStyle(SepiaButtonStyle())
+                .help("Добавить новую персону в дерево")
+            Button { editingPerson = selectedPerson } label: { Image(systemName: "pencil") }
+                .buttonStyle(SepiaButtonStyle())
+                .disabled(selectedPerson == nil)
+                .help("Редактировать выбранную персону")
+            Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
+                .buttonStyle(SepiaButtonStyle())
+                .help("Экспорт дерева в PDF, PNG или GEDCOM")
+        }
     }
     
     private func deletePerson() {

@@ -12,15 +12,25 @@ struct PlaceEntry: Identifiable, Hashable {
     }
 }
 
-struct PlacesDatabase {
+final class PlacesDatabase {
     static let shared = PlacesDatabase()
-    
-    private let entries: [(name: String, nameLower: String, region: String, country: String)]
-    
-    init() {
-        entries = Self.loadPlaces()
+
+    // Read/written on the main thread only (search runs on main; the background
+    // load hands the parsed array back via the main queue).
+    private var entries: [(name: String, nameLower: String, region: String, country: String)] = []
+    private(set) var isReady = false
+
+    private init() {
+        // ~455k rows — parse off the main thread so opening a form never hangs.
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let loaded = Self.loadPlaces()
+            DispatchQueue.main.async {
+                self?.entries = loaded
+                self?.isReady = true
+            }
+        }
     }
-    
+
     func search(_ query: String) -> [PlaceEntry] {
         guard query.count >= 2 else { return [] }
         let q = query.lowercased()

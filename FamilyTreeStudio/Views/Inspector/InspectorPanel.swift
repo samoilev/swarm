@@ -19,11 +19,10 @@ struct InspectorPanel: View {
                     .frame(width: 6)
                     .contentShape(Rectangle())
                     .onHover { hovering in
-                        if hovering {
-                            NSCursor.resizeLeftRight.push()
-                        } else {
-                            NSCursor.pop()
-                        }
+                        // .set() (not push/pop): the panel is conditionally removed
+                        // with a transition, so a hover-exit can be missed — push/pop
+                        // would then leak the resize cursor onto the stack.
+                        if hovering { NSCursor.resizeLeftRight.set() } else { NSCursor.arrow.set() }
                     }
                     .gesture(
                         DragGesture(minimumDistance: 1)
