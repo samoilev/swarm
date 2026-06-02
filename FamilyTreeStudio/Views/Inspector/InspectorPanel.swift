@@ -162,6 +162,9 @@ struct InspectorPanel: View {
             FieldRow(label: "ДАТА", value: p.isLiving ? "— (жив)" : (p.deathDate ?? "—"))
             FieldRow(label: "МЕСТО", value: p.deathPlace ?? "—")
             FieldRow(label: "ЗАХОРОНЕНИЕ", value: p.burialPlace ?? "—")
+            if let lat = p.burialLat, let lon = p.burialLon {
+                FieldRow(label: "КООРДИНАТЫ МОГИЛЫ", value: String(format: "%.5f, %.5f", lat, lon))
+            }
         }
     }
     

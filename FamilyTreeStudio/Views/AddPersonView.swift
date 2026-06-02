@@ -17,6 +17,7 @@ struct AddPersonView: View {
     @State private var deathPlace = ""
     @State private var isLiving = true
     @State private var burialPlace = ""
+    @State private var burialCoords = ""
     @State private var occupation = ""
     @State private var education = ""
     @State private var notes = ""
@@ -88,7 +89,8 @@ struct AddPersonView: View {
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 12)
+                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
                         
                         SectionHeader(title: "Жизнь")
@@ -142,7 +144,12 @@ struct AddPersonView: View {
             education: education.isEmpty ? nil : education,
             notes: notes.isEmpty ? nil : notes
         )
-        
+
+        if !isLiving, let c = parseGraveCoords(burialCoords) {
+            person.burialLat = c.lat
+            person.burialLon = c.lon
+        }
+
         tree.people.append(person)
         
         // Links are interpreted from the new person's perspective:
@@ -197,5 +204,12 @@ struct AddPersonView: View {
         store.save()
         onAdded(person)
         dismiss()
+    }
+
+    /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
+    private func parseGraveCoords(_ s: String) -> (lat: Double, lon: Double)? {
+        let parts = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else { return nil }
+        return (lat, lon)
     }
 }

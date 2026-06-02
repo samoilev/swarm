@@ -18,6 +18,7 @@ struct EditPersonView: View {
     @State private var deathPlace: String = ""
     @State private var isLiving: Bool = true
     @State private var burialPlace: String = ""
+    @State private var burialCoords: String = ""
     @State private var occupation: String = ""
     @State private var education: String = ""
     @State private var notes: String = ""
@@ -90,7 +91,8 @@ struct EditPersonView: View {
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 12)
+                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
                         
                         SectionHeader(title: "Жизнь")
@@ -393,6 +395,13 @@ struct EditPersonView: View {
         }
     }
 
+    /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
+    private func parseGraveCoords(_ s: String) -> (lat: Double, lon: Double)? {
+        let parts = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else { return nil }
+        return (lat, lon)
+    }
+
     private func resizeImage(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
         let size = image.size
         guard size.width > maxDimension || size.height > maxDimension else { return image }
@@ -419,6 +428,11 @@ struct EditPersonView: View {
         deathPlace = person.deathPlace ?? ""
         isLiving = person.isLiving
         burialPlace = person.burialPlace ?? ""
+        if let lat = person.burialLat, let lon = person.burialLon {
+            burialCoords = "\(lat), \(lon)"
+        } else {
+            burialCoords = ""
+        }
         occupation = person.occupation ?? ""
         education = person.education ?? ""
         notes = person.notes ?? ""
@@ -437,6 +451,9 @@ struct EditPersonView: View {
         person.deathPlace = isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace)
         person.isLiving = isLiving
         person.burialPlace = burialPlace.isEmpty ? nil : burialPlace
+        let graveCoords = isLiving ? nil : parseGraveCoords(burialCoords)
+        person.burialLat = graveCoords?.lat
+        person.burialLon = graveCoords?.lon
         person.occupation = occupation.isEmpty ? nil : occupation
         person.education = education.isEmpty ? nil : education
         person.notes = notes.isEmpty ? nil : notes
