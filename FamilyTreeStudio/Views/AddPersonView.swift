@@ -22,17 +22,18 @@ struct AddPersonView: View {
     @State private var education = ""
     @State private var notes = ""
     
-    @State private var relType: RelType = .none
-    @State private var relatedPersonId: UUID?
-    
-    // Action-based, from the perspective of the NEW person being added.
-    // "Кто" selects the existing person who plays the named role.
-    enum RelType: String, CaseIterable {
-        case none = "Без связи"
-        case parent = "Добавить родителя"
-        case spouse = "Добавить супруга/у"
-        case child = "Добавить ребёнка"
-        case sibling = "Добавить брата/сестру"
+    // Any number of relatives can be linked at once. Each row names a role (read
+    // from the new person's perspective) and an existing person who fills it.
+    @State private var pendingRels: [PendingRelation] = []
+
+    struct PendingRelation: Identifiable {
+        let id = UUID()
+        var kind: RelationKind = .parent
+        var personId: UUID? = nil
+    }
+
+    private var sortedPeople: [Person] {
+        tree.people.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
     
     var body: some View {
@@ -88,8 +89,8 @@ struct AddPersonView: View {
                         
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
+                            SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
                         
@@ -98,16 +99,32 @@ struct AddPersonView: View {
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
                         SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
 
-                        SectionHeader(title: "Родство")
-                        Picker("", selection: $relType) {
-                            ForEach(RelType.allCases, id: \.rawValue) { t in Text(t.rawValue).tag(t) }
-                        }.labelsHidden().pickerStyle(.menu).font(SepiaTheme.body(size: 13)).padding(.bottom, 8)
-
-                        if relType != .none && !tree.people.isEmpty {
-                            Picker("Кто:", selection: $relatedPersonId) {
-                                Text("Выбрать…").tag(nil as UUID?)
-                                ForEach(tree.people.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }, id: \.id) { p in Text(p.listName).tag(p.id as UUID?) }
-                            }.pickerStyle(.menu).font(SepiaTheme.body(size: 13))
+                        SectionHeader(title: "Родственные связи")
+                        if tree.people.isEmpty {
+                            Text("Добавьте людей в дерево, чтобы создавать связи")
+                                .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                        } else {
+                            ForEach($pendingRels) { $rel in
+                                HStack(spacing: 8) {
+                                    Picker("", selection: $rel.kind) {
+                                        ForEach(RelationKind.allCases) { k in Text(k.displayName).tag(k) }
+                                    }.labelsHidden().pickerStyle(.menu).frame(width: 130)
+                                    Picker("", selection: $rel.personId) {
+                                        Text("Выбрать…").tag(nil as UUID?)
+                                        ForEach(sortedPeople, id: \.id) { p in Text(p.listName).tag(p.id as UUID?) }
+                                    }.labelsHidden().pickerStyle(.menu)
+                                    Button { pendingRels.removeAll { $0.id == rel.id } } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .font(.system(size: 14)).foregroundColor(.red.opacity(0.7))
+                                            .frame(width: 24, height: 24).contentShape(Rectangle())
+                                    }.buttonStyle(.plain)
+                                }
+                                .font(SepiaTheme.body(size: 13))
+                                .padding(.bottom, 6)
+                            }
+                            Button { pendingRels.append(PendingRelation()) } label: {
+                                Label("Добавить связь", systemImage: "plus")
+                            }.buttonStyle(SepiaButtonStyle()).padding(.top, 4)
                         }
                     }
                     .padding(.horizontal, 24).padding(.bottom, 20)
@@ -151,54 +168,14 @@ struct AddPersonView: View {
         }
 
         tree.people.append(person)
-        
-        // Links are interpreted from the new person's perspective:
-        // the picked person (rpid) plays the named role relative to `person`.
-        if let rpid = relatedPersonId, relType != .none {
-            switch relType {
-            case .spouse:
-                // rpid becomes the new person's spouse
-                if !tree.unions.contains(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.contains(person.id) }) {
-                    // If rpid has a one-partner union (e.g. with children), join it; else new union
-                    if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) && $0.partnerIds.count == 1 }) {
-                        if existing.partner1Id == nil { existing.partner1Id = person.id }
-                        else if existing.partner2Id == nil { existing.partner2Id = person.id }
-                    } else {
-                        let u = Union(partner1Id: rpid, partner2Id: person.id)
-                        tree.unions.append(u)
-                    }
-                }
-            case .child:
-                // rpid becomes the new person's CHILD → new person is the parent.
-                if let existing = tree.unions.first(where: { $0.childrenIds.contains(rpid) }) {
-                    // rpid already has a parent union → add new person as the co-parent
-                    if existing.partner1Id == nil { existing.partner1Id = person.id }
-                    else if existing.partner2Id == nil { existing.partner2Id = person.id }
-                    else { existing.childrenIds.append(rpid) } // fallback: shouldn't happen
-                } else {
-                    let u = Union(partner1Id: person.id, childrenIds: [rpid])
-                    tree.unions.append(u)
-                }
-            case .parent:
-                // rpid becomes the new person's PARENT → new person is the child.
-                if let existing = tree.unions.first(where: { $0.partnerIds.contains(rpid) }) {
-                    existing.childrenIds.append(person.id)
-                } else {
-                    let u = Union(partner1Id: rpid, childrenIds: [person.id])
-                    tree.unions.append(u)
-                }
-            case .sibling:
-                // new person and rpid share parents → add new person to rpid's parent union
-                if let existing = tree.unions.first(where: { $0.childrenIds.contains(rpid) }) {
-                    existing.childrenIds.append(person.id)
-                } else {
-                    let u = Union(childrenIds: [rpid, person.id])
-                    tree.unions.append(u)
-                }
-            case .none: break
-            }
+
+        // Apply all chosen relationships (parents before siblings, spouses before
+        // children) so multiple relatives merge into shared unions correctly.
+        for rel in pendingRels.sorted(by: { $0.kind.applyOrder < $1.kind.applyOrder }) {
+            guard let targetId = rel.personId else { continue }
+            tree.addRelation(rel.kind, person: person, target: targetId)
         }
-        
+
         tree.optimizeRoot()
         tree.updatedAt = Date()
         store.save()

@@ -150,13 +150,16 @@ struct ExportView: View {
             VStack(spacing: 10) {
                 Button { exportPDF() } label: { Label("Сохранить PDF-постер", systemImage: "arrow.down.doc").frame(maxWidth: .infinity) }
                     .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
+                Button { exportPersonCards() } label: { Label("PDF — карточки людей", systemImage: "person.text.rectangle").frame(maxWidth: .infinity) }
+                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
+                    .disabled(tree.people.isEmpty)
                 Button { exportPNG() } label: { Label("Скачать PNG", systemImage: "photo").frame(maxWidth: .infinity) }
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                 Button { exportGEDCOM() } label: { Label("Экспорт GEDCOM (.ged)", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity) }
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
             }
             
-            Text("PDF печатает оформленный постер. GEDCOM — стандартный файл, который можно открыть в Ancestry, Gramps или MacFamilyTree.")
+            Text("PDF-постер печатает оформленный плакат. «Карточки людей» — отдельная страница на каждого человека по алфавиту. GEDCOM — стандартный файл, который можно открыть в Ancestry, Gramps или MacFamilyTree.")
                 .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
         }
         .padding(20)
@@ -185,6 +188,13 @@ struct ExportView: View {
         guard let data = PDFExporter.render(tree: tree, title: title, subtitle: subtitle) else { return }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)
         exportName = "\(fileSlug)-poster.pdf"
+        showExporter = true
+    }
+
+    private func exportPersonCards() {
+        guard let data = PersonCardsPDFExporter.render(tree: tree) else { return }
+        exportDoc = RenderedFileDocument(data: data, type: .pdf)
+        exportName = "\(fileSlug)-cards.pdf"
         showExporter = true
     }
 

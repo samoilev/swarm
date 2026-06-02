@@ -1,15 +1,17 @@
 import SwiftUI
+import AppKit
 
 struct InspectorPanel: View {
     @Binding var person: Person?
     let tree: FamilyTree
+    var store: TreeStore
     @Binding var width: CGFloat
     var onEdit: ((Person) -> Void)? = nil
     var onDelete: ((Person) -> Void)? = nil
-    
+
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
-    
+
     var body: some View {
         if let person = person {
             HStack(spacing: 0) {
@@ -32,7 +34,7 @@ struct InspectorPanel: View {
                             }
                     )
                     .overlay(Rectangle().fill(SepiaTheme.toolbarLine).frame(width: 1))
-                
+
                 VStack(spacing: 0) {
                     inspectorHeader(person)
                     Divider().overlay(SepiaTheme.toolbarLine)
@@ -41,8 +43,9 @@ struct InspectorPanel: View {
                             identitySection(person)
                             birthSection(person)
                             deathSection(person)
+                            mapSection(person)
                             lifeSection(person)
-                            sourcesSection(person)
+                            attachmentsSection(person)
                             relationshipsSection(person)
                         }
                         .padding(.horizontal, 18)
@@ -54,7 +57,7 @@ struct InspectorPanel: View {
             .background(SepiaTheme.panelBg)
         }
     }
-    
+
     private func inspectorHeader(_ person: Person) -> some View {
         HStack(alignment: .top, spacing: 12) {
             if let data = person.photoData, let nsImage = NSImage(data: data) {
@@ -78,7 +81,7 @@ struct InspectorPanel: View {
                 }
                 .frame(width: 56, height: 56)
             }
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(person.listName)
                     .font(SepiaTheme.display(size: 19))
@@ -97,9 +100,9 @@ struct InspectorPanel: View {
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             .frame(minWidth: 120, alignment: .leading)
-            
+
             Spacer(minLength: 4)
-            
+
             VStack(spacing: 4) {
                 if let onDelete = onDelete {
                     Button { onDelete(person) } label: {
@@ -136,83 +139,128 @@ struct InspectorPanel: View {
         }
         .padding(16)
     }
-    
-    private func identitySection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Личность")
-            FieldRow(label: "ИМЕНА", value: p.givenNames)
-            FieldRow(label: "ОТЧЕСТВО", value: p.patronymic ?? "—")
-            FieldRow(label: "ФАМИЛИЯ", value: p.surname)
-            FieldRow(label: "ДЕВИЧЬЯ", value: p.maidenName ?? "—")
-            FieldRow(label: "ПОЛ", value: p.sex.displayName)
-        }
-    }
-    
-    private func birthSection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Рождение")
-            FieldRow(label: "ДАТА", value: p.birthDate ?? "—")
-            FieldRow(label: "МЕСТО", value: p.birthPlace ?? "—")
-        }
-    }
-    
-    private func deathSection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Смерть и погребение")
-            FieldRow(label: "ДАТА", value: p.isLiving ? "— (жив)" : (p.deathDate ?? "—"))
-            FieldRow(label: "МЕСТО", value: p.deathPlace ?? "—")
-            FieldRow(label: "ЗАХОРОНЕНИЕ", value: p.burialPlace ?? "—")
-            if let lat = p.burialLat, let lon = p.burialLon {
-                FieldRow(label: "КООРДИНАТЫ МОГИЛЫ", value: String(format: "%.5f, %.5f", lat, lon))
+
+    // Each section renders only when it has at least one filled field, and within
+    // a section only non-empty fields appear.
+
+    @ViewBuilder
+    private func fieldSection(_ title: String, _ rows: [(String, String)]) -> some View {
+        let filled = rows.filter { !$0.1.isEmpty }
+        if !filled.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: title)
+                ForEach(filled, id: \.0) { FieldRow(label: $0.0, value: $0.1) }
             }
         }
     }
-    
+
+    private func identitySection(_ p: Person) -> some View {
+        fieldSection("Личность", [
+            ("ИМЕНА", p.givenNames),
+            ("ОТЧЕСТВО", p.patronymic ?? ""),
+            ("ФАМИЛИЯ", p.surname),
+            ("ДЕВИЧЬЯ", p.maidenName ?? ""),
+            ("ПОЛ", p.sex == .unknown ? "" : p.sex.displayName),
+        ])
+    }
+
+    private func birthSection(_ p: Person) -> some View {
+        fieldSection("Рождение", [
+            ("ДАТА", p.birthDate ?? ""),
+            ("МЕСТО", p.birthPlace ?? ""),
+        ])
+    }
+
+    private func deathSection(_ p: Person) -> some View {
+        fieldSection("Смерть и погребение", deathRows(p))
+    }
+
+    private func deathRows(_ p: Person) -> [(String, String)] {
+        var rows: [(String, String)] = []
+        if !p.isLiving {
+            rows.append(("ДАТА", p.deathDate ?? ""))
+            rows.append(("МЕСТО СМЕРТИ", p.deathPlace ?? ""))
+        }
+        rows.append(("ЗАХОРОНЕНИЕ", p.burialPlace ?? ""))
+        if let lat = p.burialLat, let lon = p.burialLon {
+            rows.append(("КООРДИНАТЫ МОГИЛЫ", String(format: "%.5f, %.5f", lat, lon)))
+        }
+        return rows
+    }
+
     private func lifeSection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Жизнь")
-            FieldRow(label: "ПРОФЕССИЯ", value: p.occupation ?? "—")
-            FieldRow(label: "ОБРАЗОВАНИЕ", value: p.education ?? "—")
-            if let notes = p.notes, !notes.isEmpty { FieldRow(label: "ЗАМЕТКИ", value: notes) }
+        fieldSection("Жизнь", [
+            ("ПРОФЕССИЯ", p.occupation ?? ""),
+            ("ОБРАЗОВАНИЕ", p.education ?? ""),
+            ("ЗАМЕТКИ", p.notes ?? ""),
+        ])
+    }
+
+    @ViewBuilder
+    private func mapSection(_ p: Person) -> some View {
+        let hasPlace = (p.birthPlace?.isEmpty == false) || (p.deathPlace?.isEmpty == false)
+            || (p.birthLat != nil && p.birthLon != nil) || (p.deathLat != nil && p.deathLon != nil)
+        if hasPlace {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: "Карта")
+                PersonMiniMap(person: p).padding(.bottom, 12)
+            }
         }
     }
-    
-    private func sourcesSection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Источники")
-            if p.sources.isEmpty {
-                Text("Источники не указаны").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft).padding(.bottom, 8)
-            } else {
-                ForEach(p.sources, id: \.self) { s in
-                    Text("• \(s)").font(SepiaTheme.body(size: 12.5)).foregroundColor(SepiaTheme.ink).padding(.bottom, 4)
+
+    @ViewBuilder
+    private func attachmentsSection(_ p: Person) -> some View {
+        if !p.attachments.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: "Файлы")
+                ForEach(p.attachments) { att in
+                    let url = store.attachmentURL(att, in: tree)
+                    Button { NSWorkspace.shared.open(url) } label: {
+                        HStack(spacing: 10) {
+                            AttachmentThumbnail(url: url, isImage: att.isImage, format: att.format, size: 40)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(att.originalName)
+                                    .font(SepiaTheme.body(size: 13))
+                                    .foregroundColor(SepiaTheme.ink)
+                                    .lineLimit(1).truncationMode(.middle)
+                                Text(att.format.isEmpty ? "Файл" : att.format)
+                                    .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .help("Открыть «\(att.originalName)»")
+                    .padding(.bottom, 8)
                 }
             }
         }
     }
-    
+
+    @ViewBuilder
     private func relationshipsSection(_ p: Person) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Родственные")
-            let idx = FamilyIndex(tree: tree)
-            let parents = idx.parentsOf(p)
-            let spouses = idx.spousesOf(p)
-            let children = idx.childrenOf(p)
-            let siblings = idx.siblingsOf(p)
-            
-            if let f = parents.father { relRow("Отец", f) }
-            if let m = parents.mother { relRow("Мать", m) }
-            ForEach(spouses, id: \.id) { s in relRow("Супруг", s) }
-            ForEach(children, id: \.id) { c in relRow("Ребёнок", c) }
-            ForEach(siblings, id: \.id) { s in
-                relRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s)
-            }
-            
-            if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
-                Text("Родственные не указаны").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+        let idx = FamilyIndex(tree: tree)
+        let parents = idx.parentsOf(p)
+        let spouses = idx.spousesOf(p)
+        let children = idx.childrenOf(p)
+        let siblings = idx.siblingsOf(p)
+        let hasAny = parents.father != nil || parents.mother != nil
+            || !spouses.isEmpty || !children.isEmpty || !siblings.isEmpty
+        if hasAny {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: "Родственные")
+                if let f = parents.father { relRow("Отец", f) }
+                if let m = parents.mother { relRow("Мать", m) }
+                ForEach(spouses, id: \.id) { s in relRow("Супруг", s) }
+                ForEach(children, id: \.id) { c in relRow("Ребёнок", c) }
+                ForEach(siblings, id: \.id) { s in
+                    relRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s)
+                }
             }
         }
     }
-    
+
     private func relRow(_ tag: String, _ p: Person) -> some View {
         HStack(spacing: 8) {
             Text(tag.uppercased())
