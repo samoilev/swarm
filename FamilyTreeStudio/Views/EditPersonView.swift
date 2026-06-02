@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import AppKit
 
 struct EditPersonView: View {
     @Environment(\.dismiss) private var dismiss
@@ -24,6 +25,7 @@ struct EditPersonView: View {
     @State private var notes: String = ""
     @State private var photoData: Data?
     @State private var showPhotoImporter = false
+    @State private var showAttachmentImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
     
@@ -90,8 +92,8 @@ struct EditPersonView: View {
                         
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
+                            SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
                         
@@ -99,7 +101,9 @@ struct EditPersonView: View {
                         SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
                         SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
-                        
+
+                        attachmentsEditor
+
                         relationshipsEditor
                     }
                     .padding(.horizontal, 24).padding(.bottom, 20)
@@ -276,54 +280,17 @@ struct EditPersonView: View {
     }
     
     private func addRelationship() {
-        guard let targetId = addRelPersonId, addRelType != .none else { return }
-        
+        guard let targetId = addRelPersonId else { return }
+        let kind: RelationKind
         switch addRelType {
-        case .parent:
-            // Check: target is already a parent of this person
-            if tree.unions.contains(where: { $0.childrenIds.contains(person.id) && $0.partnerIds.contains(targetId) }) {
-                break
-            }
-            if let existing = tree.unions.first(where: { $0.childrenIds.contains(person.id) }) {
-                if existing.partner1Id == nil { existing.partner1Id = targetId }
-                else if existing.partner2Id == nil { existing.partner2Id = targetId }
-            } else {
-                let u = Union(partner1Id: targetId, childrenIds: [person.id])
-                tree.unions.append(u)
-            }
-        case .spouse:
-            // Check: already spouses
-            if tree.unions.contains(where: { $0.partnerIds.contains(person.id) && $0.partnerIds.contains(targetId) }) {
-                break
-            }
-            let u = Union(partner1Id: person.id, partner2Id: targetId)
-            tree.unions.append(u)
-        case .child:
-            // Check: target is already a child of this person
-            if tree.unions.contains(where: { $0.partnerIds.contains(person.id) && $0.childrenIds.contains(targetId) }) {
-                break
-            }
-            if let existing = tree.unions.first(where: { $0.partnerIds.contains(person.id) }) {
-                existing.childrenIds.append(targetId)
-            } else {
-                let u = Union(partner1Id: person.id, childrenIds: [targetId])
-                tree.unions.append(u)
-            }
-        case .sibling:
-            // Check: already siblings (share a parent union)
-            if tree.unions.contains(where: { $0.childrenIds.contains(person.id) && $0.childrenIds.contains(targetId) }) {
-                break
-            }
-            if let existing = tree.unions.first(where: { $0.childrenIds.contains(person.id) }) {
-                existing.childrenIds.append(targetId)
-            } else {
-                let u = Union(childrenIds: [person.id, targetId])
-                tree.unions.append(u)
-            }
-        case .none:
-            break
+        case .parent: kind = .parent
+        case .spouse: kind = .spouse
+        case .child: kind = .child
+        case .sibling: kind = .sibling
+        case .none: return
         }
-        
+        tree.addRelation(kind, person: person, target: targetId)
+
         addRelType = .none
         addRelPersonId = nil
         tree.optimizeRoot()
@@ -331,6 +298,76 @@ struct EditPersonView: View {
         store.save()
     }
     
+    // MARK: - Attachments Editor
+
+    private var attachmentsEditor: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: "Файлы")
+
+            if person.attachments.isEmpty {
+                Text("Файлы не прикреплены")
+                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .padding(.bottom, 8)
+            } else {
+                ForEach(person.attachments) { att in
+                    attachmentEditRow(att)
+                }
+            }
+
+            Button { showAttachmentImporter = true } label: {
+                Label("Прикрепить файл", systemImage: "paperclip")
+            }
+            .buttonStyle(SepiaButtonStyle())
+            .padding(.top, 4)
+            .padding(.bottom, 12)
+            .fileImporter(isPresented: $showAttachmentImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
+                if case .success(let urls) = result { attachFiles(urls) }
+            }
+        }
+    }
+
+    private func attachmentEditRow(_ att: Attachment) -> some View {
+        let url = store.attachmentURL(att, in: tree)
+        return HStack(spacing: 10) {
+            Button { NSWorkspace.shared.open(url) } label: {
+                HStack(spacing: 10) {
+                    AttachmentThumbnail(url: url, isImage: att.isImage, format: att.format, size: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(att.originalName)
+                            .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
+                            .lineLimit(1).truncationMode(.middle)
+                        Text(att.format.isEmpty ? "Файл" : att.format)
+                            .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Открыть «\(att.originalName)»")
+
+            Spacer(minLength: 0)
+
+            Button { store.removeAttachment(att, from: person, in: tree) } label: {
+                Image(systemName: "minus.circle.fill")
+                    .font(.system(size: 14)).foregroundColor(.red.opacity(0.7))
+                    .frame(width: 24, height: 24).contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help("Удалить файл")
+        }
+        .padding(.bottom, 8)
+    }
+
+    private func attachFiles(_ urls: [URL]) {
+        for url in urls {
+            do {
+                _ = try store.addAttachment(to: person, in: tree, sourceURL: url)
+            } catch {
+                print("Failed to attach \(url.lastPathComponent): \(error)")
+            }
+        }
+    }
+
     private var photoEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("ФОТО")

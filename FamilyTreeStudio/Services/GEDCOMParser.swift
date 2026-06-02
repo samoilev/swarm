@@ -145,15 +145,29 @@ struct GEDCOMParser {
         var notes: String? = nil
         var sources: [String] = []
         var photoData: Data? = nil
-        
+        var attachments: [Attachment] = []
+        var pendingAttachFile: String? = nil
+        var pendingAttachTitle: String? = nil
+
+        func flushAttachment() {
+            guard let file = pendingAttachFile else { return }
+            let stored = (file as NSString).lastPathComponent
+            attachments.append(Attachment(storedName: stored, originalName: pendingAttachTitle ?? stored))
+            pendingAttachFile = nil
+            pendingAttachTitle = nil
+        }
+
         var context = "" // tracks current level-1 tag
-        
+
         for line in record.dropFirst() {
             let level = extractLevel(line)
             let tag = extractTag(line, level: level)
             let value = extractValue(line, level: level, tag: tag)
             
             if level == 1 {
+                // Any new top-level tag (including the next _ATTC) closes the
+                // attachment record currently being read. No-op if none pending.
+                flushAttachment()
                 context = tag
                 switch tag {
                 case "NAME":
@@ -208,6 +222,10 @@ struct GEDCOMParser {
                         let photoURL = mediaFolder.appendingPathComponent(value)
                         photoData = try? Data(contentsOf: photoURL)
                     }
+                case ("_ATTC", "FILE"):
+                    pendingAttachFile = value
+                case ("_ATTC", "TITL"):
+                    pendingAttachTitle = value
                 case ("NOTE", "CONT"), ("NOTE", "CONC"):
                     let sep = tag == "CONT" ? "\n" : ""
                     notes = (notes ?? "") + sep + value
@@ -215,7 +233,8 @@ struct GEDCOMParser {
                 }
             }
         }
-        
+        flushAttachment() // capture a trailing attachment record
+
         let person = Person(
             givenNames: givenNames,
             patronymic: patronymic,
@@ -238,6 +257,7 @@ struct GEDCOMParser {
         person.id = uuid
         person.burialLat = burialLat
         person.burialLon = burialLon
+        person.attachments = attachments
         return person
     }
     

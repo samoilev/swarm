@@ -1,4 +1,6 @@
 import SwiftUI
+import AppKit
+import UniformTypeIdentifiers
 
 struct TreeLibraryView: View {
     let trees: [FamilyTree]
@@ -6,7 +8,20 @@ struct TreeLibraryView: View {
     let onCreate: () -> Void
     var onImport: (() -> Void)? = nil
     var onRevealInFinder: ((FamilyTree) -> Void)? = nil
-    
+
+    @Environment(TreeStore.self) private var store
+
+    // Delete flow
+    @State private var treeToDelete: FamilyTree?
+    @State private var treeToExport: FamilyTree?
+    @State private var showExporter = false
+    // Rename flow
+    @State private var treeToRename: FamilyTree?
+    @State private var renameName = ""
+    @State private var renameSubtitle = ""
+    // Errors
+    @State private var errorMessage: String?
+
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
@@ -91,7 +106,13 @@ struct TreeLibraryView: View {
                             .buttonStyle(.plain)
                             
                             ForEach(trees, id: \.id) { tree in
-                                TreeCardView(tree: tree, onSelect: { onSelect(tree) }, onReveal: { onRevealInFinder?(tree) })
+                                TreeCardView(
+                                    tree: tree,
+                                    onSelect: { onSelect(tree) },
+                                    onReveal: { onRevealInFinder?(tree) },
+                                    onRename: { startRename(tree) },
+                                    onDelete: { treeToDelete = tree }
+                                )
                             }
                         }
                         .padding(24)
@@ -100,6 +121,74 @@ struct TreeLibraryView: View {
             }
         }
         .frame(minWidth: 600, minHeight: 400)
+        .confirmationDialog(
+            "Удалить дерево «\(treeToDelete?.name ?? "")»?",
+            isPresented: Binding(get: { treeToDelete != nil }, set: { if !$0 { treeToDelete = nil } }),
+            titleVisibility: .visible
+        ) {
+            Button("Удалить вместе с файлами", role: .destructive) {
+                if let tree = treeToDelete { store.deleteTree(tree) }
+                treeToDelete = nil
+            }
+            Button("Архивировать (оставить файлы)") {
+                if let tree = treeToDelete {
+                    let url = store.archiveTree(tree)
+                    NSWorkspace.shared.activateFileViewerSelecting([url])
+                }
+                treeToDelete = nil
+            }
+            Button("Экспортировать копию и удалить…") {
+                treeToExport = treeToDelete
+                treeToDelete = nil
+                // Defer so the dialog finishes dismissing before the open panel appears.
+                DispatchQueue.main.async { showExporter = true }
+            }
+            Button("Отмена", role: .cancel) { treeToDelete = nil }
+        } message: {
+            Text("Выберите, что сделать с файлом GEDCOM и фотографиями этого дерева.")
+        }
+        .alert("Переименовать дерево", isPresented: Binding(get: { treeToRename != nil }, set: { if !$0 { treeToRename = nil } })) {
+            TextField("Название", text: $renameName)
+            TextField("Подзаголовок (необязательно)", text: $renameSubtitle)
+            Button("Сохранить") {
+                if let tree = treeToRename {
+                    store.renameTree(tree, name: renameName, subtitle: renameSubtitle)
+                }
+                treeToRename = nil
+            }
+            Button("Отмена", role: .cancel) { treeToRename = nil }
+        } message: {
+            Text("Измените название и подзаголовок дерева.")
+        }
+        .fileImporter(isPresented: $showExporter, allowedContentTypes: [.folder]) { result in
+            guard let tree = treeToExport else { return }
+            treeToExport = nil
+            switch result {
+            case .success(let directory):
+                let scoped = directory.startAccessingSecurityScopedResource()
+                defer { if scoped { directory.stopAccessingSecurityScopedResource() } }
+                do {
+                    let bundle = try store.exportTree(tree, toDirectory: directory)
+                    store.deleteTree(tree) // originals copied out — remove from the app
+                    NSWorkspace.shared.activateFileViewerSelecting([bundle])
+                } catch {
+                    errorMessage = "Не удалось экспортировать дерево.\n\n\(error.localizedDescription)"
+                }
+            case .failure(let error):
+                errorMessage = error.localizedDescription
+            }
+        }
+        .alert("Ошибка", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+            Button("OK", role: .cancel) { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "")
+        }
+    }
+
+    private func startRename(_ tree: FamilyTree) {
+        renameName = tree.name
+        renameSubtitle = tree.subtitle ?? ""
+        treeToRename = tree
     }
 }
 
@@ -107,7 +196,16 @@ struct TreeCardView: View {
     let tree: FamilyTree
     let onSelect: () -> Void
     var onReveal: (() -> Void)? = nil
-    
+    var onRename: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
+
+    @ViewBuilder private var menuItems: some View {
+        Button { onRename?() } label: { Label("Переименовать…", systemImage: "pencil") }
+        Button { onReveal?() } label: { Label("Показать в Finder", systemImage: "folder") }
+        Divider()
+        Button(role: .destructive) { onDelete?() } label: { Label("Удалить…", systemImage: "trash") }
+    }
+
     var body: some View {
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 8) {
@@ -138,13 +236,17 @@ struct TreeCardView: View {
                             .font(SepiaTheme.ui(size: 11))
                             .foregroundColor(SepiaTheme.inkSoft)
                         Spacer()
-                        Button(action: { onReveal?() }) {
-                            Image(systemName: "folder")
-                                .font(.system(size: 12))
+                        Menu {
+                            menuItems
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                                .font(.system(size: 13))
                                 .foregroundColor(SepiaTheme.inkSoft)
                         }
-                        .buttonStyle(.plain)
-                        .help("Открыть в Finder")
+                        .menuStyle(.borderlessButton)
+                        .menuIndicator(.hidden)
+                        .fixedSize()
+                        .help("Действия с деревом")
                     }
                     .padding(.top, 2)
                 }
@@ -161,5 +263,6 @@ struct TreeCardView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
+        .contextMenu { menuItems }
     }
 }

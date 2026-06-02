@@ -23,9 +23,13 @@ final class Person: Identifiable, Codable, Hashable {
     var education: String?
     var notes: String?
     var sources: [String]
-    
+
     var photoData: Data?
-    
+
+    /// Files attached to this person. The bytes live on disk in the tree's
+    /// `Attachments/` folder; these entries only hold the linking metadata.
+    var attachments: [Attachment] = []
+
     // Cached coordinates for map pins
     var birthLat: Double?
     var birthLon: Double?
@@ -144,7 +148,7 @@ final class Person: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving
-        case burialPlace, occupation, education, notes, sources, photoData
+        case burialPlace, occupation, education, notes, sources, photoData, attachments
         case birthLat, birthLon, deathLat, deathLon, burialLat, burialLon
         case createdAt, updatedAt
     }
@@ -168,6 +172,7 @@ final class Person: Identifiable, Codable, Hashable {
         notes = try c.decodeIfPresent(String.self, forKey: .notes)
         sources = try c.decode([String].self, forKey: .sources)
         photoData = try c.decodeIfPresent(Data.self, forKey: .photoData)
+        attachments = try c.decodeIfPresent([Attachment].self, forKey: .attachments) ?? []
         birthLat = try c.decodeIfPresent(Double.self, forKey: .birthLat)
         birthLon = try c.decodeIfPresent(Double.self, forKey: .birthLon)
         deathLat = try c.decodeIfPresent(Double.self, forKey: .deathLat)
@@ -197,6 +202,7 @@ final class Person: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(notes, forKey: .notes)
         try c.encode(sources, forKey: .sources)
         try c.encodeIfPresent(photoData, forKey: .photoData)
+        if !attachments.isEmpty { try c.encode(attachments, forKey: .attachments) }
         try c.encodeIfPresent(birthLat, forKey: .birthLat)
         try c.encodeIfPresent(birthLon, forKey: .birthLon)
         try c.encodeIfPresent(deathLat, forKey: .deathLat)

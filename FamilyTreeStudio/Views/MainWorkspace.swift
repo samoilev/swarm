@@ -48,7 +48,7 @@ struct MainWorkspace: View {
                     }
                     
                     if selectedPerson != nil {
-                        InspectorPanel(person: $selectedPerson, tree: tree, width: $inspectorWidth, onEdit: { person in
+                        InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
                             editingPerson = person
                         }, onDelete: { person in
                             personToDelete = person
@@ -329,7 +329,10 @@ struct MainWorkspace: View {
     private func deletePerson() {
         guard let person = personToDelete else { return }
         let name = person.listName
-        
+
+        // Remove the person's attached files from the tree folder.
+        store.deleteAttachmentFiles(of: person, in: tree)
+
         // Remove from all unions
         for union in tree.unions {
             union.childrenIds.removeAll { $0 == person.id }

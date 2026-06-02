@@ -114,7 +114,15 @@ struct GEDCOMSerializer {
                 lines.append("2 FILE \(filename)")
                 lines.append("2 FORM JPEG")
             }
-            
+
+            // Attachments — referenced by relative path; the bytes live on disk in
+            // the tree's Attachments/ folder (written when the file is attached).
+            for att in p.attachments {
+                lines.append("1 _ATTC")
+                lines.append("2 FILE Attachments/\(att.storedName)")
+                lines.append("2 TITL \(att.originalName)")
+            }
+
             // Family links
             for union in (idx.unionsOf[p.id] ?? []) {
                 if let fx = famXref[union.id] { lines.append("1 FAMS @\(fx)@") }

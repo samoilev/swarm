@@ -1,6 +1,30 @@
 import Foundation
 import Observation
 
+/// A kinship role to attach, expressed from the subject person's point of view.
+enum RelationKind: String, CaseIterable, Identifiable, Hashable {
+    case parent, spouse, child, sibling
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .parent: return "Родитель"
+        case .spouse: return "Супруг(а)"
+        case .child: return "Ребёнок"
+        case .sibling: return "Брат/сестра"
+        }
+    }
+    /// Apply parents before siblings and spouses before children so a batch of
+    /// relatives added at once links into shared unions in the right order.
+    var applyOrder: Int {
+        switch self {
+        case .parent: return 0
+        case .spouse: return 1
+        case .sibling: return 2
+        case .child: return 3
+        }
+    }
+}
+
 @Observable
 final class FamilyTree: Identifiable, Codable {
     var id: UUID
@@ -134,6 +158,41 @@ final class FamilyTree: Identifiable, Codable {
         unions = merged
     }
     
+    /// Link `targetId` to `person` in the given role (read from `person`'s point of
+    /// view). Reuses existing unions so that adding several relatives — two parents,
+    /// a spouse and their children — collapses into the correct shared families.
+    func addRelation(_ kind: RelationKind, person: Person, target targetId: UUID) {
+        guard targetId != person.id else { return }
+        switch kind {
+        case .parent:
+            if unions.contains(where: { $0.childrenIds.contains(person.id) && $0.partnerIds.contains(targetId) }) { return }
+            if let existing = unions.first(where: { $0.childrenIds.contains(person.id) }) {
+                if existing.partner1Id == nil { existing.partner1Id = targetId }
+                else if existing.partner2Id == nil { existing.partner2Id = targetId }
+                else { unions.append(Union(partner1Id: targetId, childrenIds: [person.id])) }
+            } else {
+                unions.append(Union(partner1Id: targetId, childrenIds: [person.id]))
+            }
+        case .spouse:
+            if unions.contains(where: { $0.partnerIds.contains(person.id) && $0.partnerIds.contains(targetId) }) { return }
+            unions.append(Union(partner1Id: person.id, partner2Id: targetId))
+        case .child:
+            if unions.contains(where: { $0.partnerIds.contains(person.id) && $0.childrenIds.contains(targetId) }) { return }
+            if let existing = unions.first(where: { $0.partnerIds.contains(person.id) }) {
+                existing.childrenIds.append(targetId)
+            } else {
+                unions.append(Union(partner1Id: person.id, childrenIds: [targetId]))
+            }
+        case .sibling:
+            if unions.contains(where: { $0.childrenIds.contains(person.id) && $0.childrenIds.contains(targetId) }) { return }
+            if let existing = unions.first(where: { $0.childrenIds.contains(person.id) }) {
+                existing.childrenIds.append(targetId)
+            } else {
+                unions.append(Union(childrenIds: [person.id, targetId]))
+            }
+        }
+    }
+
     // MARK: - Codable
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle, homePersonId, rootUnionId, people, unions, createdAt, updatedAt
