@@ -10,6 +10,12 @@ struct ExportView: View {
     @State private var title: String = ""
     @State private var subtitle: String = ""
     @State private var posterStyle: PosterStyle = .cartouche
+
+    // Native file export (PNG / PDF)
+    @State private var exportDoc: RenderedFileDocument?
+    @State private var exportName = ""
+    @State private var showExporter = false
+    @State private var exportError: String?
     
     enum PosterStyle: String, CaseIterable {
         case cartouche = "Картуш"
@@ -32,6 +38,26 @@ struct ExportView: View {
             title = tree.name
             subtitle = tree.subtitle ?? ""
         }
+        .fileExporter(
+            isPresented: $showExporter,
+            document: exportDoc,
+            contentType: exportDoc?.type ?? .data,
+            defaultFilename: exportName
+        ) { result in
+            if case .failure(let error) = result { exportError = error.localizedDescription }
+        }
+        .alert("Не удалось сохранить файл", isPresented: Binding(
+            get: { exportError != nil },
+            set: { if !$0 { exportError = nil } }
+        )) {
+            Button("OK", role: .cancel) { exportError = nil }
+        } message: {
+            Text(exportError ?? "")
+        }
+    }
+
+    private var fileSlug: String {
+        tree.name.replacingOccurrences(of: " ", with: "-").lowercased()
     }
     
     private var posterPreview: some View {
@@ -139,10 +165,13 @@ struct ExportView: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
+    // GEDCOM export stays on NSSavePanel: it writes a sibling `Media/` folder next
+    // to the chosen .ged file, which doesn't fit the single-file FileWrapper model
+    // used by .fileExporter (the app is effectively non-sandboxed, so this is fine).
     private func exportGEDCOM() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "ged") ?? .plainText]
-        panel.nameFieldStringValue = "\(tree.name.replacingOccurrences(of: " ", with: "-").lowercased()).ged"
+        panel.nameFieldStringValue = "\(fileSlug).ged"
         panel.begin { r in
             if r == .OK, let url = panel.url {
                 let mediaFolder = url.deletingLastPathComponent().appendingPathComponent("Media", isDirectory: true)
@@ -151,27 +180,19 @@ struct ExportView: View {
             }
         }
     }
-    
+
     private func exportPDF() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.pdf]
-        panel.nameFieldStringValue = "\(tree.name.replacingOccurrences(of: " ", with: "-").lowercased())-poster.pdf"
-        panel.begin { r in
-            if r == .OK, let url = panel.url {
-                PDFExporter.export(tree: tree, title: title, subtitle: subtitle, to: url)
-            }
-        }
+        guard let data = PDFExporter.render(tree: tree, title: title, subtitle: subtitle) else { return }
+        exportDoc = RenderedFileDocument(data: data, type: .pdf)
+        exportName = "\(fileSlug)-poster.pdf"
+        showExporter = true
     }
-    
+
     private func exportPNG() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [.png]
-        panel.nameFieldStringValue = "\(tree.name.replacingOccurrences(of: " ", with: "-").lowercased())-tree.png"
-        panel.begin { r in
-            if r == .OK, let url = panel.url {
-                PNGExporter.export(tree: tree, title: title, subtitle: subtitle, to: url)
-            }
-        }
+        guard let data = PNGExporter.render(tree: tree, title: title, subtitle: subtitle) else { return }
+        exportDoc = RenderedFileDocument(data: data, type: .png)
+        exportName = "\(fileSlug)-tree.png"
+        showExporter = true
     }
     
     private var formattedDate: String {

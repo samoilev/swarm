@@ -84,20 +84,19 @@ struct RelationshipCalculator {
     
     private func neighbors(of personId: UUID) -> [UUID] {
         var result: [UUID] = []
-        
-        // Parents
-        if let parentUnion = idx.childOf[personId] {
-            result.append(contentsOf: parentUnion.partnerIds)
-            // Siblings
-            result.append(contentsOf: parentUnion.childrenIds.filter { $0 != personId })
-        }
-        
+
+        // Parents + siblings (merged across split-family FAM records)
+        let parents = idx.mergedParentIds(personId)
+        if let f = parents.father { result.append(f) }
+        if let m = parents.mother { result.append(m) }
+        result.append(contentsOf: idx.mergedSiblingIds(personId))
+
         // Spouses and children
         for union in idx.unionsOf[personId] ?? [] {
             result.append(contentsOf: union.partnerIds.filter { $0 != personId })
             result.append(contentsOf: union.childrenIds)
         }
-        
+
         return result
     }
     
@@ -130,15 +129,14 @@ struct RelationshipCalculator {
     private func allAncestorsWithDepth(_ personId: UUID) -> [UUID: Int] {
         var result: [UUID: Int] = [personId: 0]
         var queue: [(UUID, Int)] = [(personId, 0)]
-        
+
         while !queue.isEmpty {
             let (current, depth) = queue.removeFirst()
-            if let parentUnion = idx.childOf[current] {
-                for pid in parentUnion.partnerIds {
-                    if result[pid] == nil {
-                        result[pid] = depth + 1
-                        queue.append((pid, depth + 1))
-                    }
+            let parents = idx.mergedParentIds(current)
+            for pid in [parents.father, parents.mother].compactMap({ $0 }) {
+                if result[pid] == nil {
+                    result[pid] = depth + 1
+                    queue.append((pid, depth + 1))
                 }
             }
         }
@@ -147,6 +145,22 @@ struct RelationshipCalculator {
     
     // MARK: - Naming
     
+    /// Names a sibling, distinguishing full (2 shared parents) from half
+    /// (1 shared parent → единокровный via father / единоутробный via mother).
+    private func siblingName(from a: Person, to b: Person) -> String {
+        let full = idx.sharedParentCount(a.id, b.id) >= 2
+        if b.sex == .unknown {
+            return full ? "Брат/сестра" : "Неполнородный брат/сестра"
+        }
+        let isF = b.sex == .female
+        if full { return isF ? "Сестра" : "Брат" }
+        let pa = idx.mergedParentIds(a.id)
+        let pb = idx.mergedParentIds(b.id)
+        let sameFather = pa.father != nil && pa.father == pb.father
+        if sameFather { return isF ? "Единокровная сестра" : "Единокровный брат" }
+        return isF ? "Единоутробная сестра" : "Единоутробный брат"
+    }
+
     private func nameRelationship(stepsUp: Int, stepsDown: Int, from personA: Person, to personB: Person) -> String {
         let sexB = personB.sex
         
@@ -171,9 +185,9 @@ struct RelationshipCalculator {
             }
         }
         
-        // Siblings
+        // Siblings (distinguish full from half siblings)
         if stepsUp == 1 && stepsDown == 1 {
-            return sexB == .male ? "Брат" : "Сестра"
+            return siblingName(from: personA, to: personB)
         }
         
         // Uncle/Aunt - Nephew/Niece

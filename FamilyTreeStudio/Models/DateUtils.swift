@@ -210,10 +210,11 @@ enum FamilyDate {
     /// Convert to GEDCOM date format: "5 MAR 1978"
     static func toGEDCOM(_ string: String?) -> String {
         let comp = parse(string)
-        if let d = comp.day, let m = comp.month, let y = comp.year {
-            return "\(d) \(gedcomMonths[m - 1]) \(y)"
-        } else if let m = comp.month, let y = comp.year {
-            return "\(gedcomMonths[m - 1]) \(y)"
+        let monthName: (Int) -> String? = { m in (1...12).contains(m) ? gedcomMonths[m - 1] : nil }
+        if let d = comp.day, let m = comp.month, let y = comp.year, let mon = monthName(m) {
+            return "\(d) \(mon) \(y)"
+        } else if let m = comp.month, let y = comp.year, let mon = monthName(m) {
+            return "\(mon) \(y)"
         } else if let y = comp.year {
             return "\(y)"
         }

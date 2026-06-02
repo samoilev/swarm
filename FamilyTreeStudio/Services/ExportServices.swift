@@ -2,14 +2,16 @@ import AppKit
 import CoreGraphics
 
 struct PDFExporter {
-    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
+    /// Renders the poster to PDF data in memory (used by the native .fileExporter).
+    static func render(tree: FamilyTree, title: String, subtitle: String) -> Data? {
         let pageW: CGFloat = 842
         let pageH: CGFloat = 595
         let margin: CGFloat = 40
-        
+
         let pdfData = NSMutableData()
         var box = CGRect(x: 0, y: 0, width: pageW, height: pageH)
-        guard let ctx = CGContext(consumer: CGDataConsumer(data: pdfData as CFMutableData)!, mediaBox: &box, nil) else { return }
+        guard let consumer = CGDataConsumer(data: pdfData as CFMutableData),
+              let ctx = CGContext(consumer: consumer, mediaBox: &box, nil) else { return nil }
         
         ctx.beginPDFPage(nil)
         ctx.setFillColor(NSColor(SepiaTheme.posterBg).cgColor)
@@ -89,16 +91,23 @@ struct PDFExporter {
         NSGraphicsContext.restoreGraphicsState()
         ctx.endPDFPage()
         ctx.closePDF()
-        pdfData.write(to: url, atomically: true)
+        return pdfData as Data
+    }
+
+    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
+        if let data = render(tree: tree, title: title, subtitle: subtitle) {
+            try? data.write(to: url, options: .atomic)
+        }
     }
 }
 
 struct PNGExporter {
-    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
+    /// Renders the tree to PNG data in memory (used by the native .fileExporter).
+    static func render(tree: FamilyTree, title: String, subtitle: String) -> Data? {
         let w = 1600, h = 1000
         guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
                                    space: CGColorSpaceCreateDeviceRGB(),
-                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return }
+                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
         
         ctx.setFillColor(NSColor(SepiaTheme.posterBg).cgColor)
         ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
@@ -140,10 +149,15 @@ struct PNGExporter {
         }
         
         NSGraphicsContext.restoreGraphicsState()
-        
-        guard let image = ctx.makeImage() else { return }
+
+        guard let image = ctx.makeImage() else { return nil }
         let rep = NSBitmapImageRep(cgImage: image)
-        guard let data = rep.representation(using: .png, properties: [:]) else { return }
-        try? data.write(to: url)
+        return rep.representation(using: .png, properties: [:])
+    }
+
+    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
+        if let data = render(tree: tree, title: title, subtitle: subtitle) {
+            try? data.write(to: url)
+        }
     }
 }

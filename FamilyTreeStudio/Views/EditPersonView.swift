@@ -22,6 +22,7 @@ struct EditPersonView: View {
     @State private var education: String = ""
     @State private var notes: String = ""
     @State private var photoData: Data?
+    @State private var showPhotoImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
     
@@ -356,23 +357,14 @@ struct EditPersonView: View {
                 
                 VStack(alignment: .leading, spacing: 6) {
                     Button {
-                        let panel = NSOpenPanel()
-                        panel.allowedContentTypes = [.image]
-                        panel.allowsMultipleSelection = false
-                        panel.canChooseDirectories = false
-                        if panel.runModal() == .OK, let url = panel.url {
-                            if let img = NSImage(contentsOf: url) {
-                                let resized = resizeImage(img, maxDimension: 400)
-                                if let tiff = resized.tiffRepresentation,
-                                   let rep = NSBitmapImageRep(data: tiff) {
-                                    photoData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
-                                }
-                            }
-                        }
+                        showPhotoImporter = true
                     } label: {
                         Label("Выбрать фото", systemImage: "photo.on.rectangle")
                     }
                     .buttonStyle(SepiaButtonStyle())
+                    .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
+                        if case .success(let url) = result { loadPhoto(from: url) }
+                    }
                     
                     if photoData != nil {
                         Button(role: .destructive) {
@@ -390,6 +382,17 @@ struct EditPersonView: View {
         .padding(.vertical, 12)
     }
     
+    private func loadPhoto(from url: URL) {
+        // .fileImporter may hand back a security-scoped URL (sandbox-safe).
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let img = NSImage(contentsOf: url) else { return }
+        let resized = resizeImage(img, maxDimension: 400)
+        if let tiff = resized.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) {
+            photoData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+        }
+    }
+
     private func resizeImage(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
         let size = image.size
         guard size.width > maxDimension || size.height > maxDimension else { return image }

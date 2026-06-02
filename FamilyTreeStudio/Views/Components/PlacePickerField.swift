@@ -7,8 +7,9 @@ struct PlacePickerField: View {
     
     @State private var suggestions: [PlaceEntry] = []
     @State private var showSuggestions = false
+    @State private var searchWork: DispatchWorkItem?
     @FocusState private var isFocused: Bool
-    
+
     private let db = PlacesDatabase.shared
     
     var body: some View {
@@ -85,13 +86,19 @@ struct PlacePickerField: View {
     }
     
     private func updateSuggestions(_ query: String) {
+        searchWork?.cancel()
         let trimmed = query.trimmingCharacters(in: .whitespaces)
         if trimmed.count < 2 {
             suggestions = []
             showSuggestions = false
             return
         }
-        suggestions = db.search(trimmed)
-        showSuggestions = !suggestions.isEmpty
+        // Debounce: only scan the place DB after the user pauses typing.
+        let work = DispatchWorkItem {
+            suggestions = db.search(trimmed)
+            showSuggestions = !suggestions.isEmpty
+        }
+        searchWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: work)
     }
 }
