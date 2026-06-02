@@ -78,10 +78,14 @@ struct GEDCOMSerializer {
                 if let pl = p.deathPlace { lines.append("2 PLAC \(pl)") }
             }
             
-            // Burial
-            if let b = p.burialPlace, !b.isEmpty {
+            // Burial (place and/or precise grave coordinates)
+            let hasBurialCoord = p.burialLat != nil && p.burialLon != nil
+            if (p.burialPlace?.isEmpty == false) || hasBurialCoord {
                 lines.append("1 BURI")
-                lines.append("2 PLAC \(b)")
+                if let b = p.burialPlace, !b.isEmpty { lines.append("2 PLAC \(b)") }
+                if let lat = p.burialLat, let lon = p.burialLon {
+                    lines.append("2 _COORD \(lat) \(lon)")
+                }
             }
             
             // Occupation & Education

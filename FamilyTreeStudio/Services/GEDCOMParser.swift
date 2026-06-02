@@ -138,6 +138,8 @@ struct GEDCOMParser {
         var deathPlace: String? = nil
         var isLiving = true
         var burialPlace: String? = nil
+        var burialLat: Double? = nil
+        var burialLon: Double? = nil
         var occupation: String? = nil
         var education: String? = nil
         var notes: String? = nil
@@ -194,6 +196,9 @@ struct GEDCOMParser {
                     deathPlace = value
                 case ("BURI", "PLAC"):
                     burialPlace = value
+                case ("BURI", "_COORD"):
+                    let nums = value.split(separator: " ").compactMap { Double($0) }
+                    if nums.count == 2 { burialLat = nums[0]; burialLon = nums[1] }
                 case ("NAME", "_MARNM"), ("NAME", "2 _MARNM"):
                     let parsed = parseName(value)
                     maidenName = surname
@@ -231,6 +236,8 @@ struct GEDCOMParser {
         )
         // Override the auto-generated UUID
         person.id = uuid
+        person.burialLat = burialLat
+        person.burialLon = burialLon
         return person
     }
     

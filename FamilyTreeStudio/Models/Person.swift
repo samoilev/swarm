@@ -31,6 +31,9 @@ final class Person: Identifiable, Codable, Hashable {
     var birthLon: Double?
     var deathLat: Double?
     var deathLon: Double?
+    // Precise grave/burial coordinates (entered manually, not geocoded)
+    var burialLat: Double?
+    var burialLon: Double?
     
     var createdAt: Date
     var updatedAt: Date
@@ -142,7 +145,7 @@ final class Person: Identifiable, Codable, Hashable {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving
         case burialPlace, occupation, education, notes, sources, photoData
-        case birthLat, birthLon, deathLat, deathLon
+        case birthLat, birthLon, deathLat, deathLon, burialLat, burialLon
         case createdAt, updatedAt
     }
     
@@ -169,6 +172,8 @@ final class Person: Identifiable, Codable, Hashable {
         birthLon = try c.decodeIfPresent(Double.self, forKey: .birthLon)
         deathLat = try c.decodeIfPresent(Double.self, forKey: .deathLat)
         deathLon = try c.decodeIfPresent(Double.self, forKey: .deathLon)
+        burialLat = try c.decodeIfPresent(Double.self, forKey: .burialLat)
+        burialLon = try c.decodeIfPresent(Double.self, forKey: .burialLon)
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
     }
@@ -196,6 +201,8 @@ final class Person: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(birthLon, forKey: .birthLon)
         try c.encodeIfPresent(deathLat, forKey: .deathLat)
         try c.encodeIfPresent(deathLon, forKey: .deathLon)
+        try c.encodeIfPresent(burialLat, forKey: .burialLat)
+        try c.encodeIfPresent(burialLon, forKey: .burialLon)
         try c.encode(createdAt, forKey: .createdAt)
         try c.encode(updatedAt, forKey: .updatedAt)
     }
