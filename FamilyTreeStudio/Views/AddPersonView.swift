@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct AddPersonView: View {
     @Environment(\.dismiss) private var dismiss
@@ -41,7 +42,8 @@ struct AddPersonView: View {
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
-            
+                .onTapGesture { NSApp.keyWindow?.makeFirstResponder(nil) } // tap empty space → close dropdowns
+
             VStack(spacing: 0) {
                 HStack {
                     Text("Добавить родственника")
@@ -82,7 +84,7 @@ struct AddPersonView: View {
                         
                         SectionHeader(title: "Рождение")
                         SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8)
+                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8).zIndex(1)
                         SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
@@ -92,7 +94,7 @@ struct AddPersonView: View {
                         
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8).zIndex(1)
                             SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
                             SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)

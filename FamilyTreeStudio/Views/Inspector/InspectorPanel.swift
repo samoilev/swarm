@@ -50,6 +50,7 @@ struct InspectorPanel: View {
                         }
                         .padding(.horizontal, 18)
                         .padding(.vertical, 14)
+                        .textSelection(.enabled)
                     }
                 }
             }
@@ -59,27 +60,15 @@ struct InspectorPanel: View {
     }
 
     private func inspectorHeader(_ person: Person) -> some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 0) {
+            // Portrait photo — same 3:4 ratio as the tree node, flush to the top-left
+            // edges (no placeholder when absent).
             if let data = person.photoData, let nsImage = NSImage(data: data) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 60, height: 80) // 3:4 portrait, matches the tree node
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-            } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(LinearGradient(colors: [SepiaTheme.photoA, SepiaTheme.photoB], startPoint: .topLeading, endPoint: .bottomTrailing))
-                    Path { path in
-                        for i in stride(from: 0, to: 80, by: 6) {
-                            path.move(to: CGPoint(x: CGFloat(i), y: 0))
-                            path.addLine(to: CGPoint(x: 0, y: CGFloat(i)))
-                        }
-                    }
-                    .stroke(SepiaTheme.photoB.opacity(0.5), lineWidth: 0.5)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                }
-                .frame(width: 60, height: 80)
+                    .frame(width: 120, height: 160)
+                    .clipped()
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -87,7 +76,6 @@ struct InspectorPanel: View {
                     .font(SepiaTheme.display(size: 19))
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
-                    .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
                 if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                     Text("урожд. \(maiden)")
@@ -95,49 +83,52 @@ struct InspectorPanel: View {
                         .italic()
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
-                Text(person.lifespan.isEmpty ? "—" : person.lifespan)
-                    .font(SepiaTheme.body(size: 13))
-                    .foregroundColor(SepiaTheme.inkSoft)
+                if !person.lifespan.isEmpty {
+                    Text(person.lifespan)
+                        .font(SepiaTheme.body(size: 13))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                }
             }
-            .frame(minWidth: 120, alignment: .leading)
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, 14)
+            .padding(.top, 14)
 
-            Spacer(minLength: 4)
-
-            VStack(spacing: 4) {
-                if let onDelete = onDelete {
-                    Button { onDelete(person) } label: {
-                        Image(systemName: "trash").font(.system(size: 12)).foregroundColor(.red.opacity(0.7))
-                            .frame(width: 30, height: 30)
-                            .background(SepiaTheme.cardBg)
-                            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Удалить")
-                }
-                if let onEdit = onEdit {
-                    Button { onEdit(person) } label: {
-                        Image(systemName: "pencil").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
-                            .frame(width: 30, height: 30)
-                            .background(SepiaTheme.cardBg)
-                            .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Редактировать")
-                }
-                Button { self.person = nil } label: {
-                    Image(systemName: "xmark").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
-                        .frame(width: 30, height: 30)
-                        .background(SepiaTheme.cardBg)
-                        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .help("Закрыть")
-            }
+            actionButtons(person: person, tinted: false)
+                .padding(.top, 14)
+                .padding(.bottom, 14)
+                .padding(.trailing, 14)
         }
-        .padding(16)
+    }
+
+    @ViewBuilder
+    private func actionButtons(person: Person, tinted: Bool) -> some View {
+        let bg = tinted ? Color.black.opacity(0.35) : SepiaTheme.cardBg
+        let fg = tinted ? Color.white : SepiaTheme.inkSoft
+        let stroke = tinted ? Color.white.opacity(0.25) : SepiaTheme.cardLine
+
+        VStack(spacing: 4) {
+            if let onDelete = onDelete {
+                actionBtn("trash", fg: tinted ? .red.opacity(0.85) : .red.opacity(0.7), bg: bg, stroke: stroke) { onDelete(person) }
+                    .help("Удалить")
+            }
+            if let onEdit = onEdit {
+                actionBtn("pencil", fg: fg, bg: bg, stroke: stroke) { onEdit(person) }
+                    .help("Редактировать")
+            }
+            actionBtn("xmark", fg: fg, bg: bg, stroke: stroke) { self.person = nil }
+                .help("Закрыть")
+        }
+    }
+
+    private func actionBtn(_ image: String, fg: Color, bg: Color, stroke: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: image).font(.system(size: 12)).foregroundColor(fg)
+                .frame(width: 30, height: 30)
+                .background(bg)
+                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(stroke, lineWidth: 1))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // Each section renders only when it has at least one filled field, and within

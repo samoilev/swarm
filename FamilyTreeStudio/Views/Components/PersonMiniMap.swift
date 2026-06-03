@@ -42,7 +42,7 @@ struct PersonMiniMap: View {
                 .frame(height: 80)
             }
         }
-        .task(id: person.id) { await resolve() }
+        .task(id: locationKey) { await resolve() }
     }
 
     /// The settlement name for a pin caption — the first comma-component of the stored
@@ -53,9 +53,15 @@ struct PersonMiniMap: View {
     }
 
     private func dot(_ color: Color) -> some View {
-        Circle().fill(color).frame(width: 12, height: 12)
-            .overlay(Circle().strokeBorder(.white, lineWidth: 2))
-            .shadow(color: .black.opacity(0.3), radius: 1, y: 1)
+        ZStack {
+            Circle().fill(color)
+                .frame(width: 14, height: 14)
+                .overlay(Circle().strokeBorder(.white, lineWidth: 2))
+                .shadow(color: .black.opacity(0.35), radius: 2, y: 1)
+        }
+        // An explicit outer frame is required: without it MapKit on macOS
+        // measures the annotation content as zero-sized and clips it invisible.
+        .frame(width: 28, height: 28)
     }
 
     private func placeholder(text: String) -> some View {
@@ -84,9 +90,28 @@ struct PersonMiniMap: View {
         .padding(6)
     }
 
+    /// Changes whenever any location-relevant field changes, so `.task` re-runs.
+    private var locationKey: String {
+        "\(person.birthPlace ?? "")|" +
+        "\(person.birthLat.map{String($0)} ?? "")|\(person.birthLon.map{String($0)} ?? "")|" +
+        "\(person.deathPlace ?? "")|" +
+        "\(person.deathLat.map{String($0)} ?? "")|\(person.deathLon.map{String($0)} ?? "")"
+    }
+
     // MARK: - Coordinate resolution
 
     private func resolve() async {
+        // Clear stale pins immediately so the old location doesn't linger
+        // while the new one is geocoding.
+        birth = nil
+        death = nil
+        resolved = false
+        // Also clear the in-memory geocoding cache for this person's places so
+        // that if wrong coordinates were previously cached (e.g. a disambiguation
+        // error) they don't survive across the task restart.
+        if let p = person.birthPlace { GeocodingService.shared.clearCache(for: p) }
+        if let p = person.deathPlace { GeocodingService.shared.clearCache(for: p) }
+
         let geo = GeocodingService.shared
         var b: CLLocationCoordinate2D?
         var d: CLLocationCoordinate2D?

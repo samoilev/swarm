@@ -36,10 +36,27 @@ struct FamilyTreeStudioApp: App {
                 }
                 .keyboardShortcut("n")
             }
+            CommandGroup(after: .toolbar) {
+                Button("Увеличить масштаб") {
+                    NotificationCenter.default.post(name: .zoomInRequested, object: nil)
+                }
+                .keyboardShortcut("+")
+                Button("Уменьшить масштаб") {
+                    NotificationCenter.default.post(name: .zoomOutRequested, object: nil)
+                }
+                .keyboardShortcut("-")
+                Button("По размеру экрана") {
+                    NotificationCenter.default.post(name: .zoomFitRequested, object: nil)
+                }
+                .keyboardShortcut("0")
+            }
         }
     }
 }
 
 extension Notification.Name {
     static let newTreeRequested = Notification.Name("newTreeRequested")
+    static let zoomInRequested  = Notification.Name("zoomInRequested")
+    static let zoomOutRequested = Notification.Name("zoomOutRequested")
+    static let zoomFitRequested = Notification.Name("zoomFitRequested")
 }

@@ -39,11 +39,26 @@ struct TreeLibraryView: View {
                 .padding(.top, 48)
                 .padding(.bottom, 32)
                 
+                // Action toolbar — always visible above the grid
+                HStack(spacing: 10) {
+                    Spacer()
+                    Button(action: { onImport?() }) {
+                        Label("Импорт GEDCOM", systemImage: "square.and.arrow.down")
+                    }
+                    .buttonStyle(SepiaButtonStyle())
+                    Button(action: onCreate) {
+                        Label("Новое дерево", systemImage: "plus")
+                    }
+                    .buttonStyle(SepiaButtonStyle(isActive: true))
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+
                 Divider().overlay(SepiaTheme.line)
-                
+
                 if trees.isEmpty {
                     Spacer()
-                    VStack(spacing: 16) {
+                    VStack(spacing: 12) {
                         Image(systemName: "tree")
                             .font(.system(size: 48))
                             .foregroundColor(SepiaTheme.inkSoft)
@@ -53,11 +68,6 @@ struct TreeLibraryView: View {
                         Text("Создайте первое родословное дерево")
                             .font(SepiaTheme.body(size: 14))
                             .foregroundColor(SepiaTheme.inkSoft)
-                        Button(action: onCreate) {
-                            Label("Создать дерево", systemImage: "plus")
-                        }
-                        .buttonStyle(SepiaButtonStyle(isActive: true))
-                        .padding(.top, 8)
                     }
                     Spacer()
                 } else {
@@ -65,46 +75,6 @@ struct TreeLibraryView: View {
                         LazyVGrid(columns: [
                             GridItem(.adaptive(minimum: 240, maximum: 320), spacing: 20)
                         ], spacing: 20) {
-                            Button(action: onCreate) {
-                                VStack(spacing: 12) {
-                                    Image(systemName: "plus.circle")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(SepiaTheme.accent)
-                                    Text("Новое дерево")
-                                        .font(SepiaTheme.ui(size: 14))
-                                        .foregroundColor(SepiaTheme.ink)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 160)
-                                .background(SepiaTheme.cardBg)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .strokeBorder(SepiaTheme.cardLine, style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                            
-                            Button(action: { onImport?() }) {
-                                VStack(spacing: 12) {
-                                    Image(systemName: "square.and.arrow.down")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(SepiaTheme.accent2)
-                                    Text("Импорт GEDCOM")
-                                        .font(SepiaTheme.ui(size: 14))
-                                        .foregroundColor(SepiaTheme.ink)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 160)
-                                .background(SepiaTheme.cardBg)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .strokeBorder(SepiaTheme.cardLine, style: StrokeStyle(lineWidth: 1, dash: [6, 4]))
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                            }
-                            .buttonStyle(.plain)
-                            
                             ForEach(trees, id: \.id) { tree in
                                 TreeCardView(
                                     tree: tree,

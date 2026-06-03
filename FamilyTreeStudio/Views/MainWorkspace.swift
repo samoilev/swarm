@@ -22,7 +22,7 @@ struct MainWorkspace: View {
     @State private var personToDelete: Person?
     @State private var fitRequest: Int = 0
     @State private var fanLevels: Int = 4
-    @State private var showPhotos: Bool = false
+    @State private var showPhotos: Bool = true
     
     enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
@@ -100,6 +100,9 @@ struct MainWorkspace: View {
         .frame(minWidth: 900, minHeight: 600)
         .onChange(of: selectedPerson?.id) { _, _ in recomputeHighlight() }
         .onChange(of: secondaryPerson?.id) { _, _ in recomputeHighlight() }
+        // Zoom-in/out notifications are handled inside TreeCanvasView where
+        // panOffset and viewport size are available for center-anchored zooming.
+        .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
     }
     
     private func recomputeHighlight() {

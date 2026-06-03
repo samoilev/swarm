@@ -29,17 +29,26 @@ struct PlacePickerField: View {
                     .foregroundColor(SepiaTheme.ink)
                     .colorMultiply(Color(hex: "f5eed8"))
                     .focused($isFocused)
-                    .onChange(of: text) { _, newValue in
-                        updateSuggestions(newValue)
+                    .onChange(of: text) { old, newValue in
+                        // Only show suggestions when the user is actively typing
+                        // (i.e. the field is focused). This prevents the list from
+                        // opening when the form loads with a pre-filled value.
+                        if isFocused { updateSuggestions(newValue) }
                     }
                     .onChange(of: isFocused) { _, focused in
-                        if focused && !text.isEmpty {
-                            updateSuggestions(text)
-                        } else if !focused {
+                        if !focused {
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                 showSuggestions = false
                             }
                         }
+                        // Intentionally NOT calling updateSuggestions on focus gain —
+                        // that was what caused the dropdown to appear when opening the
+                        // edit form with an already-filled-in place name.
+                    }
+                    .onSubmit {
+                        // Enter confirms the manually-typed text and closes the list.
+                        showSuggestions = false
+                        searchWork?.cancel()
                     }
                 
                 if showSuggestions && !suggestions.isEmpty {
