@@ -64,7 +64,7 @@ struct InspectorPanel: View {
                 Image(nsImage: nsImage)
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 56, height: 56)
+                    .frame(width: 60, height: 80) // 3:4 portrait, matches the tree node
                     .clipShape(RoundedRectangle(cornerRadius: 4))
             } else {
                 ZStack {
@@ -79,7 +79,7 @@ struct InspectorPanel: View {
                     .stroke(SepiaTheme.photoB.opacity(0.5), lineWidth: 0.5)
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                 }
-                .frame(width: 56, height: 56)
+                .frame(width: 60, height: 80)
             }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -165,10 +165,14 @@ struct InspectorPanel: View {
     }
 
     private func birthSection(_ p: Person) -> some View {
-        fieldSection("Рождение", [
+        var rows: [(String, String)] = [
             ("ДАТА", p.birthDate ?? ""),
             ("МЕСТО", p.birthPlace ?? ""),
-        ])
+        ]
+        if let lat = p.birthLat, let lon = p.birthLon {
+            rows.append(("КООРДИНАТЫ", String(format: "%.5f, %.5f", lat, lon)))
+        }
+        return fieldSection("Рождение", rows)
     }
 
     private func deathSection(_ p: Person) -> some View {
@@ -180,6 +184,9 @@ struct InspectorPanel: View {
         if !p.isLiving {
             rows.append(("ДАТА", p.deathDate ?? ""))
             rows.append(("МЕСТО СМЕРТИ", p.deathPlace ?? ""))
+            if let lat = p.deathLat, let lon = p.deathLon {
+                rows.append(("КООРДИНАТЫ", String(format: "%.5f, %.5f", lat, lon)))
+            }
         }
         rows.append(("ЗАХОРОНЕНИЕ", p.burialPlace ?? ""))
         if let lat = p.burialLat, let lon = p.burialLon {

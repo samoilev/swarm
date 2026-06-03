@@ -17,10 +17,10 @@ struct PersonMiniMap: View {
             if birth != nil || death != nil {
                 Map(position: $position, interactionModes: []) {
                     if let b = birth {
-                        Annotation("Рождение", coordinate: b) { dot(SepiaTheme.pinBirth) }
+                        Annotation(settlement(person.birthPlace), coordinate: b) { dot(SepiaTheme.pinBirth) }
                     }
                     if let d = death {
-                        Annotation("Смерть", coordinate: d) { dot(SepiaTheme.pinDeath) }
+                        Annotation(settlement(person.deathPlace), coordinate: d) { dot(SepiaTheme.pinDeath) }
                     }
                     if let b = birth, let d = death {
                         MapPolyline(coordinates: [b, d])
@@ -43,6 +43,13 @@ struct PersonMiniMap: View {
             }
         }
         .task(id: person.id) { await resolve() }
+    }
+
+    /// The settlement name for a pin caption — the first comma-component of the stored
+    /// place (e.g. "Москва" from "Москва, Москва, Россия"). Empty when no place is set.
+    private func settlement(_ place: String?) -> String {
+        guard let p = place?.trimmingCharacters(in: .whitespaces), !p.isEmpty else { return "" }
+        return p.split(separator: ",").first.map { $0.trimmingCharacters(in: .whitespaces) } ?? p
     }
 
     private func dot(_ color: Color) -> some View {

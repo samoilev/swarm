@@ -165,20 +165,39 @@ final class FamilyTree: Identifiable, Codable {
         guard targetId != person.id else { return }
         switch kind {
         case .parent:
+            // Make `target` a parent of `person` (person is the child).
             if unions.contains(where: { $0.childrenIds.contains(person.id) && $0.partnerIds.contains(targetId) }) { return }
-            if let existing = unions.first(where: { $0.childrenIds.contains(person.id) }) {
-                if existing.partner1Id == nil { existing.partner1Id = targetId }
-                else if existing.partner2Id == nil { existing.partner2Id = targetId }
-                else { unions.append(Union(partner1Id: targetId, childrenIds: [person.id])) }
+            if let u = unions.first(where: { $0.childrenIds.contains(person.id) }) {
+                // A child belongs to exactly one parent union: add the co-parent if there
+                // is room; if it is already a couple, we can't record a third parent —
+                // leave it rather than duplicating the child into another union.
+                if u.partner1Id == nil || u.partner2Id == nil { fillFreePartner(u, with: targetId) }
+            } else if let u = unions.first(where: { $0.partnerIds.contains(targetId) }) {
+                // Target already heads a family → person joins it as a child.
+                u.childrenIds.append(person.id)
             } else {
                 unions.append(Union(partner1Id: targetId, childrenIds: [person.id]))
             }
         case .spouse:
             if unions.contains(where: { $0.partnerIds.contains(person.id) && $0.partnerIds.contains(targetId) }) { return }
-            unions.append(Union(partner1Id: person.id, partner2Id: targetId))
+            // Prefer slotting into an existing single-partner union so its children stay
+            // shared, instead of spawning a duplicate childless union.
+            if let u = unions.first(where: { $0.partnerIds == [person.id] }) {
+                fillFreePartner(u, with: targetId)
+            } else if let u = unions.first(where: { $0.partnerIds == [targetId] }) {
+                fillFreePartner(u, with: person.id)
+            } else {
+                unions.append(Union(partner1Id: person.id, partner2Id: targetId))
+            }
         case .child:
+            // Make `target` a child of `person` (person is the parent).
             if unions.contains(where: { $0.partnerIds.contains(person.id) && $0.childrenIds.contains(targetId) }) { return }
-            if let existing = unions.first(where: { $0.partnerIds.contains(person.id) }) {
+            if let u = unions.first(where: { $0.childrenIds.contains(targetId) }) {
+                // The child already belongs to a parent union: add person as co-parent if
+                // there is room; if it is already a couple, don't duplicate the child into
+                // a second union (a child has exactly one parent union).
+                if u.partner1Id == nil || u.partner2Id == nil { fillFreePartner(u, with: person.id) }
+            } else if let existing = unions.first(where: { $0.partnerIds.contains(person.id) }) {
                 existing.childrenIds.append(targetId)
             } else {
                 unions.append(Union(partner1Id: person.id, childrenIds: [targetId]))
@@ -191,6 +210,12 @@ final class FamilyTree: Identifiable, Codable {
                 unions.append(Union(childrenIds: [person.id, targetId]))
             }
         }
+    }
+
+    /// Put `id` into whichever partner slot of `union` is free (partner1 first).
+    private func fillFreePartner(_ union: Union, with id: UUID) {
+        if union.partner1Id == nil { union.partner1Id = id }
+        else if union.partner2Id == nil { union.partner2Id = id }
     }
 
     // MARK: - Codable

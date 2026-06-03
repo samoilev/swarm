@@ -13,8 +13,10 @@ struct AddPersonView: View {
     @State private var sex: Person.Sex = .unknown
     @State private var birthDate = ""
     @State private var birthPlace = ""
+    @State private var birthCoords = ""
     @State private var deathDate = ""
     @State private var deathPlace = ""
+    @State private var deathCoords = ""
     @State private var isLiving = true
     @State private var burialPlace = ""
     @State private var burialCoords = ""
@@ -80,7 +82,8 @@ struct AddPersonView: View {
                         
                         SectionHeader(title: "Рождение")
                         SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна").padding(.bottom, 12)
+                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8)
+                        SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
                         Toggle(isOn: $isLiving) {
@@ -89,7 +92,8 @@ struct AddPersonView: View {
                         
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8)
+                            SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
                             SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
@@ -162,6 +166,14 @@ struct AddPersonView: View {
             notes: notes.isEmpty ? nil : notes
         )
 
+        if let c = parseGraveCoords(birthCoords) {
+            person.birthLat = c.lat
+            person.birthLon = c.lon
+        }
+        if !isLiving, let c = parseGraveCoords(deathCoords) {
+            person.deathLat = c.lat
+            person.deathLon = c.lon
+        }
         if !isLiving, let c = parseGraveCoords(burialCoords) {
             person.burialLat = c.lat
             person.burialLon = c.lon
@@ -181,6 +193,16 @@ struct AddPersonView: View {
         store.save()
         onAdded(person)
         dismiss()
+    }
+
+    /// Resolve a picked place to coordinates and fill the bound field. Only fires when
+    /// a suggestion is chosen from the list, so manual entries keep their manual coords.
+    private func prefillCoords(for place: String, into coords: Binding<String>) {
+        GeocodingService.shared.coordinate(for: place) { coord in
+            DispatchQueue.main.async {
+                if let c = coord { coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude) }
+            }
+        }
     }
 
     /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.

@@ -860,7 +860,7 @@ struct PersonCardView: View, Equatable {
                     Image(nsImage: nsImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 54, height: 88)
+                        .frame(width: 66, height: 88) // 3:4 portrait, matches the inspector
                         .clipped()
                 } else {
                     ZStack {
@@ -869,7 +869,7 @@ struct PersonCardView: View, Equatable {
                             .font(.system(size: 20))
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
                     }
-                    .frame(width: 54, height: 88)
+                    .frame(width: 66, height: 88)
                 }
             }
             
