@@ -32,6 +32,7 @@ struct GEDCOMSerializer {
         df.locale = Locale(identifier: "en_US_POSIX")
         lines.append("1 DATE \(df.string(from: Date()).uppercased())")
         // Custom metadata
+        lines.append("1 _TREEID \(tree.id.uuidString)")
         lines.append("1 _NAME \(tree.name)")
         if let sub = tree.subtitle, !sub.isEmpty {
             lines.append("1 _SUBTITLE \(sub)")
@@ -65,17 +66,20 @@ struct GEDCOMSerializer {
             if p.sex != .unknown { lines.append("1 SEX \(p.sex.rawValue)") }
             
             // Birth
-            if p.birthDate != nil || p.birthPlace != nil {
+            let hasBirthCoord = p.birthLat != nil && p.birthLon != nil
+            if p.birthDate != nil || p.birthPlace != nil || hasBirthCoord {
                 lines.append("1 BIRT")
                 if let d = p.birthDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = p.birthPlace { lines.append("2 PLAC \(pl)") }
+                if let lat = p.birthLat, let lon = p.birthLon { lines.append("2 _COORD \(lat) \(lon)") }
             }
-            
+
             // Death
             if !p.isLiving {
                 lines.append("1 DEAT")
                 if let d = p.deathDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = p.deathPlace { lines.append("2 PLAC \(pl)") }
+                if let lat = p.deathLat, let lon = p.deathLon { lines.append("2 _COORD \(lat) \(lon)") }
             }
             
             // Burial (place and/or precise grave coordinates)

@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct SepiaTheme {
+    /// Portrait photo aspect ratio (width ÷ height), used consistently for the photo
+    /// in tree nodes, the inspector, the editor, and the upload crop selector.
+    static let portraitAspect: CGFloat = 3.0 / 4.0
+
     // Core colors
     static let paper = Color(hex: "ece1c9")
     static let ink = Color(hex: "3a2c1a")

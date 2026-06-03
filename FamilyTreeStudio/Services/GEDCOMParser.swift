@@ -6,6 +6,7 @@ struct GEDCOMParser {
     struct ParsedTree {
         var name: String
         var subtitle: String?
+        var treeId: UUID?
         var homePersonId: UUID?
         var rootUnionId: UUID?
         var people: [Person]
@@ -29,6 +30,7 @@ struct GEDCOMParser {
         
         var treeName = "Без названия"
         var treeSubtitle: String? = nil
+        var treeId: UUID? = nil
         var homeXref: String? = nil
         var rootFamXref: String? = nil
         
@@ -60,6 +62,8 @@ struct GEDCOMParser {
                     treeName = String(trimmed.dropFirst(8))
                 } else if trimmed.hasPrefix("1 _SUBTITLE ") {
                     treeSubtitle = String(trimmed.dropFirst(12))
+                } else if trimmed.hasPrefix("1 _TREEID ") {
+                    treeId = UUID(uuidString: String(trimmed.dropFirst(10)))
                 } else if trimmed.hasPrefix("1 _HOME @") {
                     homeXref = extractPointer(trimmed)
                 } else if trimmed.hasPrefix("1 _ROOT @") {
@@ -96,6 +100,7 @@ struct GEDCOMParser {
         return ParsedTree(
             name: treeName,
             subtitle: treeSubtitle,
+            treeId: treeId,
             homePersonId: homePersonId,
             rootUnionId: rootUnionId,
             people: people,
@@ -137,6 +142,10 @@ struct GEDCOMParser {
         var deathDate: String? = nil
         var deathPlace: String? = nil
         var isLiving = true
+        var birthLat: Double? = nil
+        var birthLon: Double? = nil
+        var deathLat: Double? = nil
+        var deathLon: Double? = nil
         var burialPlace: String? = nil
         var burialLat: Double? = nil
         var burialLon: Double? = nil
@@ -204,10 +213,16 @@ struct GEDCOMParser {
                     birthDate = FamilyDate.normalize(value)
                 case ("BIRT", "PLAC"):
                     birthPlace = value
+                case ("BIRT", "_COORD"):
+                    let nums = value.split(separator: " ").compactMap { Double($0) }
+                    if nums.count == 2 { birthLat = nums[0]; birthLon = nums[1] }
                 case ("DEAT", "DATE"):
                     deathDate = FamilyDate.normalize(value)
                 case ("DEAT", "PLAC"):
                     deathPlace = value
+                case ("DEAT", "_COORD"):
+                    let nums = value.split(separator: " ").compactMap { Double($0) }
+                    if nums.count == 2 { deathLat = nums[0]; deathLon = nums[1] }
                 case ("BURI", "PLAC"):
                     burialPlace = value
                 case ("BURI", "_COORD"):
@@ -255,6 +270,10 @@ struct GEDCOMParser {
         )
         // Override the auto-generated UUID
         person.id = uuid
+        person.birthLat = birthLat
+        person.birthLon = birthLon
+        person.deathLat = deathLat
+        person.deathLon = deathLon
         person.burialLat = burialLat
         person.burialLon = burialLon
         person.attachments = attachments

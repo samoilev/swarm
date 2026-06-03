@@ -15,8 +15,10 @@ struct EditPersonView: View {
     @State private var sex: Person.Sex = .unknown
     @State private var birthDate: String = ""
     @State private var birthPlace: String = ""
+    @State private var birthCoords: String = ""
     @State private var deathDate: String = ""
     @State private var deathPlace: String = ""
+    @State private var deathCoords: String = ""
     @State private var isLiving: Bool = true
     @State private var burialPlace: String = ""
     @State private var burialCoords: String = ""
@@ -25,6 +27,7 @@ struct EditPersonView: View {
     @State private var notes: String = ""
     @State private var photoData: Data?
     @State private var showPhotoImporter = false
+    @State private var cropSource: NSImage?
     @State private var showAttachmentImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
@@ -83,7 +86,8 @@ struct EditPersonView: View {
                         
                         SectionHeader(title: "Рождение")
                         SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна").padding(.bottom, 12)
+                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8)
+                        SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         
                         SectionHeader(title: "Смерть и погребение")
                         Toggle(isOn: $isLiving) {
@@ -92,7 +96,8 @@ struct EditPersonView: View {
                         
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8)
+                            SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
                             SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
@@ -123,6 +128,13 @@ struct EditPersonView: View {
         }
         .frame(width: 540, height: 720)
         .onAppear { loadPerson() }
+        .sheet(isPresented: Binding(get: { cropSource != nil }, set: { if !$0 { cropSource = nil } })) {
+            if let img = cropSource {
+                PhotoCropView(image: img,
+                              onCancel: { cropSource = nil },
+                              onConfirm: { cropped in storePhoto(cropped); cropSource = nil })
+            }
+        }
     }
     
     // MARK: - Relationships Editor
@@ -380,14 +392,14 @@ struct EditPersonView: View {
                     Image(nsImage: nsImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 80, height: 80)
+                        .frame(width: 96, height: 128) // 3:4 portrait, matches tree node & inspector
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(SepiaTheme.toolbarLine, lineWidth: 1))
                 } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(SepiaTheme.photoA.opacity(0.3))
-                            .frame(width: 80, height: 80)
+                            .frame(width: 96, height: 128)
                         Image(systemName: "person.crop.rectangle")
                             .font(.system(size: 28))
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.5))
@@ -402,7 +414,7 @@ struct EditPersonView: View {
                     }
                     .buttonStyle(SepiaButtonStyle())
                     .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
-                        if case .success(let url) = result { loadPhoto(from: url) }
+                        if case .success(let url) = result { beginPhotoSelection(from: url) }
                     }
                     
                     if photoData != nil {
@@ -421,14 +433,35 @@ struct EditPersonView: View {
         .padding(.vertical, 12)
     }
     
-    private func loadPhoto(from url: URL) {
+    /// Load the picked image at full resolution and present the crop selector.
+    private func beginPhotoSelection(from url: URL) {
         // .fileImporter may hand back a security-scoped URL (sandbox-safe).
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         guard let img = NSImage(contentsOf: url) else { return }
-        let resized = resizeImage(img, maxDimension: 400)
+        cropSource = img
+    }
+
+    /// Store a (already cropped to 3:4) image as the card photo, downscaled to a thumbnail.
+    private func storePhoto(_ image: NSImage) {
+        let resized = resizeImage(image, maxDimension: 600)
         if let tiff = resized.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) {
-            photoData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+            photoData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.85])
+        }
+    }
+
+    private func formatCoords(_ lat: Double?, _ lon: Double?) -> String {
+        guard let lat, let lon else { return "" }
+        return String(format: "%.5f, %.5f", lat, lon)
+    }
+
+    /// Resolve a picked place to coordinates and fill the bound field. Only fires when
+    /// a suggestion is chosen from the list, so manual entries keep their manual coords.
+    private func prefillCoords(for place: String, into coords: Binding<String>) {
+        GeocodingService.shared.coordinate(for: place) { coord in
+            DispatchQueue.main.async {
+                if let c = coord { coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude) }
+            }
         }
     }
 
@@ -461,8 +494,10 @@ struct EditPersonView: View {
         sex = person.sex
         birthDate = person.birthDate ?? ""
         birthPlace = person.birthPlace ?? ""
+        birthCoords = formatCoords(person.birthLat, person.birthLon)
         deathDate = person.deathDate ?? ""
         deathPlace = person.deathPlace ?? ""
+        deathCoords = formatCoords(person.deathLat, person.deathLon)
         isLiving = person.isLiving
         burialPlace = person.burialPlace ?? ""
         if let lat = person.burialLat, let lon = person.burialLon {
@@ -484,8 +519,14 @@ struct EditPersonView: View {
         person.sex = sex
         person.birthDate = birthDate.isEmpty ? nil : FamilyDate.normalize(birthDate)
         person.birthPlace = birthPlace.isEmpty ? nil : birthPlace
+        let birthCoord = parseGraveCoords(birthCoords)
+        person.birthLat = birthCoord?.lat
+        person.birthLon = birthCoord?.lon
         person.deathDate = isLiving ? nil : (deathDate.isEmpty ? nil : FamilyDate.normalize(deathDate))
         person.deathPlace = isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace)
+        let deathCoord = isLiving ? nil : parseGraveCoords(deathCoords)
+        person.deathLat = deathCoord?.lat
+        person.deathLon = deathCoord?.lon
         person.isLiving = isLiving
         person.burialPlace = burialPlace.isEmpty ? nil : burialPlace
         let graveCoords = isLiving ? nil : parseGraveCoords(burialCoords)

@@ -2,167 +2,6 @@ import AppKit
 import CoreGraphics
 import CoreText
 
-struct PDFExporter {
-    /// Renders the poster to PDF data in memory (used by the native .fileExporter).
-    static func render(tree: FamilyTree, title: String, subtitle: String) -> Data? {
-        let pageW: CGFloat = 842
-        let pageH: CGFloat = 595
-        let margin: CGFloat = 40
-
-        let pdfData = NSMutableData()
-        var box = CGRect(x: 0, y: 0, width: pageW, height: pageH)
-        guard let consumer = CGDataConsumer(data: pdfData as CFMutableData),
-              let ctx = CGContext(consumer: consumer, mediaBox: &box, nil) else { return nil }
-        
-        ctx.beginPDFPage(nil)
-        ctx.setFillColor(NSColor(SepiaTheme.posterBg).cgColor)
-        ctx.fill(box)
-        
-        // Frame
-        ctx.setStrokeColor(NSColor(SepiaTheme.accent2).cgColor)
-        ctx.setLineWidth(2)
-        ctx.stroke(CGRect(x: 14, y: 14, width: pageW - 28, height: pageH - 28))
-        ctx.setStrokeColor(NSColor(SepiaTheme.cardLine).cgColor)
-        ctx.setLineWidth(1)
-        ctx.stroke(CGRect(x: 19, y: 19, width: pageW - 38, height: pageH - 38))
-        
-        // Title
-        let titleFont = NSFont.systemFont(ofSize: 28, weight: .semibold)
-        let titleAttr: [NSAttributedString.Key: Any] = [.font: titleFont, .foregroundColor: NSColor(SepiaTheme.ink)]
-        let titleStr = NSAttributedString(string: title, attributes: titleAttr)
-        let titleSz = titleStr.size()
-        let titleY = pageH - margin - 50
-        
-        let nsCtx = NSGraphicsContext(cgContext: ctx, flipped: false)
-        NSGraphicsContext.saveGraphicsState()
-        NSGraphicsContext.current = nsCtx
-        titleStr.draw(at: NSPoint(x: (pageW - titleSz.width) / 2, y: titleY))
-        
-        let subFont = NSFont.systemFont(ofSize: 14)
-        let subAttr: [NSAttributedString.Key: Any] = [.font: subFont, .foregroundColor: NSColor(SepiaTheme.inkSoft)]
-        let subStr = NSAttributedString(string: subtitle, attributes: subAttr)
-        let subSz = subStr.size()
-        subStr.draw(at: NSPoint(x: (pageW - subSz.width) / 2, y: titleY - 24))
-        
-        // People cards
-        let people = tree.people
-        let cols = min(people.count, 6)
-        let rows = max(1, (people.count + cols - 1) / cols)
-        let cellW = (pageW - margin * 2) / CGFloat(max(cols, 1))
-        let cellH = min(60, (titleY - 90 - margin) / CGFloat(rows))
-        let startY = titleY - 70
-        
-        let nameFont2 = NSFont.systemFont(ofSize: 10)
-        let nameAttr2: [NSAttributedString.Key: Any] = [.font: nameFont2, .foregroundColor: NSColor(SepiaTheme.ink)]
-        let dateAttr: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 8), .foregroundColor: NSColor(SepiaTheme.inkSoft)]
-        
-        for (i, p) in people.enumerated() {
-            let col = i % cols
-            let row = i / cols
-            let x = margin + CGFloat(col) * cellW + cellW / 2
-            let y = startY - CGFloat(row) * cellH
-            
-            let cardRect = CGRect(x: x - 60, y: y - 20, width: 120, height: 40)
-            ctx.setFillColor(NSColor(SepiaTheme.cardBg).cgColor)
-            ctx.fill(cardRect)
-            ctx.setStrokeColor(NSColor(SepiaTheme.cardLine).cgColor)
-            ctx.setLineWidth(0.5)
-            ctx.stroke(cardRect)
-            
-            let name = NSAttributedString(string: p.listName, attributes: nameAttr2)
-            let ns = name.size()
-            name.draw(at: NSPoint(x: x - ns.width / 2, y: y - 4))
-            
-            if !p.lifespan.isEmpty {
-                let dates = NSAttributedString(string: p.lifespan, attributes: dateAttr)
-                let ds = dates.size()
-                dates.draw(at: NSPoint(x: x - ds.width / 2, y: y - 16))
-            }
-        }
-        
-        // Footer
-        let footAttr: [NSAttributedString.Key: Any] = [.font: NSFont.systemFont(ofSize: 9), .foregroundColor: NSColor(SepiaTheme.inkSoft)]
-        let df = DateFormatter(); df.dateFormat = "d MMMM yyyy"
-        let footStr = NSAttributedString(string: "\(people.count) чел. · подготовлено \(df.string(from: Date()))", attributes: footAttr)
-        footStr.draw(at: NSPoint(x: margin + 10, y: margin - 10))
-        let brand = NSAttributedString(string: "Родословная Студия", attributes: footAttr)
-        let bs = brand.size()
-        brand.draw(at: NSPoint(x: pageW - margin - bs.width, y: margin - 10))
-        
-        NSGraphicsContext.restoreGraphicsState()
-        ctx.endPDFPage()
-        ctx.closePDF()
-        return pdfData as Data
-    }
-
-    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
-        if let data = render(tree: tree, title: title, subtitle: subtitle) {
-            try? data.write(to: url, options: .atomic)
-        }
-    }
-}
-
-struct PNGExporter {
-    /// Renders the tree to PNG data in memory (used by the native .fileExporter).
-    static func render(tree: FamilyTree, title: String, subtitle: String) -> Data? {
-        let w = 1600, h = 1000
-        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0,
-                                   space: CGColorSpaceCreateDeviceRGB(),
-                                   bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
-        
-        ctx.setFillColor(NSColor(SepiaTheme.posterBg).cgColor)
-        ctx.fill(CGRect(x: 0, y: 0, width: w, height: h))
-        
-        let nsCtx = NSGraphicsContext(cgContext: ctx, flipped: false)
-        NSGraphicsContext.saveGraphicsState()
-        NSGraphicsContext.current = nsCtx
-        
-        let titleFont = NSFont.systemFont(ofSize: 36, weight: .semibold)
-        let titleAttr: [NSAttributedString.Key: Any] = [.font: titleFont, .foregroundColor: NSColor(SepiaTheme.ink)]
-        let ts = NSAttributedString(string: title, attributes: titleAttr)
-        let tsz = ts.size()
-        ts.draw(at: NSPoint(x: (CGFloat(w) - tsz.width) / 2, y: CGFloat(h) - 70))
-        
-        let nameFont = NSFont.systemFont(ofSize: 14)
-        let nameAttr: [NSAttributedString.Key: Any] = [.font: nameFont, .foregroundColor: NSColor(SepiaTheme.ink)]
-        
-        let people = tree.people
-        let cols = min(people.count, 8)
-        let cellW = CGFloat(w - 100) / CGFloat(max(cols, 1))
-        let startY = CGFloat(h) - 140
-        
-        for (i, p) in people.enumerated() {
-            let col = i % cols
-            let row = i / cols
-            let x = 50 + CGFloat(col) * cellW + cellW / 2
-            let y = startY - CGFloat(row) * 70
-            
-            let cardRect = CGRect(x: x - 70, y: y - 15, width: 140, height: 50)
-            ctx.setFillColor(NSColor(SepiaTheme.cardBg).cgColor)
-            ctx.fill(cardRect)
-            ctx.setStrokeColor(NSColor(SepiaTheme.cardLine).cgColor)
-            ctx.setLineWidth(1)
-            ctx.stroke(cardRect)
-            
-            let name = NSAttributedString(string: p.listName, attributes: nameAttr)
-            let ns = name.size()
-            name.draw(at: NSPoint(x: x - ns.width / 2, y: y))
-        }
-        
-        NSGraphicsContext.restoreGraphicsState()
-
-        guard let image = ctx.makeImage() else { return nil }
-        let rep = NSBitmapImageRep(cgImage: image)
-        return rep.representation(using: .png, properties: [:])
-    }
-
-    static func export(tree: FamilyTree, title: String, subtitle: String, to url: URL) {
-        if let data = render(tree: tree, title: title, subtitle: subtitle) {
-            try? data.write(to: url)
-        }
-    }
-}
-
 /// Renders every person as their own card, sorted alphabetically by name, one card
 /// per page (A4 portrait). A card whose content overflows continues onto further
 /// pages; the next person always begins on a fresh page.
@@ -173,7 +12,7 @@ struct PersonCardsPDFExporter {
     private static let footerBaseline: CGFloat = 30   // y of footer text
     private static let bodyBottom: CGFloat = 50       // text never drops below this y
 
-    static func render(tree: FamilyTree) -> Data? {
+    static func render(tree: FamilyTree, attachmentsFolder: URL? = nil) -> Data? {
         let people = tree.people.sorted {
             $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending
         }
@@ -193,6 +32,7 @@ struct PersonCardsPDFExporter {
             let total = body.length
             var location = 0
             var firstPage = true
+            var stalls = 0
 
             repeat {
                 ctx.beginPDFPage(nil)
@@ -207,16 +47,15 @@ struct PersonCardsPDFExporter {
                     ? drawHeader(person, ctx: ctx, textWidth: contentW)
                     : drawContinuationHeader(person, textWidth: contentW)
 
+                var advanced = 0
                 if total > 0 && topY > bodyBottom {
                     let textRect = CGRect(x: margin, y: bodyBottom, width: contentW, height: topY - bodyBottom)
                     let path = CGMutablePath(); path.addRect(textRect)
                     ctx.textMatrix = .identity
                     let frame = CTFramesetterCreateFrame(framesetter, CFRange(location: location, length: 0), path, nil)
                     CTFrameDraw(frame, ctx)
-                    let visible = CTFrameGetVisibleStringRange(frame)
-                    location += visible.length > 0 ? visible.length : (total - location) // guard: avoid stall
-                } else {
-                    location = total
+                    advanced = CTFrameGetVisibleStringRange(frame).length
+                    location += advanced
                 }
 
                 drawFooter(person)
@@ -224,7 +63,21 @@ struct PersonCardsPDFExporter {
                 NSGraphicsContext.restoreGraphicsState()
                 ctx.endPDFPage()
                 firstPage = false
+
+                // If a page fit nothing (e.g. a tall first-page header left no room),
+                // spill onto a continuation page rather than dropping the rest. Bail only
+                // if two pages in a row make no progress, to avoid an infinite loop.
+                if total > 0 && advanced == 0 {
+                    stalls += 1
+                    if stalls >= 2 { break }
+                } else {
+                    stalls = 0
+                }
             } while location < total
+
+            // After the text, render any attached images full-size on their own page(s).
+            renderImages(loadImages(for: person, in: attachmentsFolder),
+                         ctx: ctx, box: box, person: person, contentW: contentW)
         }
 
         ctx.closePDF()
@@ -234,7 +87,7 @@ struct PersonCardsPDFExporter {
     // MARK: - Page chrome
 
     private static func drawBackground(_ ctx: CGContext, box: CGRect) {
-        ctx.setFillColor(NSColor(SepiaTheme.paper).cgColor)
+        ctx.setFillColor(NSColor.white.cgColor)
         ctx.fill(box)
     }
 
@@ -259,11 +112,12 @@ struct PersonCardsPDFExporter {
 
     private static func drawHeader(_ person: Person, ctx: CGContext, textWidth: CGFloat) -> CGFloat {
         let topEdge = pageH - margin
-        let photoSize: CGFloat = 84
+        let photoH: CGFloat = 96
+        let photoW: CGFloat = photoH * SepiaTheme.portraitAspect // 3:4 portrait, matches the app
         var textX = margin
 
         if let data = person.photoData, let img = NSImage(data: data) {
-            let rect = NSRect(x: margin, y: topEdge - photoSize, width: photoSize, height: photoSize)
+            let rect = NSRect(x: margin, y: topEdge - photoH, width: photoW, height: photoH)
             let path = CGPath(roundedRect: rect, cornerWidth: 6, cornerHeight: 6, transform: nil)
             ctx.saveGState()
             ctx.addPath(path); ctx.clip()
@@ -271,7 +125,7 @@ struct PersonCardsPDFExporter {
             ctx.restoreGState()
             ctx.addPath(path)
             ctx.setStrokeColor(NSColor(SepiaTheme.cardLine).cgColor); ctx.setLineWidth(1); ctx.strokePath()
-            textX = margin + photoSize + 16
+            textX = margin + photoW + 16
         }
 
         let textW = pageW - margin - textX
@@ -306,7 +160,7 @@ struct PersonCardsPDFExporter {
         }
 
         // Rule under whichever is taller — the photo or the text block.
-        let blockBottom = min(cursorY, person.photoData != nil ? topEdge - photoSize : cursorY)
+        let blockBottom = min(cursorY, person.photoData != nil ? topEdge - photoH : cursorY)
         let ruleY = blockBottom - 12
         ctx.setStrokeColor(NSColor(SepiaTheme.accent2).withAlphaComponent(0.5).cgColor)
         ctx.setLineWidth(1)
@@ -314,9 +168,9 @@ struct PersonCardsPDFExporter {
         return ruleY - 14
     }
 
-    private static func drawContinuationHeader(_ person: Person, textWidth: CGFloat) -> CGFloat {
+    private static func drawContinuationHeader(_ person: Person, suffix: String = "продолжение", textWidth: CGFloat) -> CGFloat {
         let topEdge = pageH - margin
-        let s = NSAttributedString(string: "\(person.listName) — продолжение", attributes: [
+        let s = NSAttributedString(string: "\(person.listName) — \(suffix)", attributes: [
             .font: NSFont.systemFont(ofSize: 11).withItalic(),
             .foregroundColor: NSColor(SepiaTheme.inkSoft)
         ])
@@ -426,6 +280,79 @@ struct PersonCardsPDFExporter {
     private static func textHeight(_ s: NSAttributedString, width: CGFloat) -> CGFloat {
         ceil(s.boundingRect(with: NSSize(width: width, height: .greatestFiniteMagnitude),
                             options: [.usesLineFragmentOrigin, .usesFontLeading]).height)
+    }
+
+    /// Load the person's image attachments (full resolution) from the tree's folder.
+    private static func loadImages(for person: Person, in folder: URL?) -> [(img: NSImage, name: String)] {
+        guard let folder else { return [] }
+        var result: [(NSImage, String)] = []
+        for a in person.attachments where a.isImage {
+            if let img = NSImage(contentsOf: folder.appendingPathComponent(a.storedName)) {
+                result.append((img, a.originalName))
+            }
+        }
+        return result
+    }
+
+    /// Draw each image attachment full-size (aspect-fit to the page, no cropping or
+    /// downsampling) with its filename, flowing onto continuation pages as needed.
+    private static func renderImages(_ images: [(img: NSImage, name: String)],
+                                     ctx: CGContext, box: CGRect, person: Person, contentW: CGFloat) {
+        guard !images.isEmpty else { return }
+        let topStart = pageH - margin
+        let captionH: CGFloat = 14
+        let gap: CGFloat = 14
+        let freshAvail = topStart - 36 - bodyBottom // usable height on a continuation page
+        var cursorY: CGFloat = 0
+        var pageOpen = false
+        var placedOnPage = false
+
+        func startPage() {
+            ctx.beginPDFPage(nil)
+            let nsCtx = NSGraphicsContext(cgContext: ctx, flipped: false)
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = nsCtx
+            nsCtx.imageInterpolation = .high
+            drawBackground(ctx, box: box)
+            drawBorder(ctx)
+            cursorY = drawContinuationHeader(person, suffix: "изображения", textWidth: contentW)
+            pageOpen = true
+            placedOnPage = false
+        }
+        func endPage() {
+            drawFooter(person)
+            NSGraphicsContext.restoreGraphicsState()
+            ctx.endPDFPage()
+            pageOpen = false
+        }
+
+        startPage()
+        for (img, name) in images {
+            let sz = img.size
+            guard sz.width > 0, sz.height > 0 else { continue }
+            // Aspect-fit to the content width, capped so a block always fits one page.
+            var dw = contentW
+            var dh = contentW * sz.height / sz.width
+            let maxImgH = freshAvail - captionH - gap
+            if dh > maxImgH { dw *= maxImgH / dh; dh = maxImgH }
+            let blockH = dh + captionH + gap
+
+            if placedOnPage && blockH > (cursorY - bodyBottom) {
+                endPage(); startPage()
+            }
+
+            let imgRect = NSRect(x: margin + (contentW - dw) / 2, y: cursorY - dh, width: dw, height: dh)
+            img.draw(in: imgRect, from: .zero, operation: .copy, fraction: 1.0)
+
+            let caption = NSAttributedString(string: name, attributes: [
+                .font: NSFont.systemFont(ofSize: 9), .foregroundColor: NSColor(SepiaTheme.inkSoft)
+            ])
+            caption.draw(at: NSPoint(x: margin + (contentW - caption.size().width) / 2, y: cursorY - dh - captionH + 2))
+
+            cursorY -= blockH
+            placedOnPage = true
+        }
+        if pageOpen { endPage() }
     }
 
     private static func drawImageAspectFill(_ img: NSImage, in rect: NSRect) {

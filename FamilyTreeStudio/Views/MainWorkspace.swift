@@ -75,7 +75,7 @@ struct MainWorkspace: View {
             }
         }
         .sheet(isPresented: $showExportModal) {
-            ExportView(tree: tree, viewMode: viewMode)
+            ExportView(tree: tree, store: store)
         }
         .sheet(isPresented: $showAddSheet) {
             AddPersonView(tree: tree, store: store) { newPerson in
@@ -316,13 +316,9 @@ struct MainWorkspace: View {
             Button { showAddSheet = true } label: { Image(systemName: "plus") }
                 .buttonStyle(SepiaButtonStyle())
                 .help("Добавить новую персону в дерево")
-            Button { editingPerson = selectedPerson } label: { Image(systemName: "pencil") }
-                .buttonStyle(SepiaButtonStyle())
-                .disabled(selectedPerson == nil)
-                .help("Редактировать выбранную персону")
             Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
                 .buttonStyle(SepiaButtonStyle())
-                .help("Экспорт дерева в PDF, PNG или GEDCOM")
+                .help("Экспорт карточек в PDF или GEDCOM")
         }
     }
     
@@ -339,8 +335,10 @@ struct MainWorkspace: View {
             if union.partner1Id == person.id { union.partner1Id = nil }
             if union.partner2Id == person.id { union.partner2Id = nil }
         }
-        // Remove empty unions (no partners left)
-        tree.unions.removeAll { $0.partner1Id == nil && $0.partner2Id == nil }
+        // Remove unions that are now truly empty. A partner-less union that still has
+        // children is a valid sibling grouping (possibly for unrelated people), so keep
+        // it — only drop unions with no partners AND no children.
+        tree.unions.removeAll { $0.partner1Id == nil && $0.partner2Id == nil && $0.childrenIds.isEmpty }
         
         // Update homePersonId if needed
         if tree.homePersonId == person.id {

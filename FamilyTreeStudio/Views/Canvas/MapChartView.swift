@@ -223,11 +223,12 @@ struct MapChartView: View {
             var birthCoord: CLLocationCoordinate2D?
             var deathCoord: CLLocationCoordinate2D?
             
-            // Birth
-            if let place = person.birthPlace, !place.isEmpty {
-                if let lat = person.birthLat, let lon = person.birthLon {
-                    birthCoord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                } else if let coord = geo.coordinateSync(for: place) {
+            // Birth — explicit (manual or previously-resolved) coordinates win; only
+            // geocode the place name when no coordinates are stored.
+            if let lat = person.birthLat, let lon = person.birthLon {
+                birthCoord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            } else if let place = person.birthPlace, !place.isEmpty {
+                if let coord = geo.coordinateSync(for: place) {
                     birthCoord = coord
                     person.birthLat = coord.latitude
                     person.birthLon = coord.longitude
@@ -235,12 +236,12 @@ struct MapChartView: View {
                     pendingGeocode.append((person, place, .birth))
                 }
             }
-            
+
             // Death
-            if let place = person.deathPlace, !place.isEmpty {
-                if let lat = person.deathLat, let lon = person.deathLon {
-                    deathCoord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                } else if let coord = geo.coordinateSync(for: place) {
+            if let lat = person.deathLat, let lon = person.deathLon {
+                deathCoord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            } else if let place = person.deathPlace, !place.isEmpty {
+                if let coord = geo.coordinateSync(for: place) {
                     deathCoord = coord
                     person.deathLat = coord.latitude
                     person.deathLon = coord.longitude

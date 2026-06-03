@@ -4,7 +4,10 @@ struct PlacePickerField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
-    
+    /// Called with the chosen place's display name when a suggestion is picked from
+    /// the list (not on manual typing), so the caller can pre-fill coordinates.
+    var onSelect: ((String) -> Void)? = nil
+
     @State private var suggestions: [PlaceEntry] = []
     @State private var showSuggestions = false
     @State private var searchWork: DispatchWorkItem?
@@ -48,36 +51,42 @@ struct PlacePickerField: View {
     }
     
     private var suggestionsDropdown: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ForEach(suggestions) { place in
-                Button {
-                    text = place.displayName
-                    showSuggestions = false
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(place.name)
-                            .font(SepiaTheme.body(size: 13.5))
-                            .foregroundColor(SepiaTheme.ink)
-                        if !place.region.isEmpty || !place.country.isEmpty {
-                            Text([place.region, place.country].filter { !$0.isEmpty }.joined(separator: ", "))
-                                .font(SepiaTheme.ui(size: 11))
-                                .foregroundColor(SepiaTheme.inkSoft)
+        let rowHeight: CGFloat = 44
+        let visibleRows = min(suggestions.count, 6)
+        return ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(suggestions) { place in
+                    Button {
+                        text = place.displayName
+                        showSuggestions = false
+                        onSelect?(place.displayName)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(place.name)
+                                .font(SepiaTheme.body(size: 13.5))
+                                .foregroundColor(SepiaTheme.ink)
+                                .lineLimit(1)
+                            if !place.region.isEmpty || !place.country.isEmpty {
+                                Text([place.region, place.country].filter { !$0.isEmpty }.joined(separator: ", "))
+                                    .font(SepiaTheme.ui(size: 11))
+                                    .foregroundColor(SepiaTheme.inkSoft)
+                                    .lineLimit(1)
+                            }
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .contentShape(Rectangle())
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .background(Color.clear)
-                .onHover { hovering in }
-                
-                if place.id != suggestions.last?.id {
-                    Divider().overlay(SepiaTheme.fieldLine.opacity(0.5))
+                    .buttonStyle(.plain)
+
+                    if place.id != suggestions.last?.id {
+                        Divider().overlay(SepiaTheme.fieldLine.opacity(0.5))
+                    }
                 }
             }
         }
+        .frame(height: CGFloat(visibleRows) * rowHeight)
         .background(SepiaTheme.cardBg)
         .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 6))

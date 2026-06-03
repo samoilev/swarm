@@ -4,40 +4,63 @@ import UniformTypeIdentifiers
 
 struct ExportView: View {
     let tree: FamilyTree
-    let viewMode: MainWorkspace.ViewMode
+    var store: TreeStore
     @Environment(\.dismiss) private var dismiss
-    
-    @State private var title: String = ""
-    @State private var subtitle: String = ""
-    @State private var posterStyle: PosterStyle = .cartouche
 
-    // Native file export (PNG / PDF)
+    // Native file export (PDF cards via .fileExporter; GEDCOM via NSSavePanel).
     @State private var exportDoc: RenderedFileDocument?
     @State private var exportName = ""
     @State private var showExporter = false
     @State private var exportError: String?
-    
-    enum PosterStyle: String, CaseIterable {
-        case cartouche = "Картуш"
-        case botanical = "Ботаника"
-        case plate = "Гравюра"
-    }
-    
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.4).ignoresSafeArea()
-            
-            HStack(spacing: 18) {
-                posterPreview
-                controlsPanel
+
+            VStack(alignment: .leading, spacing: 18) {
+                HStack {
+                    Text("Экспорт").font(SepiaTheme.display(size: 22)).foregroundColor(SepiaTheme.ink)
+                    Spacer()
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
+                            .frame(width: 32, height: 32)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(tree.name.isEmpty ? "Дерево" : tree.name)
+                        .font(SepiaTheme.display(size: 17)).fontWeight(.semibold).foregroundColor(SepiaTheme.ink)
+                        .lineLimit(1)
+                    Text("\(tree.people.count) чел.")
+                        .font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
+                }
+
+                VStack(spacing: 10) {
+                    Button { exportPersonCards() } label: {
+                        Label("PDF — карточки людей", systemImage: "person.text.rectangle").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
+                    .disabled(tree.people.isEmpty)
+
+                    Button { exportGEDCOM() } label: {
+                        Label("Экспорт GEDCOM (.ged)", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
+                }
+
+                Text("«Карточки людей» — отдельная страница на каждого человека по алфавиту, с фото и изображениями из вложений. GEDCOM — стандартный файл, который можно открыть в Ancestry, Gramps или MacFamilyTree.")
+                    .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(24)
+            .frame(width: 360)
+            .background(SepiaTheme.panelBg)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .shadow(color: .black.opacity(0.35), radius: 22, y: 10)
         }
-        .frame(width: 960, height: 620)
-        .onAppear {
-            title = tree.name
-            subtitle = tree.subtitle ?? ""
-        }
+        .frame(minWidth: 460, minHeight: 340)
         .fileExporter(
             isPresented: $showExporter,
             document: exportDoc,
@@ -59,153 +82,25 @@ struct ExportView: View {
     private var fileSlug: String {
         tree.name.replacingOccurrences(of: " ", with: "-").lowercased()
     }
-    
-    private var posterPreview: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 4).fill(SepiaTheme.posterBg)
-            
-            VStack(spacing: 12) {
-                VStack(spacing: 6) {
-                    Text(viewMode == .fan ? "ВЕЕР ПРЕДКОВ" : "РОДОСЛОВНОЕ ДЕРЕВО")
-                        .font(SepiaTheme.ui(size: 10.5)).tracking(4).foregroundColor(SepiaTheme.accent2)
-                    Text(title)
-                        .font(SepiaTheme.display(size: 28)).fontWeight(.semibold).foregroundColor(SepiaTheme.ink)
-                    Text(subtitle)
-                        .font(SepiaTheme.body(size: 13)).italic().foregroundColor(SepiaTheme.inkSoft)
-                    Rectangle().fill(SepiaTheme.accent2.opacity(0.6)).frame(width: 60, height: 1).padding(.top, 4)
-                }
-                .padding(.top, 28)
-                
-                ZStack {
-                    RoundedRectangle(cornerRadius: 2).fill(SepiaTheme.paper.opacity(0.5))
-                    Image(systemName: viewMode == .fan ? "chart.pie" : "rectangle.connected.to.line.below")
-                        .font(.system(size: 48)).foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
-                    Text("\(tree.people.count) чел.")
-                        .font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft).offset(y: 40)
-                }
-                .padding(.horizontal, 24)
-                
-                Spacer()
-                
-                HStack {
-                    Text("\(tree.people.count) чел. · подготовлено \(formattedDate)")
-                        .font(SepiaTheme.body(size: 10)).foregroundColor(SepiaTheme.inkSoft)
-                    Spacer()
-                    Text("Родословная")
-                        .font(SepiaTheme.ui(size: 10)).italic().foregroundColor(SepiaTheme.inkSoft)
-                }
-                .padding(.horizontal, 24).padding(.bottom, 16)
-            }
-            
-            if posterStyle == .cartouche {
-                RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.accent2, lineWidth: 2).padding(14)
-                RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1).padding(19)
-            }
-            if posterStyle == .botanical {
-                RoundedRectangle(cornerRadius: 4).strokeBorder(SepiaTheme.cardLine, lineWidth: 1).padding(16)
-            }
-        }
-        .shadow(color: .black.opacity(0.4), radius: 24, y: 12)
+
+    private func exportPersonCards() {
+        guard let data = PersonCardsPDFExporter.render(tree: tree, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else { return }
+        exportDoc = RenderedFileDocument(data: data, type: .pdf)
+        exportName = "\(fileSlug)-cards.pdf"
+        showExporter = true
     }
-    
-    private var controlsPanel: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            HStack {
-                Text("Экспорт").font(SepiaTheme.display(size: 22)).foregroundColor(SepiaTheme.ink)
-                Spacer()
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
-                        .frame(width: 32, height: 32)
-                        .contentShape(Rectangle())
-                }
-                    .buttonStyle(.plain)
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("НАЗВАНИЕ ПОСТЕРА").font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
-                TextField("Название", text: $title).textFieldStyle(.plain).font(SepiaTheme.body(size: 15))
-                    .padding(.vertical, 6)
-                    .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.fieldLine).frame(height: 1) }
-            }
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("ПОДЗАГОЛОВОК").font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
-                TextField("Подзаголовок", text: $subtitle).textFieldStyle(.plain).font(SepiaTheme.body(size: 15))
-                    .padding(.vertical, 6)
-                    .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.fieldLine).frame(height: 1) }
-            }
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text("СТИЛЬ ПОСТЕРА").font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
-                HStack(spacing: 8) {
-                    ForEach(PosterStyle.allCases, id: \.rawValue) { style in
-                        Button(style.rawValue) { posterStyle = style }
-                            .buttonStyle(SepiaButtonStyle(isActive: posterStyle == style))
-                    }
-                }
-            }
-            
-            Spacer()
-            
-            VStack(spacing: 10) {
-                Button { exportPDF() } label: { Label("Сохранить PDF-постер", systemImage: "arrow.down.doc").frame(maxWidth: .infinity) }
-                    .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
-                Button { exportPersonCards() } label: { Label("PDF — карточки людей", systemImage: "person.text.rectangle").frame(maxWidth: .infinity) }
-                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
-                    .disabled(tree.people.isEmpty)
-                Button { exportPNG() } label: { Label("Скачать PNG", systemImage: "photo").frame(maxWidth: .infinity) }
-                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
-                Button { exportGEDCOM() } label: { Label("Экспорт GEDCOM (.ged)", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity) }
-                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
-            }
-            
-            Text("PDF-постер печатает оформленный плакат. «Карточки людей» — отдельная страница на каждого человека по алфавиту. GEDCOM — стандартный файл, который можно открыть в Ancestry, Gramps или MacFamilyTree.")
-                .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
-        }
-        .padding(20)
-        .frame(width: 280)
-        .background(SepiaTheme.panelBg)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-    
-    // GEDCOM export stays on NSSavePanel: it writes a sibling `Media/` folder next
-    // to the chosen .ged file, which doesn't fit the single-file FileWrapper model
-    // used by .fileExporter (the app is effectively non-sandboxed, so this is fine).
+
+    // GEDCOM export stays on NSSavePanel: it writes sibling `Media/` and `Attachments/`
+    // folders next to the chosen .ged file, which doesn't fit the single-file
+    // FileWrapper model used by .fileExporter (the app is effectively non-sandboxed).
     private func exportGEDCOM() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "ged") ?? .plainText]
         panel.nameFieldStringValue = "\(fileSlug).ged"
         panel.begin { r in
             if r == .OK, let url = panel.url {
-                let mediaFolder = url.deletingLastPathComponent().appendingPathComponent("Media", isDirectory: true)
-                let gedcom = GEDCOMSerializer.serialize(tree: tree, mediaFolder: mediaFolder)
-                try? gedcom.write(to: url, atomically: true, encoding: .utf8)
+                store.exportGEDCOM(tree: tree, to: url)
             }
         }
-    }
-
-    private func exportPDF() {
-        guard let data = PDFExporter.render(tree: tree, title: title, subtitle: subtitle) else { return }
-        exportDoc = RenderedFileDocument(data: data, type: .pdf)
-        exportName = "\(fileSlug)-poster.pdf"
-        showExporter = true
-    }
-
-    private func exportPersonCards() {
-        guard let data = PersonCardsPDFExporter.render(tree: tree) else { return }
-        exportDoc = RenderedFileDocument(data: data, type: .pdf)
-        exportName = "\(fileSlug)-cards.pdf"
-        showExporter = true
-    }
-
-    private func exportPNG() {
-        guard let data = PNGExporter.render(tree: tree, title: title, subtitle: subtitle) else { return }
-        exportDoc = RenderedFileDocument(data: data, type: .png)
-        exportName = "\(fileSlug)-tree.png"
-        showExporter = true
-    }
-    
-    private var formattedDate: String {
-        let f = DateFormatter(); f.dateFormat = "d MMMM yyyy"; return f.string(from: Date())
     }
 }
