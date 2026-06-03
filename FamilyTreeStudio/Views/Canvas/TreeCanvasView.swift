@@ -29,6 +29,10 @@ struct TreeCanvasView: View {
     @State private var magnifyStart: CGFloat = 1.0
     @State private var panAtMagnifyStart: CGSize = .zero
     @State private var isMagnifying = false
+    // Inertia / momentum scrolling
+    @State private var velocity: CGSize = .zero
+    @State private var lastDragValue: CGSize = .zero
+    @State private var inertiaTimer: Timer?
     // Layout only depends on tree structure + direction, so cache it and recompute
     // only when those change — body re-runs on every pan/zoom frame otherwise.
     @State private var cachedLayout: TreeLayout?
@@ -136,24 +140,35 @@ struct TreeCanvasView: View {
                     let newZoom = min(2.0, max(0.2, zoom * factor))
                     guard newZoom != zoom else { return }
                     let ratio = newZoom / zoom
-                    panOffset = CGSize(
+                    let newPan = CGSize(
                         width: location.x - (location.x - panOffset.width) * ratio,
                         height: location.y - (location.y - panOffset.height) * ratio
                     )
-                    zoom = newZoom
-                    dragStart = panOffset
+                    withAnimation(.interactiveSpring(response: 0.22, dampingFraction: 0.82)) {
+                        zoom = newZoom
+                        panOffset = newPan
+                    }
+                    dragStart = newPan
                 }
             )
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        panOffset = CGSize(
+                        inertiaTimer?.invalidate()
+                        let newOffset = CGSize(
                             width: dragStart.width + value.translation.width,
                             height: dragStart.height + value.translation.height
                         )
+                        velocity = CGSize(
+                            width: newOffset.width - panOffset.width,
+                            height: newOffset.height - panOffset.height
+                        )
+                        panOffset = newOffset
+                        lastDragValue = value.translation
                     }
                     .onEnded { _ in
                         dragStart = panOffset
+                        startInertia()
                     }
             )
             .gesture(
@@ -206,6 +221,12 @@ struct TreeCanvasView: View {
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
+                applyZoomStep(delta: 0.1, viewSize: geo.size)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
+                applyZoomStep(delta: -0.1, viewSize: geo.size)
+            }
         }
     }
     
@@ -237,6 +258,39 @@ struct TreeCanvasView: View {
         }
     }
     
+    // MARK: - Inertia (momentum scrolling)
+
+    /// Zoom by `delta` anchored to the viewport centre (same math as scroll-wheel zoom).
+    private func applyZoomStep(delta: CGFloat, viewSize: CGSize) {
+        let newZoom = min(2.0, max(0.2, zoom + delta))
+        guard newZoom != zoom else { return }
+        let ratio = newZoom / zoom
+        let cx = viewSize.width / 2
+        let cy = viewSize.height / 2
+        let newPan = CGSize(
+            width: cx - (cx - panOffset.width) * ratio,
+            height: cy - (cy - panOffset.height) * ratio
+        )
+        withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
+            zoom = newZoom
+            panOffset = newPan
+        }
+        dragStart = newPan
+    }
+
+    private func startInertia() {
+        inertiaTimer?.invalidate()
+        let decay: CGFloat = 0.88       // fraction of velocity kept per frame (higher = slower decay)
+        let cutoff: CGFloat = 0.5       // stop when velocity drops below this px/frame
+        var v = velocity
+        inertiaTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { t in
+            v = CGSize(width: v.width * decay, height: v.height * decay)
+            if abs(v.width) < cutoff && abs(v.height) < cutoff { t.invalidate(); return }
+            panOffset = CGSize(width: panOffset.width + v.width, height: panOffset.height + v.height)
+            dragStart = panOffset
+        }
+    }
+
     // MARK: - Layout (Buchheim-Jünger-Leipert algorithm adapted for family trees)
     //
     // The Buchheim algorithm is the O(n) state-of-the-art for tidy tree drawings.
@@ -874,19 +928,23 @@ struct PersonCardView: View, Equatable {
             }
             
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 0) {
-                    HStack(spacing: 4) {
+                HStack(alignment: .top, spacing: 0) {
+                    VStack(alignment: .leading, spacing: 0) {
+                        // Surname — allow up to 2 lines so long names are never truncated.
+                        // The maiden name sits on its own line below (1-line, clipped if needed).
                         Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: 8.5))
-                            .tracking(1.2)
+                            .font(SepiaTheme.ui(size: 8))
+                            .tracking(1.0)
                             .foregroundColor(SepiaTheme.inkSoft)
-                            .lineLimit(1)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                         if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
                             Text("(\(maiden.uppercased()))")
-                                .font(SepiaTheme.ui(size: 7.5))
-                                .tracking(0.8)
+                                .font(SepiaTheme.ui(size: 7))
+                                .tracking(0.6)
                                 .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                                 .lineLimit(1)
+                                .minimumScaleFactor(0.8)
                         }
                     }
                     Spacer(minLength: 4)
@@ -895,30 +953,30 @@ struct PersonCardView: View, Equatable {
                     }
                 }
                 .padding(.horizontal, 10)
-                .padding(.top, 7)
-                .padding(.bottom, 4)
+                .padding(.top, 6)
+                .padding(.bottom, 2)
                 
                 Divider().overlay(SepiaTheme.cardRule)
                 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 1) {
                     let nameDisplay = [person.givenNames, person.patronymic ?? ""]
                         .filter { !$0.isEmpty }
                         .joined(separator: " ")
                     Text(nameDisplay.isEmpty ? "Неизвестно" : nameDisplay)
-                        .font(SepiaTheme.display(size: 14))
+                        .font(SepiaTheme.display(size: 13.5))
                         .fontWeight(.semibold)
                         .foregroundColor(SepiaTheme.ink)
                         .lineLimit(2)
-                        .minimumScaleFactor(0.85)
+                        .minimumScaleFactor(0.8)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
-                            .font(SepiaTheme.body(size: 11))
+                            .font(SepiaTheme.body(size: 10.5))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
                 .padding(.horizontal, 10)
-                .padding(.top, 6)
-                .padding(.bottom, 8)
+                .padding(.top, 4)
+                .padding(.bottom, 6)
             }
         }
         .frame(width: 210, height: 90)

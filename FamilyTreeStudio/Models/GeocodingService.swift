@@ -111,6 +111,12 @@ class GeocodingService {
         }
     }
     
+    /// Remove a place from the in-memory cache so the next lookup re-geocodes it.
+    func clearCache(for placeName: String) {
+        let key = placeName.lowercased().trimmingCharacters(in: .whitespaces)
+        cache.removeValue(forKey: key)
+    }
+
     /// Synchronous lookup for known places only
     func coordinateSync(for placeName: String?) -> CLLocationCoordinate2D? {
         guard let place = placeName, !place.isEmpty else { return nil }
@@ -125,21 +131,30 @@ class GeocodingService {
         return nil
     }
     
-    /// Try various strategies to find the place name in the database
+    /// Try various strategies to find the place name in the database.
     private func lookupInDatabase(_ key: String) -> CLLocationCoordinate2D? {
-        // Direct match
+        // Direct match on the full string (works for single city names in GeoNames).
         if let coord = knownPlaces[key] { return coord }
-        
-        // Try each comma-separated part (e.g. "Витебск, Беларусь" -> try "витебск")
+
+        // ё/е normalization of the full key.
+        let normalized = key.replacingOccurrences(of: "ё", with: "е")
+        if normalized != key, let coord = knownPlaces[normalized] { return coord }
+
+        // Partial (comma-part) matching only for single-word inputs.
+        // For multi-part addresses like "Зарубино, Новгородская обл., Россия" we
+        // deliberately skip this — stripping the region would return the first city
+        // with that name in the DB (e.g. the Far-East Зарубино instead of the
+        // Novgorod one). Returning nil here lets CLGeocoder use the full address
+        // string including region for a much more accurate result.
+        guard !key.contains(",") else { return nil }
+
         let parts = key.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         for part in parts {
             if let coord = knownPlaces[part] { return coord }
+            let normPart = part.replacingOccurrences(of: "ё", with: "е")
+            if normPart != part, let coord = knownPlaces[normPart] { return coord }
         }
-        
-        // Try with ё/е normalization
-        let normalized = key.replacingOccurrences(of: "ё", with: "е")
-        if normalized != key, let coord = knownPlaces[normalized] { return coord }
-        
+
         return nil
     }
 }
