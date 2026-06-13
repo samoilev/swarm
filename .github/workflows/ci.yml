@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select latest stable Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Swift version
+        run: swift --version
+
+      # FamilyTreeCore is the pure logic library; building it first surfaces
+      # API/access-control breaks before the slower SwiftUI app target.
+      - name: Build FamilyTreeCore
+        run: swift build --target FamilyTreeCore
+
+      - name: Build (all targets)
+        run: swift build
+
+      # Full Xcode on the runner provides the Swift Testing frameworks, so plain
+      # `swift test` works here (locally, Scripts/run-tests.sh adds the paths).
+      - name: Test
+        run: swift test
