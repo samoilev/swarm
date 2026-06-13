@@ -23,17 +23,21 @@ public struct GEDCOMSerializer {
     /// `TreeStore.writePhotos`). Kept pure so it is trivially testable.
     public static func serialize(tree: FamilyTree) -> Result {
         let idx = FamilyIndex(tree: tree)
-        
+
         // Stable xref assignment: sort by creation date for deterministic output
         var indiXref: [UUID: String] = [:]
         var famXref: [UUID: String] = [:]
-        
-        for (i, p) in tree.people.enumerated() { indiXref[p.id] = "I\(i + 1)" }
-        for (i, u) in tree.unions.enumerated() { famXref[u.id] = "F\(i + 1)" }
+
+        for (i, p) in tree.people.enumerated() {
+            indiXref[p.id] = "I\(i + 1)"
+        }
+        for (i, u) in tree.unions.enumerated() {
+            famXref[u.id] = "F\(i + 1)"
+        }
 
         var lines: [String] = []
         var photos: [Photo] = []
-        
+
         // HEAD
         lines.append("0 HEAD")
         lines.append("1 SOUR FamilyTreeStudio")
@@ -59,28 +63,28 @@ public struct GEDCOMSerializer {
         if let rootId = tree.rootUnionId, let xref = famXref[rootId] {
             lines.append("1 _ROOT @\(xref)@")
         }
-        
+
         // INDI records
         for p in tree.people {
             guard let xref = indiXref[p.id] else { continue }
             lines.append("0 @\(xref)@ INDI")
-            
+
             // NAME — use maiden name as birth surname if available
             let birthSurname = p.maidenName ?? p.surname
             lines.append("1 NAME \(p.givenNames) /\(birthSurname)/")
-            
+
             // Married name (if maiden differs from current surname)
             if let maiden = p.maidenName, !maiden.isEmpty, maiden != p.surname {
                 lines.append("2 _MARNM \(p.givenNames) /\(p.surname)/")
             }
-            
+
             // Patronymic (custom tag)
             if let patr = p.patronymic, !patr.isEmpty {
                 lines.append("1 _PATR \(patr)")
             }
-            
+
             if p.sex != .unknown { lines.append("1 SEX \(p.sex.rawValue)") }
-            
+
             // Birth
             let hasBirthCoord = p.birthLat != nil && p.birthLon != nil
             if p.birthDate != nil || (p.birthPlace?.isEmpty == false) || hasBirthCoord {
@@ -102,11 +106,11 @@ public struct GEDCOMSerializer {
                 lines.append("1 BURI")
                 appendPlace(p.burialPlace, lat: p.burialLat, lon: p.burialLon, to: &lines)
             }
-            
+
             // Occupation & Education
             if let o = p.occupation, !o.isEmpty { lines.append("1 OCCU \(o)") }
             if let e = p.education, !e.isEmpty { lines.append("1 EDUC \(e)") }
-            
+
             // Notes (multi-line via CONT)
             if let n = p.notes, !n.isEmpty {
                 let noteLines = n.components(separatedBy: "\n")
@@ -115,10 +119,12 @@ public struct GEDCOMSerializer {
                     lines.append("2 CONT \(noteLine)")
                 }
             }
-            
+
             // Sources
-            for s in p.sources { lines.append("1 SOUR \(s)") }
-            
+            for s in p.sources {
+                lines.append("1 SOUR \(s)")
+            }
+
             // Photo — referenced by filename here; the bytes are returned in
             // `Result.photos` for the caller to persist into the media folder.
             if let photoData = p.photoData {
@@ -138,19 +144,19 @@ public struct GEDCOMSerializer {
             }
 
             // Family links
-            for union in (idx.unionsOf[p.id] ?? []) {
+            for union in idx.unionsOf[p.id] ?? [] {
                 if let fx = famXref[union.id] { lines.append("1 FAMS @\(fx)@") }
             }
             if let pu = idx.childOf[p.id], let fx = famXref[pu.id] {
                 lines.append("1 FAMC @\(fx)@")
             }
         }
-        
+
         // FAM records
         for u in tree.unions {
             guard let fx = famXref[u.id] else { continue }
             lines.append("0 @\(fx)@ FAM")
-            
+
             // Determine HUSB/WIFE by sex
             var husb: UUID? = nil, wife: UUID? = nil
             for pid in u.partnerIds {
@@ -168,22 +174,22 @@ public struct GEDCOMSerializer {
             } else if wife == nil {
                 wife = u.partnerIds.first(where: { $0 != husb })
             }
-            
+
             if let h = husb, let x = indiXref[h] { lines.append("1 HUSB @\(x)@") }
             if let w = wife, let x = indiXref[w] { lines.append("1 WIFE @\(x)@") }
-            
+
             // Children
             for cid in u.childrenIds {
                 if let x = indiXref[cid] { lines.append("1 CHIL @\(x)@") }
             }
-            
+
             // Marriage
             if u.marriageDate != nil || u.marriagePlace != nil {
                 lines.append("1 MARR")
                 if let d = u.marriageDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
                 if let pl = u.marriagePlace { lines.append("2 PLAC \(pl)") }
             }
-            
+
             // Divorce / status
             if let st = u.status, !st.isEmpty {
                 if st == "divorced" {
@@ -193,7 +199,7 @@ public struct GEDCOMSerializer {
                 }
             }
         }
-        
+
         lines.append("0 TRLR")
         return Result(gedcom: lines.joined(separator: "\n"), photos: photos)
     }
@@ -205,14 +211,14 @@ public struct GEDCOMSerializer {
     /// If coordinates exist but there is no place to host a MAP, fall back to the
     /// private `2 _COORD lat lon` so the app's own data still round-trips.
     private static func appendPlace(_ place: String?, lat: Double?, lon: Double?, to lines: inout [String]) {
-        if let place = place, !place.isEmpty {
+        if let place, !place.isEmpty {
             lines.append("2 PLAC \(place)")
-            if let lat = lat, let lon = lon {
+            if let lat, let lon {
                 lines.append("3 MAP")
                 lines.append("4 LATI \(gedLat(lat))")
                 lines.append("4 LONG \(gedLong(lon))")
             }
-        } else if let lat = lat, let lon = lon {
+        } else if let lat, let lon {
             lines.append("2 _COORD \(lat) \(lon)")
         }
     }
@@ -227,4 +233,3 @@ public struct GEDCOMSerializer {
         String(format: "%@%.6f", v < 0 ? "W" : "E", abs(v))
     }
 }
-

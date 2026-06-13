@@ -49,13 +49,15 @@ public final class Person: Identifiable, Codable, Hashable {
 
         public var displayName: String {
             switch self {
-            case .male: return "Муж"
-            case .female: return "Жен"
-            case .unknown: return "Не указан"
+            case .male: "Муж"
+            case .female: "Жен"
+            case .unknown: "Не указан"
             }
         }
 
-        public var russianName: String { displayName }
+        public var russianName: String {
+            displayName
+        }
     }
 
     public init(
@@ -141,10 +143,17 @@ public final class Person: Identifiable, Codable, Hashable {
     }
 
     // MARK: - Hashable
-    public static func == (lhs: Person, rhs: Person) -> Bool { lhs.id == rhs.id }
-    public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+
+    public static func == (lhs: Person, rhs: Person) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 
     // MARK: - Codable
+
     enum CodingKeys: String, CodingKey {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving

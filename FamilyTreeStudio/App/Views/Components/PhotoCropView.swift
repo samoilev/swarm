@@ -1,17 +1,17 @@
-import SwiftUI
 import AppKit
+import SwiftUI
 
 /// Lets the user pick a portrait (3:4) rectangle from a freshly-chosen photo before it
 /// becomes the card thumbnail. The selection can be moved and resized (aspect-locked);
 /// `onConfirm` returns the cropped image at full resolution.
 struct PhotoCropView: View {
     let image: NSImage
-    var aspect: CGFloat = SepiaTheme.portraitAspect   // width ÷ height
+    var aspect: CGFloat = SepiaTheme.portraitAspect // width ÷ height
     let onCancel: () -> Void
     let onConfirm: (NSImage) -> Void
 
-    @State private var imageFrame: CGRect = .zero   // where the image is drawn (view coords)
-    @State private var crop: CGRect = .zero         // selection rect (same coords)
+    @State private var imageFrame: CGRect = .zero // where the image is drawn (view coords)
+    @State private var crop: CGRect = .zero // selection rect (same coords)
     @State private var moveStart: CGRect?
     @State private var resizeStart: CGRect?
 

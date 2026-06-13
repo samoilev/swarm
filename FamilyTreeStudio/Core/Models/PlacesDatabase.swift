@@ -26,8 +26,8 @@ public final class PlacesDatabase {
         let name: String
         let region: String
         let country: String
-        let nameLower: String   // normalized name (lowercased, ё→е) — used for ranking
-        let haystack: String    // normalized "name region country" — used for matching
+        let nameLower: String // normalized name (lowercased, ё→е) — used for ranking
+        let haystack: String // normalized "name region country" — used for matching
     }
 
     // Read/written on the main thread only (search runs on main; the background
@@ -75,11 +75,12 @@ public final class PlacesDatabase {
             // The primary token must match the name, region, or country somewhere.
             guard e.haystack.contains(first) else { continue }
 
-            var score: Int
-            if e.nameLower.hasPrefix(first) { score = 1000 }       // best: name starts with it
-            else if e.nameLower.contains(first) { score = 500 }    // name contains it
-            else { score = 100 }                                   // matched only via region/country
-            for tk in extra where e.haystack.contains(tk) { score += 200 }
+            var score = if e.nameLower.hasPrefix(first) { 1000 } // best: name starts with it
+            else if e.nameLower.contains(first) { 500 } // name contains it
+            else { 100 } // matched only via region/country
+            for tk in extra where e.haystack.contains(tk) {
+                score += 200
+            }
 
             scored.append((PlaceEntry(id: i, name: e.name, region: e.region, country: e.country), score, i))
             if scored.count >= 400 { break } // perf cap; the sort below keeps the best
@@ -102,7 +103,7 @@ public final class PlacesDatabase {
         }
 
         var result: [Entry] = []
-        result.reserveCapacity(460000)
+        result.reserveCapacity(460_000)
 
         for line in data.split(separator: "\n") {
             let parts = line.split(separator: "\t", maxSplits: 2, omittingEmptySubsequences: false)

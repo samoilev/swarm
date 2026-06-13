@@ -1,17 +1,17 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 
 struct RelationshipView: View {
     let tree: FamilyTree
     @Binding var isPresented: Bool
     var preselectedPerson: Person?
-    
+
     @State private var personA: Person?
     @State private var personB: Person?
     @State private var result: RelationshipCalculator.RelationshipResult?
     @State private var searchA = ""
     @State private var searchB = ""
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -30,9 +30,9 @@ struct RelationshipView: View {
                 .buttonStyle(.plain)
             }
             .padding(16)
-            
+
             Divider().overlay(SepiaTheme.toolbarLine)
-            
+
             VStack(spacing: 16) {
                 // Person A picker
                 personPicker(
@@ -41,7 +41,7 @@ struct RelationshipView: View {
                     selected: $personA,
                     placeholder: "Выберите первого..."
                 )
-                
+
                 // Person B picker
                 personPicker(
                     label: "ВТОРОЙ ЧЕЛОВЕК",
@@ -49,7 +49,7 @@ struct RelationshipView: View {
                     selected: $personB,
                     placeholder: "Выберите второго..."
                 )
-                
+
                 // Calculate button
                 Button {
                     calculateRelationship()
@@ -58,14 +58,14 @@ struct RelationshipView: View {
                 }
                 .buttonStyle(SepiaButtonStyle(isActive: true))
                 .disabled(personA == nil || personB == nil)
-                
+
                 // Result
-                if let result = result {
+                if let result {
                     resultView(result)
                 }
             }
             .padding(20)
-            
+
             Spacer()
         }
         .frame(width: 440, height: 520)
@@ -77,14 +77,14 @@ struct RelationshipView: View {
             }
         }
     }
-    
+
     private func personPicker(label: String, search: Binding<String>, selected: Binding<Person?>, placeholder: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
                 .font(SepiaTheme.ui(size: 9.5))
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
-            
+
             if let person = selected.wrappedValue {
                 HStack {
                     Text(person.listName)
@@ -112,7 +112,7 @@ struct RelationshipView: View {
                         .textFieldStyle(.roundedBorder)
                         .font(SepiaTheme.body(size: 14))
                         .colorMultiply(SepiaTheme.cardBg)
-                    
+
                     let filtered = filteredPeople(query: search.wrappedValue, excluding: personA?.id == selected.wrappedValue?.id ? personB : personA)
                     if !filtered.isEmpty && !search.wrappedValue.isEmpty {
                         ScrollView {
@@ -152,7 +152,7 @@ struct RelationshipView: View {
             }
         }
     }
-    
+
     private func filteredPeople(query: String, excluding: Person?) -> [Person] {
         guard !query.isEmpty else { return [] }
         let q = query.lowercased()
@@ -160,28 +160,28 @@ struct RelationshipView: View {
             person.id != excluding?.id && person.id != personA?.id && person.id != personB?.id
         }.filter { person in
             person.fullName.lowercased().contains(q) ||
-            person.surname.lowercased().contains(q) ||
-            person.givenNames.lowercased().contains(q)
+                person.surname.lowercased().contains(q) ||
+                person.givenNames.lowercased().contains(q)
         }.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
-    
+
     private func resultView(_ result: RelationshipCalculator.RelationshipResult) -> some View {
         VStack(spacing: 10) {
             Divider().overlay(SepiaTheme.toolbarLine)
-            
+
             Text(result.name)
                 .font(SepiaTheme.display(size: 22))
                 .fontWeight(.semibold)
                 .foregroundColor(SepiaTheme.accent2)
                 .multilineTextAlignment(.center)
-            
+
             if !result.description.isEmpty {
                 Text(result.description)
                     .font(SepiaTheme.body(size: 12.5))
                     .foregroundColor(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
             }
-            
+
             if result.path.count > 1 {
                 Text("Шагов в дереве: \(result.path.count - 1)")
                     .font(SepiaTheme.ui(size: 11))
@@ -190,7 +190,7 @@ struct RelationshipView: View {
         }
         .padding(.top, 8)
     }
-    
+
     private func calculateRelationship() {
         guard let a = personA, let b = personB else { return }
         let calc = RelationshipCalculator(tree: tree)

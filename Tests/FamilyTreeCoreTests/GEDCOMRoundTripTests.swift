@@ -1,10 +1,10 @@
-import Testing
-import Foundation
 @testable import FamilyTreeCore
+import Foundation
+import Testing
 
 /// Round-trip and interop coverage for the GEDCOM parser/serializer. Identity is
 /// regenerated on parse, so everything is compared by content, not UUID.
-@Suite struct GEDCOMRoundTripTests {
+struct GEDCOMRoundTripTests {
 
     /// A representative tree: a deceased couple (one with a maiden name, birth coords,
     /// multi-line notes), their living child, marriage data, home person and root union.
@@ -64,9 +64,9 @@ import Foundation
         #expect(home?.givenNames == "Пётр")
     }
 
-    @Test func preservesPersonFields() {
+    @Test func preservesPersonFields() throws {
         let parsed = roundTrip(makeTree())
-        let father = parsed.people.first { $0.givenNames == "Иван" }!
+        let father = try #require(parsed.people.first { $0.givenNames == "Иван" })
         #expect(father.surname == "Сидоров")
         #expect(father.patronymic == "Петрович")
         #expect(father.sex == .male)
@@ -81,33 +81,33 @@ import Foundation
         #expect(father.sources.contains("Перепись 1926"))
     }
 
-    @Test func preservesMaidenName() {
+    @Test func preservesMaidenName() throws {
         let parsed = roundTrip(makeTree())
-        let mother = parsed.people.first { $0.givenNames == "Анна" }!
+        let mother = try #require(parsed.people.first { $0.givenNames == "Анна" })
         #expect(mother.surname == "Сидорова")
         #expect(mother.maidenName == "Иванова")
     }
 
-    @Test func preservesUnionAndChildLinks() {
+    @Test func preservesUnionAndChildLinks() throws {
         let parsed = roundTrip(makeTree())
         let idx = FamilyIndex(tree: treeFrom(parsed))
-        let child = parsed.people.first { $0.givenNames == "Пётр" }!
+        let child = try #require(parsed.people.first { $0.givenNames == "Пётр" })
         let parents = idx.mergedParentIds(child.id)
         let father = parents.father.flatMap { id in parsed.people.first { $0.id == id } }
         let mother = parents.mother.flatMap { id in parsed.people.first { $0.id == id } }
         #expect(father?.givenNames == "Иван")
         #expect(mother?.givenNames == "Анна")
-        let union = parsed.unions.first!
+        let union = try #require(parsed.unions.first)
         #expect(union.marriageDate == "14.04.1928")
         #expect(union.marriagePlace == "Москва")
     }
 
-    @Test func roundTripsCoordinatesViaStandardMap() {
+    @Test func roundTripsCoordinatesViaStandardMap() throws {
         let parsed = roundTrip(makeTree())
-        let father = parsed.people.first { $0.givenNames == "Иван" }!
+        let father = try #require(parsed.people.first { $0.givenNames == "Иван" })
         #expect(abs((father.birthLat ?? 0) - 55.7558) < 1e-4)
         #expect(abs((father.birthLon ?? 0) - 37.6173) < 1e-4)
-        let mother = parsed.people.first { $0.givenNames == "Анна" }!
+        let mother = try #require(parsed.people.first { $0.givenNames == "Анна" })
         #expect(abs((mother.deathLat ?? 0) - 56.8587) < 1e-4)
         #expect(abs((mother.deathLon ?? 0) - 35.9176) < 1e-4)
     }
@@ -119,9 +119,9 @@ import Foundation
         #expect(gedcom.contains("4 LONG E37.6173"))
     }
 
-    @Test func preservesAttachments() {
+    @Test func preservesAttachments() throws {
         let parsed = roundTrip(makeTree())
-        let child = parsed.people.first { $0.givenNames == "Пётр" }!
+        let child = try #require(parsed.people.first { $0.givenNames == "Пётр" })
         #expect(child.attachments.count == 1)
         #expect(child.attachments.first?.storedName == "abc.pdf")
         #expect(child.attachments.first?.originalName == "Свидетельство.pdf")
@@ -131,7 +131,7 @@ import Foundation
 
     /// Coordinates written by other tools (standard MAP/LATI/LONG, southern/western
     /// hemispheres) must import correctly.
-    @Test func importsThirdPartyCoordinates() {
+    @Test func importsThirdPartyCoordinates() throws {
         let gedcom = """
         0 HEAD
         1 _NAME External
@@ -146,14 +146,14 @@ import Foundation
         0 TRLR
         """
         let parsed = GEDCOMParser.parse(gedcom: gedcom)
-        let maria = parsed.people.first!
+        let maria = try #require(parsed.people.first)
         #expect(maria.surname == "Silva")
-        #expect(abs((maria.birthLat ?? 0) - (-23.5505)) < 1e-4)
-        #expect(abs((maria.birthLon ?? 0) - (-46.6333)) < 1e-4)
+        #expect(abs((maria.birthLat ?? 0) - -23.5505) < 1e-4)
+        #expect(abs((maria.birthLon ?? 0) - -46.6333) < 1e-4)
     }
 
     /// Legacy private `_COORD` (what older saves used) must still import.
-    @Test func importsLegacyCoordTag() {
+    @Test func importsLegacyCoordTag() throws {
         let gedcom = """
         0 HEAD
         0 @I1@ INDI
@@ -163,13 +163,13 @@ import Foundation
         2 _COORD 50.45 30.52
         0 TRLR
         """
-        let p = GEDCOMParser.parse(gedcom: gedcom).people.first!
+        let p = try #require(GEDCOMParser.parse(gedcom: gedcom).people.first)
         #expect(abs((p.birthLat ?? 0) - 50.45) < 1e-4)
         #expect(abs((p.birthLon ?? 0) - 30.52) < 1e-4)
     }
 
     /// A value that begins with what looks like another tag must not be mis-split.
-    @Test func valueContainingTagWordIsNotMisparsed() {
+    @Test func valueContainingTagWordIsNotMisparsed() throws {
         let gedcom = """
         0 HEAD
         0 @I1@ INDI
@@ -177,7 +177,7 @@ import Foundation
         1 OCCU DATE clerk and PLAC keeper
         0 TRLR
         """
-        let p = GEDCOMParser.parse(gedcom: gedcom).people.first!
+        let p = try #require(GEDCOMParser.parse(gedcom: gedcom).people.first)
         #expect(p.occupation == "DATE clerk and PLAC keeper")
     }
 
@@ -190,7 +190,7 @@ import Foundation
     }
 
     /// Father and mother recorded in separate FAM records must merge into one parentage.
-    @Test func mergesSplitFamilyParents() {
+    @Test func mergesSplitFamilyParents() throws {
         let gedcom = """
         0 HEAD
         0 @I1@ INDI
@@ -211,13 +211,13 @@ import Foundation
         """
         let parsed = GEDCOMParser.parse(gedcom: gedcom)
         let idx = FamilyIndex(tree: treeFrom(parsed))
-        let kid = parsed.people.first { $0.givenNames == "Kid" }!
+        let kid = try #require(parsed.people.first { $0.givenNames == "Kid" })
         let parents = idx.mergedParentIds(kid.id)
         #expect(parents.father != nil)
         #expect(parents.mother != nil)
     }
 
-    // Rebuild a FamilyTree shell from a ParsedTree so FamilyIndex can be used.
+    /// Rebuild a FamilyTree shell from a ParsedTree so FamilyIndex can be used.
     private func treeFrom(_ parsed: GEDCOMParser.ParsedTree) -> FamilyTree {
         let t = FamilyTree(name: parsed.name)
         t.people = parsed.people

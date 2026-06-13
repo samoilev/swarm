@@ -1,9 +1,9 @@
-import Testing
-import Foundation
 import CoreGraphics
 @testable import FamilyTreeCore
+import Foundation
+import Testing
 
-@Suite struct LayoutEngineTests {
+struct LayoutEngineTests {
 
     private let config = LayoutConfig()
 
@@ -43,8 +43,8 @@ import CoreGraphics
     @Test func cardsDoNotOverlap() {
         let (t, _) = familyTree()
         let nodes = TreeLayoutEngine(config: config).layout(tree: t, direction: .topDown).nodes
-        for i in 0..<nodes.count {
-            for j in (i + 1)..<nodes.count {
+        for i in 0 ..< nodes.count {
+            for j in (i + 1) ..< nodes.count {
                 let a = rect(nodes[i]).insetBy(dx: 0.5, dy: 0.5) // tolerate exact edge touching
                 #expect(a.intersects(rect(nodes[j])) == false,
                         "\(nodes[i].person.givenNames) overlaps \(nodes[j].person.givenNames)")

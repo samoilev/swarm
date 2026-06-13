@@ -60,18 +60,18 @@ public struct RelationshipCalculator {
         let name = nameRelationship(stepsUp: up, stepsDown: down, from: personA, to: personB)
         return RelationshipResult(name: name, path: [], description: "")
     }
-    
+
     // MARK: - Path Finding (BFS)
-    
+
     private func findPath(from startId: UUID, to targetId: UUID) -> [UUID]? {
         var visited = Set<UUID>()
         var queue: [(id: UUID, path: [UUID])] = [(startId, [startId])]
         visited.insert(startId)
-        
+
         while !queue.isEmpty {
             let (current, path) = queue.removeFirst()
             if current == targetId { return path }
-            
+
             for neighbor in neighbors(of: current) {
                 if !visited.contains(neighbor) {
                     visited.insert(neighbor)
@@ -81,7 +81,7 @@ public struct RelationshipCalculator {
         }
         return nil
     }
-    
+
     private func neighbors(of personId: UUID) -> [UUID] {
         var result: [UUID] = []
 
@@ -99,18 +99,18 @@ public struct RelationshipCalculator {
 
         return result
     }
-    
+
     // MARK: - Common Ancestor
-    
+
     /// Returns (stepsUp from A to ancestor, stepsDown from ancestor to B)
     private func findCommonAncestorDistances(from aId: UUID, to bId: UUID) -> (Int?, Int?) {
         let ancestorsA = allAncestorsWithDepth(aId)
         let ancestorsB = allAncestorsWithDepth(bId)
-        
+
         var bestSum = Int.max
         var bestUp = 0
         var bestDown = 0
-        
+
         for (ancId, depthA) in ancestorsA {
             if let depthB = ancestorsB[ancId] {
                 let sum = depthA + depthB
@@ -121,11 +121,11 @@ public struct RelationshipCalculator {
                 }
             }
         }
-        
+
         if bestSum == Int.max { return (nil, nil) }
         return (bestUp, bestDown)
     }
-    
+
     private func allAncestorsWithDepth(_ personId: UUID) -> [UUID: Int] {
         var result: [UUID: Int] = [personId: 0]
         var queue: [(UUID, Int)] = [(personId, 0)]
@@ -142,9 +142,9 @@ public struct RelationshipCalculator {
         }
         return result
     }
-    
+
     // MARK: - Naming
-    
+
     /// Names a sibling, distinguishing full (2 shared parents) from half
     /// (1 shared parent → единокровный via father / единоутробный via mother).
     private func siblingName(from a: Person, to b: Person) -> String {
@@ -163,7 +163,7 @@ public struct RelationshipCalculator {
 
     private func nameRelationship(stepsUp: Int, stepsDown: Int, from personA: Person, to personB: Person) -> String {
         let sexB = personB.sex
-        
+
         // Direct ancestor/descendant
         if stepsDown == 0 {
             switch stepsUp {
@@ -174,7 +174,7 @@ public struct RelationshipCalculator {
             default: return "\(stepsUp)-й предок"
             }
         }
-        
+
         if stepsUp == 0 {
             switch stepsDown {
             case 1: return sexB == .male ? "Сын" : "Дочь"
@@ -184,12 +184,12 @@ public struct RelationshipCalculator {
             default: return "\(stepsDown)-й потомок"
             }
         }
-        
+
         // Siblings (distinguish full from half siblings)
         if stepsUp == 1 && stepsDown == 1 {
             return siblingName(from: personA, to: personB)
         }
-        
+
         // Uncle/Aunt - Nephew/Niece
         if stepsUp == 1 && stepsDown == 2 {
             return sexB == .male ? "Племянник" : "Племянница"
@@ -197,7 +197,7 @@ public struct RelationshipCalculator {
         if stepsUp == 2 && stepsDown == 1 {
             return sexB == .male ? "Дядя" : "Тётя"
         }
-        
+
         // Great uncle/aunt - grand nephew/niece
         if stepsUp == 1 && stepsDown == 3 {
             return sexB == .male ? "Внучатый племянник" : "Внучатая племянница"
@@ -205,7 +205,7 @@ public struct RelationshipCalculator {
         if stepsUp == 3 && stepsDown == 1 {
             return sexB == .male ? "Двоюродный дед" : "Двоюродная бабушка"
         }
-        
+
         // Cousins
         if stepsUp == stepsDown {
             let degree = stepsUp - 1
@@ -216,15 +216,14 @@ public struct RelationshipCalculator {
             default: return "\(degree + 1)-юродный \(sexB == .male ? "брат" : "сестра")"
             }
         }
-        
+
         // Cousins removed
         if stepsUp >= 2 && stepsDown >= 2 {
             let degree = min(stepsUp, stepsDown) - 1
-            let cousinName: String
-            switch degree {
-            case 1: cousinName = sexB == .male ? "Двоюродный" : "Двоюродная"
-            case 2: cousinName = sexB == .male ? "Троюродный" : "Троюродная"
-            default: cousinName = "\(degree + 1)-юродный"
+            let cousinName: String = switch degree {
+            case 1: sexB == .male ? "Двоюродный" : "Двоюродная"
+            case 2: sexB == .male ? "Троюродный" : "Троюродная"
+            default: "\(degree + 1)-юродный"
             }
             let relType = sexB == .male ? "племянник" : "племянница"
             if stepsDown > stepsUp {
@@ -234,16 +233,16 @@ public struct RelationshipCalculator {
                 return "\(cousinName) \(relType2)"
             }
         }
-        
+
         return "Дальний родственник"
     }
-    
+
     // MARK: - In-Law Relationships
-    
+
     private func checkInLawRelationship(from personA: Person, to personB: Person, path: [UUID]) -> RelationshipResult? {
         let sexA = personA.sex
         let sexB = personB.sex
-        
+
         // Check if B is spouse of a blood relative of A
         let spousesOfB = idx.spousesOf(personB)
         for spouseOfB in spousesOfB where spouseOfB.id != personA.id {
@@ -268,51 +267,51 @@ public struct RelationshipCalculator {
 
         return nil
     }
-    
+
     /// Names in-law when B is the spouse of A's blood relative
     private func inLawName(bloodRelName: String, sexA: Person.Sex, sexB: Person.Sex) -> String? {
         switch bloodRelName {
         case "Брат":
             // B is spouse of A's brother → B is невестка/сноха for female, N/A for male
-            return sexB == .female ? "Невестка (жена брата)" : nil
+            sexB == .female ? "Невестка (жена брата)" : nil
         case "Сестра":
             // B is spouse of A's sister → B is зять for male
-            return sexB == .male ? "Зять (муж сестры)" : nil
+            sexB == .male ? "Зять (муж сестры)" : nil
         case "Сын":
-            return sexB == .female ? "Невестка (сноха)" : nil
+            sexB == .female ? "Невестка (сноха)" : nil
         case "Дочь":
-            return sexB == .male ? "Зять (муж дочери)" : nil
+            sexB == .male ? "Зять (муж дочери)" : nil
         default:
-            return nil
+            nil
         }
     }
-    
+
     /// Names when B is blood relative of A's spouse
     private func inLawViaMySpouse(bloodRelName: String, sexA: Person.Sex, sexB: Person.Sex) -> String? {
         switch bloodRelName {
         case "Отец":
-            return sexB == .male ? "Свёкор" : "Тесть"
+            sexB == .male ? "Свёкор" : "Тесть"
         case "Мать":
-            return sexB == .female ? (sexA == .female ? "Свекровь" : "Тёща") : nil
+            sexB == .female ? (sexA == .female ? "Свекровь" : "Тёща") : nil
         case "Брат":
             if sexA == .female {
-                return sexB == .male ? "Деверь" : nil
+                sexB == .male ? "Деверь" : nil
             } else {
-                return sexB == .male ? "Шурин" : nil
+                sexB == .male ? "Шурин" : nil
             }
         case "Сестра":
             if sexA == .male {
-                return sexB == .female ? "Свояченица" : nil
+                sexB == .female ? "Свояченица" : nil
             } else {
-                return sexB == .female ? "Золовка" : nil
+                sexB == .female ? "Золовка" : nil
             }
         default:
-            return nil
+            nil
         }
     }
-    
+
     // MARK: - Description
-    
+
     private func buildDescription(from personA: Person, to personB: Person, path: [UUID]) -> String {
         guard path.count > 2 else { return "" }
         let names = path.compactMap { idx.byId[$0]?.listName }

@@ -1,9 +1,9 @@
-import Testing
-import Foundation
 @testable import FamilyTreeCore
+import Foundation
+import Testing
 
 /// Lineage labelling, path finding, person derivations, and Codable persistence.
-@Suite struct CoreModelTests {
+struct CoreModelTests {
 
     /// gf+gm → dad; dad+mom → me, sis; me+spouse → son.
     private func threeGenerationTree() -> (FamilyTree, [String: Person]) {
@@ -26,29 +26,29 @@ import Foundation
         return (t, ["gf": gf, "gm": gm, "dad": dad, "mom": mom, "me": me, "sis": sis, "spouse": spouse, "son": son])
     }
 
-    @Test func lineageLabelsAncestorsDescendantsAndSpouse() {
+    @Test func lineageLabelsAncestorsDescendantsAndSpouse() throws {
         let (t, p) = threeGenerationTree()
-        let result = LineageCalculator(index: FamilyIndex(tree: t)).compute(for: p["me"]!)
-        #expect(result.labels[p["me"]!.id] == "Я")
-        #expect(result.labels[p["dad"]!.id] == "Отец")
-        #expect(result.labels[p["mom"]!.id] == "Мать")
-        #expect(result.labels[p["gf"]!.id] == "Дедушка")
-        #expect(result.labels[p["gm"]!.id] == "Бабушка")
-        #expect(result.labels[p["son"]!.id] == "Сын")
-        #expect(result.labels[p["spouse"]!.id] == "Жена")
+        let result = try LineageCalculator(index: FamilyIndex(tree: t)).compute(for: #require(p["me"]))
+        #expect(try result.labels[#require(p["me"]?.id)] == "Я")
+        #expect(try result.labels[#require(p["dad"]?.id)] == "Отец")
+        #expect(try result.labels[#require(p["mom"]?.id)] == "Мать")
+        #expect(try result.labels[#require(p["gf"]?.id)] == "Дедушка")
+        #expect(try result.labels[#require(p["gm"]?.id)] == "Бабушка")
+        #expect(try result.labels[#require(p["son"]?.id)] == "Сын")
+        #expect(try result.labels[#require(p["spouse"]?.id)] == "Жена")
         // A sibling is not part of direct lineage.
-        #expect(result.ids.contains(p["sis"]!.id) == false)
+        #expect(try result.ids.contains(#require(p["sis"]?.id)) == false)
     }
 
-    @Test func pathFinderConnectsMeToGrandfather() {
+    @Test func pathFinderConnectsMeToGrandfather() throws {
         let (t, p) = threeGenerationTree()
         let finder = RelationshipPathFinder(index: FamilyIndex(tree: t))
-        let result = finder.findPath(from: p["me"]!.id, to: p["gf"]!.id)
+        let result = try finder.findPath(from: #require(p["me"]?.id), to: #require(p["gf"]?.id))
         #expect(result != nil)
         #expect(result?.path.first == p["me"]!.id)
         #expect(result?.path.last == p["gf"]!.id)
         #expect(result?.path.count == 3) // me → dad → gf
-        #expect(result?.ids.contains(p["dad"]!.id) == true)
+        #expect(try result?.ids.contains(#require(p["dad"]?.id)) == true)
     }
 
     @Test func personDerivedNamesAndLifespan() {
@@ -78,7 +78,7 @@ import Foundation
         let decodedMe = decoded.people.first { $0.id == p["me"]!.id }
         #expect(decodedMe?.givenNames == "Я")
         let idx = FamilyIndex(tree: decoded)
-        #expect(idx.mergedParentIds(p["me"]!.id).father == p["dad"]!.id)
+        #expect(try idx.mergedParentIds(#require(p["me"]?.id)).father == p["dad"]!.id)
     }
 
     @Test func attachmentFormatAndImageDetection() {

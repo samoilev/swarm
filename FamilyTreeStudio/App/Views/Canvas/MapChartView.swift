@@ -1,13 +1,13 @@
-import SwiftUI
 import FamilyTreeCore
 import MapKit
+import SwiftUI
 
 struct MapChartView: View {
     let tree: FamilyTree
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
-    
+
     @State private var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 55, longitude: 40),
         span: MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 60)
@@ -16,10 +16,10 @@ struct MapChartView: View {
     @State private var polylines: [MapPolylineData] = []
     @State private var isGeocodingInProgress = false
     @State private var lastZoom: CGFloat = 0.85
-    @State private var currentSpan: MKCoordinateSpan = MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 60)
-    @State private var currentCenter: CLLocationCoordinate2D = CLLocationCoordinate2D(latitude: 55, longitude: 40)
+    @State private var currentSpan: MKCoordinateSpan = .init(latitudeDelta: 40, longitudeDelta: 60)
+    @State private var currentCenter: CLLocationCoordinate2D = .init(latitude: 55, longitude: 40)
     @State private var expandedGroupId: String? = nil
-    
+
     var body: some View {
         let grouped = groupedAnnotations()
         Map(position: $mapPosition) {
@@ -71,7 +71,7 @@ struct MapChartView: View {
             let clampedLat = max(0.5, min(newLatDelta, 160))
             let clampedLon = max(0.5, min(newLonDelta, 360))
             currentSpan = MKCoordinateSpan(latitudeDelta: clampedLat, longitudeDelta: clampedLon)
-            
+
             withAnimation(.easeInOut(duration: 0.3)) {
                 mapPosition = .region(MKCoordinateRegion(center: currentCenter, span: currentSpan))
             }
@@ -80,9 +80,9 @@ struct MapChartView: View {
             legendView
         }
     }
-    
+
     // MARK: - Pin Button (interactive)
-    
+
     @ViewBuilder
     private func pinButton(for group: AnnotationGroup) -> some View {
         let hasBirth = group.annotations.contains { $0.eventType == .birth }
@@ -92,7 +92,7 @@ struct MapChartView: View {
             get: { expandedGroupId == group.id },
             set: { if !$0 { expandedGroupId = nil } }
         )
-        
+
         ZStack {
             if hasBirth && hasDeath {
                 HStack(spacing: 2) {
@@ -113,7 +113,7 @@ struct MapChartView: View {
                     .strokeBorder(Color.white, lineWidth: 2)
                     .frame(width: 14, height: 14)
             }
-            
+
             if count > 1 {
                 Text("\(count)")
                     .font(.system(size: 9, weight: .bold))
@@ -157,7 +157,7 @@ struct MapChartView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    
+
                     if ann.id != group.annotations.last?.id {
                         Divider()
                     }
@@ -166,9 +166,9 @@ struct MapChartView: View {
             .padding(.vertical, 4)
         }
     }
-    
+
     // MARK: - Grouping
-    
+
     private func groupedAnnotations() -> [AnnotationGroup] {
         // Group annotations by approximate coordinate (within ~100m)
         var groups: [String: [PersonMapAnnotation]] = [:]
@@ -176,7 +176,7 @@ struct MapChartView: View {
             let key = "\(String(format: "%.3f", ann.coordinate.latitude)),\(String(format: "%.3f", ann.coordinate.longitude))"
             groups[key, default: []].append(ann)
         }
-        return groups.map { (key, anns) in
+        return groups.map { key, anns in
             AnnotationGroup(
                 id: key,
                 coordinate: anns[0].coordinate,
@@ -184,9 +184,9 @@ struct MapChartView: View {
             )
         }
     }
-    
+
     // MARK: - Legend
-    
+
     private var legendView: some View {
         HStack(spacing: 12) {
             HStack(spacing: 4) {
@@ -211,19 +211,19 @@ struct MapChartView: View {
         )
         .padding(12)
     }
-    
+
     // MARK: - Compute Annotations
-    
+
     private func computeAnnotations() {
         let geo = GeocodingService.shared
         var newAnnotations: [PersonMapAnnotation] = []
         var newPolylines: [MapPolylineData] = []
         var pendingGeocode: [(Person, String, MapPinType)] = []
-        
+
         for person in tree.people {
             var birthCoord: CLLocationCoordinate2D?
             var deathCoord: CLLocationCoordinate2D?
-            
+
             // Birth — explicit (manual or previously-resolved) coordinates win; only
             // geocode the place name when no coordinates are stored.
             if let lat = person.birthLat, let lon = person.birthLon {
@@ -250,7 +250,7 @@ struct MapChartView: View {
                     pendingGeocode.append((person, place, .death))
                 }
             }
-            
+
             // Create annotations
             if let coord = birthCoord {
                 newAnnotations.append(PersonMapAnnotation(
@@ -270,7 +270,7 @@ struct MapChartView: View {
                     coordinate: coord
                 ))
             }
-            
+
             // Polyline
             if let b = birthCoord, let d = deathCoord {
                 newPolylines.append(MapPolylineData(
@@ -279,30 +279,30 @@ struct MapChartView: View {
                 ))
             }
         }
-        
+
         annotations = newAnnotations
         polylines = newPolylines
-        
+
         // Fit map to show all annotations
         fitToAnnotations()
-        
+
         // Resolve any pending places from the local GeoNames DB.
         if !pendingGeocode.isEmpty {
             isGeocodingInProgress = true
             geocodeSequentially(items: pendingGeocode, index: 0)
         }
     }
-    
+
     private func geocodeSequentially(items: [(Person, String, MapPinType)], index: Int) {
         guard index < items.count else {
             isGeocodingInProgress = false
             fitToAnnotations()
             return
         }
-        
+
         let (person, place, eventType) = items[index]
         let geo = GeocodingService.shared
-        
+
         geo.coordinate(for: place) { coord in
             DispatchQueue.main.async {
                 if let coord {
@@ -314,7 +314,7 @@ struct MapChartView: View {
                         person.deathLat = coord.latitude
                         person.deathLon = coord.longitude
                     }
-                    
+
                     let ann = PersonMapAnnotation(
                         personId: person.id,
                         personName: person.listName,
@@ -323,7 +323,7 @@ struct MapChartView: View {
                         coordinate: coord
                     )
                     annotations.append(ann)
-                    
+
                     if let bLat = person.birthLat, let bLon = person.birthLon,
                        let dLat = person.deathLat, let dLon = person.deathLon {
                         let b = CLLocationCoordinate2D(latitude: bLat, longitude: bLon)
@@ -332,7 +332,7 @@ struct MapChartView: View {
                         polylines.append(MapPolylineData(id: person.id, coordinates: [b, d]))
                     }
                 }
-                
+
                 // Lookups are local now, so process the next place immediately
                 // (the async hop just unwinds the recursion off the stack).
                 DispatchQueue.main.async {
@@ -341,7 +341,7 @@ struct MapChartView: View {
             }
         }
     }
-    
+
     private func fitToAnnotations() {
         guard !annotations.isEmpty else {
             // Default: show Eurasia
@@ -354,14 +354,14 @@ struct MapChartView: View {
             ))
             return
         }
-        
+
         let lats = annotations.map(\.coordinate.latitude)
         let lons = annotations.map(\.coordinate.longitude)
         let minLat = lats.min()!
         let maxLat = lats.max()!
         let minLon = lons.min()!
         let maxLon = lons.max()!
-        
+
         let center = CLLocationCoordinate2D(
             latitude: (minLat + maxLat) / 2,
             longitude: (minLon + maxLon) / 2
@@ -370,10 +370,10 @@ struct MapChartView: View {
             latitudeDelta: max((maxLat - minLat) * 1.4, 5),
             longitudeDelta: max((maxLon - minLon) * 1.4, 5)
         )
-        
+
         currentSpan = span
         lastZoom = zoom
-        
+
         withAnimation(.easeInOut(duration: 0.5)) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
@@ -383,10 +383,10 @@ struct MapChartView: View {
 // MARK: - Data Types
 
 struct AnnotationGroup: Identifiable {
-    let id: String  // stable key from coordinates
+    let id: String // stable key from coordinates
     let coordinate: CLLocationCoordinate2D
     let annotations: [PersonMapAnnotation]
-    
+
     var label: String {
         if annotations.count == 1 {
             return annotations[0].personName
@@ -402,7 +402,7 @@ struct PersonMapAnnotation: Identifiable {
     let placeName: String
     let eventType: MapPinType
     let coordinate: CLLocationCoordinate2D
-    
+
     var label: String {
         personName
     }

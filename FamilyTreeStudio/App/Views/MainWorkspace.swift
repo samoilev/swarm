@@ -1,11 +1,11 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 
 struct MainWorkspace: View {
     @Bindable var tree: FamilyTree
     var store: TreeStore
     let onBack: () -> Void
-    
+
     @State private var viewMode: ViewMode = .tree
     @State private var direction: TreeDirection = .topDown
     @State private var selectedPerson: Person?
@@ -28,18 +28,18 @@ struct MainWorkspace: View {
 
     enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
-    
+
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 toolbar
-                
+
                 HStack(spacing: 0) {
                     ZStack {
                         SepiaTheme.paper
-                        
+
                         if viewMode == .tree {
                             TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
                         } else if viewMode == .fan {
@@ -48,7 +48,7 @@ struct MainWorkspace: View {
                             MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                         }
                     }
-                    
+
                     if selectedPerson != nil {
                         InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
                             editingPerson = person
@@ -56,11 +56,11 @@ struct MainWorkspace: View {
                             personToDelete = person
                             showDeleteConfirm = true
                         })
-                            .transition(.move(edge: .trailing))
+                        .transition(.move(edge: .trailing))
                     }
                 }
             }
-            
+
             if let msg = toastMessage {
                 VStack {
                     Spacer()
@@ -112,10 +112,10 @@ struct MainWorkspace: View {
         // panOffset and viewport size are available for center-anchored zooming.
         .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
     }
-    
+
     private func recomputeHighlight() {
         let idx = FamilyIndex(tree: tree)
-        
+
         if let primary = selectedPerson, let secondary = secondaryPerson {
             // Dual selection: find path between the two
             let finder = RelationshipPathFinder(index: idx)
@@ -138,7 +138,7 @@ struct MainWorkspace: View {
             lineageLabels = [:]
         }
     }
-    
+
     private var toolbar: some View {
         HStack(spacing: 8) {
             Button(action: onBack) {
@@ -187,7 +187,7 @@ struct MainWorkspace: View {
         .frame(maxWidth: 160, alignment: .leading)
     }
 
-    // Wide layout: everything inline.
+    /// Wide layout: everything inline.
     private var fullControls: some View {
         HStack(spacing: 8) {
             viewModeControls
@@ -202,7 +202,7 @@ struct MainWorkspace: View {
         }
     }
 
-    // Narrow layout: keep zoom inline, fold the rest into a native menu.
+    /// Narrow layout: keep zoom inline, fold the rest into a native menu.
     private var compactControls: some View {
         HStack(spacing: 8) {
             zoomControls
@@ -306,7 +306,7 @@ struct MainWorkspace: View {
                 Toggle("Фотографии", isOn: $showPhotos)
             }
             if viewMode == .fan {
-                Stepper("Поколений: \(fanLevels)", value: $fanLevels, in: 2...8)
+                Stepper("Поколений: \(fanLevels)", value: $fanLevels, in: 2 ... 8)
             }
         } label: {
             Image(systemName: "ellipsis")
@@ -332,7 +332,7 @@ struct MainWorkspace: View {
                 .help("Экспорт карточек в PDF или GEDCOM")
         }
     }
-    
+
     private func deletePerson() {
         guard let person = personToDelete else { return }
         let name = person.listName
@@ -350,7 +350,7 @@ struct MainWorkspace: View {
         // children is a valid sibling grouping (possibly for unrelated people), so keep
         // it — only drop unions with no partners AND no children.
         tree.unions.removeAll { $0.partner1Id == nil && $0.partner2Id == nil && $0.childrenIds.isEmpty }
-        
+
         // Update homePersonId if needed
         if tree.homePersonId == person.id {
             tree.homePersonId = tree.people.first(where: { $0.id != person.id })?.id
@@ -359,22 +359,21 @@ struct MainWorkspace: View {
         if let ruid = tree.rootUnionId, tree.unions.first(where: { $0.id == ruid }) == nil {
             tree.rootUnionId = tree.unions.first?.id
         }
-        
+
         // Remove person
         tree.people.removeAll { $0.id == person.id }
-        
+
         // Clear selection and highlight
         selectedPerson = nil
         highlightedBranch = []
         personToDelete = nil
-        
+
         tree.optimizeRoot()
         tree.updatedAt = Date()
         store.saveTree(tree)
         showToast("Удалён: \(name)")
     }
-    
-    
+
     private func showToast(_ message: String) {
         toastMessage = message
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { toastMessage = nil }

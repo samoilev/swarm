@@ -1,7 +1,7 @@
-import Testing
 @testable import FamilyTreeCore
+import Testing
 
-@Suite struct FamilyDateTests {
+struct FamilyDateTests {
 
     @Test func parsesFullNumericDate() {
         let c = FamilyDate.parse("05.03.1978")

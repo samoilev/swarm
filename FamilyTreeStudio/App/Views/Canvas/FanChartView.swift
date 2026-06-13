@@ -1,5 +1,5 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 
 struct FanChartView: View {
     let tree: FamilyTree
@@ -10,15 +10,15 @@ struct FanChartView: View {
     private let rootR: CGFloat = 78
     private let ringW: CGFloat = 92
     private let sweep: Double = 180
-    
+
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var magnifyStart: CGFloat = 1.0
-    
+
     var body: some View {
         GeometryReader { geo in
             let layout = computeFan()
-            
+
             ZStack {
                 // Wedges
                 ForEach(layout.wedges) { wedge in
@@ -77,7 +77,7 @@ struct FanChartView: View {
         }
         .clipped()
     }
-    
+
     private func fitToScreen(viewSize: CGSize, chartWidth: CGFloat, chartHeight: CGFloat) {
         guard chartWidth > 0, chartHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
         let margin: CGFloat = 20
@@ -95,12 +95,12 @@ struct FanChartView: View {
             magnifyStart = newZoom
         }
     }
-    
+
     private func computeFan() -> FanData {
         let idx = FamilyIndex(tree: tree)
         var wedges: [Wedge] = []
-        
-        // Upper half: home person's ancestors (180° sweep, angles 0..180)
+
+        /// Upper half: home person's ancestors (180° sweep, angles 0..180)
         func walkUp(_ personId: UUID?, gen: Int, slot: Int) {
             let slots = Int(pow(2.0, Double(gen)))
             let w = sweep / Double(slots)
@@ -108,7 +108,7 @@ struct FanChartView: View {
             let aEnd = 180.0 - Double(slot) * w
             let rInner = gen == 0 ? 0 : rootR + CGFloat(gen - 1) * ringW
             let rOuter = gen == 0 ? rootR : rInner + ringW
-            
+
             let person = personId.flatMap { idx.byId[$0] }
             wedges.append(Wedge(
                 id: UUID(), personId: personId, person: person,
@@ -116,7 +116,7 @@ struct FanChartView: View {
                 aStart: aStart, aEnd: aEnd,
                 rInner: rInner, rOuter: rOuter
             ))
-            
+
             guard gen < maxGen else { return }
             var fatherId: UUID? = nil
             var motherId: UUID? = nil
@@ -128,8 +128,8 @@ struct FanChartView: View {
             walkUp(fatherId, gen: gen + 1, slot: 2 * slot)
             walkUp(motherId, gen: gen + 1, slot: 2 * slot + 1)
         }
-        
-        // Lower half: spouse's ancestors (180° sweep, angles 180..360)
+
+        /// Lower half: spouse's ancestors (180° sweep, angles 180..360)
         func walkDown(_ personId: UUID?, gen: Int, slot: Int) {
             let slots = Int(pow(2.0, Double(gen)))
             let w = sweep / Double(slots)
@@ -137,7 +137,7 @@ struct FanChartView: View {
             let aEnd = 180.0 + Double(slot + 1) * w
             let rInner = gen == 0 ? 0 : rootR + CGFloat(gen - 1) * ringW
             let rOuter = gen == 0 ? rootR : rInner + ringW
-            
+
             let person = personId.flatMap { idx.byId[$0] }
             wedges.append(Wedge(
                 id: UUID(), personId: personId, person: person,
@@ -145,7 +145,7 @@ struct FanChartView: View {
                 aStart: aStart, aEnd: aEnd,
                 rInner: rInner, rOuter: rOuter
             ))
-            
+
             guard gen < maxGen else { return }
             var fatherId: UUID? = nil
             var motherId: UUID? = nil
@@ -157,17 +157,17 @@ struct FanChartView: View {
             walkDown(fatherId, gen: gen + 1, slot: 2 * slot)
             walkDown(motherId, gen: gen + 1, slot: 2 * slot + 1)
         }
-        
+
         // Home person — upper half
         walkUp(tree.homePersonId, gen: 0, slot: 0)
-        
+
         // Spouse — lower half
         let spouseId: UUID? = {
             guard let hid = tree.homePersonId, let homePerson = idx.byId[hid] else { return nil }
             let spouses = idx.spousesOf(homePerson)
             return spouses.first?.id
         }()
-        
+
         if let sid = spouseId {
             // Start spouse from gen 1 (skip center — it's shared with home person)
             // Add a small semicircle wedge for the spouse label at gen 0 level (bottom half)
@@ -189,7 +189,7 @@ struct FanChartView: View {
             walkDown(fatherId, gen: 1, slot: 0)
             walkDown(motherId, gen: 1, slot: 1)
         }
-        
+
         let outerR = rootR + CGFloat(maxGen) * ringW
         let cx = outerR + 80
         let hasSpouse = spouseId != nil
@@ -225,7 +225,7 @@ struct FanWedgeShape: View {
     let cy: CGFloat
     var isSelected: Bool = false
     var isHome: Bool = false
-    
+
     var body: some View {
         if wedge.gen == 0 && wedge.slot == 0 {
             centerTopView
@@ -235,7 +235,7 @@ struct FanWedgeShape: View {
             wedgeView
         }
     }
-    
+
     private var centerTopView: some View {
         ZStack {
             WedgePath(cx: cx, cy: cy, rInner: 0, rOuter: wedge.rOuter,
@@ -311,7 +311,7 @@ struct FanWedgeShape: View {
             }
         }
     }
-    
+
     private var wedgeView: some View {
         ZStack {
             WedgePath(cx: cx, cy: cy, rInner: wedge.rInner, rOuter: wedge.rOuter,
@@ -320,28 +320,28 @@ struct FanWedgeShape: View {
             WedgePath(cx: cx, cy: cy, rInner: wedge.rInner, rOuter: wedge.rOuter,
                       startAngle: .degrees(wedge.aStart), endAngle: .degrees(wedge.aEnd))
                 .stroke(SepiaTheme.fanLine, lineWidth: 0.8)
-            
+
             if let person = wedge.person {
                 let midA = (wedge.aStart + wedge.aEnd) / 2
                 let midR = (wedge.rInner + wedge.rOuter) / 2
                 let tx = cx + midR * CGFloat(cos(midA * .pi / 180))
                 let ty = cy - midR * CGFloat(sin(midA * .pi / 180))
-                
+
                 // Available arc length determines text detail level
                 let arcSpan = wedge.aEnd - wedge.aStart
                 let arcLen = midR * CGFloat(arcSpan * .pi / 180)
-                
+
                 wedgeText(person: person, arcLen: arcLen, gen: wedge.gen)
                     .rotationEffect(textAngle(midA))
                     .position(x: tx, y: ty)
             }
         }
     }
-    
+
     @ViewBuilder
     private func wedgeText(person: Person, arcLen: CGFloat, gen: Int) -> some View {
         let fontSize = max(7.5, 11 - CGFloat(gen) * 0.8)
-        
+
         if arcLen > 140 {
             // Large: "Фамилия И.О." + "(девичья)" + year
             VStack(spacing: 1) {
@@ -394,33 +394,33 @@ struct FanWedgeShape: View {
             }
         }
     }
-    
+
     private func personFullGivenName(_ person: Person) -> String {
         [person.givenNames, person.patronymic ?? ""]
             .filter { !$0.isEmpty }
             .joined(separator: " ")
     }
-    
+
     private func personShortName(_ person: Person) -> String {
         let surname = person.displaySurname
         let givenInitial = person.givenNames.first.map { "\($0)." } ?? ""
         let patronInitial = (person.patronymic ?? "").first.map { "\($0)." } ?? ""
         return "\(surname) \(givenInitial)\(patronInitial)".trimmingCharacters(in: .whitespaces)
     }
-    
+
     private func personMinimalName(_ person: Person) -> String {
         let surname = person.displaySurname
         let initial = person.givenNames.first.map { "\($0)." } ?? ""
         return "\(surname) \(initial)".trimmingCharacters(in: .whitespaces)
     }
-    
+
     private var fillColor: Color {
         if isSelected { return SepiaTheme.fanSel }
         if isHome { return SepiaTheme.fanSel.opacity(0.6) }
         if wedge.person == nil { return SepiaTheme.fanEmpty }
         return wedge.gen % 2 == 0 ? SepiaTheme.fanA : SepiaTheme.fanB
     }
-    
+
     private func textAngle(_ angle: Double) -> Angle {
         let a = angle.truncatingRemainder(dividingBy: 360)
         return a > 90 && a < 270 ? .degrees(-(angle - 180)) : .degrees(-angle)
@@ -431,12 +431,12 @@ struct WedgePath: Shape {
     let cx: CGFloat, cy: CGFloat
     let rInner: CGFloat, rOuter: CGFloat
     let startAngle: Angle, endAngle: Angle
-    
+
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let start = Angle(degrees: -startAngle.degrees)
         let end = Angle(degrees: -endAngle.degrees)
-        
+
         path.addArc(center: CGPoint(x: cx, y: cy), radius: rOuter, startAngle: end, endAngle: start, clockwise: false)
         if rInner > 0 {
             path.addArc(center: CGPoint(x: cx, y: cy), radius: rInner, startAngle: start, endAngle: end, clockwise: true)
@@ -448,7 +448,7 @@ struct WedgePath: Shape {
     }
 }
 
-// Helper
+/// Helper
 extension Person {
     var yearFrom: String {
         guard let d = birthDate, let range = d.range(of: #"\b\d{4}\b"#, options: .regularExpression) else { return "" }

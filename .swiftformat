@@ -1,0 +1,21 @@
+# SwiftFormat configuration for FamilyTreeStudio.
+# Conservative on purpose: enforce whitespace/indentation consistency without
+# structural or opinionated rewrites, so the format gate stays low-risk.
+
+--swiftversion 5.9
+--exclude .build
+
+# Disable opinionated / structural rules that would churn or alter intent:
+--disable enumNamespaces          # don't flip static-only structs into enums
+--disable andOperator             # keep `&&` in conditions (don't force commas)
+--disable trailingCommas          # leave trailing-comma style as written
+--disable wrapMultilineStatementBraces
+--disable redundantSelf
+--disable unusedArguments          # named args used for documentation/clarity
+--disable hoistPatternLet
+--disable blankLinesAtStartOfScope
+--disable blankLinesAtEndOfScope
+
+# Indentation / wrapping
+--indent 4
+--ifdef no-indent

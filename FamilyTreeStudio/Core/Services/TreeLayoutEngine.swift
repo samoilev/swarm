@@ -1,5 +1,5 @@
-import Foundation
 import CoreGraphics
+import Foundation
 
 /// Orientation for a tidy tree drawing.
 public enum LayoutDirection: Equatable {
@@ -15,6 +15,7 @@ public struct TreeNode: Equatable {
     public init(person: Person, x: CGFloat, y: CGFloat) {
         self.person = person; self.x = x; self.y = y
     }
+
     public static func == (lhs: TreeNode, rhs: TreeNode) -> Bool {
         lhs.person.id == rhs.person.id && lhs.x == rhs.x && lhs.y == rhs.y
     }
@@ -23,7 +24,9 @@ public struct TreeNode: Equatable {
 public struct LinkSegment: Equatable {
     public let from: CGPoint
     public let to: CGPoint
-    public init(from: CGPoint, to: CGPoint) { self.from = from; self.to = to }
+    public init(from: CGPoint, to: CGPoint) {
+        self.from = from; self.to = to
+    }
 }
 
 public struct TreeLink: Identifiable, Equatable {
@@ -51,9 +54,9 @@ public struct TreeLayout: Equatable {
 public struct LayoutConfig {
     public var cardW: CGFloat = 210
     public var cardH: CGFloat = 90
-    public var spouseGap: CGFloat = 30    // gap between partners within a couple
-    public var siblingGap: CGFloat = 110  // gap between separate couples / branches
-    public var familyGap: CGFloat = 140   // gap between unrelated families / roots
+    public var spouseGap: CGFloat = 30 // gap between partners within a couple
+    public var siblingGap: CGFloat = 110 // gap between separate couples / branches
+    public var familyGap: CGFloat = 140 // gap between unrelated families / roots
     public var vGapTB: CGFloat = 110
     public var vGapLR: CGFloat = 150
     public var pad: CGFloat = 60
@@ -146,7 +149,9 @@ public struct TreeLayoutEngine {
         }
         let minDepthVal = depths.values.min() ?? 0
         if minDepthVal < 0 {
-            for (key, val) in depths { depths[key] = val - minDepthVal }
+            for (key, val) in depths {
+                depths[key] = val - minDepthVal
+            }
         }
 
         // ─── STEP 2: Build a couple-anchored ancestor tree (LayoutNode) ───
@@ -158,7 +163,7 @@ public struct TreeLayoutEngine {
         // and connectors don't cross between branches.
 
         class LayoutNode {
-            var memberIds: [UUID] = []   // people on this row, left → right
+            var memberIds: [UUID] = [] // people on this row, left → right
             var children: [LayoutNode] = []
             var parent: LayoutNode?
 
@@ -173,7 +178,9 @@ public struct TreeLayoutEngine {
 
             var width: CGFloat = 0
 
-            init() { self.ancestor = nil }
+            init() {
+                self.ancestor = nil
+            }
 
             var leftSibling: LayoutNode? {
                 guard let p = parent else { return nil }
@@ -190,17 +197,21 @@ public struct TreeLayoutEngine {
 
         let memberGap = spouseGap // gap between adjacent cards within a unit
 
-        // Parent/sibling lookups merge across split GEDCOM families (a person's
-        // father and mother can be in separate FAM records). Backed by the
-        // precomputed FamilyIndex maps — O(1) per call instead of scanning unions.
-        func mergedParents(_ pid: UUID) -> (father: UUID?, mother: UUID?) { idx.mergedParentIds(pid) }
-        func mergedSiblings(_ pid: UUID) -> [UUID] { idx.mergedSiblingIds(pid) }
+        /// Parent/sibling lookups merge across split GEDCOM families (a person's
+        /// father and mother can be in separate FAM records). Backed by the
+        /// precomputed FamilyIndex maps — O(1) per call instead of scanning unions.
+        func mergedParents(_ pid: UUID) -> (father: UUID?, mother: UUID?) {
+            idx.mergedParentIds(pid)
+        }
+        func mergedSiblings(_ pid: UUID) -> [UUID] {
+            idx.mergedSiblingIds(pid)
+        }
 
         var placedPersons = Set<UUID>()
         var rootNodes: [LayoutNode] = []
 
-        // Build a unit anchored on `leftId` (and optional `rightId` partner).
-        // Recurses upward into each anchor's ancestry.
+        /// Build a unit anchored on `leftId` (and optional `rightId` partner).
+        /// Recurses upward into each anchor's ancestry.
         func buildUnit(_ leftId: UUID, _ rightId: UUID?) -> LayoutNode {
             let node = LayoutNode()
             node.ancestor = node
@@ -218,12 +229,14 @@ public struct TreeLayoutEngine {
             // Deduplicate, mark placed
             var seen = Set<UUID>()
             members = members.filter { seen.insert($0).inserted && idx.byId[$0] != nil }
-            for m in members { placedPersons.insert(m) }
+            for m in members {
+                placedPersons.insert(m)
+            }
             node.memberIds = members
             let n = max(members.count, 1)
             node.width = CGFloat(n) * nodeWidth + CGFloat(n - 1) * memberGap
 
-            // Ancestor fans (tidy-tree children), one per anchor partner.
+            /// Ancestor fans (tidy-tree children), one per anchor partner.
             func ancestorUnit(of pid: UUID) -> LayoutNode? {
                 let (f, m) = mergedParents(pid)
                 let fOpen = (f != nil && !placedPersons.contains(f!)) ? f : nil
@@ -237,7 +250,9 @@ public struct TreeLayoutEngine {
             var kids: [LayoutNode] = []
             if let fan = ancestorUnit(of: leftId) { kids.append(fan) }
             if let rightId, let fan = ancestorUnit(of: rightId) { kids.append(fan) }
-            for (i, k) in kids.enumerated() { k.parent = node; k.number = i + 1 }
+            for (i, k) in kids.enumerated() {
+                k.parent = node; k.number = i + 1
+            }
             node.children = kids
             return node
         }
@@ -428,7 +443,9 @@ public struct TreeLayoutEngine {
                 let fx = n.x + modSum
                 let half = n.width / 2
                 minX = min(minX, fx - half)
-                for c in n.children { findMin(c, modSum: modSum + n.mod) }
+                for c in n.children {
+                    findMin(c, modSum: modSum + n.mod)
+                }
             }
             findMin(root, modSum: 0)
 
@@ -444,7 +461,9 @@ public struct TreeLayoutEngine {
                 let fx = n.x + modSum
                 let half = n.width / 2
                 maxX = max(maxX, fx + half)
-                for c in n.children { findMax(c, modSum: modSum + n.mod) }
+                for c in n.children {
+                    findMax(c, modSum: modSum + n.mod)
+                }
             }
             findMax(root, modSum: treeShift)
             globalOffset = maxX
@@ -455,7 +474,7 @@ public struct TreeLayoutEngine {
         var nodes: [TreeNode] = []
         var minB: CGFloat = .infinity
         var maxB: CGFloat = -.infinity
-        var maxDepth: Int = 0
+        var maxDepth = 0
 
         for (_, pl) in placements {
             minB = min(minB, pl.bc - nodeWidth / 2)
@@ -511,13 +530,13 @@ public struct TreeLayoutEngine {
         // (busFraction) of its gap, giving all connectors one consistent shape.
         struct ChildBus {
             let id: String
-            let depth: Int            // parent generation index
-            let ax: CGFloat           // parent-side stem position (cross-axis)
+            let depth: Int // parent generation index
+            let ax: CGFloat // parent-side stem position (cross-axis)
             let childCoords: [CGFloat] // child stem positions (cross-axis)
-            let lo: CGFloat           // trunk span min (cross-axis)
-            let hi: CGFloat           // trunk span max (cross-axis)
-            let parentEdge: CGFloat   // main-axis: bottom/right edge of parents
-            let childEdge: CGFloat    // main-axis: top/left edge of children
+            let lo: CGFloat // trunk span min (cross-axis)
+            let hi: CGFloat // trunk span max (cross-axis)
+            let parentEdge: CGFloat // main-axis: bottom/right edge of parents
+            let childEdge: CGFloat // main-axis: top/left edge of children
             let personIds: Set<UUID>
         }
 

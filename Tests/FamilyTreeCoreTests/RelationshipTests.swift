@@ -1,10 +1,10 @@
-import Testing
-import Foundation
 @testable import FamilyTreeCore
+import Foundation
+import Testing
 
 /// Kinship naming coverage. Builds one tree spanning blood, half-blood, cousin and
 /// in-law relations, then asserts the Russian term RelationshipCalculator returns.
-@Suite struct RelationshipTests {
+struct RelationshipTests {
 
     private final class Fixture {
         let tree = FamilyTree(name: "Род")
@@ -87,11 +87,11 @@ import Foundation
         #expect(name(from: "me", to: "wifeBro", in: f) == "Шурин")
     }
 
-    @Test func unrelatedPeopleReportNoLink() {
+    @Test func unrelatedPeopleReportNoLink() throws {
         let f = Fixture()
         let stranger = Person(givenNames: "Чужак", surname: "Нет", sex: .male)
         f.tree.people.append(stranger)
-        let result = RelationshipCalculator(tree: f.tree).relationship(from: f.people["me"]!, to: stranger)
+        let result = try RelationshipCalculator(tree: f.tree).relationship(from: #require(f.people["me"]), to: stranger)
         #expect(result?.name == "Связь не найдена")
     }
 }

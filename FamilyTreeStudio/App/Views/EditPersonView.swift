@@ -1,14 +1,14 @@
-import SwiftUI
-import FamilyTreeCore
-import UniformTypeIdentifiers
 import AppKit
+import FamilyTreeCore
+import SwiftUI
+import UniformTypeIdentifiers
 
 struct EditPersonView: View {
     @Environment(\.dismiss) private var dismiss
     let person: Person
     var tree: FamilyTree
     var store: TreeStore
-    
+
     @State private var givenNames: String = ""
     @State private var patronymic: String = ""
     @State private var surname: String = ""
@@ -32,7 +32,7 @@ struct EditPersonView: View {
     @State private var showAttachmentImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
-    
+
     enum AddRelType: String, CaseIterable {
         case none = "—"
         case parent = "Добавить родителя"
@@ -40,7 +40,7 @@ struct EditPersonView: View {
         case child = "Добавить ребёнка"
         case sibling = "Добавить брата/сестру"
     }
-    
+
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
@@ -57,23 +57,23 @@ struct EditPersonView: View {
                             .frame(width: 32, height: 32)
                             .contentShape(Rectangle())
                     }
-                        .buttonStyle(.plain)
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 24).padding(.top, 20).padding(.bottom, 12)
-                
+
                 Divider().overlay(SepiaTheme.toolbarLine)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         photoEditor
-                        
+
                         SectionHeader(title: "Личность")
                         HStack(spacing: 12) {
                             SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
                             SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
                             SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                         }.padding(.bottom, 12)
-                        
+
                         HStack(spacing: 12) {
                             SepiaTextField(label: "ДЕВИЧЬЯ ФАМИЛИЯ", text: $maidenName, placeholder: "—")
                             VStack(alignment: .leading, spacing: 6) {
@@ -85,17 +85,17 @@ struct EditPersonView: View {
                                 }
                             }
                         }.padding(.bottom, 12)
-                        
+
                         SectionHeader(title: "Рождение")
                         SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
                         PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8).zIndex(1)
                         SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
-                        
+
                         SectionHeader(title: "Смерть и погребение")
                         Toggle(isOn: $isLiving) {
                             Text("Жив(а)").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
-                        
+
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8).zIndex(1)
@@ -103,7 +103,7 @@ struct EditPersonView: View {
                             SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
-                        
+
                         SectionHeader(title: "Жизнь")
                         SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
@@ -115,9 +115,9 @@ struct EditPersonView: View {
                     }
                     .padding(.horizontal, 24).padding(.bottom, 20)
                 }
-                
+
                 Divider().overlay(SepiaTheme.toolbarLine)
-                
+
                 HStack {
                     Button("Отмена") { dismiss() }.buttonStyle(SepiaButtonStyle())
                     Spacer()
@@ -138,19 +138,19 @@ struct EditPersonView: View {
             }
         }
     }
-    
+
     // MARK: - Relationships Editor
-    
+
     private var relationshipsEditor: some View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: "Родство")
-            
+
             let idx = FamilyIndex(tree: tree)
             let parents = idx.parentsOf(person)
             let spouses = idx.spousesOf(person)
             let children = idx.childrenOf(person)
             let siblings = idx.siblingsOf(person)
-            
+
             // Current relationships
             if let f = parents.father { relEditRow("Отец", f) { removeParent(f) } }
             if let m = parents.mother { relEditRow("Мать", m) { removeParent(m) } }
@@ -159,17 +159,17 @@ struct EditPersonView: View {
             ForEach(siblings, id: \.id) { s in
                 relEditRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s) { removeSibling(s) }
             }
-            
+
             if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
                 Text("Родственные связи не заданы")
                     .font(SepiaTheme.body(size: 13))
                     .foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             }
-            
+
             // Add new relationship
             Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
-            
+
             HStack(spacing: 8) {
                 Picker("", selection: $addRelType) {
                     ForEach(AddRelType.allCases, id: \.rawValue) { t in
@@ -179,7 +179,7 @@ struct EditPersonView: View {
                 .pickerStyle(.menu)
                 .frame(width: 200)
                 .font(SepiaTheme.body(size: 13))
-                
+
                 if addRelType != .none {
                     Picker("Кто:", selection: $addRelPersonId) {
                         Text("Выбрать…").tag(nil as UUID?)
@@ -192,7 +192,7 @@ struct EditPersonView: View {
                 }
             }
             .padding(.bottom, 4)
-            
+
             if addRelType != .none && addRelPersonId != nil {
                 Button("Связать") { addRelationship() }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
@@ -200,13 +200,13 @@ struct EditPersonView: View {
             }
         }
     }
-    
+
     private var availablePeople: [Person] {
         tree.people
             .filter { $0.id != person.id }
             .sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
-    
+
     private func relEditRow(_ tag: String, _ p: Person, onRemove: @escaping () -> Void) -> some View {
         HStack(spacing: 8) {
             Text(tag.uppercased())
@@ -227,9 +227,9 @@ struct EditPersonView: View {
         }
         .padding(.bottom, 6)
     }
-    
+
     // MARK: - Relationship Actions
-    
+
     private func removeParent(_ parent: Person) {
         for union in tree.unions {
             if union.childrenIds.contains(person.id) && union.partnerIds.contains(parent.id) {
@@ -248,7 +248,7 @@ struct EditPersonView: View {
         tree.updatedAt = Date()
         store.saveTree(tree)
     }
-    
+
     private func removeSpouse(_ spouse: Person) {
         tree.unions.removeAll { union in
             union.partnerIds.contains(person.id) && union.partnerIds.contains(spouse.id) && union.childrenIds.isEmpty
@@ -265,7 +265,7 @@ struct EditPersonView: View {
         tree.updatedAt = Date()
         store.saveTree(tree)
     }
-    
+
     private func removeChild(_ child: Person) {
         for union in tree.unions {
             if union.partnerIds.contains(person.id) && union.childrenIds.contains(child.id) {
@@ -280,7 +280,7 @@ struct EditPersonView: View {
         tree.updatedAt = Date()
         store.saveTree(tree)
     }
-    
+
     private func removeSibling(_ sibling: Person) {
         for union in tree.unions {
             if union.childrenIds.contains(person.id) && union.childrenIds.contains(sibling.id) {
@@ -292,7 +292,7 @@ struct EditPersonView: View {
         tree.updatedAt = Date()
         store.saveTree(tree)
     }
-    
+
     private func addRelationship() {
         guard let targetId = addRelPersonId else { return }
         let kind: RelationKind
@@ -311,7 +311,7 @@ struct EditPersonView: View {
         tree.updatedAt = Date()
         store.saveTree(tree)
     }
-    
+
     // MARK: - Attachments Editor
 
     private var attachmentsEditor: some View {
@@ -388,7 +388,7 @@ struct EditPersonView: View {
                 .font(SepiaTheme.ui(size: 10))
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
-            
+
             HStack(spacing: 12) {
                 if let data = photoData, let nsImage = NSImage(data: data) {
                     Image(nsImage: nsImage)
@@ -407,7 +407,7 @@ struct EditPersonView: View {
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.5))
                     }
                 }
-                
+
                 VStack(alignment: .leading, spacing: 6) {
                     Button {
                         showPhotoImporter = true
@@ -418,7 +418,7 @@ struct EditPersonView: View {
                     .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
                         if case .success(let url) = result { beginPhotoSelection(from: url) }
                     }
-                    
+
                     if photoData != nil {
                         Button(role: .destructive) {
                             photoData = nil
@@ -434,7 +434,7 @@ struct EditPersonView: View {
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
     }
-    
+
     /// Load the picked image at full resolution and present the crop selector.
     private func beginPhotoSelection(from url: URL) {
         // .fileImporter may hand back a security-scoped URL (sandbox-safe).
@@ -487,7 +487,7 @@ struct EditPersonView: View {
         newImage.unlockFocus()
         return newImage
     }
-    
+
     private func loadPerson() {
         givenNames = person.givenNames
         patronymic = person.patronymic ?? ""
@@ -512,7 +512,7 @@ struct EditPersonView: View {
         notes = person.notes ?? ""
         photoData = person.photoData
     }
-    
+
     private func savePerson() {
         person.givenNames = givenNames
         person.patronymic = patronymic.isEmpty ? nil : patronymic
