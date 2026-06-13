@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Keep GitHub Actions (e.g. actions/checkout) current. This is the only
+  # ecosystem with external dependencies today — the Swift package has no
+  # third-party packages, so there is nothing for a "swift" entry to update.
+  # Add one (package-ecosystem: "swift") if external SPM dependencies are
+  # introduced and a Package.resolved is committed.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    groups:
+      # Bundle all action bumps into a single PR rather than one per action.
+      github-actions:
+        patterns:
+          - "*"
