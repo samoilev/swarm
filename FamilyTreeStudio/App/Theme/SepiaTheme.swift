@@ -32,7 +32,7 @@ struct SepiaTheme {
     static let fanSel = Color(hex: "edcfa8")
     static let fanLine = Color(hex: "c7b389")
     static let posterBg = Color(hex: "f4ecd6")
-    
+
     // Map view colors
     static let mapSea = Color(hex: "dde8e4")
     static let mapLand = Color(hex: "f2ead7")
@@ -41,15 +41,15 @@ struct SepiaTheme {
     static let mapLine = Color(hex: "8a6d2f").opacity(0.7)
     static let pinBirth = Color(hex: "4a8c6e")
     static let pinDeath = Color(hex: "9c4a2f")
-    
+
     static func display(size: CGFloat) -> Font {
         .system(size: size, weight: .semibold, design: .serif)
     }
-    
+
     static func body(size: CGFloat) -> Font {
         .system(size: size, design: .serif)
     }
-    
+
     static func ui(size: CGFloat) -> Font {
         .system(size: size, weight: .medium, design: .serif)
     }
@@ -81,7 +81,7 @@ extension Color {
 
 struct SepiaButtonStyle: ButtonStyle {
     var isActive: Bool = false
-    
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(SepiaTheme.ui(size: 12))

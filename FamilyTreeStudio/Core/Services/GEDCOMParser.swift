@@ -115,7 +115,7 @@ public struct GEDCOMParser {
         // Optional record xref immediately after the level: "@X@ TAG ...".
         var xref: String? = nil
         if rest.hasPrefix("@"), let close = rest.dropFirst().firstIndex(of: "@") {
-            xref = String(rest[rest.index(after: rest.startIndex)..<close])
+            xref = String(rest[rest.index(after: rest.startIndex) ..< close])
             rest = String(rest[rest.index(after: close)...]).trimmingCharacters(in: .whitespaces)
         }
 
@@ -222,7 +222,9 @@ public struct GEDCOMParser {
             let tag = line.tag
             let value = line.value
             tagAtLevel[level] = tag
-            for deeper in tagAtLevel.keys where deeper > level { tagAtLevel[deeper] = nil }
+            for deeper in tagAtLevel.keys where deeper > level {
+                tagAtLevel[deeper] = nil
+            }
 
             switch level {
             case 1:
@@ -275,7 +277,7 @@ public struct GEDCOMParser {
                     maidenName = surname
                     surname = parsed.surname.isEmpty ? parsed.given : parsed.surname
                 case ("OBJE", "FILE"):
-                    if let mediaFolder = mediaFolder {
+                    if let mediaFolder {
                         let photoURL = mediaFolder.appendingPathComponent(value)
                         photoData = try? Data(contentsOf: photoURL)
                     }
@@ -360,7 +362,9 @@ public struct GEDCOMParser {
             let level = line.level
             let tag = line.tag
             tagAtLevel[level] = tag
-            for deeper in tagAtLevel.keys where deeper > level { tagAtLevel[deeper] = nil }
+            for deeper in tagAtLevel.keys where deeper > level {
+                tagAtLevel[deeper] = nil
+            }
 
             switch level {
             case 1:

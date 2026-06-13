@@ -1,18 +1,18 @@
-import SwiftUI
 import AppKit
 import CoreGraphics
 import CoreText
 import FamilyTreeCore
+import SwiftUI
 
 /// Renders every person as their own card, sorted alphabetically by name, one card
 /// per page (A4 portrait). A card whose content overflows continues onto further
 /// pages; the next person always begins on a fresh page.
 struct PersonCardsPDFExporter {
-    private static let pageW: CGFloat = 595   // A4 portrait @ 72 dpi
+    private static let pageW: CGFloat = 595 // A4 portrait @ 72 dpi
     private static let pageH: CGFloat = 842
     private static let margin: CGFloat = 48
-    private static let footerBaseline: CGFloat = 30   // y of footer text
-    private static let bodyBottom: CGFloat = 50       // text never drops below this y
+    private static let footerBaseline: CGFloat = 30 // y of footer text
+    private static let bodyBottom: CGFloat = 50 // text never drops below this y
 
     static func render(tree: FamilyTree, attachmentsFolder: URL? = nil) -> Data? {
         let people = tree.people.sorted {

@@ -35,10 +35,17 @@ public final class Union: Identifiable, Codable, Hashable {
     }
 
     // MARK: - Hashable
-    public static func == (lhs: Union, rhs: Union) -> Bool { lhs.id == rhs.id }
-    public func hash(into hasher: inout Hasher) { hasher.combine(id) }
+
+    public static func == (lhs: Union, rhs: Union) -> Bool {
+        lhs.id == rhs.id
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
 
     // MARK: - Codable
+
     enum CodingKeys: String, CodingKey {
         case id, partner1Id, partner2Id, marriageDate, marriagePlace, status, childrenIds, createdAt
     }

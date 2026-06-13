@@ -1,11 +1,11 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 
 @main
 struct FamilyTreeStudioApp: App {
     @State private var store = TreeStore()
-    
+
     init() {
         NSApplication.shared.setActivationPolicy(.regular)
         if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
@@ -13,7 +13,7 @@ struct FamilyTreeStudioApp: App {
             NSApplication.shared.applicationIconImage = icon
         }
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -57,7 +57,7 @@ struct FamilyTreeStudioApp: App {
 
 extension Notification.Name {
     static let newTreeRequested = Notification.Name("newTreeRequested")
-    static let zoomInRequested  = Notification.Name("zoomInRequested")
+    static let zoomInRequested = Notification.Name("zoomInRequested")
     static let zoomOutRequested = Notification.Name("zoomOutRequested")
     static let zoomFitRequested = Notification.Name("zoomFitRequested")
 }

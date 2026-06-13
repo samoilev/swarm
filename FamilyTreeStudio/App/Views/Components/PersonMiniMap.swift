@@ -1,6 +1,6 @@
-import SwiftUI
 import FamilyTreeCore
 import MapKit
+import SwiftUI
 
 /// A small, non-interactive map showing a person's birth and death places as pins,
 /// connected by a line. Shows just one pin when only one place is known. Coordinates
@@ -94,9 +94,9 @@ struct PersonMiniMap: View {
     /// Changes whenever any location-relevant field changes, so `.task` re-runs.
     private var locationKey: String {
         "\(person.birthPlace ?? "")|" +
-        "\(person.birthLat.map{String($0)} ?? "")|\(person.birthLon.map{String($0)} ?? "")|" +
-        "\(person.deathPlace ?? "")|" +
-        "\(person.deathLat.map{String($0)} ?? "")|\(person.deathLon.map{String($0)} ?? "")"
+            "\(person.birthLat.map { String($0) } ?? "")|\(person.birthLon.map { String($0) } ?? "")|" +
+            "\(person.deathPlace ?? "")|" +
+            "\(person.deathLat.map { String($0) } ?? "")|\(person.deathLon.map { String($0) } ?? "")"
     }
 
     // MARK: - Coordinate resolution
@@ -151,15 +151,18 @@ struct PersonMiniMap: View {
         if coords.count == 1 {
             position = .region(MKCoordinateRegion(
                 center: coords[0],
-                span: MKCoordinateSpan(latitudeDelta: 6, longitudeDelta: 6)))
+                span: MKCoordinateSpan(latitudeDelta: 6, longitudeDelta: 6)
+            ))
         } else {
             let lats = coords.map(\.latitude), lons = coords.map(\.longitude)
             let center = CLLocationCoordinate2D(
                 latitude: (lats.min()! + lats.max()!) / 2,
-                longitude: (lons.min()! + lons.max()!) / 2)
+                longitude: (lons.min()! + lons.max()!) / 2
+            )
             let span = MKCoordinateSpan(
                 latitudeDelta: max((lats.max()! - lats.min()!) * 1.6, 4),
-                longitudeDelta: max((lons.max()! - lons.min()!) * 1.6, 4))
+                longitudeDelta: max((lons.max()! - lons.min()!) * 1.6, 4)
+            )
             position = .region(MKCoordinateRegion(center: center, span: span))
         }
     }

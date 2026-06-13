@@ -4,7 +4,9 @@ import UniformTypeIdentifiers
 /// Minimal in-memory document wrapper so already-rendered bytes (PNG/PDF) can be
 /// written through the native `.fileExporter` modifier.
 struct RenderedFileDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.png, .pdf] }
+    static var readableContentTypes: [UTType] {
+        [.png, .pdf]
+    }
 
     var data: Data
     var type: UTType

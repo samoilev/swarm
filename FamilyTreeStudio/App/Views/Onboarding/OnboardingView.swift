@@ -1,5 +1,5 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 
 struct OnboardingView: View {
     @Environment(\.dismiss) private var dismiss
@@ -13,15 +13,15 @@ struct OnboardingView: View {
     @State private var birthPlace: String = ""
     @State private var deathPlace: String = ""
     @FocusState private var focusedField: Field?
-    
+
     enum Field: Hashable { case treeName, subtitle, givenNames, patronymic, surname }
-    
+
     let onComplete: (FamilyTree) -> Void
-    
+
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 VStack(spacing: 6) {
                     Text("Создать родословное дерево")
@@ -33,15 +33,15 @@ struct OnboardingView: View {
                 }
                 .padding(.top, 32)
                 .padding(.bottom, 24)
-                
+
                 HStack(spacing: 8) {
                     Circle().fill(step >= 0 ? SepiaTheme.accent : SepiaTheme.cardLine).frame(width: 8, height: 8)
                     Circle().fill(step >= 1 ? SepiaTheme.accent : SepiaTheme.cardLine).frame(width: 8, height: 8)
                 }
                 .padding(.bottom, 24)
-                
+
                 Divider().overlay(SepiaTheme.fieldLine)
-                
+
                 VStack(spacing: 20) {
                     if step == 0 {
                         treeNameStep
@@ -51,9 +51,9 @@ struct OnboardingView: View {
                 }
                 .padding(32)
                 .frame(maxWidth: 400)
-                
+
                 Spacer()
-                
+
                 HStack(spacing: 12) {
                     Button("Отмена") { dismiss() }
                         .buttonStyle(SepiaButtonStyle())
@@ -77,7 +77,7 @@ struct OnboardingView: View {
         }
         .frame(width: 500, height: 460)
     }
-    
+
     private var treeNameStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             SepiaTextField(label: "НАЗВАНИЕ СЕМЬИ", text: $treeName, placeholder: "напр. Семья Ивановых")
@@ -87,7 +87,7 @@ struct OnboardingView: View {
         }
         .onAppear { focusedField = .treeName }
     }
-    
+
     private var firstPersonStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
@@ -118,7 +118,7 @@ struct OnboardingView: View {
             PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—")
         }
     }
-    
+
     private func createTree() {
         let tree = FamilyTree(name: treeName, subtitle: subtitle.isEmpty ? nil : subtitle)
         let person = Person(givenNames: givenNames, patronymic: patronymic.isEmpty ? nil : patronymic, surname: surname, sex: sex, birthPlace: birthPlace.isEmpty ? nil : birthPlace, deathPlace: deathPlace.isEmpty ? nil : deathPlace)
@@ -132,7 +132,7 @@ struct SepiaTextField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
@@ -215,7 +215,7 @@ struct SepiaDateField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = "ДД.ММ.ГГГГ"
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
@@ -240,27 +240,27 @@ struct SepiaDateField: View {
             }
         }
     }
-    
+
     /// Allow only digits and dots, auto-insert dots, limit length
     private func filterDateInput(_ input: String) -> String {
         // Remove anything that's not a digit or dot
         var cleaned = String(input.filter { $0.isNumber || $0 == "." })
-        
+
         // Remove leading dots
         while cleaned.hasPrefix(".") {
             cleaned.removeFirst()
         }
-        
+
         // Remove consecutive dots
         while cleaned.contains("..") {
             cleaned = cleaned.replacingOccurrences(of: "..", with: ".")
         }
-        
+
         // Limit: max 10 chars (DD.MM.YYYY)
         if cleaned.count > 10 {
             cleaned = String(cleaned.prefix(10))
         }
-        
+
         // Limit to max 2 dots
         let dots = cleaned.filter { $0 == "." }
         if dots.count > 2 {
@@ -276,14 +276,14 @@ struct SepiaDateField: View {
             }
             cleaned = result
         }
-        
+
         return cleaned
     }
-    
+
     private func isValidDateFormat(_ input: String) -> Bool {
         let str = input.trimmingCharacters(in: .whitespaces)
         if str.isEmpty { return true }
-        
+
         // ГГГГ
         if str.range(of: #"^\d{4}$"#, options: .regularExpression) != nil { return true }
         // ММ.ГГГГ
@@ -301,7 +301,7 @@ struct SepiaDateField: View {
         if str.range(of: #"^\d{1,2}\.\d{1,2}\.?$"#, options: .regularExpression) != nil { return true }
         if str.range(of: #"^\d{1,2}\.\d{1,4}$"#, options: .regularExpression) != nil { return true }
         if str.range(of: #"^\d{1,4}$"#, options: .regularExpression) != nil { return true }
-        
+
         return false
     }
 }

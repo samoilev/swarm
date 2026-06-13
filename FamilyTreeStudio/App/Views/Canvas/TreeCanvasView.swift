@@ -1,6 +1,6 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 
 struct TreeCanvasView: View {
     let tree: FamilyTree
@@ -12,7 +12,7 @@ struct TreeCanvasView: View {
     var lineageLabels: [UUID: String] = [:]
     @Binding var fitRequest: Int
     var showPhotos: Bool = false
-    
+
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
     private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
@@ -27,8 +27,8 @@ struct TreeCanvasView: View {
     @State private var velocity: CGSize = .zero
     @State private var lastDragValue: CGSize = .zero
     @State private var inertiaTimer: Timer?
-    // Layout only depends on tree structure + direction, so cache it and recompute
-    // only when those change — body re-runs on every pan/zoom frame otherwise.
+    /// Layout only depends on tree structure + direction, so cache it and recompute
+    /// only when those change — body re-runs on every pan/zoom frame otherwise.
     @State private var cachedLayout: TreeLayout?
 
     var body: some View {
@@ -46,8 +46,8 @@ struct TreeCanvasView: View {
                     let cols = Int(size.width / spacing) + 2
                     let rows = Int(size.height / spacing) + 2
 
-                    for col in 0...cols {
-                        for row in 0...rows {
+                    for col in 0 ... cols {
+                        for row in 0 ... rows {
                             let x = CGFloat(col) * spacing + offsetX
                             let y = CGFloat(row) * spacing + offsetY
                             guard x >= -dotRadius, x <= size.width + dotRadius,
@@ -223,27 +223,27 @@ struct TreeCanvasView: View {
             }
         }
     }
-    
+
     // MARK: - Fit to Screen
-    
+
     private func fitToScreen(viewSize: CGSize, treeWidth: CGFloat, treeHeight: CGFloat) {
         guard treeWidth > 0, treeHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
-        
+
         let margin: CGFloat = 20
         let availW = viewSize.width - margin * 2
         let availH = viewSize.height - margin * 2
-        
+
         let scaleW = availW / treeWidth
         let scaleH = availH / treeHeight
         let newZoom = min(min(scaleW, scaleH), 1.6) // don't exceed max zoom
         let clampedZoom = max(0.2, newZoom)
-        
+
         // Center the tree in the viewport
         let scaledW = treeWidth * clampedZoom
         let scaledH = treeHeight * clampedZoom
         let offsetX = (viewSize.width - scaledW) / 2
         let offsetY = (viewSize.height - scaledH) / 2
-        
+
         withAnimation(.easeInOut(duration: 0.3)) {
             zoom = clampedZoom
             panOffset = CGSize(width: offsetX, height: offsetY)
@@ -251,7 +251,7 @@ struct TreeCanvasView: View {
             magnifyStart = clampedZoom
         }
     }
-    
+
     // MARK: - Inertia (momentum scrolling)
 
     /// Zoom by `delta` anchored to the viewport centre (same math as scroll-wheel zoom).
@@ -274,8 +274,8 @@ struct TreeCanvasView: View {
 
     private func startInertia() {
         inertiaTimer?.invalidate()
-        let decay: CGFloat = 0.88       // fraction of velocity kept per frame (higher = slower decay)
-        let cutoff: CGFloat = 0.5       // stop when velocity drops below this px/frame
+        let decay: CGFloat = 0.88 // fraction of velocity kept per frame (higher = slower decay)
+        let cutoff: CGFloat = 0.5 // stop when velocity drops below this px/frame
         var v = velocity
         inertiaTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { t in
             v = CGSize(width: v.width * decay, height: v.height * decay)
@@ -284,6 +284,7 @@ struct TreeCanvasView: View {
             dragStart = panOffset
         }
     }
+
     /// Build the tidy-tree layout via the pure engine in FamilyTreeCore.
     private func makeLayout() -> TreeLayout {
         TreeLayoutEngine().layout(tree: tree, direction: direction == .leftRight ? .leftRight : .topDown)
@@ -311,8 +312,12 @@ struct ScrollWheelZoom: NSViewRepresentable {
         var onScroll: ((CGFloat, CGPoint) -> Void)?
         private var monitor: Any?
 
-        override var isFlipped: Bool { true } // top-left origin to match SwiftUI
-        override func hitTest(_ point: NSPoint) -> NSView? { nil } // pass clicks through
+        override var isFlipped: Bool {
+            true
+        } // top-left origin to match SwiftUI
+        override func hitTest(_ point: NSPoint) -> NSView? {
+            nil
+        } // pass clicks through
 
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
@@ -349,39 +354,39 @@ struct PersonCardView: View, Equatable {
     var isSecondarySelected: Bool = false
     var isHome: Bool = false
     var isHighlighted: Bool = false
-    var lineageLabel: String? = nil
+    var lineageLabel: String?
     var showPhoto: Bool = false
-    
+
     static func == (lhs: PersonCardView, rhs: PersonCardView) -> Bool {
         lhs.person.id == rhs.person.id &&
-        lhs.person.givenNames == rhs.person.givenNames &&
-        lhs.person.surname == rhs.person.surname &&
-        lhs.person.maidenName == rhs.person.maidenName &&
-        lhs.person.lifespan == rhs.person.lifespan &&
-        lhs.isSelected == rhs.isSelected &&
-        lhs.isSecondarySelected == rhs.isSecondarySelected &&
-        lhs.isHome == rhs.isHome &&
-        lhs.isHighlighted == rhs.isHighlighted &&
-        lhs.lineageLabel == rhs.lineageLabel &&
-        lhs.showPhoto == rhs.showPhoto
+            lhs.person.givenNames == rhs.person.givenNames &&
+            lhs.person.surname == rhs.person.surname &&
+            lhs.person.maidenName == rhs.person.maidenName &&
+            lhs.person.lifespan == rhs.person.lifespan &&
+            lhs.isSelected == rhs.isSelected &&
+            lhs.isSecondarySelected == rhs.isSecondarySelected &&
+            lhs.isHome == rhs.isHome &&
+            lhs.isHighlighted == rhs.isHighlighted &&
+            lhs.lineageLabel == rhs.lineageLabel &&
+            lhs.showPhoto == rhs.showPhoto
     }
-    
+
     private var cardBackground: Color {
         switch person.sex {
-        case .male: return SepiaTheme.cardBgMale
-        case .female: return SepiaTheme.cardBgFemale
-        case .unknown: return SepiaTheme.cardBg
+        case .male: SepiaTheme.cardBgMale
+        case .female: SepiaTheme.cardBgFemale
+        case .unknown: SepiaTheme.cardBg
         }
     }
-    
+
     private var cardBorder: Color {
         switch person.sex {
-        case .male: return SepiaTheme.cardLineMale
-        case .female: return SepiaTheme.cardLineFemale
-        case .unknown: return SepiaTheme.cardLine
+        case .male: SepiaTheme.cardLineMale
+        case .female: SepiaTheme.cardLineFemale
+        case .unknown: SepiaTheme.cardLine
         }
     }
-    
+
     var body: some View {
         HStack(spacing: 0) {
             if showPhoto {
@@ -401,7 +406,7 @@ struct PersonCardView: View, Equatable {
                     .frame(width: 66, height: 88)
                 }
             }
-            
+
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top, spacing: 0) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -430,9 +435,9 @@ struct PersonCardView: View, Equatable {
                 .padding(.horizontal, 10)
                 .padding(.top, 6)
                 .padding(.bottom, 2)
-                
+
                 Divider().overlay(SepiaTheme.cardRule)
-                
+
                 VStack(alignment: .leading, spacing: 1) {
                     let nameDisplay = [person.givenNames, person.patronymic ?? ""]
                         .filter { !$0.isEmpty }
@@ -460,8 +465,8 @@ struct PersonCardView: View, Equatable {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(
                     isSelected ? SepiaTheme.accent :
-                    isSecondarySelected ? SepiaTheme.accent :
-                    (isHighlighted ? SepiaTheme.accent2 : cardBorder),
+                        isSecondarySelected ? SepiaTheme.accent :
+                        (isHighlighted ? SepiaTheme.accent2 : cardBorder),
                     lineWidth: (isSelected || isSecondarySelected) ? 3 : (isHighlighted ? 1.5 : 1)
                 )
         )

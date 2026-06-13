@@ -1,5 +1,5 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 
 struct PlacePickerField: View {
     let label: String
@@ -7,7 +7,7 @@ struct PlacePickerField: View {
     var placeholder: String = ""
     /// Called with the chosen place's display name when a suggestion is picked from
     /// the list (not on manual typing), so the caller can pre-fill coordinates.
-    var onSelect: ((String) -> Void)? = nil
+    var onSelect: ((String) -> Void)?
 
     @State private var suggestions: [PlaceEntry] = []
     @State private var showSuggestions = false
@@ -15,14 +15,14 @@ struct PlacePickerField: View {
     @FocusState private var isFocused: Bool
 
     private let db = PlacesDatabase.shared
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label)
                 .font(SepiaTheme.ui(size: 9.5))
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
-            
+
             ZStack(alignment: .topLeading) {
                 TextField(placeholder, text: $text)
                     .textFieldStyle(.roundedBorder)
@@ -51,7 +51,7 @@ struct PlacePickerField: View {
                         showSuggestions = false
                         searchWork?.cancel()
                     }
-                
+
                 if showSuggestions && !suggestions.isEmpty {
                     suggestionsDropdown
                         .offset(y: 32)
@@ -59,7 +59,7 @@ struct PlacePickerField: View {
             }
         }
     }
-    
+
     private var suggestionsDropdown: some View {
         let rowHeight: CGFloat = 44
         let visibleRows = min(suggestions.count, 6)
@@ -103,7 +103,7 @@ struct PlacePickerField: View {
         .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
         .zIndex(100)
     }
-    
+
     private func updateSuggestions(_ query: String) {
         searchWork?.cancel()
         let trimmed = query.trimmingCharacters(in: .whitespaces)

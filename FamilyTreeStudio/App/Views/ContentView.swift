@@ -1,5 +1,5 @@
-import SwiftUI
 import FamilyTreeCore
+import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
@@ -9,8 +9,10 @@ struct ContentView: View {
     @State private var showGEDCOMImporter = false
     @State private var importError: String?
 
-    private var gedcomType: UTType { UTType(filenameExtension: "ged") ?? .plainText }
-    
+    private var gedcomType: UTType {
+        UTType(filenameExtension: "ged") ?? .plainText
+    }
+
     var body: some View {
         Group {
             if let tree = selectedTree {

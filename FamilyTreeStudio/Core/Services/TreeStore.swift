@@ -38,7 +38,7 @@ public final class TreeStore {
         storageFolder = appFolder
         load()
     }
-    
+
     // MARK: - Load all tree folders from storage
 
     public func load() {
@@ -102,7 +102,9 @@ public final class TreeStore {
         }
 
         // One-time: rename UUID/"tree.ged" layouts to readable names and embed _TREEID.
-        for tree in needsReconcile { saveTree(tree) }
+        for tree in needsReconcile {
+            saveTree(tree)
+        }
 
         // Migration: if old JSON exists and no trees were loaded, import it
         let legacyURL = storageFolder.appendingPathComponent("trees.json")
@@ -154,9 +156,9 @@ public final class TreeStore {
             }
         }
     }
-    
+
     // MARK: - Save a specific tree to its .ged file
-    
+
     public func save() {
         for tree in trees {
             saveTree(tree)
@@ -206,12 +208,12 @@ public final class TreeStore {
             try? photo.data.write(to: dest)
         }
     }
-    
+
     public func addTree(_ tree: FamilyTree) {
         trees.append(tree)
         saveTree(tree)
     }
-    
+
     public func deleteTree(_ tree: FamilyTree) {
         trees.removeAll(where: { $0.id == tree.id })
         // Remove the whole tree folder (.ged + Media/ + Attachments/).
@@ -277,9 +279,9 @@ public final class TreeStore {
         }
         return bundle
     }
-    
+
     // MARK: - Import external .ged file
-    
+
     public func importGEDCOM(from url: URL) throws -> FamilyTree {
         let parsed = try GEDCOMParser.parse(from: url)
         let tree = FamilyTree(name: parsed.name, subtitle: parsed.subtitle)
@@ -304,9 +306,9 @@ public final class TreeStore {
         }
         return tree
     }
-    
+
     // MARK: - Export .ged to a user-chosen location
-    
+
     public func exportGEDCOM(tree: FamilyTree, to url: URL) throws {
         let fm = FileManager.default
         let dir = url.deletingLastPathComponent()
@@ -328,7 +330,7 @@ public final class TreeStore {
             }
         }
     }
-    
+
     // MARK: - Attachments
 
     /// The folder that holds a tree's attached files (created on demand).
@@ -475,9 +477,9 @@ public final class TreeStore {
             i += 1
         }
     }
-    
+
     // MARK: - Legacy JSON Migration
-    
+
     private func migrateFromJSON(_ jsonURL: URL) {
         do {
             let data = try Data(contentsOf: jsonURL)
@@ -495,4 +497,3 @@ public final class TreeStore {
         }
     }
 }
-

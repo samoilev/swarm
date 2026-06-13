@@ -1,8 +1,8 @@
-import Testing
-import Foundation
 @testable import FamilyTreeCore
+import Foundation
+import Testing
 
-@Suite struct FamilyTreeTests {
+struct FamilyTreeTests {
 
     private func tree(_ people: Person...) -> FamilyTree {
         let t = FamilyTree(name: "T")

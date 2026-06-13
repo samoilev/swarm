@@ -1,6 +1,6 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 import UniformTypeIdentifiers
 
 struct ExportView: View {
@@ -91,9 +91,9 @@ struct ExportView: View {
         showExporter = true
     }
 
-    // GEDCOM export stays on NSSavePanel: it writes sibling `Media/` and `Attachments/`
-    // folders next to the chosen .ged file, which doesn't fit the single-file
-    // FileWrapper model used by .fileExporter (the app is effectively non-sandboxed).
+    /// GEDCOM export stays on NSSavePanel: it writes sibling `Media/` and `Attachments/`
+    /// folders next to the chosen .ged file, which doesn't fit the single-file
+    /// FileWrapper model used by .fileExporter (the app is effectively non-sandboxed).
     private func exportGEDCOM() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [UTType(filenameExtension: "ged") ?? .plainText]

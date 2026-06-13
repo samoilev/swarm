@@ -1,5 +1,5 @@
-import SwiftUI
 import AppKit
+import SwiftUI
 
 /// A small square preview for an attachment: the image itself for pictures,
 /// otherwise a document icon with the file's format (e.g. PDF, DOCX).

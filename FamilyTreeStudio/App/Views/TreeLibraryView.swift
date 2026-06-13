@@ -1,14 +1,14 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 import UniformTypeIdentifiers
 
 struct TreeLibraryView: View {
     let trees: [FamilyTree]
     let onSelect: (FamilyTree) -> Void
     let onCreate: () -> Void
-    var onImport: (() -> Void)? = nil
-    var onRevealInFinder: ((FamilyTree) -> Void)? = nil
+    var onImport: (() -> Void)?
+    var onRevealInFinder: ((FamilyTree) -> Void)?
 
     @Environment(TreeStore.self) private var store
 
@@ -20,13 +20,13 @@ struct TreeLibraryView: View {
     @State private var treeToRename: FamilyTree?
     @State private var renameName = ""
     @State private var renameSubtitle = ""
-    // Errors
+    /// Errors
     @State private var errorMessage: String?
 
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
-            
+
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
                     Text("Родословная")
@@ -39,7 +39,7 @@ struct TreeLibraryView: View {
                 }
                 .padding(.top, 48)
                 .padding(.bottom, 32)
-                
+
                 // Action toolbar — always visible above the grid
                 HStack(spacing: 10) {
                     Spacer()
@@ -166,9 +166,9 @@ struct TreeLibraryView: View {
 struct TreeCardView: View {
     let tree: FamilyTree
     let onSelect: () -> Void
-    var onReveal: (() -> Void)? = nil
-    var onRename: (() -> Void)? = nil
-    var onDelete: (() -> Void)? = nil
+    var onReveal: (() -> Void)?
+    var onRename: (() -> Void)?
+    var onDelete: (() -> Void)?
 
     @ViewBuilder private var menuItems: some View {
         Button { onRename?() } label: { Label("Переименовать…", systemImage: "pencil") }
@@ -189,7 +189,7 @@ struct TreeCardView: View {
                 }
                 .padding(.top, 20)
                 .padding(.bottom, 8)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(tree.name)
                         .font(SepiaTheme.display(size: 18))

@@ -1,5 +1,5 @@
-import SwiftUI
 import AppKit
+import SwiftUI
 
 /// A sepia icon button that fires `action` once on a tap and then keeps firing
 /// while held (press-and-hold auto-repeat), like a native Stepper — but keeping

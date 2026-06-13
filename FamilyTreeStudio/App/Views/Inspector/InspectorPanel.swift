@@ -1,20 +1,20 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 
 struct InspectorPanel: View {
     @Binding var person: Person?
     let tree: FamilyTree
     var store: TreeStore
     @Binding var width: CGFloat
-    var onEdit: ((Person) -> Void)? = nil
-    var onDelete: ((Person) -> Void)? = nil
+    var onEdit: ((Person) -> Void)?
+    var onDelete: ((Person) -> Void)?
 
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
 
     var body: some View {
-        if let person = person {
+        if let person {
             HStack(spacing: 0) {
                 // Drag handle
                 Rectangle()
@@ -108,11 +108,11 @@ struct InspectorPanel: View {
         let stroke = tinted ? Color.white.opacity(0.25) : SepiaTheme.cardLine
 
         VStack(spacing: 4) {
-            if let onDelete = onDelete {
+            if let onDelete {
                 actionBtn("trash", fg: tinted ? .red.opacity(0.85) : .red.opacity(0.7), bg: bg, stroke: stroke) { onDelete(person) }
                     .help("Удалить")
             }
-            if let onEdit = onEdit {
+            if let onEdit {
                 actionBtn("pencil", fg: fg, bg: bg, stroke: stroke) { onEdit(person) }
                     .help("Редактировать")
             }

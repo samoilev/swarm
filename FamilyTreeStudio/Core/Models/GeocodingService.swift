@@ -1,5 +1,5 @@
-import Foundation
 import CoreLocation
+import Foundation
 
 /// Fully offline geocoding, backed solely by the bundled GeoNames database
 /// (252K+ settlements of the former USSR). Place names never leave the device —
@@ -35,7 +35,7 @@ public final class GeocodingService {
     public func whenReady(_ run: @escaping () -> Void) {
         if isReady { run() } else { readyCallbacks.append(run) }
     }
-    
+
     private static func loadGeoNames() -> [String: CLLocationCoordinate2D] {
         guard let url = Bundle.module.url(forResource: "geonames_ussr", withExtension: "tsv") else {
             print("GeocodingService: geonames_ussr.tsv not found in bundle")
@@ -45,10 +45,10 @@ public final class GeocodingService {
             print("GeocodingService: failed to read geonames_ussr.tsv")
             return [:]
         }
-        
+
         var result: [String: CLLocationCoordinate2D] = [:]
-        result.reserveCapacity(260000)
-        
+        result.reserveCapacity(260_000)
+
         for line in data.split(separator: "\n") {
             let parts = line.split(separator: "\t", maxSplits: 2)
             guard parts.count == 3,
@@ -57,7 +57,7 @@ public final class GeocodingService {
             let name = String(parts[0])
             result[name] = CLLocationCoordinate2D(latitude: lat, longitude: lon)
         }
-        
+
         // Add historical name aliases not in GeoNames
         let aliases: [(String, String)] = [
             ("ленинград", "санкт-петербург"),
@@ -74,25 +74,25 @@ public final class GeocodingService {
                 result[alias] = coord
             }
         }
-        
+
         print("GeocodingService: loaded \(result.count) places from GeoNames")
         return result
     }
-    
+
     public func coordinate(for placeName: String?, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
         guard let place = placeName, !place.isEmpty else {
             completion(nil)
             return
         }
-        
+
         let key = place.lowercased().trimmingCharacters(in: .whitespaces)
-        
+
         // Check cache
         if let cached = cache[key] {
             completion(cached)
             return
         }
-        
+
         // Look up in the bundled GeoNames database. Offline only — unknown places
         // resolve to nil rather than being sent to a network geocoder.
         if let coord = lookupInDatabase(key) {
@@ -102,7 +102,7 @@ public final class GeocodingService {
             completion(nil)
         }
     }
-    
+
     /// Remove a place from the in-memory cache so the next lookup re-geocodes it.
     public func clearCache(for placeName: String) {
         let key = placeName.lowercased().trimmingCharacters(in: .whitespaces)
@@ -113,16 +113,16 @@ public final class GeocodingService {
     public func coordinateSync(for placeName: String?) -> CLLocationCoordinate2D? {
         guard let place = placeName, !place.isEmpty else { return nil }
         let key = place.lowercased().trimmingCharacters(in: .whitespaces)
-        
+
         if let cached = cache[key] { return cached }
-        
+
         if let coord = lookupInDatabase(key) {
             cache[key] = coord
             return coord
         }
         return nil
     }
-    
+
     /// Try various strategies to find the place name in the database.
     private func lookupInDatabase(_ key: String) -> CLLocationCoordinate2D? {
         // Direct match on the full string (works for single city names in GeoNames).

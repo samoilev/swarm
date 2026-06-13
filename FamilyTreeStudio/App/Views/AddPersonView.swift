@@ -1,13 +1,13 @@
-import SwiftUI
-import FamilyTreeCore
 import AppKit
+import FamilyTreeCore
+import SwiftUI
 
 struct AddPersonView: View {
     @Environment(\.dismiss) private var dismiss
     var tree: FamilyTree
     var store: TreeStore
     let onAdded: (Person) -> Void
-    
+
     @State private var givenNames = ""
     @State private var patronymic = ""
     @State private var surname = ""
@@ -25,21 +25,21 @@ struct AddPersonView: View {
     @State private var occupation = ""
     @State private var education = ""
     @State private var notes = ""
-    
-    // Any number of relatives can be linked at once. Each row names a role (read
-    // from the new person's perspective) and an existing person who fills it.
+
+    /// Any number of relatives can be linked at once. Each row names a role (read
+    /// from the new person's perspective) and an existing person who fills it.
     @State private var pendingRels: [PendingRelation] = []
 
     struct PendingRelation: Identifiable {
         let id = UUID()
         var kind: RelationKind = .parent
-        var personId: UUID? = nil
+        var personId: UUID?
     }
 
     private var sortedPeople: [Person] {
         tree.people.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
-    
+
     var body: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
@@ -56,12 +56,12 @@ struct AddPersonView: View {
                             .frame(width: 32, height: 32)
                             .contentShape(Rectangle())
                     }
-                        .buttonStyle(.plain)
+                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 24).padding(.top, 20).padding(.bottom, 12)
-                
+
                 Divider().overlay(SepiaTheme.toolbarLine)
-                
+
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         SectionHeader(title: "Личность")
@@ -70,7 +70,7 @@ struct AddPersonView: View {
                             SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
                             SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
                         }.padding(.bottom, 12)
-                        
+
                         HStack(spacing: 12) {
                             SepiaTextField(label: "ДЕВИЧЬЯ ФАМИЛИЯ", text: $maidenName, placeholder: "—")
                             VStack(alignment: .leading, spacing: 6) {
@@ -82,17 +82,17 @@ struct AddPersonView: View {
                                 }
                             }
                         }.padding(.bottom, 12)
-                        
+
                         SectionHeader(title: "Рождение")
                         SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
                         PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8).zIndex(1)
                         SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
-                        
+
                         SectionHeader(title: "Смерть и погребение")
                         Toggle(isOn: $isLiving) {
                             Text("Жив(а)").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
-                        
+
                         if !isLiving {
                             SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
                             PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8).zIndex(1)
@@ -100,7 +100,7 @@ struct AddPersonView: View {
                             SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
-                        
+
                         SectionHeader(title: "Жизнь")
                         SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
@@ -136,9 +136,9 @@ struct AddPersonView: View {
                     }
                     .padding(.horizontal, 24).padding(.bottom, 20)
                 }
-                
+
                 Divider().overlay(SepiaTheme.toolbarLine)
-                
+
                 HStack {
                     Button("Отмена") { dismiss() }.buttonStyle(SepiaButtonStyle())
                     Spacer()
@@ -151,7 +151,7 @@ struct AddPersonView: View {
         }
         .frame(width: 540, height: 680)
     }
-    
+
     private func addPerson() {
         let person = Person(
             givenNames: givenNames,

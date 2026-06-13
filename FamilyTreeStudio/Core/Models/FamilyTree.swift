@@ -4,23 +4,27 @@ import Observation
 /// A kinship role to attach, expressed from the subject person's point of view.
 public enum RelationKind: String, CaseIterable, Identifiable, Hashable {
     case parent, spouse, child, sibling
-    public var id: String { rawValue }
+    public var id: String {
+        rawValue
+    }
+
     public var displayName: String {
         switch self {
-        case .parent: return "Родитель"
-        case .spouse: return "Супруг(а)"
-        case .child: return "Ребёнок"
-        case .sibling: return "Брат/сестра"
+        case .parent: "Родитель"
+        case .spouse: "Супруг(а)"
+        case .child: "Ребёнок"
+        case .sibling: "Брат/сестра"
         }
     }
+
     /// Apply parents before siblings and spouses before children so a batch of
     /// relatives added at once links into shared unions in the right order.
     public var applyOrder: Int {
         switch self {
-        case .parent: return 0
-        case .spouse: return 1
-        case .sibling: return 2
-        case .child: return 3
+        case .parent: 0
+        case .spouse: 1
+        case .sibling: 2
+        case .child: 3
         }
     }
 }
@@ -147,7 +151,9 @@ public final class FamilyTree: Identifiable, Codable {
         // Remove children from partner-less unions if they already belong to a union with partners
         var childrenInPartnerUnions = Set<UUID>()
         for u in merged where u.partnerIds.count >= 2 {
-            for cid in u.childrenIds { childrenInPartnerUnions.insert(cid) }
+            for cid in u.childrenIds {
+                childrenInPartnerUnions.insert(cid)
+            }
         }
         for u in merged where u.partnerIds.isEmpty {
             u.childrenIds.removeAll { childrenInPartnerUnions.contains($0) }
@@ -219,6 +225,7 @@ public final class FamilyTree: Identifiable, Codable {
     }
 
     // MARK: - Codable
+
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle, homePersonId, rootUnionId, people, unions, createdAt, updatedAt
     }
