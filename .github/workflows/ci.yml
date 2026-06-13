@@ -34,3 +34,13 @@ jobs:
       # `swift test` works here (locally, Scripts/run-tests.sh adds the paths).
       - name: Test
         run: swift test
+
+  lint:
+    name: SwiftFormat
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install SwiftFormat
+        run: brew install swiftformat
+      - name: Check formatting
+        run: swiftformat --lint .

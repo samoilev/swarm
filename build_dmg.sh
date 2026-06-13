@@ -7,7 +7,7 @@ set -e
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="Родословная Студия"
 BUNDLE_ID="com.familytreestudio.app"
-VERSION="1.5.0"
+VERSION="$(cat "$(cd "$(dirname "$0")" && pwd)/VERSION" 2>/dev/null || echo "1.5.0")"
 BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
 BINARY="$BUILD_DIR/FamilyTreeStudio"
 # Two SwiftPM resource bundles after the FamilyTreeCore split:
@@ -96,10 +96,17 @@ echo -n "APPL????" > "$APP_BUNDLE/Contents/PkgInfo"
 
 echo "=== .app bundle created at: $APP_BUNDLE ==="
 
-# Verify the app
-echo "=== Verifying bundle ==="
-codesign --sign - --force --deep "$APP_BUNDLE"
-echo "Ad-hoc signed OK"
+# Sign the app. A real Developer ID (set CODESIGN_IDENTITY) produces a
+# distributable, notarizable build with the hardened runtime; otherwise fall
+# back to an ad-hoc signature for local use only (Gatekeeper will warn).
+echo "=== Signing bundle ==="
+if [ -n "$CODESIGN_IDENTITY" ]; then
+    codesign --sign "$CODESIGN_IDENTITY" --force --deep --options runtime --timestamp "$APP_BUNDLE"
+    echo "Signed with: $CODESIGN_IDENTITY"
+else
+    codesign --sign - --force --deep "$APP_BUNDLE"
+    echo "Ad-hoc signed (local use only; not notarizable)"
+fi
 
 # Create DMG
 echo "=== Creating DMG ==="
@@ -121,6 +128,24 @@ hdiutil create -volname "$APP_NAME" \
     "$DMG_PATH"
 
 rm -rf "$DMG_TEMP"
+
+# Notarize + staple when credentials are available (requires Developer ID signing).
+# Provide either a stored notarytool keychain profile via NOTARY_PROFILE, or
+# APPLE_ID + APPLE_TEAM_ID + APPLE_APP_PASSWORD (an app-specific password).
+if [ -n "$CODESIGN_IDENTITY" ] && { [ -n "$NOTARY_PROFILE" ] || [ -n "$APPLE_ID" ]; }; then
+    echo "=== Notarizing DMG ==="
+    if [ -n "$NOTARY_PROFILE" ]; then
+        xcrun notarytool submit "$DMG_PATH" --keychain-profile "$NOTARY_PROFILE" --wait
+    else
+        xcrun notarytool submit "$DMG_PATH" \
+            --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --wait
+    fi
+    xcrun stapler staple "$DMG_PATH"
+    echo "Notarized and stapled."
+else
+    echo "Skipping notarization — set CODESIGN_IDENTITY plus NOTARY_PROFILE"
+    echo "(or APPLE_ID/APPLE_TEAM_ID/APPLE_APP_PASSWORD) to enable a distributable build."
+fi
 
 echo ""
 echo "=============================="
