@@ -1,13 +1,13 @@
 import Foundation
 import CoreLocation
 
-/// Geocoding service backed by GeoNames database (252K+ settlements of the former USSR)
-/// Falls back to Apple CLGeocoder for places not in the database
+/// Fully offline geocoding, backed solely by the bundled GeoNames database
+/// (252K+ settlements of the former USSR). Place names never leave the device —
+/// a place absent from the database simply resolves to nil (no map pin).
 public final class GeocodingService {
     public static let shared = GeocodingService()
 
     private var cache: [String: CLLocationCoordinate2D] = [:]
-    private let geocoder = CLGeocoder()
 
     /// GeoNames-sourced coordinates loaded from bundled TSV (name\tlat\tlon)
     private var knownPlaces: [String: CLLocationCoordinate2D] = [:]
@@ -30,8 +30,8 @@ public final class GeocodingService {
     }
 
     /// Runs `run` once the GeoNames DB is loaded (immediately if already loaded).
-    /// Callers that geocode in bulk should gate on this to avoid hitting CLGeocoder
-    /// for places that are actually in the (not-yet-loaded) database.
+    /// Callers that geocode in bulk should gate on this so places that are in the
+    /// (not-yet-loaded) database don't prematurely resolve to nil.
     public func whenReady(_ run: @escaping () -> Void) {
         if isReady { run() } else { readyCallbacks.append(run) }
     }
@@ -93,21 +93,13 @@ public final class GeocodingService {
             return
         }
         
-        // Try lookup in GeoNames database
+        // Look up in the bundled GeoNames database. Offline only — unknown places
+        // resolve to nil rather than being sent to a network geocoder.
         if let coord = lookupInDatabase(key) {
             cache[key] = coord
             completion(coord)
-            return
-        }
-        
-        // Fallback to CLGeocoder
-        geocoder.geocodeAddressString(place) { [weak self] placemarks, _ in
-            if let location = placemarks?.first?.location?.coordinate {
-                self?.cache[key] = location
-                completion(location)
-            } else {
-                completion(nil)
-            }
+        } else {
+            completion(nil)
         }
     }
     
@@ -144,8 +136,8 @@ public final class GeocodingService {
         // For multi-part addresses like "Зарубино, Новгородская обл., Россия" we
         // deliberately skip this — stripping the region would return the first city
         // with that name in the DB (e.g. the Far-East Зарубино instead of the
-        // Novgorod one). Returning nil here lets CLGeocoder use the full address
-        // string including region for a much more accurate result.
+        // Novgorod one). Returning nil keeps such ambiguous addresses unpinned
+        // rather than placing a confidently-wrong pin.
         guard !key.contains(",") else { return nil }
 
         let parts = key.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }

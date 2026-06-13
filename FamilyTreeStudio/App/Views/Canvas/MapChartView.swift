@@ -47,8 +47,8 @@ struct MapChartView: View {
         }
         .onAppear {
             lastZoom = zoom
-            // Wait for the GeoNames DB so known places resolve locally instead of
-            // all falling through to CLGeocoder (rate-limited).
+            // Wait for the GeoNames DB so known places resolve instead of
+            // prematurely returning nil (unpinned) before it has loaded.
             GeocodingService.shared.whenReady {
                 computeAnnotations()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -286,7 +286,7 @@ struct MapChartView: View {
         // Fit map to show all annotations
         fitToAnnotations()
         
-        // Async geocode pending places — serialize to avoid CLGeocoder throttling
+        // Resolve any pending places from the local GeoNames DB.
         if !pendingGeocode.isEmpty {
             isGeocodingInProgress = true
             geocodeSequentially(items: pendingGeocode, index: 0)
@@ -333,8 +333,9 @@ struct MapChartView: View {
                     }
                 }
                 
-                // Process next after short delay to respect CLGeocoder rate limits
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                // Lookups are local now, so process the next place immediately
+                // (the async hop just unwinds the recursion off the stack).
+                DispatchQueue.main.async {
                     geocodeSequentially(items: items, index: index + 1)
                 }
             }
