@@ -4,7 +4,7 @@ import MapKit
 
 /// A small, non-interactive map showing a person's birth and death places as pins,
 /// connected by a line. Shows just one pin when only one place is known. Coordinates
-/// come from the person's cached lat/lon, the local GeoNames DB, or CLGeocoder.
+/// come from the person's cached lat/lon or the local GeoNames DB (offline only).
 struct PersonMiniMap: View {
     let person: Person
 
@@ -120,7 +120,8 @@ struct PersonMiniMap: View {
         if let lat = person.birthLat, let lon = person.birthLon { b = .init(latitude: lat, longitude: lon) }
         if let lat = person.deathLat, let lon = person.deathLon { d = .init(latitude: lat, longitude: lon) }
 
-        // Wait for the local GeoNames DB so known places resolve without CLGeocoder.
+        // Wait for the local GeoNames DB so known places resolve instead of
+        // returning nil before it has finished loading.
         await withCheckedContinuation { cont in geo.whenReady { cont.resume() } }
 
         if b == nil, let place = person.birthPlace, !place.isEmpty {
