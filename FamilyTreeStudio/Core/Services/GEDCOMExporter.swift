@@ -4,9 +4,24 @@ import Foundation
 /// This is the primary persistence format — each tree is stored as a .ged file.
 public struct GEDCOMSerializer {
 
-    /// Serialize tree to GEDCOM string.
-    /// Photos are saved to the mediaFolder; paths are relative in the GEDCOM.
-    public static func serialize(tree: FamilyTree, mediaFolder: URL? = nil) -> String {
+    /// A person portrait the GEDCOM references, paired with the filename used in its
+    /// `OBJE`/`FILE` line. The caller persists the bytes — serialization stays pure.
+    public struct Photo: Equatable {
+        public let filename: String
+        public let data: Data
+    }
+
+    /// Result of serialization: the GEDCOM text plus the photos it references.
+    public struct Result: Equatable {
+        public let gedcom: String
+        public let photos: [Photo]
+    }
+
+    /// Serialize a tree to GEDCOM. This is a pure, side-effect-free transform:
+    /// photo bytes are returned in `Result.photos` (referenced by relative filename),
+    /// and writing them to a media folder is the caller's responsibility (see
+    /// `TreeStore.writePhotos`). Kept pure so it is trivially testable.
+    public static func serialize(tree: FamilyTree) -> Result {
         let idx = FamilyIndex(tree: tree)
         
         // Stable xref assignment: sort by creation date for deterministic output
@@ -15,8 +30,9 @@ public struct GEDCOMSerializer {
         
         for (i, p) in tree.people.enumerated() { indiXref[p.id] = "I\(i + 1)" }
         for (i, u) in tree.unions.enumerated() { famXref[u.id] = "F\(i + 1)" }
-        
+
         var lines: [String] = []
+        var photos: [Photo] = []
         
         // HEAD
         lines.append("0 HEAD")
@@ -108,12 +124,11 @@ public struct GEDCOMSerializer {
             // Sources
             for s in p.sources { lines.append("1 SOUR \(s)") }
             
-            // Photo (save to media folder, reference by filename)
-            if let photoData = p.photoData, let mediaFolder = mediaFolder {
+            // Photo — referenced by filename here; the bytes are returned in
+            // `Result.photos` for the caller to persist into the media folder.
+            if let photoData = p.photoData {
                 let filename = "\(xref).jpg"
-                let photoURL = mediaFolder.appendingPathComponent(filename)
-                try? FileManager.default.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
-                try? photoData.write(to: photoURL)
+                photos.append(Photo(filename: filename, data: photoData))
                 lines.append("1 OBJE")
                 lines.append("2 FILE \(filename)")
                 lines.append("2 FORM JPEG")
@@ -185,7 +200,7 @@ public struct GEDCOMSerializer {
         }
         
         lines.append("0 TRLR")
-        return lines.joined(separator: "\n")
+        return Result(gedcom: lines.joined(separator: "\n"), photos: photos)
     }
 }
 

@@ -16,6 +16,11 @@ import Foundation
 public final class TreeStore {
     public var trees: [FamilyTree] = []
 
+    /// Set when a save/export write fails, so views can surface it (a silent write
+    /// failure in a data-authoring app is undetectable data loss). Cleared by the
+    /// view once shown.
+    public var lastSaveError: String?
+
     private let storageFolder: URL
 
     /// Maps tree UUID → its folder URL.
@@ -170,12 +175,35 @@ public final class TreeStore {
             }
         }
         let mediaFolder = folder.appendingPathComponent(Self.mediaName, isDirectory: true)
-        let content = GEDCOMSerializer.serialize(tree: tree, mediaFolder: mediaFolder)
+        let result = GEDCOMSerializer.serialize(tree: tree)
         do {
-            try content.write(to: ged, atomically: true, encoding: .utf8)
+            try result.gedcom.write(to: ged, atomically: true, encoding: .utf8)
+            writePhotos(result.photos, to: mediaFolder)
             folderMap[tree.id] = folder
         } catch {
+            // Surface the failure: in a data-authoring app a silent write error
+            // means undetectable data loss. Views observe `lastSaveError`.
             print("Failed to save tree \(tree.name): \(error)")
+            lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
+        }
+    }
+
+    /// Write only the photos whose bytes changed, so editing one field doesn't
+    /// rewrite every portrait on disk. The filename↔person mapping is owned by the
+    /// serializer (`Result.photos`), keeping it consistent with the GEDCOM refs.
+    private func writePhotos(_ photos: [GEDCOMSerializer.Photo], to mediaFolder: URL) {
+        guard !photos.isEmpty else { return }
+        let fm = FileManager.default
+        try? fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
+        for photo in photos {
+            let dest = mediaFolder.appendingPathComponent(photo.filename)
+            // Skip if an identical file already exists (cheap size check, then bytes).
+            if let attrs = try? fm.attributesOfItem(atPath: dest.path),
+               let size = attrs[.size] as? Int, size == photo.data.count,
+               let existing = try? Data(contentsOf: dest), existing == photo.data {
+                continue
+            }
+            try? photo.data.write(to: dest)
         }
     }
     
@@ -235,8 +263,9 @@ public final class TreeStore {
         if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path) {
             try fm.copyItem(at: gedSrc, to: gedDest)
         } else {
-            let content = GEDCOMSerializer.serialize(tree: tree, mediaFolder: bundle.appendingPathComponent(Self.mediaName))
-            try content.write(to: gedDest, atomically: true, encoding: .utf8)
+            let result = GEDCOMSerializer.serialize(tree: tree)
+            try result.gedcom.write(to: gedDest, atomically: true, encoding: .utf8)
+            writePhotos(result.photos, to: bundle.appendingPathComponent(Self.mediaName))
         }
 
         // Photos and attachments — copy the folders verbatim so refs resolve on re-import.
@@ -278,12 +307,14 @@ public final class TreeStore {
     
     // MARK: - Export .ged to a user-chosen location
     
-    public func exportGEDCOM(tree: FamilyTree, to url: URL) {
+    public func exportGEDCOM(tree: FamilyTree, to url: URL) throws {
         let fm = FileManager.default
         let dir = url.deletingLastPathComponent()
         let mediaFolder = dir.appendingPathComponent(Self.mediaName, isDirectory: true)
-        let content = GEDCOMSerializer.serialize(tree: tree, mediaFolder: mediaFolder)
-        try? content.write(to: url, atomically: true, encoding: .utf8)
+        let result = GEDCOMSerializer.serialize(tree: tree)
+        // The .ged write is the contract — surface its failure to the caller.
+        try result.gedcom.write(to: url, atomically: true, encoding: .utf8)
+        writePhotos(result.photos, to: mediaFolder)
 
         // Carry attachments next to the .ged so its _ATTC references resolve on re-import.
         let attSrc = attachmentsFolderURL(for: tree)

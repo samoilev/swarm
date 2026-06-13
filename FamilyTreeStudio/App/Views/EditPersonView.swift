@@ -246,7 +246,7 @@ struct EditPersonView: View {
         }
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
     }
     
     private func removeSpouse(_ spouse: Person) {
@@ -263,7 +263,7 @@ struct EditPersonView: View {
         }
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
     }
     
     private func removeChild(_ child: Person) {
@@ -278,7 +278,7 @@ struct EditPersonView: View {
         }
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
     }
     
     private func removeSibling(_ sibling: Person) {
@@ -290,7 +290,7 @@ struct EditPersonView: View {
         }
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
     }
     
     private func addRelationship() {
@@ -309,7 +309,7 @@ struct EditPersonView: View {
         addRelPersonId = nil
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
     }
     
     // MARK: - Attachments Editor
@@ -541,7 +541,7 @@ struct EditPersonView: View {
         person.updatedAt = Date()
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
         dismiss()
     }
 }
