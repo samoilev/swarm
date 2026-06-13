@@ -193,7 +193,7 @@ struct AddPersonView: View {
 
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.save()
+        store.saveTree(tree)
         onAdded(person)
         dismiss()
     }

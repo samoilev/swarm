@@ -100,7 +100,11 @@ struct ExportView: View {
         panel.nameFieldStringValue = "\(fileSlug).ged"
         panel.begin { r in
             if r == .OK, let url = panel.url {
-                store.exportGEDCOM(tree: tree, to: url)
+                do {
+                    try store.exportGEDCOM(tree: tree, to: url)
+                } catch {
+                    exportError = error.localizedDescription
+                }
             }
         }
     }
