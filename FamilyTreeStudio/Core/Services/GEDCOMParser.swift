@@ -1,6 +1,11 @@
 import Foundation
 
 /// Parses a GEDCOM 5.5.1 file into FamilyTree model objects.
+///
+/// Lines are tokenized positionally (`level [@xref@] tag [value|@pointer@]`) and
+/// walked with a level stack, so nested structures (e.g. the standard
+/// `PLAC › MAP › LATI/LONG` coordinate triple) are addressable and record/tag
+/// detection is exact rather than substring-based.
 public struct GEDCOMParser {
 
     public struct ParsedTree {
@@ -23,80 +28,56 @@ public struct GEDCOMParser {
             ?? String(decoding: raw, as: UTF8.self)
         return parse(gedcom: content, mediaFolder: url.deletingLastPathComponent().appendingPathComponent("Media"))
     }
-    
+
     public static func parse(gedcom: String, mediaFolder: URL? = nil) -> ParsedTree {
         let lines = gedcom.components(separatedBy: .newlines)
         let records = splitRecords(lines: lines)
-        
+
         var treeName = "Без названия"
         var treeSubtitle: String? = nil
         var treeId: UUID? = nil
         var homeXref: String? = nil
         var rootFamXref: String? = nil
-        
+
         // Maps: GEDCOM xref → UUID
         var indiUUIDs: [String: UUID] = [:]
         var famUUIDs: [String: UUID] = [:]
-        
-        // Pre-scan: assign UUIDs to all INDI and FAM records
+
+        // Pre-scan: assign UUIDs to all INDI and FAM records (exact tag match).
         for record in records {
-            let firstLine = record[0]
-            if let xref = extractXref(firstLine) {
-                if firstLine.contains("INDI") {
-                    indiUUIDs[xref] = UUID()
-                } else if firstLine.contains("FAM") {
-                    famUUIDs[xref] = UUID()
-                }
-            }
+            guard let head = parseLine(record[0]), let xref = head.xref else { continue }
+            if head.tag == "INDI" { indiUUIDs[xref] = UUID() }
+            else if head.tag == "FAM" { famUUIDs[xref] = UUID() }
         }
-        
+
         var people: [Person] = []
         var unions: [Union] = []
-        
-        // Parse HEAD for metadata
+
         for record in records {
-            guard record[0].hasPrefix("0 HEAD") else { continue }
-            for line in record {
-                let trimmed = line.trimmingCharacters(in: .whitespaces)
-                if trimmed.hasPrefix("1 _NAME ") {
-                    treeName = String(trimmed.dropFirst(8))
-                } else if trimmed.hasPrefix("1 _SUBTITLE ") {
-                    treeSubtitle = String(trimmed.dropFirst(12))
-                } else if trimmed.hasPrefix("1 _TREEID ") {
-                    treeId = UUID(uuidString: String(trimmed.dropFirst(10)))
-                } else if trimmed.hasPrefix("1 _HOME @") {
-                    homeXref = extractPointer(trimmed)
-                } else if trimmed.hasPrefix("1 _ROOT @") {
-                    rootFamXref = extractPointer(trimmed)
+            guard let head = parseLine(record[0]) else { continue }
+
+            if head.tag == "HEAD" {
+                for raw in record.dropFirst() {
+                    guard let line = parseLine(raw), line.level == 1 else { continue }
+                    switch line.tag {
+                    case "_NAME": treeName = line.value
+                    case "_SUBTITLE": treeSubtitle = line.value
+                    case "_TREEID": treeId = UUID(uuidString: line.value)
+                    case "_HOME": homeXref = line.pointer
+                    case "_ROOT": rootFamXref = line.pointer
+                    default: break
+                    }
                 }
+            } else if head.tag == "INDI", let xref = head.xref, let uuid = indiUUIDs[xref] {
+                people.append(parseIndividual(record: record, uuid: uuid, mediaFolder: mediaFolder))
+            } else if head.tag == "FAM", let xref = head.xref, let uuid = famUUIDs[xref] {
+                unions.append(parseFamily(record: record, uuid: uuid, indiUUIDs: indiUUIDs))
             }
-            break
         }
-        
-        // Parse INDI records
-        for record in records {
-            let firstLine = record[0]
-            guard let xref = extractXref(firstLine), firstLine.contains("INDI") else { continue }
-            guard let uuid = indiUUIDs[xref] else { continue }
-            
-            let person = parseIndividual(record: record, uuid: uuid, mediaFolder: mediaFolder)
-            people.append(person)
-        }
-        
-        // Parse FAM records
-        for record in records {
-            let firstLine = record[0]
-            guard let xref = extractXref(firstLine), firstLine.contains("FAM") else { continue }
-            guard let uuid = famUUIDs[xref] else { continue }
-            
-            let union = parseFamily(record: record, uuid: uuid, indiUUIDs: indiUUIDs)
-            unions.append(union)
-        }
-        
-        // Resolve home person and root union
+
         let homePersonId = homeXref.flatMap { indiUUIDs[$0] }
         let rootUnionId = rootFamXref.flatMap { famUUIDs[$0] }
-        
+
         return ParsedTree(
             name: treeName,
             subtitle: treeSubtitle,
@@ -107,17 +88,81 @@ public struct GEDCOMParser {
             unions: unions
         )
     }
-    
+
+    // MARK: - Line tokenizer
+
+    /// One parsed GEDCOM line. `xref` is the optional `@X@` *record id* before the tag
+    /// (e.g. `0 @I1@ INDI`); `pointer` is an `@X@` *pointer value* after the tag
+    /// (e.g. `1 HUSB @I1@`). `value` is the free-text remainder otherwise.
+    private struct GEDCOMLine {
+        let level: Int
+        let xref: String?
+        let tag: String
+        let pointer: String?
+        let value: String
+    }
+
+    private static func parseLine(_ raw: String) -> GEDCOMLine? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard let sp1 = trimmed.firstIndex(of: " ") else {
+            // A bare level with no tag is malformed — ignore.
+            return nil
+        }
+        guard let level = Int(trimmed[..<sp1]) else { return nil }
+        var rest = String(trimmed[trimmed.index(after: sp1)...]).trimmingCharacters(in: .whitespaces)
+
+        // Optional record xref immediately after the level: "@X@ TAG ...".
+        var xref: String? = nil
+        if rest.hasPrefix("@"), let close = rest.dropFirst().firstIndex(of: "@") {
+            xref = String(rest[rest.index(after: rest.startIndex)..<close])
+            rest = String(rest[rest.index(after: close)...]).trimmingCharacters(in: .whitespaces)
+        }
+
+        // Tag is the next whitespace-delimited token.
+        let tag: String
+        let afterTag: String
+        if let sp2 = rest.firstIndex(of: " ") {
+            tag = String(rest[..<sp2])
+            afterTag = String(rest[rest.index(after: sp2)...]).trimmingCharacters(in: .whitespaces)
+        } else {
+            tag = rest
+            afterTag = ""
+        }
+
+        // A value that is exactly "@X@" is a pointer, not free text.
+        var pointer: String? = nil
+        var value = afterTag
+        if afterTag.hasPrefix("@"), afterTag.hasSuffix("@"), afterTag.count >= 2 {
+            let inner = afterTag.dropFirst().dropLast()
+            if !inner.contains("@") { pointer = String(inner); value = "" }
+        }
+
+        return GEDCOMLine(level: level, xref: xref, tag: tag, pointer: pointer, value: value)
+    }
+
+    /// Parse a GEDCOM `LATI`/`LONG` value ("N55.75", "E37.61", "S12.3", "W4.1", or a
+    /// plain signed decimal) into a signed degree value. Nil if unparseable.
+    private static func parseLatLong(_ s: String) -> Double? {
+        let t = s.trimmingCharacters(in: .whitespaces)
+        guard let first = t.first else { return nil }
+        if "NSEW".contains(first) {
+            guard let mag = Double(t.dropFirst()) else { return nil }
+            return (first == "S" || first == "W") ? -mag : mag
+        }
+        return Double(t)
+    }
+
     // MARK: - Record splitting
-    
+
     private static func splitRecords(lines: [String]) -> [[String]] {
         var records: [[String]] = []
         var current: [String] = []
-        
+
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { continue }
-            
+
             if trimmed.hasPrefix("0 ") {
                 if !current.isEmpty { records.append(current) }
                 current = [trimmed]
@@ -128,9 +173,9 @@ public struct GEDCOMParser {
         if !current.isEmpty { records.append(current) }
         return records
     }
-    
+
     // MARK: - Parse Individual
-    
+
     private static func parseIndividual(record: [String], uuid: UUID, mediaFolder: URL?) -> Person {
         var givenNames = ""
         var surname = ""
@@ -166,18 +211,23 @@ public struct GEDCOMParser {
             pendingAttachTitle = nil
         }
 
-        var context = "" // tracks current level-1 tag
+        // tagAtLevel[L] = the tag most recently seen at level L within this record.
+        // It gives each line its parent context (e.g. a level-4 LATI knows it sits
+        // under PLAC › MAP under some BIRT/DEAT/BURI event).
+        var tagAtLevel: [Int: String] = [:]
 
-        for line in record.dropFirst() {
-            let level = extractLevel(line)
-            let tag = extractTag(line, level: level)
-            let value = extractValue(line, level: level, tag: tag)
-            
-            if level == 1 {
-                // Any new top-level tag (including the next _ATTC) closes the
-                // attachment record currently being read. No-op if none pending.
+        for raw in record.dropFirst() {
+            guard let line = parseLine(raw) else { continue }
+            let level = line.level
+            let tag = line.tag
+            let value = line.value
+            tagAtLevel[level] = tag
+            for deeper in tagAtLevel.keys where deeper > level { tagAtLevel[deeper] = nil }
+
+            switch level {
+            case 1:
+                // Any new top-level tag closes the attachment record being read.
                 flushAttachment()
-                context = tag
                 switch tag {
                 case "NAME":
                     let parsed = parseName(value)
@@ -186,49 +236,41 @@ public struct GEDCOMParser {
                 case "SEX":
                     sex = Person.Sex(rawValue: value) ?? .unknown
                 case "BIRT": break
-                case "DEAT":
-                    isLiving = false
+                case "DEAT": isLiving = false
                 case "BURI": break
-                case "OCCU":
-                    occupation = value.isEmpty ? nil : value
-                case "EDUC":
-                    education = value.isEmpty ? nil : value
-                case "NOTE":
-                    notes = value.isEmpty ? nil : value
-                case "SOUR":
-                    if !value.isEmpty { sources.append(value) }
-                case "_PATR":
-                    patronymic = value.isEmpty ? nil : value
+                case "OCCU": occupation = value.isEmpty ? nil : value
+                case "EDUC": education = value.isEmpty ? nil : value
+                case "NOTE": notes = value.isEmpty ? nil : value
+                case "SOUR": if !value.isEmpty { sources.append(value) }
+                case "_PATR": patronymic = value.isEmpty ? nil : value
                 case "_MARNM":
-                    // Married name given → current surname is married, birth surname is in NAME
+                    // Married name at level 1 → current surname is the married name,
+                    // the birth surname (from NAME) becomes the maiden name.
                     let parsed = parseName(value)
                     maidenName = surname.isEmpty ? nil : surname
                     surname = parsed.surname.isEmpty ? parsed.given : parsed.surname
                 case "OBJE": break
                 default: break
                 }
-            } else if level == 2 {
-                switch (context, tag) {
-                case ("BIRT", "DATE"):
-                    birthDate = FamilyDate.normalize(value)
-                case ("BIRT", "PLAC"):
-                    birthPlace = value
+
+            case 2:
+                let ctx1 = tagAtLevel[1] ?? ""
+                switch (ctx1, tag) {
+                case ("BIRT", "DATE"): birthDate = FamilyDate.normalize(value)
+                case ("BIRT", "PLAC"): birthPlace = value
                 case ("BIRT", "_COORD"):
                     let nums = value.split(separator: " ").compactMap { Double($0) }
                     if nums.count == 2 { birthLat = nums[0]; birthLon = nums[1] }
-                case ("DEAT", "DATE"):
-                    deathDate = FamilyDate.normalize(value)
-                case ("DEAT", "PLAC"):
-                    deathPlace = value
+                case ("DEAT", "DATE"): deathDate = FamilyDate.normalize(value)
+                case ("DEAT", "PLAC"): deathPlace = value
                 case ("DEAT", "_COORD"):
                     let nums = value.split(separator: " ").compactMap { Double($0) }
                     if nums.count == 2 { deathLat = nums[0]; deathLon = nums[1] }
-                case ("BURI", "PLAC"):
-                    burialPlace = value
+                case ("BURI", "PLAC"): burialPlace = value
                 case ("BURI", "_COORD"):
                     let nums = value.split(separator: " ").compactMap { Double($0) }
                     if nums.count == 2 { burialLat = nums[0]; burialLon = nums[1] }
-                case ("NAME", "_MARNM"), ("NAME", "2 _MARNM"):
+                case ("NAME", "_MARNM"):
                     let parsed = parseName(value)
                     maidenName = surname
                     surname = parsed.surname.isEmpty ? parsed.given : parsed.surname
@@ -237,15 +279,37 @@ public struct GEDCOMParser {
                         let photoURL = mediaFolder.appendingPathComponent(value)
                         photoData = try? Data(contentsOf: photoURL)
                     }
-                case ("_ATTC", "FILE"):
-                    pendingAttachFile = value
-                case ("_ATTC", "TITL"):
-                    pendingAttachTitle = value
+                case ("_ATTC", "FILE"): pendingAttachFile = value
+                case ("_ATTC", "TITL"): pendingAttachTitle = value
                 case ("NOTE", "CONT"), ("NOTE", "CONC"):
                     let sep = tag == "CONT" ? "\n" : ""
                     notes = (notes ?? "") + sep + value
                 default: break
                 }
+
+            case 4:
+                // Standard coordinates: <EVENT> › PLAC › MAP › LATI/LONG.
+                let ctx1 = tagAtLevel[1] ?? ""
+                let ctx2 = tagAtLevel[2] ?? ""
+                let ctx3 = tagAtLevel[3] ?? ""
+                guard ctx2 == "PLAC", ctx3 == "MAP" else { break }
+                if tag == "LATI", let v = parseLatLong(value) {
+                    switch ctx1 {
+                    case "BIRT": birthLat = v
+                    case "DEAT": deathLat = v
+                    case "BURI": burialLat = v
+                    default: break
+                    }
+                } else if tag == "LONG", let v = parseLatLong(value) {
+                    switch ctx1 {
+                    case "BIRT": birthLon = v
+                    case "DEAT": deathLon = v
+                    case "BURI": burialLon = v
+                    default: break
+                    }
+                }
+
+            default: break
             }
         }
         flushAttachment() // capture a trailing attachment record
@@ -279,9 +343,9 @@ public struct GEDCOMParser {
         person.attachments = attachments
         return person
     }
-    
+
     // MARK: - Parse Family
-    
+
     private static func parseFamily(record: [String], uuid: UUID, indiUUIDs: [String: UUID]) -> Union {
         var partner1Id: UUID? = nil
         var partner2Id: UUID? = nil
@@ -289,40 +353,37 @@ public struct GEDCOMParser {
         var marriagePlace: String? = nil
         var status: String? = nil
         var childrenIds: [UUID] = []
-        var context = ""
-        
-        for line in record.dropFirst() {
-            let level = extractLevel(line)
-            let tag = extractTag(line, level: level)
-            let value = extractValue(line, level: level, tag: tag)
-            
-            if level == 1 {
-                context = tag
+        var tagAtLevel: [Int: String] = [:]
+
+        for raw in record.dropFirst() {
+            guard let line = parseLine(raw) else { continue }
+            let level = line.level
+            let tag = line.tag
+            tagAtLevel[level] = tag
+            for deeper in tagAtLevel.keys where deeper > level { tagAtLevel[deeper] = nil }
+
+            switch level {
+            case 1:
                 switch tag {
-                case "HUSB":
-                    if let xref = extractPointer(line) { partner1Id = indiUUIDs[xref] }
-                case "WIFE":
-                    if let xref = extractPointer(line) { partner2Id = indiUUIDs[xref] }
-                case "CHIL":
-                    if let xref = extractPointer(line), let cid = indiUUIDs[xref] { childrenIds.append(cid) }
+                case "HUSB": if let p = line.pointer { partner1Id = indiUUIDs[p] }
+                case "WIFE": if let p = line.pointer { partner2Id = indiUUIDs[p] }
+                case "CHIL": if let p = line.pointer, let cid = indiUUIDs[p] { childrenIds.append(cid) }
                 case "MARR": break
-                case "DIV":
-                    status = "divorced"
-                case "_STAT":
-                    status = value.isEmpty ? nil : value
+                case "DIV": status = "divorced"
+                case "_STAT": status = line.value.isEmpty ? nil : line.value
                 default: break
                 }
-            } else if level == 2 {
-                switch (context, tag) {
-                case ("MARR", "DATE"):
-                    marriageDate = FamilyDate.normalize(value)
-                case ("MARR", "PLAC"):
-                    marriagePlace = value
+            case 2:
+                let ctx1 = tagAtLevel[1] ?? ""
+                switch (ctx1, tag) {
+                case ("MARR", "DATE"): marriageDate = FamilyDate.normalize(line.value)
+                case ("MARR", "PLAC"): marriagePlace = line.value
                 default: break
                 }
+            default: break
             }
         }
-        
+
         let union = Union(
             partner1Id: partner1Id,
             partner2Id: partner2Id,
@@ -334,63 +395,15 @@ public struct GEDCOMParser {
         union.id = uuid
         return union
     }
-    
+
     // MARK: - Helpers
-    
-    private static func extractXref(_ line: String) -> String? {
-        // "0 @I1@ INDI" → "I1"
-        guard let at1 = line.firstIndex(of: "@") else { return nil }
-        let after = line[line.index(after: at1)...]
-        guard let at2 = after.firstIndex(of: "@") else { return nil }
-        return String(after[..<at2])
-    }
-    
-    private static func extractPointer(_ line: String) -> String? {
-        // "1 HUSB @I1@" → "I1"
-        guard let at1 = line.firstIndex(of: "@") else { return nil }
-        let after = line[line.index(after: at1)...]
-        guard let at2 = after.firstIndex(of: "@") else { return nil }
-        return String(after[..<at2])
-    }
-    
-    private static func extractLevel(_ line: String) -> Int {
-        guard let first = line.first, let level = Int(String(first)) else { return 0 }
-        return level
-    }
-    
-    private static func extractTag(_ line: String, level: Int) -> String {
-        // "2 DATE 1 JAN 1990" → "DATE"
-        let prefix = "\(level) "
-        guard line.hasPrefix(prefix) else { return "" }
-        let rest = String(line.dropFirst(prefix.count))
-        // Skip xref if present
-        if rest.hasPrefix("@") {
-            if let end = rest.dropFirst().firstIndex(of: "@") {
-                let afterXref = rest[rest.index(after: end)...].trimmingCharacters(in: .whitespaces)
-                return String(afterXref.prefix(while: { !$0.isWhitespace }))
-            }
-        }
-        return String(rest.prefix(while: { !$0.isWhitespace }))
-    }
-    
-    private static func extractValue(_ line: String, level: Int, tag: String) -> String {
-        let prefix = "\(level) "
-        guard line.hasPrefix(prefix) else { return "" }
-        let rest = String(line.dropFirst(prefix.count))
-        // Find value after tag
-        if let range = rest.range(of: tag) {
-            let afterTag = rest[range.upperBound...].trimmingCharacters(in: .whitespaces)
-            return afterTag
-        }
-        return ""
-    }
-    
+
     private static func parseName(_ nameStr: String) -> (given: String, surname: String) {
         // "John /Smith/" → ("John", "Smith")
         // "Иван Петрович /Сидоров/" → ("Иван Петрович", "Сидоров")
         var given = ""
         var surname = ""
-        
+
         if let slashRange = nameStr.range(of: "/") {
             given = String(nameStr[..<slashRange.lowerBound]).trimmingCharacters(in: .whitespaces)
             let afterSlash = nameStr[slashRange.upperBound...]
@@ -402,7 +415,7 @@ public struct GEDCOMParser {
         } else {
             given = nameStr.trimmingCharacters(in: .whitespaces)
         }
-        
+
         return (given, surname)
     }
 }
