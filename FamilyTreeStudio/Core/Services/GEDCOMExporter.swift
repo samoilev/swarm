@@ -83,29 +83,24 @@ public struct GEDCOMSerializer {
             
             // Birth
             let hasBirthCoord = p.birthLat != nil && p.birthLon != nil
-            if p.birthDate != nil || p.birthPlace != nil || hasBirthCoord {
+            if p.birthDate != nil || (p.birthPlace?.isEmpty == false) || hasBirthCoord {
                 lines.append("1 BIRT")
                 if let d = p.birthDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
-                if let pl = p.birthPlace { lines.append("2 PLAC \(pl)") }
-                if let lat = p.birthLat, let lon = p.birthLon { lines.append("2 _COORD \(lat) \(lon)") }
+                appendPlace(p.birthPlace, lat: p.birthLat, lon: p.birthLon, to: &lines)
             }
 
             // Death
             if !p.isLiving {
                 lines.append("1 DEAT")
                 if let d = p.deathDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
-                if let pl = p.deathPlace { lines.append("2 PLAC \(pl)") }
-                if let lat = p.deathLat, let lon = p.deathLon { lines.append("2 _COORD \(lat) \(lon)") }
+                appendPlace(p.deathPlace, lat: p.deathLat, lon: p.deathLon, to: &lines)
             }
-            
+
             // Burial (place and/or precise grave coordinates)
             let hasBurialCoord = p.burialLat != nil && p.burialLon != nil
             if (p.burialPlace?.isEmpty == false) || hasBurialCoord {
                 lines.append("1 BURI")
-                if let b = p.burialPlace, !b.isEmpty { lines.append("2 PLAC \(b)") }
-                if let lat = p.burialLat, let lon = p.burialLon {
-                    lines.append("2 _COORD \(lat) \(lon)")
-                }
+                appendPlace(p.burialPlace, lat: p.burialLat, lon: p.burialLon, to: &lines)
             }
             
             // Occupation & Education
@@ -201,6 +196,35 @@ public struct GEDCOMSerializer {
         
         lines.append("0 TRLR")
         return Result(gedcom: lines.joined(separator: "\n"), photos: photos)
+    }
+
+    // MARK: - Coordinate / place emission
+
+    /// Emit a `2 PLAC` line and, when coordinates are present, the standard
+    /// `3 MAP / 4 LATI / 4 LONG` triple so other genealogy software reads them.
+    /// If coordinates exist but there is no place to host a MAP, fall back to the
+    /// private `2 _COORD lat lon` so the app's own data still round-trips.
+    private static func appendPlace(_ place: String?, lat: Double?, lon: Double?, to lines: inout [String]) {
+        if let place = place, !place.isEmpty {
+            lines.append("2 PLAC \(place)")
+            if let lat = lat, let lon = lon {
+                lines.append("3 MAP")
+                lines.append("4 LATI \(gedLat(lat))")
+                lines.append("4 LONG \(gedLong(lon))")
+            }
+        } else if let lat = lat, let lon = lon {
+            lines.append("2 _COORD \(lat) \(lon)")
+        }
+    }
+
+    /// GEDCOM latitude: hemisphere-prefixed magnitude, e.g. 55.75 → "N55.750000".
+    private static func gedLat(_ v: Double) -> String {
+        String(format: "%@%.6f", v < 0 ? "S" : "N", abs(v))
+    }
+
+    /// GEDCOM longitude: hemisphere-prefixed magnitude, e.g. 37.61 → "E37.610000".
+    private static func gedLong(_ v: Double) -> String {
+        String(format: "%@%.6f", v < 0 ? "W" : "E", abs(v))
     }
 }
 
