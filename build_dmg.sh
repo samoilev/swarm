@@ -10,8 +10,12 @@ BUNDLE_ID="com.familytreestudio.app"
 VERSION="1.5.0"
 BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
 BINARY="$BUILD_DIR/FamilyTreeStudio"
-RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeStudio.bundle"
-ICON_SRC="$PROJECT_DIR/FamilyTreeStudio/Resources/AppIcon.icns"
+# Two SwiftPM resource bundles after the FamilyTreeCore split:
+#   - App bundle: AppIcon.icns (loaded via Bundle.module in the app target)
+#   - Core bundle: places.tsv / geonames_ussr.tsv (loaded via Bundle.module in FamilyTreeCore)
+APP_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeStudio.bundle"
+CORE_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeCore.bundle"
+ICON_SRC="$PROJECT_DIR/FamilyTreeStudio/App/Resources/AppIcon.icns"
 DMG_DIR="$PROJECT_DIR/dist"
 APP_BUNDLE="$DMG_DIR/$APP_NAME.app"
 
@@ -27,8 +31,9 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 # Copy binary
 cp "$BINARY" "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio"
 
-# Copy resource bundle
-cp -R "$RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
+# Copy resource bundles (app icon + core data tables)
+cp -R "$APP_RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
+cp -R "$CORE_RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
 
 # Copy icon
 cp "$ICON_SRC" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
