@@ -8,7 +8,10 @@ struct SepiaTheme {
     // Core colors
     static let paper = Color(hex: "ece1c9")
     static let ink = Color(hex: "3a2c1a")
-    static let inkSoft = Color(hex: "917c59")
+    // Muted secondary text. Kept dark enough to clear WCAG AA (≥4.5:1) on the
+    // lightest-through-darkest surfaces it sits on (paper, cards, toolbar, fan);
+    // don't lighten "for elegance" — that regresses contrast.
+    static let inkSoft = Color(hex: "6e5b36")
     static let line = Color(hex: "b39c70")
     static let cardBg = Color(hex: "f8f1df")
     static let cardBgMale = Color(hex: "eaf2f0")
@@ -18,7 +21,8 @@ struct SepiaTheme {
     static let cardLineFemale = Color(hex: "c49a82")
     static let cardRule = Color(hex: "d9c9a4")
     static let accent = Color(hex: "9c4a2f")
-    static let accent2 = Color(hex: "8a6d2f")
+    // Secondary gold accent, also used for small tracked labels — kept ≥4.5:1 (AA).
+    static let accent2 = Color(hex: "775d26")
     static let photoA = Color(hex: "e7dcc2")
     static let photoB = Color(hex: "dccdab")
     static let toolbarBg = Color(hex: "e8ddc4")
