@@ -15,6 +15,12 @@ struct TreeCanvasView: View {
 
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
+    /// The tree is laid out and rasterized at this fixed multiple of its base size,
+    /// then shown via a single `.scaleEffect(zoom / superSample)` transform. Zooming
+    /// is therefore one cheap GPU transform (smooth, everything moves in lockstep —
+    /// no per-frame relayout, no jitter), while the 2× bitmap keeps text crisp: the
+    /// max zoom (2.0) lands at exactly 1:1, and every lower zoom is downsampled.
+    private let superSample: CGFloat = 2
     private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
     private let wheelZoomSensitivity: CGFloat = 0.05 // mouse-wheel zoom step per scroll unit (soft)
 
@@ -69,10 +75,10 @@ struct TreeCanvasView: View {
                 // frame+clip below keeps it from overflowing onto the toolbar
                 // (which would otherwise swallow toolbar button clicks).
                 ZStack(alignment: .topLeading) {
-                    // Connectors — draw at the zoomed scale so lines stay vector-crisp
-                    // (scaling the context, not a bitmap, keeps strokes sharp at any zoom).
+                    // Connectors — drawn at the supersample scale (matching the cards),
+                    // then transformed with everything else by the outer .scaleEffect.
                     Canvas { ctx, _ in
-                        ctx.scaleBy(x: zoom, y: zoom)
+                        ctx.scaleBy(x: superSample, y: superSample)
                         for link in layout.links {
                             var path = Path()
                             for seg in link.segments {
@@ -84,7 +90,10 @@ struct TreeCanvasView: View {
                             ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
                         }
                     }
-                    .frame(width: layout.totalWidth * zoom, height: layout.totalHeight * zoom)
+                    .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample)
+                    // Decorative only — let clicks on empty space pass through to the
+                    // background's tap-to-deselect instead of being swallowed here.
+                    .allowsHitTesting(false)
                     .accessibilityHidden(true)
 
                     // Cards
@@ -101,11 +110,11 @@ struct TreeCanvasView: View {
                             isHighlighted: highlightedIds.contains(node.person.id),
                             lineageLabel: label,
                             showPhoto: showPhotos,
-                            scale: zoom
+                            scale: superSample
                         )
                         .equatable()
                         .opacity(dimmed ? 0.3 : 1.0)
-                        .position(x: (node.x + cardW / 2) * zoom, y: (node.y + cardH / 2) * zoom)
+                        .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
                         .onTapGesture {
                             if NSEvent.modifierFlags.contains(.command) {
                                 // CMD+click: set as secondary (max 2)
@@ -132,10 +141,11 @@ struct TreeCanvasView: View {
                         }
                     }
                 }
-                // Geometric zoom (real layout size + scaled fonts), NOT .scaleEffect —
-                // scaleEffect rasterizes the cards at 1× and blows the bitmap up, which
-                // pixelates the text above 100%. Sizing the content for real keeps it crisp.
-                .frame(width: layout.totalWidth * zoom, height: layout.totalHeight * zoom, alignment: .topLeading)
+                // Content is built at superSample× and shown via one .scaleEffect — the
+                // zoom is a single GPU transform (smooth, lockstep, no relayout) and the
+                // 2× bitmap is only ever shown at ≤1:1, so the text never pixelates.
+                .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample, alignment: .topLeading)
+                .scaleEffect(zoom / superSample, anchor: .topLeading)
                 .offset(x: panOffset.width, y: panOffset.height)
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
