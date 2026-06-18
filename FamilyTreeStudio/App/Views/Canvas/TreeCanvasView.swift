@@ -69,8 +69,10 @@ struct TreeCanvasView: View {
                 // frame+clip below keeps it from overflowing onto the toolbar
                 // (which would otherwise swallow toolbar button clicks).
                 ZStack(alignment: .topLeading) {
-                    // Connectors
-                    Canvas { ctx, size in
+                    // Connectors — draw at the zoomed scale so lines stay vector-crisp
+                    // (scaling the context, not a bitmap, keeps strokes sharp at any zoom).
+                    Canvas { ctx, _ in
+                        ctx.scaleBy(x: zoom, y: zoom)
                         for link in layout.links {
                             var path = Path()
                             for seg in link.segments {
@@ -82,7 +84,7 @@ struct TreeCanvasView: View {
                             ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
                         }
                     }
-                    .frame(width: layout.totalWidth, height: layout.totalHeight)
+                    .frame(width: layout.totalWidth * zoom, height: layout.totalHeight * zoom)
                     .accessibilityHidden(true)
 
                     // Cards
@@ -98,11 +100,12 @@ struct TreeCanvasView: View {
                             isHome: tree.homePersonId == node.person.id,
                             isHighlighted: highlightedIds.contains(node.person.id),
                             lineageLabel: label,
-                            showPhoto: showPhotos
+                            showPhoto: showPhotos,
+                            scale: zoom
                         )
                         .equatable()
                         .opacity(dimmed ? 0.3 : 1.0)
-                        .position(x: node.x + cardW / 2, y: node.y + cardH / 2)
+                        .position(x: (node.x + cardW / 2) * zoom, y: (node.y + cardH / 2) * zoom)
                         .onTapGesture {
                             if NSEvent.modifierFlags.contains(.command) {
                                 // CMD+click: set as secondary (max 2)
@@ -129,8 +132,10 @@ struct TreeCanvasView: View {
                         }
                     }
                 }
-                .frame(width: layout.totalWidth, height: layout.totalHeight, alignment: .topLeading)
-                .scaleEffect(zoom, anchor: .topLeading)
+                // Geometric zoom (real layout size + scaled fonts), NOT .scaleEffect —
+                // scaleEffect rasterizes the cards at 1× and blows the bitmap up, which
+                // pixelates the text above 100%. Sizing the content for real keeps it crisp.
+                .frame(width: layout.totalWidth * zoom, height: layout.totalHeight * zoom, alignment: .topLeading)
                 .offset(x: panOffset.width, y: panOffset.height)
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
@@ -366,6 +371,9 @@ struct PersonCardView: View, Equatable {
     var isHighlighted: Bool = false
     var lineageLabel: String?
     var showPhoto: Bool = false
+    /// Zoom factor. The card renders at its real scaled size (fonts included) so the
+    /// text stays crisp at any zoom, instead of being a 1× bitmap stretched by the canvas.
+    var scale: CGFloat = 1
 
     static func == (lhs: PersonCardView, rhs: PersonCardView) -> Bool {
         lhs.person.id == rhs.person.id &&
@@ -378,7 +386,13 @@ struct PersonCardView: View, Equatable {
             lhs.isHome == rhs.isHome &&
             lhs.isHighlighted == rhs.isHighlighted &&
             lhs.lineageLabel == rhs.lineageLabel &&
-            lhs.showPhoto == rhs.showPhoto
+            lhs.showPhoto == rhs.showPhoto &&
+            lhs.scale == rhs.scale
+    }
+
+    /// Scale a base point value by the current zoom.
+    private func s(_ v: CGFloat) -> CGFloat {
+        v * scale
     }
 
     private var cardBackground: Color {
@@ -404,16 +418,16 @@ struct PersonCardView: View, Equatable {
                     Image(nsImage: nsImage)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 66, height: 88) // 3:4 portrait, matches the inspector
+                        .frame(width: s(66), height: s(88)) // 3:4 portrait, matches the inspector
                         .clipped()
                 } else {
                     ZStack {
                         Rectangle().fill(SepiaTheme.cardLine.opacity(0.2))
                         Image(systemName: "person.fill")
-                            .font(.system(size: 20))
+                            .font(.system(size: s(20)))
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
                     }
-                    .frame(width: 66, height: 88)
+                    .frame(width: s(66), height: s(88))
                 }
             }
 
@@ -423,76 +437,76 @@ struct PersonCardView: View, Equatable {
                         // Surname — allow up to 2 lines so long names are never truncated.
                         // The maiden name sits on its own line below (1-line, clipped if needed).
                         Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: 8))
-                            .tracking(1.0)
+                            .font(SepiaTheme.ui(size: s(8)))
+                            .tracking(s(1.0))
                             .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(2)
                             .minimumScaleFactor(0.8)
                         if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
                             Text("(\(maiden.uppercased()))")
-                                .font(SepiaTheme.ui(size: 7))
-                                .tracking(0.6)
+                                .font(SepiaTheme.ui(size: s(7)))
+                                .tracking(s(0.6))
                                 .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
                         }
                     }
-                    Spacer(minLength: 4)
+                    Spacer(minLength: s(4))
                     if isHome {
-                        Circle().fill(SepiaTheme.accent).frame(width: 6, height: 6)
+                        Circle().fill(SepiaTheme.accent).frame(width: s(6), height: s(6))
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.top, 6)
-                .padding(.bottom, 2)
+                .padding(.horizontal, s(10))
+                .padding(.top, s(6))
+                .padding(.bottom, s(2))
 
-                Divider().overlay(SepiaTheme.cardRule)
+                Rectangle().fill(SepiaTheme.cardRule).frame(height: max(0.5, s(1)))
 
-                VStack(alignment: .leading, spacing: 1) {
+                VStack(alignment: .leading, spacing: s(1)) {
                     let nameDisplay = [person.givenNames, person.patronymic ?? ""]
                         .filter { !$0.isEmpty }
                         .joined(separator: " ")
                     Text(nameDisplay.isEmpty ? "Неизвестно" : nameDisplay)
-                        .font(SepiaTheme.display(size: 13.5))
+                        .font(SepiaTheme.display(size: s(13.5)))
                         .fontWeight(.semibold)
                         .foregroundColor(SepiaTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
-                            .font(SepiaTheme.body(size: 10.5))
+                            .font(SepiaTheme.body(size: s(10.5)))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
-                .padding(.horizontal, 10)
-                .padding(.top, 4)
-                .padding(.bottom, 6)
+                .padding(.horizontal, s(10))
+                .padding(.top, s(4))
+                .padding(.bottom, s(6))
             }
         }
-        .frame(width: 210, height: 90)
+        .frame(width: s(210), height: s(90))
         .background(isHighlighted ? SepiaTheme.accent.opacity(0.08) : cardBackground)
         .overlay(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: s(4))
                 .strokeBorder(
                     isSelected ? SepiaTheme.accent :
                         isSecondarySelected ? SepiaTheme.accent :
                         (isHighlighted ? SepiaTheme.accent2 : cardBorder),
-                    lineWidth: (isSelected || isSecondarySelected) ? 3 : (isHighlighted ? 1.5 : 1)
+                    lineWidth: (isSelected || isSecondarySelected) ? s(3) : (isHighlighted ? s(1.5) : s(1))
                 )
         )
-        .clipShape(RoundedRectangle(cornerRadius: 4))
-        .shadow(color: (isSelected || isSecondarySelected) ? SepiaTheme.accent.opacity(0.3) : .black.opacity(0.06), radius: (isSelected || isSecondarySelected) ? 4 : 2, y: 1)
+        .clipShape(RoundedRectangle(cornerRadius: s(4)))
+        .shadow(color: (isSelected || isSecondarySelected) ? SepiaTheme.accent.opacity(0.3) : .black.opacity(0.06), radius: (isSelected || isSecondarySelected) ? s(4) : s(2), y: s(1))
         .overlay(alignment: .topTrailing) {
             if let label = lineageLabel {
                 Text(label)
-                    .font(SepiaTheme.ui(size: 9))
+                    .font(SepiaTheme.ui(size: s(9)))
                     .fontWeight(.medium)
                     .foregroundColor(.white)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, s(5))
+                    .padding(.vertical, s(2))
                     .background(SepiaTheme.accent.opacity(0.85))
-                    .clipShape(RoundedRectangle(cornerRadius: 3))
-                    .offset(x: -4, y: 4)
+                    .clipShape(RoundedRectangle(cornerRadius: s(3)))
+                    .offset(x: s(-4), y: s(4))
             }
         }
     }
