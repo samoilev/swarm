@@ -15,10 +15,11 @@ struct MainWorkspace: View {
     @State private var showExportModal = false
     @State private var showAddSheet = false
     @State private var editingPerson: Person?
-    @State private var showRelationshipSheet = false
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
     @State private var lineageLabels: [UUID: String] = [:]
+    /// Kinship name shown when two people are ⌘-selected (replaces the old modal).
+    @State private var relationshipName: String?
     @State private var inspectorWidth: CGFloat = 320
     @State private var showDeleteConfirm = false
     @State private var personToDelete: Person?
@@ -33,6 +34,9 @@ struct MainWorkspace: View {
     @State private var searchQuery = ""
     @State private var searchHighlight = 0
     @FocusState private var searchFieldFocused: Bool
+    /// Command-hints row: expanded (full row) while browsing, auto-collapsed to an icon
+    /// when a card is open (re-openable by clicking the icon).
+    @State private var hintsExpanded = true
 
     enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
@@ -61,11 +65,10 @@ struct MainWorkspace: View {
                         }
                     }
                     .overlay(alignment: .top) { dualSelectHint }
+                    .overlay(alignment: .top) { relationshipBanner }
                     .overlay(alignment: .top) { searchBar }
                     .overlay(alignment: .bottomLeading) {
-                        // Browse-state hints: shown while no one is selected, so they never
-                        // crowd the inspector-narrowed canvas or collide with the minimap.
-                        if viewMode == .tree, !tree.people.isEmpty, selectedPerson == nil { commandHints }
+                        if viewMode == .tree, !tree.people.isEmpty { commandHints }
                     }
 
                     if selectedPerson != nil {
@@ -111,9 +114,6 @@ struct MainWorkspace: View {
                 showToast("Сохранено: \(saved.listName)")
             })
         }
-        .sheet(isPresented: $showRelationshipSheet) {
-            RelationshipView(tree: tree, isPresented: $showRelationshipSheet, preselectedPerson: selectedPerson)
-        }
         .alert("Удалить персону?", isPresented: $showDeleteConfirm) {
             Button("Отмена", role: .cancel) { personToDelete = nil }
             Button("Удалить", role: .destructive) { deletePerson() }
@@ -128,7 +128,11 @@ struct MainWorkspace: View {
             Text(store.lastSaveError ?? "")
         }
         .frame(minWidth: 900, minHeight: 600)
-        .onChange(of: selectedPerson?.id) { _, _ in recomputeHighlight() }
+        .onChange(of: selectedPerson?.id) { _, newValue in
+            recomputeHighlight()
+            // Auto-collapse the hints to an icon when a card opens; restore when browsing.
+            withAnimation(.easeOut(duration: 0.22)) { hintsExpanded = (newValue == nil) }
+        }
         .onChange(of: secondaryPerson?.id) { _, newValue in
             recomputeHighlight()
             if newValue != nil { dualSelectHintSeen = true }
@@ -200,6 +204,44 @@ struct MainWorkspace: View {
             .overlay(Capsule().strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
             .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
             .padding(.top, 14)
+        }
+    }
+
+    /// Shown when two people are ⌘-selected — names the kinship (what the removed
+    /// relationship modal used to display), right where the path is highlighted.
+    @ViewBuilder
+    private var relationshipBanner: some View {
+        if viewMode == .tree, let p = selectedPerson, let s = secondaryPerson, let name = relationshipName {
+            HStack(spacing: 10) {
+                Image(systemName: "person.2.fill")
+                    .font(.system(size: 13))
+                    .foregroundColor(SepiaTheme.accent)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(name)
+                        .font(SepiaTheme.body(size: 14))
+                        .foregroundColor(SepiaTheme.ink)
+                    Text("\(p.listName) → \(s.listName)")
+                        .font(SepiaTheme.ui(size: 10.5))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                }
+                Button { secondaryPerson = nil } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                }
+                .buttonStyle(.plain)
+                .help("Сбросить второго человека")
+                .accessibilityLabel("Сбросить второго человека")
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(SepiaTheme.panelBg)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+            .shadow(color: .black.opacity(0.1), radius: 8, y: 3)
+            .padding(.top, 12)
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -313,22 +355,42 @@ struct MainWorkspace: View {
 
     private var commandHints: some View {
         HStack(spacing: 9) {
-            hint("⌘F", "Поиск")
-            hintDivider
-            hint("⌘0", "Вписать")
-            hintDivider
-            hint("⌘±", "Масштаб")
-            hintDivider
-            hint("⌘Z", "Отмена")
-            hintDivider
-            hint("⌘-клик", "Родство")
+            Button {
+                withAnimation(.easeOut(duration: 0.22)) { hintsExpanded.toggle() }
+            } label: {
+                Image(systemName: hintsExpanded ? "chevron.left" : "keyboard")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .frame(width: 18, height: 16)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(hintsExpanded ? "Скрыть подсказки" : "Показать горячие клавиши")
+            .accessibilityLabel(hintsExpanded ? "Скрыть подсказки" : "Показать горячие клавиши")
+
+            if hintsExpanded {
+                HStack(spacing: 9) {
+                    hint("⌘F", "Поиск")
+                    hintDivider
+                    hint("⌘0", "Вписать")
+                    hintDivider
+                    hint("⌘±", "Масштаб")
+                    hintDivider
+                    hint("↑↓←→", "Родня")
+                    hintDivider
+                    hint("⌘Z", "Отмена")
+                    hintDivider
+                    hint("⌘-клик", "Родство")
+                }
+                .fixedSize()
+                .transition(.move(edge: .leading).combined(with: .opacity))
+            }
         }
-        .padding(.horizontal, 12).padding(.vertical, 6)
+        .padding(.horizontal, 10).padding(.vertical, 6)
         .background(SepiaTheme.paper.opacity(0.9))
         .clipShape(Capsule())
         .overlay(Capsule().strokeBorder(SepiaTheme.cardLine.opacity(0.6), lineWidth: 0.5))
         .padding(12)
-        .accessibilityHidden(true)
     }
 
     private func hint(_ key: String, _ label: String) -> some View {
@@ -363,15 +425,19 @@ struct MainWorkspace: View {
                 highlightedBranch = [primary.id, secondary.id]
                 lineageLabels = [primary.id: "①", secondary.id: "②"]
             }
+            // Name the kinship (the ⌘-click feature now carries what the modal showed).
+            relationshipName = RelationshipCalculator(tree: tree).relationship(from: primary, to: secondary)?.name ?? "Связь не найдена"
         } else if let person = selectedPerson {
             // Single selection: show lineage as before
             let calc = LineageCalculator(index: idx)
             let result = calc.compute(for: person)
             highlightedBranch = result.ids
             lineageLabels = result.labels
+            relationshipName = nil
         } else {
             highlightedBranch = []
             lineageLabels = [:]
+            relationshipName = nil
         }
     }
 
@@ -589,10 +655,6 @@ struct MainWorkspace: View {
 
     private var actionButtons: some View {
         HStack(spacing: 6) {
-            Button { showRelationshipSheet = true } label: { Image(systemName: "person.2") }
-                .buttonStyle(SepiaButtonStyle())
-                .help("Кем приходится? Определить родство двух людей")
-                .accessibilityLabel("Определить родство двух людей")
             Button { showAddSheet = true } label: { Image(systemName: "plus") }
                 .buttonStyle(SepiaButtonStyle())
                 .help("Добавить новую персону в дерево")

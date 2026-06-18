@@ -40,6 +40,9 @@ struct TreeCanvasView: View {
     /// the isolated content/minimap layers, so they refresh exactly when the layout
     /// actually changes (not on every pan frame), and never miss a structural update.
     @State private var layoutGeneration = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Lets the canvas receive arrow keys for relationship traversal.
+    @FocusState private var canvasFocused: Bool
 
     var body: some View {
         GeometryReader { geo in
@@ -81,6 +84,15 @@ struct TreeCanvasView: View {
                     secondaryPerson = nil
                 }
                 .accessibilityHidden(true)
+
+                // Connectors — vector Path strokes at base resolution (NOT a giant
+                // supersampled Canvas bitmap, which lagged a frame behind the cards and
+                // made the lines "jump" during movement). Scaled by `zoom` (vs the cards'
+                // `zoom/superSample`) so the two layers stay pixel-aligned at every frame.
+                TreeConnectorsLayer(layout: layout, generation: layoutGeneration, highlightedIds: highlightedIds)
+                    .equatable()
+                    .scaleEffect(zoom, anchor: .topLeading)
+                    .offset(x: panOffset.width, y: panOffset.height)
 
                 // Tree content — isolated in an Equatable layer so that pan/zoom (which
                 // change panOffset/zoom every frame) only re-apply the .scaleEffect/.offset
@@ -130,7 +142,7 @@ struct TreeCanvasView: View {
                     TreeMinimap(
                         layout: layout, generation: layoutGeneration, zoom: zoom, panOffset: panOffset, viewSize: geo.size,
                         selectedId: selectedPerson?.id, cardW: cardW, cardH: cardH,
-                        onRecenter: { treePoint in recenter(onTreePoint: treePoint, viewSize: geo.size) }
+                        onRecenter: { treePoint in recenter(onTreePoint: treePoint, viewSize: geo.size, animated: false) }
                     )
                     .padding(12)
                     .transition(.opacity)
@@ -212,6 +224,7 @@ struct TreeCanvasView: View {
                 magnifyStart = zoom
                 if cachedLayout == nil { cachedLayout = makeLayout() }
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+                canvasFocused = true
             }
             .onChange(of: tree.layoutVersion) { _, _ in
                 let l = makeLayout()
@@ -229,9 +242,12 @@ struct TreeCanvasView: View {
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: selectedPerson?.id) { _, newValue in
-                // Selecting a person (canvas tap, search, or inspector link) glides the
-                // canvas to center them, keeping the current zoom.
-                if newValue != nil { centerOnSelected(viewSize: geo.size, layout: layout) }
+                // Selecting a person (canvas tap, search, inspector link, arrow key) glides
+                // the canvas to center them when they're off-screen, keeping the zoom.
+                if newValue != nil {
+                    centerOnSelected(viewSize: geo.size, layout: layout)
+                    canvasFocused = true
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
                 applyZoomStep(delta: 0.1, viewSize: geo.size)
@@ -239,6 +255,41 @@ struct TreeCanvasView: View {
             .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
                 applyZoomStep(delta: -0.1, viewSize: geo.size)
             }
+            // Arrow keys walk the tree by relationship: ↑ parent, ↓ child, ←/→ siblings.
+            .focusable()
+            .focusEffectDisabled()
+            .focused($canvasFocused)
+            .onMoveCommand { direction in moveSelection(direction, layout: layout) }
+        }
+    }
+
+    /// Move the selection to a connected person along the family graph. ↑ a parent,
+    /// ↓ the leftmost child, ←/→ the previous/next sibling in visual (x) order.
+    private func moveSelection(_ direction: MoveCommandDirection, layout: TreeLayout) {
+        guard let current = selectedPerson else { return }
+        let idx = FamilyIndex(tree: tree)
+        let xOf: (Person) -> CGFloat = { p in layout.nodes.first(where: { $0.person.id == p.id })?.x ?? 0 }
+        var next: Person?
+        switch direction {
+        case .up:
+            let parents = idx.parentsOf(current)
+            next = parents.father ?? parents.mother
+        case .down:
+            next = idx.childrenOf(current).min(by: { xOf($0) < xOf($1) })
+        case .left, .right:
+            var group = idx.siblingsOf(current)
+            group.append(current)
+            group.sort { xOf($0) < xOf($1) }
+            if let i = group.firstIndex(where: { $0.id == current.id }) {
+                let j = direction == .left ? i - 1 : i + 1
+                if group.indices.contains(j) { next = group[j] }
+            }
+        @unknown default:
+            next = nil
+        }
+        if let next {
+            secondaryPerson = nil
+            selectedPerson = next
         }
     }
 
@@ -270,20 +321,37 @@ struct TreeCanvasView: View {
         }
     }
 
-    /// Pan (keeping the current zoom) so the selected person's card is centered. Runs on
-    /// every primary selection — canvas tap, search result, or inspector relative link.
+    /// Pan (keeping the current zoom) so the selected card is centered — but only when
+    /// it's off-screen or near an edge, so clicking a card already in view doesn't jolt
+    /// the whole tree. Honors Reduce Motion (instant when set).
     private func centerOnSelected(viewSize: CGSize, layout: TreeLayout) {
         guard let id = selectedPerson?.id,
               let n = layout.nodes.first(where: { $0.person.id == id }) else { return }
-        recenter(onTreePoint: CGPoint(x: n.x + cardW / 2, y: n.y + cardH / 2), viewSize: viewSize)
+        let centerPoint = CGPoint(x: n.x + cardW / 2, y: n.y + cardH / 2)
+        // Where the card center currently sits on screen.
+        let screenX = centerPoint.x * zoom + panOffset.width
+        let screenY = centerPoint.y * zoom + panOffset.height
+        let marginX = viewSize.width * 0.12
+        let marginY = viewSize.height * 0.12
+        let comfortablyVisible = screenX >= marginX && screenX <= viewSize.width - marginX
+            && screenY >= marginY && screenY <= viewSize.height - marginY
+        guard !comfortablyVisible else { return }
+        recenter(onTreePoint: centerPoint, viewSize: viewSize)
     }
 
     /// Pan so a given point in tree coordinates sits at the viewport center.
     /// (screen = treePoint·zoom + panOffset, so panOffset = center − treePoint·zoom.)
-    private func recenter(onTreePoint p: CGPoint, viewSize: CGSize) {
-        withAnimation(.easeInOut(duration: 0.25)) {
-            panOffset = CGSize(width: viewSize.width / 2 - p.x * zoom, height: viewSize.height / 2 - p.y * zoom)
-            dragStart = panOffset
+    /// `animated` is forced off for Reduce Motion and for live minimap dragging.
+    private func recenter(onTreePoint p: CGPoint, viewSize: CGSize, animated: Bool = true) {
+        let newPan = CGSize(width: viewSize.width / 2 - p.x * zoom, height: viewSize.height / 2 - p.y * zoom)
+        if animated, !reduceMotion {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                panOffset = newPan
+                dragStart = newPan
+            }
+        } else {
+            panOffset = newPan
+            dragStart = newPan
         }
     }
 
@@ -326,9 +394,51 @@ struct TreeCanvasView: View {
     }
 }
 
-/// The connectors + person cards, built at superSample scale. Equatable on its value
-/// inputs (layout version, selection, highlight, flags) so SwiftUI skips re-evaluating
-/// the whole card ForEach during pan/zoom — only the parent's transform updates then.
+/// Connector lines as vector `Path` strokes at base resolution. Kept as its own
+/// Equatable layer (separate from the cards) so it is NOT a giant supersampled bitmap;
+/// vector strokes transform in lockstep with the card layers, fixing the "lines jump"
+/// lag during movement. Refreshes only when the layout or highlight changes.
+private struct TreeConnectorsLayer: View, Equatable {
+    let layout: TreeLayout
+    let generation: Int
+    let highlightedIds: Set<UUID>
+
+    static func == (l: TreeConnectorsLayer, r: TreeConnectorsLayer) -> Bool {
+        l.generation == r.generation && l.highlightedIds == r.highlightedIds
+    }
+
+    private func path(for links: [TreeLink]) -> Path {
+        var p = Path()
+        for link in links {
+            for seg in link.segments {
+                p.move(to: seg.from)
+                p.addLine(to: seg.to)
+            }
+        }
+        return p
+    }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            if highlightedIds.isEmpty {
+                path(for: layout.links)
+                    .stroke(SepiaTheme.line, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+            } else {
+                path(for: layout.links.filter { !$0.personIds.allSatisfy { highlightedIds.contains($0) } })
+                    .stroke(SepiaTheme.line.opacity(0.25), style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+                path(for: layout.links.filter { $0.personIds.allSatisfy { highlightedIds.contains($0) } })
+                    .stroke(SepiaTheme.accent, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
+            }
+        }
+        .frame(width: layout.totalWidth, height: layout.totalHeight, alignment: .topLeading)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The person cards, built at superSample scale. Equatable on its value inputs (layout
+/// version, selection, highlight, flags) so SwiftUI skips re-evaluating the whole card
+/// ForEach during pan/zoom — only the parent's transform updates then.
 private struct TreeContentLayer: View, Equatable {
     let layout: TreeLayout
     let generation: Int
@@ -358,27 +468,7 @@ private struct TreeContentLayer: View, Equatable {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Connectors — drawn at the supersample scale (matching the cards).
-            Canvas { ctx, _ in
-                ctx.scaleBy(x: superSample, y: superSample)
-                for link in layout.links {
-                    var path = Path()
-                    for seg in link.segments {
-                        path.move(to: seg.from)
-                        path.addLine(to: seg.to)
-                    }
-                    let isHighlighted = !highlightedIds.isEmpty && link.personIds.allSatisfy { highlightedIds.contains($0) }
-                    let color = highlightedIds.isEmpty ? SepiaTheme.line : (isHighlighted ? SepiaTheme.accent : SepiaTheme.line.opacity(0.25))
-                    ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
-                }
-            }
-            .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample)
-            // Decorative only — let clicks on empty space pass through to the
-            // background's tap-to-deselect instead of being swallowed here.
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
-
-            // Cards
+            // Cards (connectors are a separate sibling layer — see TreeConnectorsLayer).
             ForEach(layout.nodes, id: \.person.id) { node in
                 let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
                 let isPrimary = selectedId == node.person.id
