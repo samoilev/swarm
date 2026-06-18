@@ -10,7 +10,7 @@ struct EditPersonView: View {
     var store: TreeStore
     /// Called after a successful save so the host can confirm it (toast). Mirrors
     /// AddPersonView.onAdded — without it, edits saved and dismissed silently.
-    var onSaved: ((Person) -> Void)? = nil
+    var onSaved: ((Person) -> Void)?
 
     @State private var givenNames: String = ""
     @State private var patronymic: String = ""
