@@ -301,10 +301,10 @@ struct InspectorPanel: View {
                 internalNav = true
                 self.person = p
             }
-                .buttonStyle(.plain)
-                .font(SepiaTheme.body(size: 13.5))
-                .foregroundColor(SepiaTheme.ink)
-                .underline(color: SepiaTheme.accent2.opacity(0.5))
+            .buttonStyle(.plain)
+            .font(SepiaTheme.body(size: 13.5))
+            .foregroundColor(SepiaTheme.ink)
+            .underline(color: SepiaTheme.accent2.opacity(0.5))
         }
         .padding(.bottom, 6)
     }

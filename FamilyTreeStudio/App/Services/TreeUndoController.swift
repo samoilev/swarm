@@ -17,7 +17,9 @@ final class TreeUndoController {
     /// True while a mutation session (an open add/edit sheet) is in flight. Undo/redo
     /// must be refused then — applying a snapshot would rewrite the tree under the
     /// open editor and lose its edits.
-    var isSessionActive: Bool { sessionBase != nil }
+    var isSessionActive: Bool {
+        sessionBase != nil
+    }
 
     private static let encoder = JSONEncoder()
     private static let decoder = JSONDecoder()
