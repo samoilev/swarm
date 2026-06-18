@@ -63,6 +63,7 @@ struct TreeCanvasView: View {
                     selectedPerson = nil
                     secondaryPerson = nil
                 }
+                .accessibilityHidden(true)
 
                 // Tree content — may be larger than the viewport; the outer
                 // frame+clip below keeps it from overflowing onto the toolbar
@@ -82,6 +83,7 @@ struct TreeCanvasView: View {
                         }
                     }
                     .frame(width: layout.totalWidth, height: layout.totalHeight)
+                    .accessibilityHidden(true)
 
                     // Cards
                     ForEach(layout.nodes, id: \.person.id) { node in
@@ -116,6 +118,14 @@ struct TreeCanvasView: View {
                                 secondaryPerson = nil
                                 selectedPerson = node.person
                             }
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel(node.person.accessibilityDescription)
+                        .accessibilityHint("Выбрать персону")
+                        .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
+                        .accessibilityAction {
+                            secondaryPerson = nil
+                            selectedPerson = node.person
                         }
                     }
                 }

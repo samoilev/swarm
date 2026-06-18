@@ -28,6 +28,14 @@ struct FanChartView: View {
                                 withAnimation(.easeInOut(duration: 0.15)) { selectedPerson = p }
                             }
                         }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityHidden(wedge.person == nil)
+                        .accessibilityLabel(wedge.person?.accessibilityDescription ?? "")
+                        .accessibilityHint("Выбрать персону")
+                        .accessibilityAddTraits(selectedPerson?.id == wedge.personId ? [.isButton, .isSelected] : .isButton)
+                        .accessibilityAction {
+                            if let pid = wedge.personId, let p = tree.person(byId: pid) { selectedPerson = p }
+                        }
                 }
             }
             .frame(width: layout.width, height: layout.height, alignment: .topLeading)

@@ -1,3 +1,4 @@
+import AppKit
 import FamilyTreeCore
 import SwiftUI
 
@@ -25,6 +26,9 @@ struct MainWorkspace: View {
     @State private var fanLevels: Int = 4
     @State private var showPhotos: Bool = true
     @State private var showSaveError = false
+    /// One-time teaching hint for the ⌘-click dual-select kinship feature.
+    @AppStorage("dualSelectHintSeen") private var dualSelectHintSeen = false
+    @State private var undo = TreeUndoController()
 
     enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
@@ -47,7 +51,12 @@ struct MainWorkspace: View {
                         } else {
                             MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                         }
+
+                        if tree.people.isEmpty {
+                            emptyTreeState
+                        }
                     }
+                    .overlay(alignment: .top) { dualSelectHint }
 
                     if selectedPerson != nil {
                         InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
@@ -73,6 +82,8 @@ struct MainWorkspace: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .shadow(color: .black.opacity(0.3), radius: 12, y: 6)
                         .padding(.bottom, 48)
+                        .accessibilityElement()
+                        .accessibilityLabel(msg)
                 }
             }
         }
@@ -86,7 +97,9 @@ struct MainWorkspace: View {
             }
         }
         .sheet(item: $editingPerson) { person in
-            EditPersonView(person: person, tree: tree, store: store)
+            EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
+                showToast("Сохранено: \(saved.listName)")
+            })
         }
         .sheet(isPresented: $showRelationshipSheet) {
             RelationshipView(tree: tree, isPresented: $showRelationshipSheet, preselectedPerson: selectedPerson)
@@ -106,11 +119,77 @@ struct MainWorkspace: View {
         }
         .frame(minWidth: 900, minHeight: 600)
         .onChange(of: selectedPerson?.id) { _, _ in recomputeHighlight() }
-        .onChange(of: secondaryPerson?.id) { _, _ in recomputeHighlight() }
+        .onChange(of: secondaryPerson?.id) { _, newValue in
+            recomputeHighlight()
+            if newValue != nil { dualSelectHintSeen = true }
+        }
         .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
+        // Snapshot the tree when an editing session opens and record an undo entry
+        // when it closes (only if something actually changed).
+        .onChange(of: showAddSheet) { _, isShown in
+            if isShown { undo.begin(tree) } else { undo.commit(tree) }
+        }
+        .onChange(of: editingPerson?.id) { oldValue, newValue in
+            if newValue != nil { undo.begin(tree) } else if oldValue != nil { undo.commit(tree) }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
+        .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
         // Zoom-in/out notifications are handled inside TreeCanvasView where
         // panOffset and viewport size are available for center-anchored zooming.
         .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
+    }
+
+    /// Shown over an empty canvas (no people yet) — the library has an empty state,
+    /// the workspace should too, and it gives a clear first action.
+    private var emptyTreeState: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "person.2.badge.plus")
+                .font(.system(size: 46))
+                .foregroundColor(SepiaTheme.inkSoft)
+            Text("В дереве пока никого нет")
+                .font(SepiaTheme.body(size: 18))
+                .foregroundColor(SepiaTheme.ink)
+            Text("Добавьте первого человека, чтобы начать родословную")
+                .font(SepiaTheme.body(size: 14))
+                .foregroundColor(SepiaTheme.inkSoft)
+            Button { showAddSheet = true } label: {
+                Label("Добавить первую персону", systemImage: "plus")
+            }
+            .buttonStyle(SepiaButtonStyle(isActive: true))
+            .padding(.top, 4)
+        }
+        .padding(32)
+    }
+
+    /// One-time hint that teaches the ⌘-click dual-select kinship feature. Appears
+    /// once a single person is selected, dismissible, and never returns once seen.
+    @ViewBuilder
+    private var dualSelectHint: some View {
+        if viewMode == .tree, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen {
+            HStack(spacing: 10) {
+                Image(systemName: "hand.point.up.left")
+                    .font(.system(size: 12))
+                    .foregroundColor(SepiaTheme.accent2)
+                Text("⌘-щелчок по второму человеку покажет, кем они приходятся друг другу")
+                    .font(SepiaTheme.body(size: 12.5))
+                    .foregroundColor(SepiaTheme.ink)
+                Button { dualSelectHintSeen = true } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                }
+                .buttonStyle(.plain)
+                .help("Скрыть подсказку")
+                .accessibilityLabel("Скрыть подсказку")
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(SepiaTheme.panelBg)
+            .clipShape(Capsule())
+            .overlay(Capsule().strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+            .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
+            .padding(.top, 14)
+        }
     }
 
     private func recomputeHighlight() {
@@ -147,6 +226,7 @@ struct MainWorkspace: View {
             }
             .buttonStyle(SepiaIconButtonStyle())
             .help("Вернуться к списку деревьев")
+            .accessibilityLabel("Вернуться к списку деревьев")
 
             titleBlock
 
@@ -160,6 +240,8 @@ struct MainWorkspace: View {
             }
 
             Spacer(minLength: 8)
+
+            savedStatus
 
             actionButtons
         }
@@ -217,18 +299,21 @@ struct MainWorkspace: View {
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .tree))
             .help("Древовидная схема")
+            .accessibilityLabel("Древовидная схема")
 
             Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .fan } } label: {
                 Image(systemName: "chart.pie")
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
             .help("Круговая диаграмма предков")
+            .accessibilityLabel("Круговая диаграмма предков")
 
             Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .map } } label: {
                 Image(systemName: "map")
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
             .help("Карта мест жизни")
+            .accessibilityLabel("Карта мест жизни")
         }
     }
 
@@ -239,11 +324,13 @@ struct MainWorkspace: View {
             }
             .buttonStyle(SepiaButtonStyle(isActive: direction == .topDown))
             .help("Сверху вниз")
+            .accessibilityLabel("Направление: сверху вниз")
             Button { withAnimation { direction = .leftRight } } label: {
                 Image(systemName: "arrow.right")
             }
             .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
             .help("Слева направо")
+            .accessibilityLabel("Направление: слева направо")
         }
     }
 
@@ -253,6 +340,7 @@ struct MainWorkspace: View {
         }
         .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
         .help(showPhotos ? "Скрыть фотографии" : "Показать фотографии")
+        .accessibilityLabel(showPhotos ? "Скрыть фотографии" : "Показать фотографии")
     }
 
     private var fanLevelControls: some View {
@@ -276,18 +364,23 @@ struct MainWorkspace: View {
         HStack(spacing: 3) {
             RepeatButton(action: { zoom = max(0.25, zoom - 0.1) }) { Image(systemName: "minus") }
                 .help("Уменьшить масштаб")
+                .accessibilityLabel("Уменьшить масштаб")
             Text("\(Int(zoom * 100))%")
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 34)
+                .accessibilityLabel("Масштаб \(Int(zoom * 100)) процентов")
             RepeatButton(action: { zoom = min(1.6, zoom + 0.1) }) { Image(systemName: "plus") }
                 .help("Увеличить масштаб")
+                .accessibilityLabel("Увеличить масштаб")
             Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
                 .buttonStyle(SepiaIconButtonStyle())
                 .help("Центрировать и вписать дерево")
+                .accessibilityLabel("Центрировать и вписать дерево")
             Button { tree.optimizeRoot(); fitRequest += 1 } label: { Image(systemName: "arrow.triangle.2.circlepath") }
                 .buttonStyle(SepiaIconButtonStyle())
                 .help("Обновить расположение дерева")
+                .accessibilityLabel("Обновить расположение дерева")
         }
     }
 
@@ -320,22 +413,44 @@ struct MainWorkspace: View {
         .menuIndicator(.hidden)
         .fixedSize()
         .help("Ещё")
+        .accessibilityLabel("Ещё настройки вида")
+    }
+
+    /// Quiet, always-visible reassurance that the vault is safe — edits persist
+    /// immediately, so show that plainly rather than only warning when a save fails.
+    private var savedStatus: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 10))
+            Text("Сохранено в \(tree.updatedAt.formatted(date: .omitted, time: .shortened))")
+                .font(SepiaTheme.ui(size: 10))
+        }
+        .foregroundColor(SepiaTheme.inkSoft)
+        .help("Дерево сохраняется автоматически после каждого изменения")
+        .accessibilityLabel("Сохранено в \(tree.updatedAt.formatted(date: .omitted, time: .shortened))")
     }
 
     private var actionButtons: some View {
         HStack(spacing: 6) {
+            Button { showRelationshipSheet = true } label: { Image(systemName: "person.2") }
+                .buttonStyle(SepiaButtonStyle())
+                .help("Кем приходится? Определить родство двух людей")
+                .accessibilityLabel("Определить родство двух людей")
             Button { showAddSheet = true } label: { Image(systemName: "plus") }
                 .buttonStyle(SepiaButtonStyle())
                 .help("Добавить новую персону в дерево")
+                .accessibilityLabel("Добавить новую персону в дерево")
             Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
                 .buttonStyle(SepiaButtonStyle())
                 .help("Экспорт карточек в PDF или GEDCOM")
+                .accessibilityLabel("Экспорт карточек в PDF или GEDCOM")
         }
     }
 
     private func deletePerson() {
         guard let person = personToDelete else { return }
         let name = person.listName
+        undo.begin(tree)
 
         // Remove the person's attached files from the tree folder.
         store.deleteAttachmentFiles(of: person, in: tree)
@@ -371,11 +486,51 @@ struct MainWorkspace: View {
         tree.optimizeRoot()
         tree.updatedAt = Date()
         store.saveTree(tree)
+        undo.commit(tree)
         showToast("Удалён: \(name)")
+    }
+
+    private func performUndo() {
+        // Refuse while an add/edit sheet is open — restoring under it would discard
+        // the editor's in-flight changes.
+        guard !undo.isSessionActive, undo.undo(tree) else { return }
+        reconcileSelectionAfterRestore()
+        store.saveTree(tree)
+        showToast("Отменено")
+    }
+
+    private func performRedo() {
+        guard !undo.isSessionActive, undo.redo(tree) else { return }
+        reconcileSelectionAfterRestore()
+        store.saveTree(tree)
+        showToast("Повторено")
+    }
+
+    /// A restore swaps in fresh Person instances, so the selection (which holds old
+    /// references) must be re-resolved by id; anything now gone is cleared.
+    private func reconcileSelectionAfterRestore() {
+        selectedPerson = selectedPerson.flatMap { sel in tree.people.first { $0.id == sel.id } }
+        secondaryPerson = secondaryPerson.flatMap { sel in tree.people.first { $0.id == sel.id } }
+        recomputeHighlight()
     }
 
     private func showToast(_ message: String) {
         toastMessage = message
+        announce(message)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { toastMessage = nil }
+    }
+
+    /// Speak a transient status message to VoiceOver — the toast is visual-only,
+    /// so assistive tech needs an explicit announcement to learn a save happened.
+    private func announce(_ message: String) {
+        guard let window = NSApp.keyWindow else { return }
+        NSAccessibility.post(
+            element: window,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: message,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue,
+            ]
+        )
     }
 }

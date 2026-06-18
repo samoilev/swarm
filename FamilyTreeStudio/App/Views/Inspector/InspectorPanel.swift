@@ -13,6 +13,12 @@ struct InspectorPanel: View {
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
 
+    /// Trail of people visited via relative links, so deep navigation can step back.
+    @State private var history: [Person] = []
+    /// Set when we change `person` ourselves (relative link / back) so the external-
+    /// selection observer doesn't wipe the trail on our own navigation.
+    @State private var internalNav = false
+
     var body: some View {
         if let person {
             HStack(spacing: 0) {
@@ -57,6 +63,11 @@ struct InspectorPanel: View {
             }
             .frame(width: width)
             .background(SepiaTheme.panelBg)
+            .onChange(of: person.id) { _, _ in
+                // A change we didn't make (a new canvas selection) starts a fresh
+                // context, so drop the relative-navigation trail.
+                if internalNav { internalNav = false } else { history = [] }
+            }
         }
     }
 
@@ -73,6 +84,25 @@ struct InspectorPanel: View {
             }
 
             VStack(alignment: .leading, spacing: 2) {
+                if !history.isEmpty {
+                    Button {
+                        guard let prev = history.popLast() else { return }
+                        internalNav = true
+                        // Re-resolve against the live tree: an undo since this entry
+                        // was pushed may have replaced that Person instance.
+                        self.person = tree.person(byId: prev.id) ?? prev
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
+                            Text("Назад").font(SepiaTheme.ui(size: 11))
+                        }
+                        .foregroundColor(SepiaTheme.accent2)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Вернуться к предыдущей персоне")
+                    .accessibilityLabel("Назад к предыдущей персоне")
+                    .padding(.bottom, 2)
+                }
                 Text(person.listName)
                     .font(SepiaTheme.display(size: 19))
                     .fontWeight(.semibold)
@@ -263,9 +293,14 @@ struct InspectorPanel: View {
     private func relRow(_ tag: String, _ p: Person) -> some View {
         HStack(spacing: 8) {
             Text(tag.uppercased())
-                .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundColor(SepiaTheme.inkSoft)
-                .frame(width: 60, alignment: .leading)
-            Button(p.listName) { self.person = p }
+                .font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
+                .lineLimit(1).minimumScaleFactor(0.85)
+                .frame(width: 72, alignment: .leading)
+            Button(p.listName) {
+                if let current = self.person { history.append(current) }
+                internalNav = true
+                self.person = p
+            }
                 .buttonStyle(.plain)
                 .font(SepiaTheme.body(size: 13.5))
                 .foregroundColor(SepiaTheme.ink)
@@ -279,7 +314,7 @@ struct SectionHeader: View {
     let title: String
     var body: some View {
         Text(title.uppercased())
-            .font(SepiaTheme.ui(size: 10)).tracking(2).foregroundColor(SepiaTheme.accent2).fontWeight(.semibold)
+            .font(SepiaTheme.ui(size: 11)).tracking(1.2).foregroundColor(SepiaTheme.accent2).fontWeight(.semibold)
             .padding(.top, 16).padding(.bottom, 9)
             .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.fieldLine).frame(height: 1) }
             .padding(.bottom, 10)
@@ -290,7 +325,7 @@ struct FieldRow: View {
     let label: String; let value: String
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(label).font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
+            Text(label).font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
             Text(value.isEmpty ? "—" : value).font(SepiaTheme.body(size: 14)).foregroundColor(SepiaTheme.ink)
         }
         .padding(.bottom, 12)

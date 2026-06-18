@@ -37,6 +37,16 @@ struct FamilyTreeStudioApp: App {
                 }
                 .keyboardShortcut("n")
             }
+            CommandGroup(replacing: .undoRedo) {
+                Button("Отменить") {
+                    NotificationCenter.default.post(name: .undoRequested, object: nil)
+                }
+                .keyboardShortcut("z")
+                Button("Повторить") {
+                    NotificationCenter.default.post(name: .redoRequested, object: nil)
+                }
+                .keyboardShortcut("z", modifiers: [.command, .shift])
+            }
             CommandGroup(after: .toolbar) {
                 Button("Увеличить масштаб") {
                     NotificationCenter.default.post(name: .zoomInRequested, object: nil)
@@ -60,4 +70,6 @@ extension Notification.Name {
     static let zoomInRequested = Notification.Name("zoomInRequested")
     static let zoomOutRequested = Notification.Name("zoomOutRequested")
     static let zoomFitRequested = Notification.Name("zoomFitRequested")
+    static let undoRequested = Notification.Name("undoRequested")
+    static let redoRequested = Notification.Name("redoRequested")
 }

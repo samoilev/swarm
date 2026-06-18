@@ -8,6 +8,9 @@ struct EditPersonView: View {
     let person: Person
     var tree: FamilyTree
     var store: TreeStore
+    /// Called after a successful save so the host can confirm it (toast). Mirrors
+    /// AddPersonView.onAdded — without it, edits saved and dismissed silently.
+    var onSaved: ((Person) -> Void)? = nil
 
     @State private var givenNames: String = ""
     @State private var patronymic: String = ""
@@ -542,6 +545,7 @@ struct EditPersonView: View {
         tree.optimizeRoot()
         tree.updatedAt = Date()
         store.saveTree(tree)
+        onSaved?(person)
         dismiss()
     }
 }

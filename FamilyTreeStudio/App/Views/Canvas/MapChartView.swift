@@ -126,6 +126,17 @@ struct MapChartView: View {
         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
         .frame(width: 30, height: 30)
         .contentShape(Rectangle())
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel(group.label)
+        .accessibilityHint(count == 1 ? "Выбрать персону" : "Показать \(count) персон")
+        .accessibilityAction {
+            if count == 1 {
+                selectedPerson = tree.people.first { $0.id == group.annotations[0].personId }
+            } else {
+                expandedGroupId = group.id
+            }
+        }
         .onTapGesture {
             if count == 1 {
                 selectedPerson = tree.people.first { $0.id == group.annotations[0].personId }
