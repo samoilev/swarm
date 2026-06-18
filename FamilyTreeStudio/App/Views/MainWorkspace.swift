@@ -29,6 +29,10 @@ struct MainWorkspace: View {
     /// One-time teaching hint for the ⌘-click dual-select kinship feature.
     @AppStorage("dualSelectHintSeen") private var dualSelectHintSeen = false
     @State private var undo = TreeUndoController()
+    @State private var searchActive = false
+    @State private var searchQuery = ""
+    @State private var searchHighlight = 0
+    @FocusState private var searchFieldFocused: Bool
 
     enum ViewMode: String { case tree, fan, map }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
@@ -57,6 +61,12 @@ struct MainWorkspace: View {
                         }
                     }
                     .overlay(alignment: .top) { dualSelectHint }
+                    .overlay(alignment: .top) { searchBar }
+                    .overlay(alignment: .bottomLeading) {
+                        // Browse-state hints: shown while no one is selected, so they never
+                        // crowd the inspector-narrowed canvas or collide with the minimap.
+                        if viewMode == .tree, !tree.people.isEmpty, selectedPerson == nil { commandHints }
+                    }
 
                     if selectedPerson != nil {
                         InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
@@ -134,6 +144,7 @@ struct MainWorkspace: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
         .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
+        .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
         // Zoom-in/out notifications are handled inside TreeCanvasView where
         // panOffset and viewport size are available for center-anchored zooming.
         .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
@@ -165,7 +176,7 @@ struct MainWorkspace: View {
     /// once a single person is selected, dismissible, and never returns once seen.
     @ViewBuilder
     private var dualSelectHint: some View {
-        if viewMode == .tree, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen {
+        if viewMode == .tree, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen, !searchActive {
             HStack(spacing: 10) {
                 Image(systemName: "hand.point.up.left")
                     .font(.system(size: 12))
@@ -190,6 +201,152 @@ struct MainWorkspace: View {
             .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
             .padding(.top, 14)
         }
+    }
+
+    // MARK: - Find a person (⌘F)
+
+    @ViewBuilder
+    private var searchBar: some View {
+        if searchActive {
+            let results = searchResults
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
+                    TextField("Найти персону…", text: $searchQuery)
+                        .textFieldStyle(.plain)
+                        .font(SepiaTheme.body(size: 14))
+                        .foregroundColor(SepiaTheme.ink)
+                        .focused($searchFieldFocused)
+                        .onSubmit { selectSearchHighlight() }
+                    Button { closeSearch() } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundColor(SepiaTheme.inkSoft)
+                    }
+                    .buttonStyle(.plain)
+                    .help("Закрыть поиск")
+                }
+                .padding(.horizontal, 12).padding(.vertical, 9)
+
+                if !results.isEmpty {
+                    Divider().overlay(SepiaTheme.cardLine)
+                    VStack(spacing: 0) {
+                        ForEach(Array(results.enumerated()), id: \.element.id) { idx, p in
+                            Button { selectSearchResult(p) } label: {
+                                HStack(spacing: 8) {
+                                    Text(p.listName).font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink).lineLimit(1)
+                                    Spacer(minLength: 8)
+                                    if !p.lifespan.isEmpty {
+                                        Text(p.lifespan).font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
+                                    }
+                                }
+                                .padding(.horizontal, 12).padding(.vertical, 6)
+                                .background(idx == searchHighlight ? SepiaTheme.accent.opacity(0.12) : Color.clear)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                } else if !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
+                    Divider().overlay(SepiaTheme.cardLine)
+                    Text("Никого не найдено")
+                        .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                }
+            }
+            .frame(width: 340)
+            .background(SepiaTheme.panelBg)
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+            .shadow(color: .black.opacity(0.15), radius: 14, y: 6)
+            .padding(.top, 12)
+            .onExitCommand { closeSearch() }
+            .onMoveCommand { moveSearchHighlight($0) }
+            .onChange(of: searchQuery) { _, _ in searchHighlight = 0 }
+        }
+    }
+
+    /// People whose name contains the query (diacritic + case insensitive), capped and sorted.
+    private var searchResults: [Person] {
+        let q = searchQuery.trimmingCharacters(in: .whitespaces)
+        guard !q.isEmpty else { return [] }
+        return tree.people
+            .filter { $0.listName.localizedStandardContains(q) || $0.fullName.localizedStandardContains(q) }
+            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+            .prefix(8)
+            .map { $0 }
+    }
+
+    private func selectSearchResult(_ p: Person) {
+        selectedPerson = p
+        closeSearch()
+    }
+
+    private func selectSearchHighlight() {
+        let r = searchResults
+        guard !r.isEmpty else { return }
+        selectSearchResult(r[min(max(searchHighlight, 0), r.count - 1)])
+    }
+
+    private func moveSearchHighlight(_ dir: MoveCommandDirection) {
+        let count = searchResults.count
+        guard count > 0 else { return }
+        switch dir {
+        case .up: searchHighlight = (searchHighlight - 1 + count) % count
+        case .down: searchHighlight = (searchHighlight + 1) % count
+        default: break
+        }
+    }
+
+    private func openSearch() {
+        searchQuery = ""
+        searchHighlight = 0
+        searchActive = true
+        DispatchQueue.main.async { searchFieldFocused = true }
+    }
+
+    private func closeSearch() {
+        searchActive = false
+        searchQuery = ""
+        searchFieldFocused = false
+    }
+
+    // MARK: - Keyboard/gesture hints (bottom-left)
+
+    private var commandHints: some View {
+        HStack(spacing: 9) {
+            hint("⌘F", "Поиск")
+            hintDivider
+            hint("⌘0", "Вписать")
+            hintDivider
+            hint("⌘±", "Масштаб")
+            hintDivider
+            hint("⌘Z", "Отмена")
+            hintDivider
+            hint("⌘-клик", "Родство")
+        }
+        .padding(.horizontal, 12).padding(.vertical, 6)
+        .background(SepiaTheme.paper.opacity(0.9))
+        .clipShape(Capsule())
+        .overlay(Capsule().strokeBorder(SepiaTheme.cardLine.opacity(0.6), lineWidth: 0.5))
+        .padding(12)
+        .accessibilityHidden(true)
+    }
+
+    private func hint(_ key: String, _ label: String) -> some View {
+        HStack(spacing: 4) {
+            Text(key)
+                .font(SepiaTheme.ui(size: 10))
+                .foregroundColor(SepiaTheme.ink)
+                .padding(.horizontal, 4).padding(.vertical, 1)
+                .background(SepiaTheme.btnBg)
+                .clipShape(RoundedRectangle(cornerRadius: 3))
+                .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(SepiaTheme.cardLine.opacity(0.5), lineWidth: 0.5))
+            Text(label).font(SepiaTheme.ui(size: 10.5)).foregroundColor(SepiaTheme.inkSoft)
+        }
+        .fixedSize()
+    }
+
+    private var hintDivider: some View {
+        Rectangle().fill(SepiaTheme.cardLine.opacity(0.4)).frame(width: 1, height: 12)
     }
 
     private func recomputeHighlight() {

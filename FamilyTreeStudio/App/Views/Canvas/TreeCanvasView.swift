@@ -36,6 +36,10 @@ struct TreeCanvasView: View {
     /// Layout only depends on tree structure + direction, so cache it and recompute
     /// only when those change — body re-runs on every pan/zoom frame otherwise.
     @State private var cachedLayout: TreeLayout?
+    /// Bumped whenever `cachedLayout` is reassigned. Used as the cheap equality key for
+    /// the isolated content/minimap layers, so they refresh exactly when the layout
+    /// actually changes (not on every pan frame), and never miss a structural update.
+    @State private var layoutGeneration = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -44,7 +48,11 @@ struct TreeCanvasView: View {
             ZStack(alignment: .topLeading) {
                 // Dot grid background (Miro-style) — fills the viewport, tap to deselect
                 Canvas { ctx, size in
-                    let spacing: CGFloat = 20 * zoom
+                    // Dot count is viewport_area / spacing², so an un-clamped 20·zoom
+                    // spacing explodes when zoomed out (zoom 0.2 → ~4px spacing →
+                    // ~65k dots/frame). Clamp the on-screen spacing to keep the count
+                    // bounded (and the grid from turning into a haze when zoomed out).
+                    let spacing: CGFloat = max(20, 20 * zoom)
                     let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
                     let offsetX = panOffset.width.truncatingRemainder(dividingBy: spacing)
                     let offsetY = panOffset.height.truncatingRemainder(dividingBy: spacing)
@@ -52,16 +60,19 @@ struct TreeCanvasView: View {
                     let cols = Int(size.width / spacing) + 2
                     let rows = Int(size.height / spacing) + 2
 
+                    // Accumulate every dot into one Path and fill once — a single batched
+                    // draw call instead of thousands of per-dot fills keeps panning smooth.
+                    var dots = Path()
                     for col in 0 ... cols {
                         for row in 0 ... rows {
                             let x = CGFloat(col) * spacing + offsetX
                             let y = CGFloat(row) * spacing + offsetY
                             guard x >= -dotRadius, x <= size.width + dotRadius,
                                   y >= -dotRadius, y <= size.height + dotRadius else { continue }
-                            let rect = CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2)
-                            ctx.fill(Circle().path(in: rect), with: .color(SepiaTheme.ink.opacity(0.06)))
+                            dots.addEllipse(in: CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2))
                         }
                     }
+                    ctx.fill(dots, with: .color(SepiaTheme.ink.opacity(0.06)))
                 }
                 .frame(width: geo.size.width, height: geo.size.height)
                 .contentShape(Rectangle())
@@ -71,86 +82,61 @@ struct TreeCanvasView: View {
                 }
                 .accessibilityHidden(true)
 
-                // Tree content — may be larger than the viewport; the outer
-                // frame+clip below keeps it from overflowing onto the toolbar
-                // (which would otherwise swallow toolbar button clicks).
-                ZStack(alignment: .topLeading) {
-                    // Connectors — drawn at the supersample scale (matching the cards),
-                    // then transformed with everything else by the outer .scaleEffect.
-                    Canvas { ctx, _ in
-                        ctx.scaleBy(x: superSample, y: superSample)
-                        for link in layout.links {
-                            var path = Path()
-                            for seg in link.segments {
-                                path.move(to: seg.from)
-                                path.addLine(to: seg.to)
-                            }
-                            let isHighlighted = !highlightedIds.isEmpty && link.personIds.allSatisfy { highlightedIds.contains($0) }
-                            let color = highlightedIds.isEmpty ? SepiaTheme.line : (isHighlighted ? SepiaTheme.accent : SepiaTheme.line.opacity(0.25))
-                            ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
-                        }
-                    }
-                    .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample)
-                    // Decorative only — let clicks on empty space pass through to the
-                    // background's tap-to-deselect instead of being swallowed here.
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-
-                    // Cards
-                    ForEach(layout.nodes, id: \.person.id) { node in
-                        let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
-                        let isPrimary = selectedPerson?.id == node.person.id
-                        let isSecondary = secondaryPerson?.id == node.person.id
-                        let label = lineageLabels[node.person.id]
-                        PersonCardView(
-                            person: node.person,
-                            isSelected: isPrimary,
-                            isSecondarySelected: isSecondary,
-                            isHome: tree.homePersonId == node.person.id,
-                            isHighlighted: highlightedIds.contains(node.person.id),
-                            lineageLabel: label,
-                            showPhoto: showPhotos,
-                            scale: superSample
-                        )
-                        .equatable()
-                        .opacity(dimmed ? 0.3 : 1.0)
-                        .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
-                        .onTapGesture {
-                            if NSEvent.modifierFlags.contains(.command) {
-                                // CMD+click: set as secondary (max 2)
-                                if selectedPerson == nil {
-                                    selectedPerson = node.person
-                                } else if node.person.id == selectedPerson?.id {
-                                    // Clicking primary again with CMD — ignore
-                                } else {
-                                    secondaryPerson = node.person
-                                }
+                // Tree content — isolated in an Equatable layer so that pan/zoom (which
+                // change panOffset/zoom every frame) only re-apply the .scaleEffect/.offset
+                // transform on a cached layer tree, instead of re-running the whole card
+                // ForEach each frame. The content re-renders only when selection/layout
+                // actually change. This is what keeps panning and zooming smooth.
+                TreeContentLayer(
+                    layout: layout,
+                    generation: layoutGeneration,
+                    selectedId: selectedPerson?.id,
+                    secondaryId: secondaryPerson?.id,
+                    homeId: tree.homePersonId,
+                    highlightedIds: highlightedIds,
+                    lineageLabels: lineageLabels,
+                    showPhotos: showPhotos,
+                    superSample: superSample,
+                    cardW: cardW,
+                    cardH: cardH,
+                    onSelect: { person, commandClick in
+                        if commandClick {
+                            // CMD+click: set as secondary (max 2)
+                            if selectedPerson == nil {
+                                selectedPerson = person
+                            } else if person.id == selectedPerson?.id {
+                                // Clicking primary again with CMD — ignore
                             } else {
-                                // Normal click: set as primary, clear secondary
-                                secondaryPerson = nil
-                                selectedPerson = node.person
+                                secondaryPerson = person
                             }
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel(node.person.accessibilityDescription)
-                        .accessibilityHint("Выбрать персону")
-                        .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
-                        .accessibilityAction {
+                        } else {
                             secondaryPerson = nil
-                            selectedPerson = node.person
+                            selectedPerson = person
                         }
                     }
-                }
-                // Content is built at superSample× and shown via one .scaleEffect — the
-                // zoom is a single GPU transform (smooth, lockstep, no relayout) and the
-                // 2× bitmap is only ever shown at ≤1:1, so the text never pixelates.
-                .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample, alignment: .topLeading)
+                )
+                .equatable()
                 .scaleEffect(zoom / superSample, anchor: .topLeading)
                 .offset(x: panOffset.width, y: panOffset.height)
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .contentShape(Rectangle())
             .clipped()
+            .overlay(alignment: .bottomTrailing) {
+                // Minimap — only once the tree is zoomed in past the viewport, so there's
+                // actually off-screen content worth an overview.
+                if !layout.nodes.isEmpty,
+                   layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height {
+                    TreeMinimap(
+                        layout: layout, generation: layoutGeneration, zoom: zoom, panOffset: panOffset, viewSize: geo.size,
+                        selectedId: selectedPerson?.id, cardW: cardW, cardH: cardH,
+                        onRecenter: { treePoint in recenter(onTreePoint: treePoint, viewSize: geo.size) }
+                    )
+                    .padding(12)
+                    .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height)
             .background(
                 // Mouse-wheel / scroll zoom, soft and anchored to the cursor.
                 ScrollWheelZoom { deltaY, location in
@@ -230,15 +216,22 @@ struct TreeCanvasView: View {
             .onChange(of: tree.layoutVersion) { _, _ in
                 let l = makeLayout()
                 cachedLayout = l
+                layoutGeneration += 1
                 fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
             }
             .onChange(of: direction) { _, _ in
                 let l = makeLayout()
                 cachedLayout = l
+                layoutGeneration += 1
                 fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+            }
+            .onChange(of: selectedPerson?.id) { _, newValue in
+                // Selecting a person (canvas tap, search, or inspector link) glides the
+                // canvas to center them, keeping the current zoom.
+                if newValue != nil { centerOnSelected(viewSize: geo.size, layout: layout) }
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
                 applyZoomStep(delta: 0.1, viewSize: geo.size)
@@ -274,6 +267,23 @@ struct TreeCanvasView: View {
             panOffset = CGSize(width: offsetX, height: offsetY)
             dragStart = CGSize(width: offsetX, height: offsetY)
             magnifyStart = clampedZoom
+        }
+    }
+
+    /// Pan (keeping the current zoom) so the selected person's card is centered. Runs on
+    /// every primary selection — canvas tap, search result, or inspector relative link.
+    private func centerOnSelected(viewSize: CGSize, layout: TreeLayout) {
+        guard let id = selectedPerson?.id,
+              let n = layout.nodes.first(where: { $0.person.id == id }) else { return }
+        recenter(onTreePoint: CGPoint(x: n.x + cardW / 2, y: n.y + cardH / 2), viewSize: viewSize)
+    }
+
+    /// Pan so a given point in tree coordinates sits at the viewport center.
+    /// (screen = treePoint·zoom + panOffset, so panOffset = center − treePoint·zoom.)
+    private func recenter(onTreePoint p: CGPoint, viewSize: CGSize) {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            panOffset = CGSize(width: viewSize.width / 2 - p.x * zoom, height: viewSize.height / 2 - p.y * zoom)
+            dragStart = panOffset
         }
     }
 
@@ -313,6 +323,177 @@ struct TreeCanvasView: View {
     /// Build the tidy-tree layout via the pure engine in FamilyTreeCore.
     private func makeLayout() -> TreeLayout {
         TreeLayoutEngine().layout(tree: tree, direction: direction == .leftRight ? .leftRight : .topDown)
+    }
+}
+
+/// The connectors + person cards, built at superSample scale. Equatable on its value
+/// inputs (layout version, selection, highlight, flags) so SwiftUI skips re-evaluating
+/// the whole card ForEach during pan/zoom — only the parent's transform updates then.
+private struct TreeContentLayer: View, Equatable {
+    let layout: TreeLayout
+    let generation: Int
+    let selectedId: UUID?
+    let secondaryId: UUID?
+    let homeId: UUID?
+    let highlightedIds: Set<UUID>
+    let lineageLabels: [UUID: String]
+    let showPhotos: Bool
+    let superSample: CGFloat
+    let cardW: CGFloat
+    let cardH: CGFloat
+    let onSelect: (Person, Bool) -> Void
+
+    static func == (l: TreeContentLayer, r: TreeContentLayer) -> Bool {
+        // generation stands in for the (expensive to compare) layout; it bumps whenever
+        // the cached layout is rebuilt, so structural changes always refresh.
+        l.generation == r.generation &&
+            l.selectedId == r.selectedId &&
+            l.secondaryId == r.secondaryId &&
+            l.homeId == r.homeId &&
+            l.showPhotos == r.showPhotos &&
+            l.superSample == r.superSample &&
+            l.highlightedIds == r.highlightedIds &&
+            l.lineageLabels == r.lineageLabels
+    }
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            // Connectors — drawn at the supersample scale (matching the cards).
+            Canvas { ctx, _ in
+                ctx.scaleBy(x: superSample, y: superSample)
+                for link in layout.links {
+                    var path = Path()
+                    for seg in link.segments {
+                        path.move(to: seg.from)
+                        path.addLine(to: seg.to)
+                    }
+                    let isHighlighted = !highlightedIds.isEmpty && link.personIds.allSatisfy { highlightedIds.contains($0) }
+                    let color = highlightedIds.isEmpty ? SepiaTheme.line : (isHighlighted ? SepiaTheme.accent : SepiaTheme.line.opacity(0.25))
+                    ctx.stroke(path, with: .color(color), lineWidth: isHighlighted ? 2.5 : 1.2)
+                }
+            }
+            .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample)
+            // Decorative only — let clicks on empty space pass through to the
+            // background's tap-to-deselect instead of being swallowed here.
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+
+            // Cards
+            ForEach(layout.nodes, id: \.person.id) { node in
+                let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
+                let isPrimary = selectedId == node.person.id
+                let isSecondary = secondaryId == node.person.id
+                PersonCardView(
+                    person: node.person,
+                    isSelected: isPrimary,
+                    isSecondarySelected: isSecondary,
+                    isHome: homeId == node.person.id,
+                    isHighlighted: highlightedIds.contains(node.person.id),
+                    lineageLabel: lineageLabels[node.person.id],
+                    showPhoto: showPhotos,
+                    scale: superSample
+                )
+                .equatable()
+                .opacity(dimmed ? 0.3 : 1.0)
+                .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
+                .onTapGesture {
+                    onSelect(node.person, NSEvent.modifierFlags.contains(.command))
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(node.person.accessibilityDescription)
+                .accessibilityHint("Выбрать персону")
+                .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
+                .accessibilityAction { onSelect(node.person, false) }
+            }
+        }
+        .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample, alignment: .topLeading)
+    }
+}
+
+/// Overview of the whole tree with the current viewport drawn on top. Shown only when
+/// the tree is zoomed past the viewport; tap or drag to pan there.
+private struct TreeMinimap: View {
+    let layout: TreeLayout
+    let generation: Int
+    let zoom: CGFloat
+    let panOffset: CGSize
+    let viewSize: CGSize
+    let selectedId: UUID?
+    let cardW: CGFloat
+    let cardH: CGFloat
+    let onRecenter: (CGPoint) -> Void
+
+    private let maxW: CGFloat = 210
+    private let maxH: CGFloat = 175
+
+    var body: some View {
+        let m = min(maxW / max(layout.totalWidth, 1), maxH / max(layout.totalHeight, 1))
+        let mapW = layout.totalWidth * m
+        let mapH = layout.totalHeight * m
+        // Current viewport rectangle (visible tree region): screen = tree·zoom + pan,
+        // so the visible tree origin is −pan/zoom and its size is viewSize/zoom.
+        let vx = (-panOffset.width / zoom) * m, vy = (-panOffset.height / zoom) * m
+        let vw = (viewSize.width / zoom) * m, vh = (viewSize.height / zoom) * m
+
+        ZStack(alignment: .topLeading) {
+            // Static card map — Equatable, so panning the main canvas doesn't redraw it.
+            MinimapNodes(layout: layout, generation: generation, selectedId: selectedId, m: m, cardW: cardW, cardH: cardH)
+                .equatable()
+                .frame(width: mapW, height: mapH)
+
+            // Viewport indicator — a cheap moving layer (no per-frame node redraw).
+            Rectangle()
+                .fill(SepiaTheme.accent.opacity(0.08))
+                .overlay(Rectangle().strokeBorder(SepiaTheme.accent, lineWidth: 1.5))
+                .frame(width: vw, height: vh)
+                .offset(x: vx, y: vy)
+                .allowsHitTesting(false)
+        }
+        .frame(width: mapW, height: mapH, alignment: .topLeading)
+        .clipped()
+        .contentShape(Rectangle())
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    onRecenter(CGPoint(x: value.location.x / m, y: value.location.y / m))
+                }
+        )
+        .padding(6)
+        .background(SepiaTheme.paper.opacity(0.92))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardLine, lineWidth: 0.5))
+        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
+        .help("Обзор дерева — нажмите, чтобы перейти")
+        .accessibilityHidden(true)
+    }
+}
+
+/// The minimap's card rectangles, batched into one fill. Equatable on the layout
+/// version + selection so it is drawn once and skipped while the main canvas pans.
+private struct MinimapNodes: View, Equatable {
+    let layout: TreeLayout
+    let generation: Int
+    let selectedId: UUID?
+    let m: CGFloat
+    let cardW: CGFloat
+    let cardH: CGFloat
+
+    static func == (l: MinimapNodes, r: MinimapNodes) -> Bool {
+        l.generation == r.generation && l.selectedId == r.selectedId && l.m == r.m
+    }
+
+    var body: some View {
+        Canvas { ctx, _ in
+            var rects = Path()
+            for n in layout.nodes where n.person.id != selectedId {
+                rects.addRoundedRect(in: CGRect(x: n.x * m, y: n.y * m, width: cardW * m, height: cardH * m), cornerSize: CGSize(width: 1, height: 1))
+            }
+            ctx.fill(rects, with: .color(SepiaTheme.line.opacity(0.55)))
+            if let sel = selectedId, let n = layout.nodes.first(where: { $0.person.id == sel }) {
+                let r = CGRect(x: n.x * m, y: n.y * m, width: cardW * m, height: cardH * m)
+                ctx.fill(Path(roundedRect: r, cornerRadius: 1), with: .color(SepiaTheme.accent))
+            }
+        }
     }
 }
 
@@ -391,6 +572,7 @@ struct PersonCardView: View, Equatable {
             lhs.person.surname == rhs.person.surname &&
             lhs.person.maidenName == rhs.person.maidenName &&
             lhs.person.lifespan == rhs.person.lifespan &&
+            lhs.person.sex == rhs.person.sex &&
             lhs.isSelected == rhs.isSelected &&
             lhs.isSecondarySelected == rhs.isSecondarySelected &&
             lhs.isHome == rhs.isHome &&
@@ -418,6 +600,15 @@ struct PersonCardView: View, Equatable {
         case .male: SepiaTheme.cardLineMale
         case .female: SepiaTheme.cardLineFemale
         case .unknown: SepiaTheme.cardLine
+        }
+    }
+
+    /// Non-color sex cue so sex reads independent of the card tint (color-blind / low contrast).
+    private var sexGlyph: String? {
+        switch person.sex {
+        case .male: "♂"
+        case .female: "♀"
+        case .unknown: nil
         }
     }
 
@@ -462,6 +653,12 @@ struct PersonCardView: View, Equatable {
                         }
                     }
                     Spacer(minLength: s(4))
+                    if let glyph = sexGlyph {
+                        Text(glyph)
+                            .font(SepiaTheme.ui(size: s(9)))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                            .padding(.trailing, isHome ? s(3) : 0)
+                    }
                     if isHome {
                         Circle().fill(SepiaTheme.accent).frame(width: s(6), height: s(6))
                     }
@@ -514,9 +711,12 @@ struct PersonCardView: View, Equatable {
                     .foregroundColor(.white)
                     .padding(.horizontal, s(5))
                     .padding(.vertical, s(2))
-                    .background(SepiaTheme.accent.opacity(0.85))
+                    .background(SepiaTheme.accent)
                     .clipShape(RoundedRectangle(cornerRadius: s(3)))
-                    .offset(x: s(-4), y: s(4))
+                    .shadow(color: .black.opacity(0.18), radius: s(1.5), y: s(0.5))
+                    // Float just above the card's top-right edge so it never collides with
+                    // the sex glyph / home dot inside the header.
+                    .offset(x: 0, y: -s(15))
             }
         }
     }

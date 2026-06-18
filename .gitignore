@@ -13,4 +13,6 @@ generate_icon.py
 build_dmg.sh
 FamilyTreeStudio/Core/Resources/AppIcon_preview.png
 geonames_tmp/
-.impeccable/critique/2026-06-17T20-02-00Z__familytreestudio-app-views-mainworkspace-swift.md
+
+# Impeccable critique snapshots / notes — local only
+.impeccable/**/*.md

@@ -47,6 +47,12 @@ struct FamilyTreeStudioApp: App {
                 }
                 .keyboardShortcut("z", modifiers: [.command, .shift])
             }
+            CommandGroup(after: .textEditing) {
+                Button("Найти персону") {
+                    NotificationCenter.default.post(name: .findPersonRequested, object: nil)
+                }
+                .keyboardShortcut("f")
+            }
             CommandGroup(after: .toolbar) {
                 Button("Увеличить масштаб") {
                     NotificationCenter.default.post(name: .zoomInRequested, object: nil)
@@ -72,4 +78,5 @@ extension Notification.Name {
     static let zoomFitRequested = Notification.Name("zoomFitRequested")
     static let undoRequested = Notification.Name("undoRequested")
     static let redoRequested = Notification.Name("redoRequested")
+    static let findPersonRequested = Notification.Name("findPersonRequested")
 }
