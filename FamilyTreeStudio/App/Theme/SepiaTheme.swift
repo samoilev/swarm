@@ -45,6 +45,7 @@ struct SepiaTheme {
     static let mapLine = Color(hex: "8a6d2f").opacity(0.7)
     static let pinBirth = Color(hex: "4a8c6e")
     static let pinDeath = Color(hex: "9c4a2f")
+    static let pinBurial = Color(hex: "6b5b95")
 
     static func display(size: CGFloat) -> Font {
         .system(size: size, weight: .semibold, design: .serif)

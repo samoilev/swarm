@@ -28,10 +28,15 @@ struct MapChartView: View {
                     pinButton(for: group)
                 }
             }
-            // Connection lines between birth and death of same person
+            // Connection lines: dashed birth→death life line, dotted death→grave burial line.
             ForEach(polylines) { line in
                 MapPolyline(coordinates: line.coordinates)
-                    .stroke(SepiaTheme.mapLine, style: StrokeStyle(lineWidth: 2, dash: [6, 4]))
+                    .stroke(
+                        line.dotted ? SepiaTheme.pinBurial.opacity(0.8) : SepiaTheme.mapLine,
+                        style: line.dotted
+                            ? StrokeStyle(lineWidth: 3, lineCap: .round, dash: [0.1, 6])
+                            : StrokeStyle(lineWidth: 2, dash: [6, 4])
+                    )
             }
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
@@ -84,8 +89,10 @@ struct MapChartView: View {
 
     @ViewBuilder
     private func pinButton(for group: AnnotationGroup) -> some View {
-        let hasBirth = group.annotations.contains { $0.eventType == .birth }
-        let hasDeath = group.annotations.contains { $0.eventType == .death }
+        // Distinct event types at this location, in a stable order (birth, death, burial).
+        let types = [MapPinType.birth, .death, .burial].filter { t in
+            group.annotations.contains { $0.eventType == t }
+        }
         let count = group.annotations.count
         let isExpanded = Binding<Bool>(
             get: { expandedGroupId == group.id },
@@ -93,20 +100,19 @@ struct MapChartView: View {
         )
 
         ZStack {
-            if hasBirth && hasDeath {
+            if types.count > 1 {
                 HStack(spacing: 2) {
-                    Circle()
-                        .fill(SepiaTheme.pinBirth)
-                        .frame(width: 12, height: 12)
-                    Circle()
-                        .fill(SepiaTheme.pinDeath)
-                        .frame(width: 12, height: 12)
+                    ForEach(types, id: \.self) { t in
+                        Circle()
+                            .fill(t.pinColor)
+                            .frame(width: 12, height: 12)
+                    }
                 }
                 .padding(2)
                 .background(Capsule().fill(Color.white))
             } else {
                 Circle()
-                    .fill(hasBirth ? SepiaTheme.pinBirth : SepiaTheme.pinDeath)
+                    .fill((types.first ?? .death).pinColor)
                     .frame(width: 14, height: 14)
                 Circle()
                     .strokeBorder(Color.white, lineWidth: 2)
@@ -152,13 +158,13 @@ struct MapChartView: View {
                     } label: {
                         HStack(spacing: 6) {
                             Circle()
-                                .fill(ann.eventType == .birth ? SepiaTheme.pinBirth : SepiaTheme.pinDeath)
+                                .fill(ann.eventType.pinColor)
                                 .frame(width: 8, height: 8)
                             Text(ann.personName)
                                 .font(SepiaTheme.ui(size: 11))
                                 .foregroundColor(SepiaTheme.ink)
                                 .lineLimit(1)
-                            Text(ann.eventType == .birth ? "род." : "ум.")
+                            Text(ann.eventType.shortLabel)
                                 .font(SepiaTheme.ui(size: 9))
                                 .foregroundColor(SepiaTheme.inkSoft)
                         }
@@ -211,6 +217,12 @@ struct MapChartView: View {
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }
+            HStack(spacing: 4) {
+                Circle().fill(SepiaTheme.pinBurial).frame(width: 8, height: 8)
+                Text("Захоронение")
+                    .font(SepiaTheme.ui(size: 11))
+                    .foregroundColor(SepiaTheme.inkSoft)
+            }
         }
         .padding(8)
         .background(SepiaTheme.paper.opacity(0.9))
@@ -232,6 +244,7 @@ struct MapChartView: View {
         for person in tree.people {
             var birthCoord: CLLocationCoordinate2D?
             var deathCoord: CLLocationCoordinate2D?
+            var burialCoord: CLLocationCoordinate2D?
 
             // Birth — explicit (manual or previously-resolved) coordinates win; only
             // geocode the place name when no coordinates are stored.
@@ -256,6 +269,13 @@ struct MapChartView: View {
                 }
             }
 
+            // Burial — manual grave coordinates win; otherwise geocode the place name.
+            if let lat = person.burialLat, let lon = person.burialLon {
+                burialCoord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+            } else if let place = person.burialPlace, !place.isEmpty {
+                burialCoord = geo.coordinateSync(for: place)
+            }
+
             // Create annotations
             if let coord = birthCoord {
                 newAnnotations.append(PersonMapAnnotation(
@@ -275,13 +295,23 @@ struct MapChartView: View {
                     coordinate: coord
                 ))
             }
-
-            // Polyline
-            if let b = birthCoord, let d = deathCoord {
-                newPolylines.append(MapPolylineData(
-                    id: person.id,
-                    coordinates: [b, d]
+            if let coord = burialCoord {
+                newAnnotations.append(PersonMapAnnotation(
+                    personId: person.id,
+                    personName: person.listName,
+                    placeName: person.burialPlace ?? "",
+                    eventType: .burial,
+                    coordinate: coord
                 ))
+            }
+
+            // Life line (dashed): birth → death.
+            if let b = birthCoord, let d = deathCoord {
+                newPolylines.append(MapPolylineData(coordinates: [b, d]))
+            }
+            // Burial line (dotted): death → grave.
+            if let d = deathCoord, let g = burialCoord {
+                newPolylines.append(MapPolylineData(coordinates: [d, g], dotted: true))
             }
         }
 
@@ -359,10 +389,29 @@ struct PersonMapAnnotation: Identifiable {
 }
 
 struct MapPolylineData: Identifiable {
-    let id: UUID
+    let id = UUID()
     let coordinates: [CLLocationCoordinate2D]
+    /// Life line (birth→death) is dashed; the burial line (death→grave) is dotted.
+    var dotted: Bool = false
 }
 
 enum MapPinType {
-    case birth, death
+    case birth, death, burial
+
+    var pinColor: Color {
+        switch self {
+        case .birth: SepiaTheme.pinBirth
+        case .death: SepiaTheme.pinDeath
+        case .burial: SepiaTheme.pinBurial
+        }
+    }
+
+    /// Short label used in the grouped-pin popover.
+    var shortLabel: String {
+        switch self {
+        case .birth: "род."
+        case .death: "ум."
+        case .burial: "погр."
+        }
+    }
 }

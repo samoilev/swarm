@@ -6,6 +6,10 @@ import UniformTypeIdentifiers
 struct ExportView: View {
     let tree: FamilyTree
     var store: TreeStore
+    /// Currently highlighted people (lineage or ⌘-path). Empty ⇒ no selection export.
+    var selectedIds: Set<UUID> = []
+    /// Mirrors the canvas photo toggle so the PDF diagram matches what's on screen.
+    var showPhotos: Bool = true
     @Environment(\.dismiss) private var dismiss
 
     // Native file export (PDF cards via .fileExporter; GEDCOM via NSSavePanel).
@@ -39,11 +43,17 @@ struct ExportView: View {
                 }
 
                 VStack(spacing: 10) {
-                    Button { exportPersonCards() } label: {
-                        Label("PDF — карточки людей", systemImage: "person.text.rectangle").frame(maxWidth: .infinity)
+                    Button { exportPDF(selected: false) } label: {
+                        Label("PDF — всё дерево", systemImage: "tree").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
                     .disabled(tree.people.isEmpty)
+
+                    Button { exportPDF(selected: true) } label: {
+                        Label("PDF — выделенная часть", systemImage: "scope").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
+                    .disabled(selectedIds.isEmpty)
 
                     Button { exportGEDCOM() } label: {
                         Label("Экспорт GEDCOM (.ged)", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
@@ -51,7 +61,7 @@ struct ExportView: View {
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                 }
 
-                Text("«Карточки людей» — отдельная страница на каждого человека по алфавиту, с фото и изображениями из вложений. GEDCOM — стандартный файл, который можно открыть в Ancestry, Gramps или MacFamilyTree.")
+                Text("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди (подсветка родства). GEDCOM — стандартный файл для Ancestry, Gramps или MacFamilyTree.")
                     .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -84,10 +94,11 @@ struct ExportView: View {
         tree.name.replacingOccurrences(of: " ", with: "-").lowercased()
     }
 
-    private func exportPersonCards() {
-        guard let data = PersonCardsPDFExporter.render(tree: tree, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else { return }
+    private func exportPDF(selected: Bool) {
+        let ids: Set<UUID>? = selected ? selectedIds : nil
+        guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else { return }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)
-        exportName = "\(fileSlug)-cards.pdf"
+        exportName = selected ? "\(fileSlug)-selection.pdf" : "\(fileSlug)-tree.pdf"
         showExporter = true
     }
 

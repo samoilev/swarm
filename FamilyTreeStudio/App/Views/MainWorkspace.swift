@@ -101,7 +101,7 @@ struct MainWorkspace: View {
             }
         }
         .sheet(isPresented: $showExportModal) {
-            ExportView(tree: tree, store: store)
+            ExportView(tree: tree, store: store, selectedIds: highlightedBranch, showPhotos: showPhotos)
         }
         .sheet(isPresented: $showAddSheet) {
             AddPersonView(tree: tree, store: store) { newPerson in
