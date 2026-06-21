@@ -79,30 +79,6 @@ public final class GeocodingService {
         return result
     }
 
-    public func coordinate(for placeName: String?, completion: @escaping (CLLocationCoordinate2D?) -> Void) {
-        guard let place = placeName, !place.isEmpty else {
-            completion(nil)
-            return
-        }
-
-        let key = place.lowercased().trimmingCharacters(in: .whitespaces)
-
-        // Check cache
-        if let cached = cache[key] {
-            completion(cached)
-            return
-        }
-
-        // Look up in the bundled GeoNames database. Offline only — unknown places
-        // resolve to nil rather than being sent to a network geocoder.
-        if let coord = lookupInDatabase(key) {
-            cache[key] = coord
-            completion(coord)
-        } else {
-            completion(nil)
-        }
-    }
-
     /// Remove a place from the in-memory cache so the next lookup re-geocodes it.
     public func clearCache(for placeName: String) {
         let key = placeName.lowercased().trimmingCharacters(in: .whitespaces)

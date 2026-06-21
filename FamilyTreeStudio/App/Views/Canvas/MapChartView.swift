@@ -14,7 +14,6 @@ struct MapChartView: View {
     ))
     @State private var annotations: [PersonMapAnnotation] = []
     @State private var polylines: [MapPolylineData] = []
-    @State private var isGeocodingInProgress = false
     @State private var lastZoom: CGFloat = 0.85
     @State private var currentSpan: MKCoordinateSpan = .init(latitudeDelta: 40, longitudeDelta: 60)
     @State private var currentCenter: CLLocationCoordinate2D = .init(latitude: 55, longitude: 40)
@@ -229,7 +228,6 @@ struct MapChartView: View {
         let geo = GeocodingService.shared
         var newAnnotations: [PersonMapAnnotation] = []
         var newPolylines: [MapPolylineData] = []
-        var pendingGeocode: [(Person, String, MapPinType)] = []
 
         for person in tree.people {
             var birthCoord: CLLocationCoordinate2D?
@@ -244,8 +242,6 @@ struct MapChartView: View {
                     birthCoord = coord
                     person.birthLat = coord.latitude
                     person.birthLon = coord.longitude
-                } else {
-                    pendingGeocode.append((person, place, .birth))
                 }
             }
 
@@ -257,8 +253,6 @@ struct MapChartView: View {
                     deathCoord = coord
                     person.deathLat = coord.latitude
                     person.deathLon = coord.longitude
-                } else {
-                    pendingGeocode.append((person, place, .death))
                 }
             }
 
@@ -296,61 +290,6 @@ struct MapChartView: View {
 
         // Fit map to show all annotations
         fitToAnnotations()
-
-        // Resolve any pending places from the local GeoNames DB.
-        if !pendingGeocode.isEmpty {
-            isGeocodingInProgress = true
-            geocodeSequentially(items: pendingGeocode, index: 0)
-        }
-    }
-
-    private func geocodeSequentially(items: [(Person, String, MapPinType)], index: Int) {
-        guard index < items.count else {
-            isGeocodingInProgress = false
-            fitToAnnotations()
-            return
-        }
-
-        let (person, place, eventType) = items[index]
-        let geo = GeocodingService.shared
-
-        geo.coordinate(for: place) { coord in
-            DispatchQueue.main.async {
-                if let coord {
-                    switch eventType {
-                    case .birth:
-                        person.birthLat = coord.latitude
-                        person.birthLon = coord.longitude
-                    case .death:
-                        person.deathLat = coord.latitude
-                        person.deathLon = coord.longitude
-                    }
-
-                    let ann = PersonMapAnnotation(
-                        personId: person.id,
-                        personName: person.listName,
-                        placeName: eventType == .birth ? (person.birthPlace ?? "") : (person.deathPlace ?? ""),
-                        eventType: eventType,
-                        coordinate: coord
-                    )
-                    annotations.append(ann)
-
-                    if let bLat = person.birthLat, let bLon = person.birthLon,
-                       let dLat = person.deathLat, let dLon = person.deathLon {
-                        let b = CLLocationCoordinate2D(latitude: bLat, longitude: bLon)
-                        let d = CLLocationCoordinate2D(latitude: dLat, longitude: dLon)
-                        polylines.removeAll { $0.id == person.id }
-                        polylines.append(MapPolylineData(id: person.id, coordinates: [b, d]))
-                    }
-                }
-
-                // Lookups are local now, so process the next place immediately
-                // (the async hop just unwinds the recursion off the stack).
-                DispatchQueue.main.async {
-                    geocodeSequentially(items: items, index: index + 1)
-                }
-            }
-        }
     }
 
     private func fitToAnnotations() {
