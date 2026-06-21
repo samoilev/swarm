@@ -14,8 +14,12 @@ struct PersonCardsPDFExporter {
     private static let footerBaseline: CGFloat = 30 // y of footer text
     private static let bodyBottom: CGFloat = 50 // text never drops below this y
 
-    static func render(tree: FamilyTree, attachmentsFolder: URL? = nil) -> Data? {
-        let people = tree.people.sorted {
+    /// `selectedIds` nil or empty → the whole tree. Otherwise only those people are
+    /// included (cards) and the diagram page is limited to that subset.
+    static func render(tree: FamilyTree, selectedIds: Set<UUID>? = nil, showPhotos: Bool = true, attachmentsFolder: URL? = nil) -> Data? {
+        let scopeIds = (selectedIds?.isEmpty == false) ? selectedIds : nil
+        let scoped = scopeIds.map { ids in tree.people.filter { ids.contains($0.id) } } ?? tree.people
+        let people = scoped.sorted {
             $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending
         }
         guard !people.isEmpty else { return nil }
@@ -28,6 +32,17 @@ struct PersonCardsPDFExporter {
         let idx = FamilyIndex(tree: tree)
         let contentW = pageW - margin * 2
 
+        // Page 1: the tree (or selected part) drawn as a 90°-rotated diagram.
+        drawTreePoster(tree: tree, scopeIds: scopeIds, showPhotos: showPhotos, ctx: ctx, box: box)
+
+        // Following pages: one alphabetical card per person in scope.
+        drawPersonCards(people: people, idx: idx, ctx: ctx, box: box, contentW: contentW, attachmentsFolder: attachmentsFolder)
+
+        ctx.closePDF()
+        return pdfData as Data
+    }
+
+    private static func drawPersonCards(people: [Person], idx: FamilyIndex, ctx: CGContext, box: CGRect, contentW: CGFloat, attachmentsFolder: URL?) {
         for person in people {
             let body = makeBody(for: person, idx: idx)
             let framesetter = CTFramesetterCreateWithAttributedString(body)
@@ -81,9 +96,83 @@ struct PersonCardsPDFExporter {
             renderImages(loadImages(for: person, in: attachmentsFolder),
                          ctx: ctx, box: box, person: person, contentW: contentW)
         }
+    }
 
-        ctx.closePDF()
-        return pdfData as Data
+    // MARK: - Tree diagram (page 1)
+
+    /// Draws the whole tree — or just `scopeIds` — as one page, rotated 90° so a wide
+    /// pedigree uses the portrait page's long edge. The diagram is the real on-screen
+    /// `PersonCardView` drawn through `ImageRenderer.render` straight into the PDF
+    /// context, so cards/text stay **vector** (crisp at any zoom); only embedded photos
+    /// rasterize. The 90° turn is baked into the SwiftUI view, not the CG matrix.
+    private static func drawTreePoster(tree: FamilyTree, scopeIds: Set<UUID>?, showPhotos: Bool, ctx: CGContext, box: CGRect) {
+        let layout = TreeLayoutEngine().layout(tree: tree, direction: .topDown)
+        let nodes = scopeIds.map { ids in layout.nodes.filter { ids.contains($0.person.id) } } ?? layout.nodes
+        guard !nodes.isEmpty else { return }
+        let links = scopeIds.map { ids in layout.links.filter { l in l.personIds.allSatisfy { ids.contains($0) } } } ?? layout.links
+
+        let cardW: CGFloat = 210, cardH: CGFloat = 90
+        let minX = nodes.map(\.x).min()!
+        let minY = nodes.map(\.y).min()!
+        let treeW = nodes.map { $0.x + cardW }.max()! - minX
+        let treeH = nodes.map { $0.y + cardH }.max()! - minY
+        guard treeW > 0, treeH > 0 else { return }
+
+        ctx.beginPDFPage(nil)
+        let nsCtx = NSGraphicsContext(cgContext: ctx, flipped: false)
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = nsCtx
+        nsCtx.imageInterpolation = .high
+
+        drawBackground(ctx, box: box)
+        drawBorder(ctx)
+
+        // Title near the top (drawn in normal, un-rotated page space).
+        let title = scopeIds == nil ? (tree.name.isEmpty ? "Дерево" : tree.name) : "Выделенная часть дерева"
+        let titleStr = NSAttributedString(string: title, attributes: [
+            .font: NSFont.systemFont(ofSize: 16, weight: .semibold),
+            .foregroundColor: NSColor(SepiaTheme.ink)
+        ])
+        let titleH = titleStr.size().height
+        let titleTopY = pageH - margin - titleH
+        titleStr.draw(at: NSPoint(x: margin, y: titleTopY))
+
+        // Content area below the title, above the bottom margin.
+        let availW = pageW - margin * 2
+        let availH = (titleTopY - 12) - bodyBottom
+        guard availW > 0, availH > 0 else {
+            NSGraphicsContext.restoreGraphicsState(); ctx.endPDFPage(); return
+        }
+
+        // The tree turned 90° in SwiftUI: its bounding box becomes treeH × treeW.
+        let poster = TreePosterView(
+            nodes: nodes, links: links,
+            canvasSize: CGSize(width: treeW, height: treeH),
+            originX: minX, originY: minY, showPhotos: showPhotos
+        )
+        .rotationEffect(.degrees(270))
+        .frame(width: treeH, height: treeW)
+
+        let scale = min(availW / treeH, availH / treeW)
+        let drawW = treeH * scale, drawH = treeW * scale
+        let ox = (pageW - drawW) / 2
+        let oy = bodyBottom + (availH - drawH) / 2
+
+        MainActor.assumeIsolated {
+            let renderer = ImageRenderer(content: poster)
+            renderer.isOpaque = false
+            // Vector for text/shapes; only photos rasterize — keep them crisp.
+            renderer.render(rasterizationScale: 3) { _, draw in
+                ctx.saveGState()
+                ctx.translateBy(x: ox, y: oy)
+                ctx.scaleBy(x: scale, y: scale)
+                draw(ctx)
+                ctx.restoreGState()
+            }
+        }
+
+        NSGraphicsContext.restoreGraphicsState()
+        ctx.endPDFPage()
     }
 
     // MARK: - Page chrome
@@ -375,5 +464,39 @@ private extension NSFont {
     /// Returns an italic variant of this font (falls back to self if unavailable).
     func withItalic() -> NSFont {
         NSFontManager.shared.convert(self, toHaveTrait: .italicFontMask)
+    }
+}
+
+/// The tree exactly as it appears on the canvas (cards + connectors, photos optional),
+/// laid out at base scale for `ImageRenderer`. Coordinates are translated by
+/// `originX/originY` so the scoped subtree starts at the view's origin.
+private struct TreePosterView: View {
+    let nodes: [TreeNode]
+    let links: [TreeLink]
+    let canvasSize: CGSize
+    let originX: CGFloat
+    let originY: CGFloat
+    let showPhotos: Bool
+    private let cardW: CGFloat = 210
+    private let cardH: CGFloat = 90
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Path { p in
+                for link in links {
+                    for seg in link.segments {
+                        p.move(to: CGPoint(x: seg.from.x - originX, y: seg.from.y - originY))
+                        p.addLine(to: CGPoint(x: seg.to.x - originX, y: seg.to.y - originY))
+                    }
+                }
+            }
+            .stroke(SepiaTheme.line, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+
+            ForEach(nodes, id: \.person.id) { node in
+                PersonCardView(person: node.person, showPhoto: showPhotos, scale: 1)
+                    .position(x: node.x - originX + cardW / 2, y: node.y - originY + cardH / 2)
+            }
+        }
+        .frame(width: canvasSize.width, height: canvasSize.height, alignment: .topLeading)
     }
 }
