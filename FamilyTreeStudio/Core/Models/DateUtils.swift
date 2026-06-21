@@ -68,11 +68,6 @@ public enum FamilyDate {
         "июл", "авг", "сен", "окт", "ноя", "дек"
     ]
 
-    private static let russianMonthsFull = [
-        "январь", "февраль", "март", "апрель", "май", "июнь",
-        "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"
-    ]
-
     private static let gedcomMonths = [
         "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
         "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
@@ -234,12 +229,8 @@ public enum FamilyDate {
     private static func monthNumber(_ name: String) -> Int? {
         let lower = name.lowercased().trimmingCharacters(in: .punctuationCharacters)
 
-        // Russian short
+        // Russian short (also matches full names: "январь".hasPrefix("янв"))
         if let idx = russianMonthsShort.firstIndex(where: { lower.hasPrefix($0) }) {
-            return idx + 1
-        }
-        // Russian full
-        if let idx = russianMonthsFull.firstIndex(where: { lower.hasPrefix($0.prefix(3)) }) {
             return idx + 1
         }
         // English/GEDCOM

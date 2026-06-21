@@ -25,7 +25,6 @@
 		A10016 /* ExportServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10016; };
 		A10017 /* AddPersonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10017; };
 		A10018 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10018; };
-		A10019 /* SampleData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10019; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,7 +46,6 @@
 		B10016 /* ExportServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportServices.swift; sourceTree = "<group>"; };
 		B10017 /* AddPersonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddPersonView.swift; sourceTree = "<group>"; };
 		B10018 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B10019 /* SampleData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleData.swift; sourceTree = "<group>"; };
 		B10020 /* FamilyTreeStudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FamilyTreeStudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10021 /* FamilyTreeStudio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FamilyTreeStudio.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -92,7 +90,6 @@
 				B10004 /* Union.swift */,
 				B10005 /* FamilyTree.swift */,
 				B10006 /* FamilyIndex.swift */,
-				B10019 /* SampleData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -256,7 +253,6 @@
 				A10015 /* GEDCOMExporter.swift in Sources */,
 				A10016 /* ExportServices.swift in Sources */,
 				A10017 /* AddPersonView.swift in Sources */,
-				A10019 /* SampleData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

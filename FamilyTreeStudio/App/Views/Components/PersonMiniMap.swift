@@ -125,24 +125,16 @@ struct PersonMiniMap: View {
         await withCheckedContinuation { cont in geo.whenReady { cont.resume() } }
 
         if b == nil, let place = person.birthPlace, !place.isEmpty {
-            if let c = geo.coordinateSync(for: place) { b = c } else { b = await geocode(place) }
-            if let c = b { person.birthLat = c.latitude; person.birthLon = c.longitude }
+            if let c = geo.coordinateSync(for: place) { b = c; person.birthLat = c.latitude; person.birthLon = c.longitude }
         }
         if d == nil, let place = person.deathPlace, !place.isEmpty {
-            if let c = geo.coordinateSync(for: place) { d = c } else { d = await geocode(place) }
-            if let c = d { person.deathLat = c.latitude; person.deathLon = c.longitude }
+            if let c = geo.coordinateSync(for: place) { d = c; person.deathLat = c.latitude; person.deathLon = c.longitude }
         }
 
         birth = b
         death = d
         resolved = true
         updateCamera()
-    }
-
-    private func geocode(_ place: String) async -> CLLocationCoordinate2D? {
-        await withCheckedContinuation { cont in
-            GeocodingService.shared.coordinate(for: place) { cont.resume(returning: $0) }
-        }
     }
 
     private func updateCamera() {

@@ -1,5 +1,4 @@
 import Foundation
-import Observation
 
 /// Builds relationship indexes from a FamilyTree for efficient lookups
 public struct FamilyIndex {
@@ -101,15 +100,5 @@ public struct FamilyIndex {
 
     public func siblingsOf(_ person: Person) -> [Person] {
         mergedSiblingIds(person.id).compactMap { byId[$0] }
-    }
-
-    /// Get partners of a union as Person objects
-    public func partners(of union: Union) -> [Person] {
-        union.partnerIds.compactMap { byId[$0] }
-    }
-
-    /// Get children of a union as Person objects
-    public func children(of union: Union) -> [Person] {
-        union.childrenIds.compactMap { byId[$0] }
     }
 }

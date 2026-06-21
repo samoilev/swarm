@@ -463,10 +463,8 @@ struct EditPersonView: View {
     /// Resolve a picked place to coordinates and fill the bound field. Only fires when
     /// a suggestion is chosen from the list, so manual entries keep their manual coords.
     private func prefillCoords(for place: String, into coords: Binding<String>) {
-        GeocodingService.shared.coordinate(for: place) { coord in
-            DispatchQueue.main.async {
-                if let c = coord { coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude) }
-            }
+        if let c = GeocodingService.shared.coordinateSync(for: place) {
+            coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude)
         }
     }
 
