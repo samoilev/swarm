@@ -15,6 +15,8 @@
 --disable hoistPatternLet
 --disable blankLinesAtStartOfScope
 --disable blankLinesAtEndOfScope
+--disable wrapLoopBodies           # don't force inline `for x { … }` onto extra lines
+--disable wrapPropertyBodies       # leave single-line computed properties as written
 
 # Indentation / wrapping
 --indent 4

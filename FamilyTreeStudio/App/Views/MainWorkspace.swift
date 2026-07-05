@@ -119,7 +119,7 @@ struct MainWorkspace: View {
             Button("Удалить", role: .destructive) { deletePerson() }
         } message: {
             if let p = personToDelete {
-                Text("«\(p.listName)» будет удалена из дерева. Все связи с этой персоной будут разорваны. Это действие нельзя отменить.")
+                Text("«\(p.listName)» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z).")
             }
         }
         .alert("Не удалось сохранить", isPresented: $showSaveError) {
@@ -728,6 +728,9 @@ struct MainWorkspace: View {
     /// A restore swaps in fresh Person instances, so the selection (which holds old
     /// references) must be re-resolved by id; anything now gone is cleared.
     private func reconcileSelectionAfterRestore() {
+        // Undo/redo swaps in freshly-decoded Person instances that carry the portrait
+        // filename but not its (transient) media folder — re-point them so photos load.
+        store.refreshMediaFolders(for: tree)
         selectedPerson = selectedPerson.flatMap { sel in tree.people.first { $0.id == sel.id } }
         secondaryPerson = secondaryPerson.flatMap { sel in tree.people.first { $0.id == sel.id } }
         recomputeHighlight()

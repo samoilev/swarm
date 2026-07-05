@@ -38,9 +38,14 @@ jobs:
   lint:
     name: SwiftFormat
     runs-on: macos-15
+    env:
+      # Pin the formatter version so an upstream release with changed default rules
+      # can't fail CI without a code change. Bump this deliberately. Mint builds the
+      # exact tag from source, so no reliance on release-asset packaging.
+      SWIFTFORMAT_VERSION: "0.61.1"
     steps:
       - uses: actions/checkout@v6
-      - name: Install SwiftFormat
-        run: brew install swiftformat
-      - name: Check formatting
-        run: swiftformat --lint .
+      - name: Install Mint
+        run: brew install mint
+      - name: Check formatting (pinned SwiftFormat)
+        run: mint run nicklockwood/SwiftFormat@${SWIFTFORMAT_VERSION} --lint .

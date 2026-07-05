@@ -97,6 +97,30 @@ struct FamilyTreeTests {
         #expect(t.rootUnionId == top.id)
     }
 
+    @Test func optimizeRootKeepsWidowedUnionWithMarriageData() {
+        let widow = Person(givenNames: "Вдова", sex: .female)
+        // A couple whose other partner was removed, leaving one partner + a recorded
+        // marriage. optimizeRoot() must not discard the surviving marriage record.
+        let u = Union(partner1Id: widow.id, partner2Id: nil)
+        u.marriageDate = "12.06.1950"
+        u.marriagePlace = "Москва"
+        let t = tree(widow)
+        t.unions = [u]
+        t.optimizeRoot()
+        #expect(t.unions.count == 1)
+        #expect(t.unions.first?.marriageDate == "12.06.1950")
+        #expect(t.unions.first?.marriagePlace == "Москва")
+    }
+
+    @Test func optimizeRootStillDropsEmptyLonePartnerUnion() {
+        // A lone partner with no children and no marriage data is a true orphan link.
+        let p = Person(givenNames: "Один", sex: .male)
+        let t = tree(p)
+        t.unions = [Union(partner1Id: p.id, partner2Id: nil)]
+        t.optimizeRoot()
+        #expect(t.unions.isEmpty)
+    }
+
     @Test func sharedParentCountDistinguishesFullAndHalf() {
         let dad = Person(givenNames: "Папа", sex: .male)
         let mom = Person(givenNames: "Мама", sex: .female)

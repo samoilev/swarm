@@ -25,6 +25,7 @@ struct RelationshipTests {
             let uncleWife = person("uncleWife", "Тётя", .female)
             let mother = person("mother", "Мать", .female)
             let me = person("me", "Я", .male)
+            let bro = person("bro", "Брат", .male)
             let sister = person("sister", "Сестра", .female)
             let wife = person("wife", "Жена", .female)
             let son = person("son", "Сын", .male)
@@ -34,16 +35,17 @@ struct RelationshipTests {
             let wifeFather = person("wifeFather", "ТестьО", .male)
             let wifeMother = person("wifeMother", "ТёщаМ", .female)
             let wifeBro = person("wifeBro", "Шурин", .male)
+            let wifeSis = person("wifeSis", "Свояченица", .female)
             let sisterHusband = person("sisterHusband", "ЗятьМ", .male)
             let nephew = person("nephew", "Племяш", .male)
 
             tree.unions = [
                 Union(partner1Id: gf.id, partner2Id: gm.id, childrenIds: [father.id, uncle.id]),
-                Union(partner1Id: father.id, partner2Id: mother.id, childrenIds: [me.id, sister.id]),
+                Union(partner1Id: father.id, partner2Id: mother.id, childrenIds: [me.id, bro.id, sister.id]),
                 Union(partner1Id: me.id, partner2Id: wife.id, childrenIds: [son.id]),
                 Union(partner1Id: father.id, partner2Id: stepmother.id, childrenIds: [halfBro.id]),
                 Union(partner1Id: uncle.id, partner2Id: uncleWife.id, childrenIds: [cousin.id]),
-                Union(partner1Id: wifeFather.id, partner2Id: wifeMother.id, childrenIds: [wife.id, wifeBro.id]),
+                Union(partner1Id: wifeFather.id, partner2Id: wifeMother.id, childrenIds: [wife.id, wifeBro.id, wifeSis.id]),
                 Union(partner1Id: sisterHusband.id, partner2Id: sister.id, childrenIds: [nephew.id]),
             ]
         }
@@ -85,6 +87,36 @@ struct RelationshipTests {
         let f = Fixture()
         // Wife's brother, from a male subject → Шурин.
         #expect(name(from: "me", to: "wifeBro", in: f) == "Шурин")
+    }
+
+    /// The full in-law matrix: every named term, from both subject sexes.
+    /// (свёкор/свекровь = husband's parents, viewed by the wife;
+    ///  тесть/тёща = wife's parents, viewed by the husband;
+    ///  деверь/золовка = husband's siblings; шурин/свояченица = wife's siblings;
+    ///  зять/невестка = daughter's/sister's husband, son's/brother's wife.)
+    @Test func inLawMatrix() {
+        let f = Fixture()
+        let cases: [(from: String, to: String, expected: String)] = [
+            // Spouse's parents
+            ("me", "wifeFather", "Тесть"),
+            ("me", "wifeMother", "Тёща"),
+            ("wife", "father", "Свёкор"),
+            ("wife", "mother", "Свекровь"),
+            // Spouse's siblings
+            ("me", "wifeBro", "Шурин"),
+            ("me", "wifeSis", "Свояченица"),
+            ("wife", "bro", "Деверь"),
+            ("wife", "sister", "Золовка"),
+            // Child's / sibling's spouse
+            ("father", "wife", "Невестка (сноха)"),
+            ("father", "sisterHusband", "Зять (муж дочери)"),
+            ("me", "sisterHusband", "Зять (муж сестры)"),
+            ("father", "uncleWife", "Невестка (жена брата)"),
+        ]
+        for c in cases {
+            #expect(name(from: c.from, to: c.to, in: f) == c.expected,
+                    "\(c.from) → \(c.to) должен быть «\(c.expected)»")
+        }
     }
 
     @Test func unrelatedPeopleReportNoLink() throws {

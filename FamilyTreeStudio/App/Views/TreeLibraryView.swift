@@ -22,6 +22,8 @@ struct TreeLibraryView: View {
     @State private var renameSubtitle = ""
     /// Errors
     @State private var errorMessage: String?
+    /// Set from `store.lastLoadError` when trees on disk failed to parse at launch.
+    @State private var showLoadError = false
 
     var body: some View {
         ZStack {
@@ -154,6 +156,17 @@ struct TreeLibraryView: View {
         } message: {
             Text(errorMessage ?? "")
         }
+        .alert("Некоторые деревья не открылись", isPresented: $showLoadError) {
+            Button("Показать в Finder") {
+                NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
+                store.lastLoadError = nil
+            }
+            Button("OK", role: .cancel) { store.lastLoadError = nil }
+        } message: {
+            Text(store.lastLoadError ?? "")
+        }
+        .onAppear { if store.lastLoadError != nil { showLoadError = true } }
+        .onChange(of: store.lastLoadError) { _, newValue in showLoadError = (newValue != nil) }
     }
 
     private func startRename(_ tree: FamilyTree) {

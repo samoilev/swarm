@@ -1,7 +1,10 @@
 import AppKit
 import FamilyTreeCore
+import os
 import SwiftUI
 import UniformTypeIdentifiers
+
+private let log = Logger(subsystem: "com.familytreestudio.app", category: "EditPerson")
 
 struct EditPersonView: View {
     @Environment(\.dismiss) private var dismiss
@@ -380,7 +383,7 @@ struct EditPersonView: View {
             do {
                 _ = try store.addAttachment(to: person, in: tree, sourceURL: url)
             } catch {
-                print("Failed to attach \(url.lastPathComponent): \(error)")
+                log.error("Failed to attach \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
     }

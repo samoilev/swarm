@@ -224,6 +224,85 @@ struct GEDCOMRoundTripTests {
         t.unions = parsed.unions
         t.homePersonId = parsed.homePersonId
         t.rootUnionId = parsed.rootUnionId
+        t.unknownRecords = parsed.unknownRecords
         return t
+    }
+
+    // MARK: - Spec conformance & unknown-content preservation (T6 / T19)
+
+    /// A note longer than the GEDCOM line limit must be split with CONC on export and
+    /// re-joined identically on import — with no physical line exceeding 255 bytes.
+    @Test func longNoteSplitsWithConcAndRoundTrips() {
+        let tree = FamilyTree(name: "Длинная заметка")
+        let longNote = String(repeating: "Слово ", count: 300).trimmingCharacters(in: .whitespaces) // ~1800 chars
+        let p = Person(givenNames: "Тест", surname: "Заметкин", sex: .male, notes: longNote)
+        tree.people = [p]
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        // No physical line may exceed the 255-byte GEDCOM limit.
+        for line in gedcom.split(separator: "\n") {
+            #expect(line.utf8.count <= 255, "line too long: \(line.utf8.count) bytes")
+        }
+        #expect(gedcom.contains("\nCONC ") || gedcom.contains(" CONC ")) // splitting happened
+        let parsed = GEDCOMParser.parse(gedcom: gedcom)
+        #expect(parsed.people.first?.notes == longNote) // re-joined exactly
+    }
+
+    /// A slash inside a given name must not corrupt the `/surname/` NAME structure.
+    @Test func slashInNameIsSanitized() throws {
+        let tree = FamilyTree(name: "Слэш")
+        let p = Person(givenNames: "Иван/Ваня", surname: "Пет/ров", sex: .male)
+        tree.people = [p]
+        let parsed = roundTrip(tree)
+        let back = try #require(parsed.people.first)
+        // The surname parses cleanly (exactly one /…/ pair) and no slash leaks through.
+        #expect(!back.givenNames.contains("/"))
+        #expect(!back.surname.contains("/"))
+        #expect(back.surname == "Пет ров")
+    }
+
+    /// A foreign file's unmodeled content — an event-level note, a custom individual
+    /// tag, and a whole SOUR record — must survive parse → serialize → parse.
+    @Test func preservesUnknownStructuresThroughRoundTrip() throws {
+        let gedcom = """
+        0 HEAD
+        1 _NAME Импорт
+        0 @I1@ INDI
+        1 NAME Фёдор /Достоевский/
+        1 SEX M
+        1 BIRT
+        2 DATE 11 NOV 1821
+        2 PLAC Москва
+        2 NOTE Родился в госпитале
+        1 _UID 12345-CUSTOM
+        1 SOUR @S1@
+        0 @S1@ SOUR
+        1 TITL Метрическая книга
+        1 AUTH Приход
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 MARR
+        2 DATE 1867
+        2 NOTE Венчание в соборе
+        0 TRLR
+        """
+        // First parse (as if importing), then serialize and re-parse.
+        let firstTree = treeFrom(GEDCOMParser.parse(gedcom: gedcom))
+        let out = GEDCOMSerializer.serialize(tree: firstTree).gedcom
+
+        // The custom tag, event notes and the SOUR record all appear in the output.
+        #expect(out.contains("_UID 12345-CUSTOM"))
+        #expect(out.contains("NOTE Родился в госпитале"))
+        #expect(out.contains("NOTE Венчание в соборе"))
+        #expect(out.contains("0 @S1@ SOUR"))
+        #expect(out.contains("TITL Метрическая книга"))
+
+        // And they survive a second parse (preservation is stable, not one-shot).
+        let reparsed = GEDCOMParser.parse(gedcom: out)
+        let person = try #require(reparsed.people.first)
+        #expect(person.unknownBranches.contains { $0.contains { $0.contains("_UID 12345-CUSTOM") } })
+        #expect(person.eventExtras["BIRT"]?.contains { $0.contains("Родился в госпитале") } == true)
+        #expect(reparsed.unknownRecords.contains { $0.contains { $0.contains("@S1@ SOUR") } })
+        #expect(reparsed.unions.first?.marriageExtras.contains { $0.contains("Венчание") } == true)
     }
 }

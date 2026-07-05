@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let log = Logger(subsystem: "com.familytreestudio.app", category: "PlacesDatabase")
 
 public struct PlaceEntry: Identifiable, Hashable {
     public let id: Int
@@ -93,12 +96,12 @@ public final class PlacesDatabase {
 
     private static func loadPlaces() -> [Entry] {
         guard let url = Bundle.module.url(forResource: "places", withExtension: "tsv") else {
-            print("PlacesDatabase: places.tsv not found in bundle")
+            log.error("places.tsv not found in bundle")
             return []
         }
 
         guard let data = try? String(contentsOf: url, encoding: .utf8) else {
-            print("PlacesDatabase: failed to read places.tsv")
+            log.error("failed to read places.tsv")
             return []
         }
 

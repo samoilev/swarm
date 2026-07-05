@@ -16,7 +16,26 @@ public struct GEDCOMParser {
         public var rootUnionId: UUID?
         public var people: [Person]
         public var unions: [Union]
+        /// Top-level records the parser doesn't model, kept verbatim for re-export.
+        public var unknownRecords: [[String]] = []
     }
+
+    /// Level-1 tags the parser fully models inside an INDI record. Anything else at
+    /// level 1 is preserved as an unknown branch. FAMS/FAMC/CHAN/RIN are intentionally
+    /// treated as "handled" (regenerated or ignored), so they aren't re-emitted twice.
+    private static let modeledIndiTags: Set<String> = [
+        "NAME", "SEX", "BIRT", "DEAT", "BURI", "OCCU", "EDUC", "NOTE", "SOUR",
+        "OBJE", "_ATTC", "_PATR", "_MARNM", "FAMS", "FAMC", "CHAN", "RIN"
+    ]
+    /// Level-1 tags the parser fully models inside a FAM record.
+    private static let modeledFamTags: Set<String> = [
+        "HUSB", "WIFE", "CHIL", "MARR", "DIV", "_STAT", "CHAN", "RIN"
+    ]
+    /// Sub-tags of a modeled event (BIRT/DEAT/BURI/MARR) the parser consumes; anything
+    /// else under the event is preserved as an event extra.
+    private static let modeledEventSubTags: Set<String> = ["DATE", "PLAC", "MAP", "LATI", "LONG", "_COORD"]
+    /// Top-level record tags the parser models (everything else is kept verbatim).
+    private static let modeledRecordTags: Set<String> = ["HEAD", "INDI", "FAM", "TRLR"]
 
     public static func parse(from url: URL) throws -> ParsedTree {
         let raw = try Data(contentsOf: url)
@@ -52,6 +71,7 @@ public struct GEDCOMParser {
 
         var people: [Person] = []
         var unions: [Union] = []
+        var unknownRecords: [[String]] = []
 
         for record in records {
             guard let head = parseLine(record[0]) else { continue }
@@ -69,9 +89,13 @@ public struct GEDCOMParser {
                     }
                 }
             } else if head.tag == "INDI", let xref = head.xref, let uuid = indiUUIDs[xref] {
-                people.append(parseIndividual(record: record, uuid: uuid, mediaFolder: mediaFolder))
+                people.append(parseIndividual(record: record, uuid: uuid, xref: xref, mediaFolder: mediaFolder))
             } else if head.tag == "FAM", let xref = head.xref, let uuid = famUUIDs[xref] {
-                unions.append(parseFamily(record: record, uuid: uuid, indiUUIDs: indiUUIDs))
+                unions.append(parseFamily(record: record, uuid: uuid, xref: xref, indiUUIDs: indiUUIDs))
+            } else if !modeledRecordTags.contains(head.tag) {
+                // An unmodeled top-level record (SOUR, SUBM, REPO, NOTE, …) — keep it
+                // verbatim so a foreign file survives import → re-export unscathed.
+                unknownRecords.append(record)
             }
         }
 
@@ -85,8 +109,53 @@ public struct GEDCOMParser {
             homePersonId: homePersonId,
             rootUnionId: rootUnionId,
             people: people,
-            unions: unions
+            unions: unions,
+            unknownRecords: unknownRecords
         )
+    }
+
+    // MARK: - Unknown-content preservation
+
+    /// Split a record's body (everything after the `0 …` header) into level-1 branches:
+    /// each branch is a level-1 line plus all of its deeper descendants, as raw strings.
+    private static func level1Branches(of record: [String]) -> [[String]] {
+        var branches: [[String]] = []
+        var current: [String] = []
+        for raw in record.dropFirst() {
+            guard let line = parseLine(raw) else { continue }
+            if line.level == 1 {
+                if !current.isEmpty { branches.append(current) }
+                current = [raw]
+            } else if !current.isEmpty {
+                current.append(raw)
+            }
+        }
+        if !current.isEmpty { branches.append(current) }
+        return branches
+    }
+
+    /// Collect the parts of an INDI/FAM record the modeled parse ignored, so they can be
+    /// re-emitted on export. Returns whole unmodeled level-1 branches, plus unmodeled
+    /// sub-lines of modeled events keyed by event tag.
+    private static func collectUnknowns(record: [String], modeledTags: Set<String>) -> (branches: [[String]], eventExtras: [String: [String]]) {
+        var branches: [[String]] = []
+        var eventExtras: [String: [String]] = [:]
+        for branch in level1Branches(of: record) {
+            guard let head = parseLine(branch[0]) else { continue }
+            if !modeledTags.contains(head.tag) {
+                branches.append(branch) // whole unmodeled branch, verbatim
+            } else if ["BIRT", "DEAT", "BURI", "MARR"].contains(head.tag) {
+                // A modeled event: keep any sub-line we don't consume (NOTE, SOUR, TYPE,
+                // AGNC, custom tags) so event-level detail isn't lost.
+                for raw in branch.dropFirst() {
+                    guard let line = parseLine(raw) else { continue }
+                    if !modeledEventSubTags.contains(line.tag) {
+                        eventExtras[head.tag, default: []].append(raw)
+                    }
+                }
+            }
+        }
+        return (branches, eventExtras)
     }
 
     // MARK: - Line tokenizer
@@ -176,7 +245,7 @@ public struct GEDCOMParser {
 
     // MARK: - Parse Individual
 
-    private static func parseIndividual(record: [String], uuid: UUID, mediaFolder: URL?) -> Person {
+    private static func parseIndividual(record: [String], uuid: UUID, xref: String, mediaFolder: URL?) -> Person {
         var givenNames = ""
         var surname = ""
         var patronymic: String? = nil
@@ -198,7 +267,7 @@ public struct GEDCOMParser {
         var education: String? = nil
         var notes: String? = nil
         var sources: [String] = []
-        var photoData: Data? = nil
+        var photoFilename: String? = nil
         var attachments: [Attachment] = []
         var pendingAttachFile: String? = nil
         var pendingAttachTitle: String? = nil
@@ -277,15 +346,20 @@ public struct GEDCOMParser {
                     maidenName = surname
                     surname = parsed.surname.isEmpty ? parsed.given : parsed.surname
                 case ("OBJE", "FILE"):
-                    if let mediaFolder {
-                        let photoURL = mediaFolder.appendingPathComponent(value)
-                        photoData = try? Data(contentsOf: photoURL)
-                    }
+                    // Record the filename only; the bytes are loaded lazily on demand
+                    // (Person.photoData) so importing a library doesn't pull every
+                    // portrait into memory at once.
+                    photoFilename = (value as NSString).lastPathComponent
                 case ("_ATTC", "FILE"): pendingAttachFile = value
                 case ("_ATTC", "TITL"): pendingAttachTitle = value
                 case ("NOTE", "CONT"), ("NOTE", "CONC"):
                     let sep = tag == "CONT" ? "\n" : ""
                     notes = (notes ?? "") + sep + value
+                // Long OCCU/EDUC values we emit are split with CONC — re-join them.
+                case ("OCCU", "CONC"): occupation = (occupation ?? "") + value
+                case ("OCCU", "CONT"): occupation = (occupation ?? "") + "\n" + value
+                case ("EDUC", "CONC"): education = (education ?? "") + value
+                case ("EDUC", "CONT"): education = (education ?? "") + "\n" + value
                 default: break
                 }
 
@@ -331,8 +405,7 @@ public struct GEDCOMParser {
             occupation: occupation,
             education: education,
             notes: notes,
-            sources: sources,
-            photoData: photoData
+            sources: sources
         )
         // Override the auto-generated UUID
         person.id = uuid
@@ -343,12 +416,19 @@ public struct GEDCOMParser {
         person.burialLat = burialLat
         person.burialLon = burialLon
         person.attachments = attachments
+        // Portrait: keep the filename + folder so the bytes load lazily on first use.
+        person.photoFilename = photoFilename
+        person.mediaFolderURL = mediaFolder
+        person.gedcomXref = xref
+        let unknowns = collectUnknowns(record: record, modeledTags: modeledIndiTags)
+        person.unknownBranches = unknowns.branches
+        person.eventExtras = unknowns.eventExtras
         return person
     }
 
     // MARK: - Parse Family
 
-    private static func parseFamily(record: [String], uuid: UUID, indiUUIDs: [String: UUID]) -> Union {
+    private static func parseFamily(record: [String], uuid: UUID, xref: String, indiUUIDs: [String: UUID]) -> Union {
         var partner1Id: UUID? = nil
         var partner2Id: UUID? = nil
         var marriageDate: String? = nil
@@ -397,6 +477,10 @@ public struct GEDCOMParser {
             childrenIds: childrenIds
         )
         union.id = uuid
+        union.gedcomXref = xref
+        let unknowns = collectUnknowns(record: record, modeledTags: modeledFamTags)
+        union.unknownBranches = unknowns.branches
+        union.marriageExtras = unknowns.eventExtras["MARR"] ?? []
         return union
     }
 
