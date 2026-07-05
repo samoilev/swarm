@@ -290,7 +290,9 @@ public struct RelationshipCalculator {
     private func inLawViaMySpouse(bloodRelName: String, sexA: Person.Sex, sexB: Person.Sex) -> String? {
         switch bloodRelName {
         case "Отец":
-            sexB == .male ? "Свёкор" : "Тесть"
+            // B is the spouse's father (always male); the term depends on the
+            // subject's sex: the wife's side says свёкор, the husband's side тесть.
+            sexA == .female ? "Свёкор" : "Тесть"
         case "Мать":
             sexB == .female ? (sexA == .female ? "Свекровь" : "Тёща") : nil
         case "Брат":

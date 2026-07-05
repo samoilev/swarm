@@ -16,7 +16,9 @@ fully offline.
   and in-laws (свёкор/тесть, деверь/шурин, золовка/свояченица, …).
 - Photos and arbitrary file attachments per person.
 - GEDCOM 5.5.1 import/export that interoperates with Ancestry, Gramps, and MyHeritage,
-  including standard map coordinates.
+  including standard map coordinates. Structures the app doesn't model (event-level
+  notes, source records, custom tags) are **preserved through import → edit → export**,
+  and the original imported file is kept verbatim as `original-import.ged`.
 
 ## Architecture
 
@@ -34,8 +36,8 @@ Tests/
   FamilyTreeCoreTests/  → Swift Testing suites for the Core library
 ```
 
-**SwiftPM is the canonical build.** The `.xcodeproj` is legacy and its file groups are
-not kept in sync with the `Core/`+`App/` layout.
+**SwiftPM is the canonical (and only) build.** Open the package directly in Xcode
+(`File ▸ Open…` the folder) or build from the command line — there is no `.xcodeproj`.
 
 ### Storage model — GEDCOM is the source of truth
 
@@ -43,10 +45,11 @@ Trees live in `~/Library/Application Support/FamilyTreeStudio/`, one folder per 
 
 ```
 <Tree Name>/
-  ├── <Tree Name>.ged   — the tree itself (stable identity stored as the _TREEID tag)
-  ├── Media/            — person portrait photos (GEDCOM OBJE)
-  └── Attachments/      — arbitrary files attached to people (GEDCOM _ATTC)
-Archived/               — trees removed from the library but kept on disk
+  ├── <Tree Name>.ged      — the tree itself (stable identity stored as the _TREEID tag)
+  ├── original-import.ged  — verbatim copy of an imported file (if the tree was imported)
+  ├── Media/               — person portrait photos (GEDCOM OBJE)
+  └── Attachments/         — arbitrary files attached to people (GEDCOM _ATTC)
+Archived/                  — trees removed from the library but kept on disk
 ```
 
 Because identity lives inside the GEDCOM (`_TREEID`), the folder/file can be renamed
@@ -61,7 +64,10 @@ used as a private fallback when coordinates have no place to host a `MAP`.
 ### Privacy
 
 Fully offline. Place names are geocoded solely against the bundled GeoNames database and
-never leave the device; a place not in the database simply isn't pinned on the map.
+never leave the device; a place not in the database simply isn't pinned on the map. The
+app makes no network calls at all (no networking APIs are linked). It is **not** run in
+the macOS App Sandbox — privacy comes from being genuinely offline, not from a sandbox
+profile — so it can read the GEDCOM files and photos you point it at anywhere on disk.
 
 ## Build & run
 

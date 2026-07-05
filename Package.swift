@@ -21,7 +21,7 @@ let package = Package(
             name: "FamilyTreeStudio",
             dependencies: ["FamilyTreeCore"],
             path: "FamilyTreeStudio/App",
-            exclude: ["Assets.xcassets", "FamilyTreeStudio.entitlements"],
+            exclude: ["Assets.xcassets"],
             resources: [.copy("Resources/AppIcon.icns")]
         ),
         .testTarget(

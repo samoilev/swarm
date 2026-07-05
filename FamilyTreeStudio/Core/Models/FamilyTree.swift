@@ -38,6 +38,10 @@ public final class FamilyTree: Identifiable, Codable {
     public var rootUnionId: UUID?
     public var people: [Person]
     public var unions: [Union]
+    /// Whole top-level GEDCOM records the app doesn't model (SOUR, SUBM, REPO, NOTE
+    /// records, …), kept as raw lines and re-emitted verbatim before TRLR so importing
+    /// then re-exporting a foreign file doesn't drop them.
+    public var unknownRecords: [[String]] = []
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -125,8 +129,12 @@ public final class FamilyTree: Identifiable, Codable {
         for union in unions {
             let partnerSet = Set(union.partnerIds)
 
-            // Skip unions with 0 or 1 partner that have no children (orphan link)
-            if partnerSet.count < 2 && union.childrenIds.isEmpty {
+            // Skip lone-partner unions that carry nothing worth keeping. A single
+            // partner is still meaningful when they have children (a single parent)
+            // or recorded marriage data (a widow/widower whose spouse was removed) —
+            // dropping the latter would silently lose the marriage date/place.
+            let hasMarriageData = union.marriageDate != nil || union.marriagePlace != nil
+            if partnerSet.count < 2 && union.childrenIds.isEmpty && !hasMarriageData {
                 continue
             }
 
@@ -228,6 +236,7 @@ public final class FamilyTree: Identifiable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle, homePersonId, rootUnionId, people, unions, createdAt, updatedAt
+        case unknownRecords
     }
 
     public required init(from decoder: Decoder) throws {
@@ -239,6 +248,7 @@ public final class FamilyTree: Identifiable, Codable {
         rootUnionId = try c.decodeIfPresent(UUID.self, forKey: .rootUnionId)
         people = try c.decode([Person].self, forKey: .people)
         unions = try c.decode([Union].self, forKey: .unions)
+        unknownRecords = try c.decodeIfPresent([[String]].self, forKey: .unknownRecords) ?? []
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
     }
@@ -252,6 +262,7 @@ public final class FamilyTree: Identifiable, Codable {
         try c.encodeIfPresent(rootUnionId, forKey: .rootUnionId)
         try c.encode(people, forKey: .people)
         try c.encode(unions, forKey: .unions)
+        if !unknownRecords.isEmpty { try c.encode(unknownRecords, forKey: .unknownRecords) }
         try c.encode(createdAt, forKey: .createdAt)
         try c.encode(updatedAt, forKey: .updatedAt)
     }

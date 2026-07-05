@@ -34,6 +34,18 @@ struct FamilyDateTests {
         #expect(c.year == 1978) // recovered via the trailing-year fallback
     }
 
+    @Test func rejectsDayImpossibleForMonth() {
+        // 31 February is not a real date — the day must be dropped, the year kept.
+        let feb = FamilyDate.parse("31.02.1900")
+        #expect(feb.day == nil && feb.month == nil)
+        #expect(feb.year == 1900)
+        // 29 Feb is valid in a leap year but not in a common year.
+        #expect(FamilyDate.parse("29.02.2000").day == 29) // 2000 is a leap year
+        #expect(FamilyDate.parse("29.02.1900").day == nil) // 1900 is not (century rule)
+        // 31 April doesn't exist.
+        #expect(FamilyDate.parse("31.04.1980").day == nil)
+    }
+
     @Test func normalizeProducesStandardForm() {
         #expect(FamilyDate.normalize("5 MAR 1978") == "05.03.1978")
         #expect(FamilyDate.normalize("1978") == "1978")

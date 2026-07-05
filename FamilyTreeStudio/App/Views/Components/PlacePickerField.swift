@@ -112,12 +112,20 @@ struct PlacePickerField: View {
             showSuggestions = false
             return
         }
-        // Debounce: only scan the place DB after the user pauses typing.
-        let work = DispatchWorkItem {
-            suggestions = db.search(trimmed)
-            showSuggestions = !suggestions.isEmpty
+        // Debounce, then run the ~455k-row scan on a background queue so typing never
+        // blocks the main thread. Each work item checks its OWN cancellation flag, so a
+        // result whose query the user has already typed past is discarded (a later
+        // keystroke cancels this item before starting its own).
+        var work: DispatchWorkItem!
+        work = DispatchWorkItem { [db] in
+            let results = db.search(trimmed)
+            DispatchQueue.main.async {
+                guard !work.isCancelled else { return }
+                suggestions = results
+                showSuggestions = !results.isEmpty
+            }
         }
         searchWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15, execute: work)
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.15, execute: work)
     }
 }

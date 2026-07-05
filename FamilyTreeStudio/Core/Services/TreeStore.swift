@@ -1,4 +1,7 @@
 import Foundation
+import os
+
+private let log = Logger(subsystem: "com.familytreestudio.app", category: "TreeStore")
 
 /// GEDCOM-based persistence for family trees. Everything is stored strictly
 /// locally in ~/Library/Application Support/FamilyTreeStudio/.
@@ -21,7 +24,15 @@ public final class TreeStore {
     /// view once shown.
     public var lastSaveError: String?
 
+    /// Set when one or more trees on disk could not be parsed during `load()`. A tree
+    /// that silently fails to load is indistinguishable from deleted data, so the
+    /// library surfaces this to the user. Cleared by the view once shown.
+    public var lastLoadError: String?
+
     private let storageFolder: URL
+
+    /// The root storage directory (for "Reveal in Finder" when a load fails).
+    public var storageFolderURL: URL { storageFolder }
 
     /// Maps tree UUID → its folder URL.
     private var folderMap: [UUID: URL] = [:]
@@ -30,12 +41,23 @@ public final class TreeStore {
     private static let mediaName = "Media"
     private static let attachmentsName = "Attachments"
     private static let archivedName = "Archived"
+    /// Verbatim copy of an imported file, kept as a safety net and never treated as
+    /// the tree's own working .ged (excluded from load/save/reconcile).
+    private static let originalImportName = "original-import.ged"
 
-    public init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appFolder = appSupport.appendingPathComponent("FamilyTreeStudio", isDirectory: true)
+    /// Default init: stores trees in ~/Library/Application Support/FamilyTreeStudio/.
+    /// Tests pass an explicit `storageFolder` (a temp dir) to exercise the migration
+    /// and folder-reconcile logic without touching the user's real library.
+    public init(storageFolder: URL? = nil) {
+        let appFolder: URL
+        if let storageFolder {
+            appFolder = storageFolder
+        } else {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            appFolder = appSupport.appendingPathComponent("FamilyTreeStudio", isDirectory: true)
+        }
         try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
-        storageFolder = appFolder
+        self.storageFolder = appFolder
         load()
     }
 
@@ -60,6 +82,7 @@ public final class TreeStore {
         }
 
         var needsReconcile: [FamilyTree] = []
+        var failedFolders: [String] = []
         for folder in treeFolders.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
             guard let ged = gedFile(in: folder) else { continue }
             do {
@@ -72,6 +95,7 @@ public final class TreeStore {
                 tree.rootUnionId = parsed.rootUnionId
                 tree.people = parsed.people
                 tree.unions = parsed.unions
+                tree.unknownRecords = parsed.unknownRecords
 
                 trees.append(tree)
                 folderMap[tree.id] = folder
@@ -84,7 +108,8 @@ public final class TreeStore {
                     needsReconcile.append(tree)
                 }
             } catch {
-                print("Failed to load \(folder.lastPathComponent): \(error)")
+                log.error("Failed to load \(folder.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                failedFolders.append(folder.lastPathComponent)
             }
         }
 
@@ -97,7 +122,8 @@ public final class TreeStore {
             let hasMedia = fm.fileExists(atPath: url.appendingPathComponent(Self.mediaName).path)
             let hasAttachments = fm.fileExists(atPath: url.appendingPathComponent(Self.attachmentsName).path)
             if hasMedia || hasAttachments {
-                print("Warning: folder \(url.lastPathComponent) has media/attachments but no .ged — not loaded.")
+                log.warning("Folder \(url.lastPathComponent, privacy: .public) has media/attachments but no .ged — not loaded.")
+                failedFolders.append(url.lastPathComponent)
             }
         }
 
@@ -110,6 +136,15 @@ public final class TreeStore {
         let legacyURL = storageFolder.appendingPathComponent("trees.json")
         if trees.isEmpty && fm.fileExists(atPath: legacyURL.path) {
             migrateFromJSON(legacyURL)
+        }
+
+        // Surface any unreadable trees: a folder that silently fails to load looks
+        // exactly like data the user lost, so tell them which ones and where to look.
+        if failedFolders.isEmpty {
+            lastLoadError = nil
+        } else {
+            let list = failedFolders.map { "• \($0)" }.joined(separator: "\n")
+            lastLoadError = "Не удалось прочитать \(failedFolders.count) дерев(о/а):\n\(list)\n\nФайлы не тронуты — откройте папку хранилища, чтобы проверить их."
         }
     }
 
@@ -134,7 +169,7 @@ public final class TreeStore {
             } catch {
                 // Leave the legacy file untouched so it can be retried; don't move its
                 // Media either, or we'd strand the .ged without its photos.
-                print("Migration: could not move \(ged.lastPathComponent), keeping legacy layout: \(error)")
+                log.error("Migration: could not move \(ged.lastPathComponent, privacy: .public), keeping legacy layout: \(error.localizedDescription, privacy: .public)")
                 continue
             }
             let oldMedia = storageFolder.appendingPathComponent("Media_\(stem)", isDirectory: true)
@@ -152,7 +187,7 @@ public final class TreeStore {
                 try? fm.removeItem(at: oldMedia)
             } else {
                 do { try fm.moveItem(at: oldMedia, to: newMedia) }
-                catch { print("Migration: could not move media for \(stem): \(error)") }
+                catch { log.error("Migration: could not move media for \(stem, privacy: .public): \(error.localizedDescription, privacy: .public)") }
             }
         }
     }
@@ -171,8 +206,11 @@ public final class TreeStore {
         let folder = reconcileFolder(for: tree)
         let ged = gedURL(in: folder)
         // Drop any stale .ged left from a previous name so only the readable one remains.
+        // Never touch the preserved original-import.ged safety copy.
         if let files = try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) {
-            for f in files where f.pathExtension.lowercased() == "ged" && f.lastPathComponent != ged.lastPathComponent {
+            for f in files where f.pathExtension.lowercased() == "ged"
+                && f.lastPathComponent != ged.lastPathComponent
+                && f.lastPathComponent != Self.originalImportName {
                 try? fm.removeItem(at: f)
             }
         }
@@ -182,10 +220,17 @@ public final class TreeStore {
             try result.gedcom.write(to: ged, atomically: true, encoding: .utf8)
             writePhotos(result.photos, to: mediaFolder)
             folderMap[tree.id] = folder
+            // Portraits are now on disk: point each person at the media folder (so reads
+            // load lazily) and clear the dirty flag (so an unchanged photo isn't rewritten
+            // on the next save). Only changed photos are ever re-serialized after this.
+            for person in tree.people {
+                person.mediaFolderURL = mediaFolder
+                person.photoIsDirty = false
+            }
         } catch {
             // Surface the failure: in a data-authoring app a silent write error
             // means undetectable data loss. Views observe `lastSaveError`.
-            print("Failed to save tree \(tree.name): \(error)")
+            log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
             lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
         }
     }
@@ -289,13 +334,40 @@ public final class TreeStore {
         tree.rootUnionId = parsed.rootUnionId
         tree.people = parsed.people
         tree.unions = parsed.unions
-        addTree(tree) // creates the tree folder and writes tree.ged + Media/
+        tree.unknownRecords = parsed.unknownRecords
+
+        // Copy the source file's sibling Media/ folder into the new tree folder BEFORE
+        // saving. Photo bytes are no longer loaded into memory on parse (they load
+        // lazily), so the portraits must be carried over as files here rather than being
+        // re-serialized from memory.
+        let fm = FileManager.default
+        let srcMedia = url.deletingLastPathComponent().appendingPathComponent(Self.mediaName, isDirectory: true)
+
+        addTree(tree) // creates the tree folder and writes tree.ged
+
+        let destMedia = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
+        if fm.fileExists(atPath: srcMedia.path),
+           let files = try? fm.contentsOfDirectory(at: srcMedia, includingPropertiesForKeys: nil) {
+            try? fm.createDirectory(at: destMedia, withIntermediateDirectories: true)
+            for f in files {
+                let d = destMedia.appendingPathComponent(f.lastPathComponent)
+                if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
+            }
+        }
+        // Repoint each person's lazy-load folder at the tree's own Media/ (the source
+        // URL may be a one-shot, security-scoped pick that won't be readable later).
+        for person in tree.people { person.mediaFolderURL = destMedia }
+
+        // Keep the imported file byte-for-byte as `original-import.ged`, never rewritten.
+        // Even though the parser now preserves unknown structures (T19), an exact copy of
+        // what the user handed us is the ultimate safety net against any interop surprise.
+        let originalDest = folder(for: tree).appendingPathComponent("original-import.ged")
+        try? fm.copyItem(at: url, to: originalDest)
 
         // Carry over attached files: unlike photos they aren't held in memory, so copy
         // them from the source bundle's Attachments/ folder. Best-effort (sandbox may
         // restrict sibling access on import); the tree itself imports regardless.
         let srcAttachments = url.deletingLastPathComponent().appendingPathComponent(Self.attachmentsName, isDirectory: true)
-        let fm = FileManager.default
         if fm.fileExists(atPath: srcAttachments.path),
            let files = try? fm.contentsOfDirectory(at: srcAttachments, includingPropertiesForKeys: nil) {
             let dest = attachmentsFolderURL(for: tree)
@@ -316,7 +388,18 @@ public final class TreeStore {
         let result = GEDCOMSerializer.serialize(tree: tree)
         // The .ged write is the contract — surface its failure to the caller.
         try result.gedcom.write(to: url, atomically: true, encoding: .utf8)
+        // Write any changed-in-memory portraits, then copy the rest of the tree's Media/
+        // folder verbatim (unchanged photos aren't held in memory any more).
         writePhotos(result.photos, to: mediaFolder)
+        let storedMedia = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
+        if fm.fileExists(atPath: storedMedia.path),
+           let files = try? fm.contentsOfDirectory(at: storedMedia, includingPropertiesForKeys: nil) {
+            try? fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
+            for f in files {
+                let d = mediaFolder.appendingPathComponent(f.lastPathComponent)
+                if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
+            }
+        }
 
         // Carry attachments next to the .ged so its _ATTC references resolve on re-import.
         let attSrc = attachmentsFolderURL(for: tree)
@@ -329,6 +412,14 @@ public final class TreeStore {
                 if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
             }
         }
+    }
+
+    /// Re-point every person's lazy portrait loader at the tree's Media/ folder. Undo/redo
+    /// swaps in freshly-decoded Person instances (which carry the photo *filename* but not
+    /// the transient folder URL), so call this after a restore to keep portraits loadable.
+    public func refreshMediaFolders(for tree: FamilyTree) {
+        let mediaFolder = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
+        for person in tree.people { person.mediaFolderURL = mediaFolder }
     }
 
     // MARK: - Attachments
@@ -403,9 +494,10 @@ public final class TreeStore {
     }
 
     /// The first .ged file inside a folder, if any (its name may differ pre-migration).
+    /// The preserved `original-import.ged` is never the tree's working file.
     private func gedFile(in folder: URL) -> URL? {
         guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) else { return nil }
-        return files.first { $0.pathExtension.lowercased() == "ged" }
+        return files.first { $0.pathExtension.lowercased() == "ged" && $0.lastPathComponent != Self.originalImportName }
     }
 
     /// Ensure the tree has a folder named after it (readable & unique), renaming the
@@ -421,7 +513,7 @@ public final class TreeStore {
                     folderMap[tree.id] = target
                     return target
                 } catch {
-                    print("Could not rename \(current.lastPathComponent) → \(target.lastPathComponent): \(error)")
+                    log.error("Could not rename \(current.lastPathComponent, privacy: .public) → \(target.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
                     return current
                 }
             }
@@ -491,9 +583,9 @@ public final class TreeStore {
             // Rename old file as backup
             let backup = jsonURL.appendingPathExtension("bak")
             try? FileManager.default.moveItem(at: jsonURL, to: backup)
-            print("Migrated \(oldTrees.count) tree(s) from JSON to GEDCOM")
+            log.notice("Migrated \(oldTrees.count) tree(s) from JSON to GEDCOM")
         } catch {
-            print("JSON migration failed: \(error)")
+            log.error("JSON migration failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }
