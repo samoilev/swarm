@@ -1,0 +1,26 @@
+0 HEAD
+1 SOUR Gramps
+2 VERS 5.1.6
+2 NAME Gramps
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I0001@ INDI
+1 NAME Алексей /Примеров/
+2 GIVN Алексей
+2 SURN Примеров
+1 BIRT
+2 DATE ABT 1901
+2 PLAC Москва, Россия
+3 MAP
+4 LATI N55.7558
+4 LONG E37.6173
+2 SOUR @S0001@
+3 PAGE ф. 1, оп. 2
+1 CHAN
+2 DATE 1 JAN 2020
+0 @S0001@ SOUR
+1 TITL Анонимизированная метрическая книга
+1 RIN gramps-source-1
+0 TRLR

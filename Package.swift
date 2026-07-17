@@ -10,10 +10,13 @@ let package = Package(
         .target(
             name: "FamilyTreeCore",
             path: "FamilyTreeStudio/Core",
-            exclude: ["Resources/AppIcon_preview.png"],
+            exclude: ["Resources/AppIcon_preview.png", "Resources/PLACE_DATA.md", "Resources/MAP_DATA.md"],
             resources: [
                 .copy("Resources/places.tsv"),
                 .copy("Resources/geonames_ussr.tsv"),
+                .copy("Resources/place_index_v2.tsv"),
+                .copy("Resources/ne_110m_land.geojson"),
+                .copy("Resources/ne_110m_admin_0_boundary_lines_land.geojson"),
             ]
         ),
         // The SwiftUI app shell. Depends on FamilyTreeCore for all domain types.
@@ -27,7 +30,8 @@ let package = Package(
         .testTarget(
             name: "FamilyTreeCoreTests",
             dependencies: ["FamilyTreeCore"],
-            path: "Tests/FamilyTreeCoreTests"
+            path: "Tests/FamilyTreeCoreTests",
+            resources: [.copy("Fixtures")]
         ),
     ]
 )

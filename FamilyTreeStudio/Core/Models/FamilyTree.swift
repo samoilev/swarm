@@ -32,12 +32,28 @@ public enum RelationKind: String, CaseIterable, Identifiable, Hashable {
 @Observable
 public final class FamilyTree: Identifiable, Codable {
     public var id: UUID
+    public var schemaVersion: Int = 2
     public var name: String
     public var subtitle: String?
     public var homePersonId: UUID?
     public var rootUnionId: UUID?
     public var people: [Person]
     public var unions: [Union]
+    /// Structured source records and explicit parentage links. Legacy flat source
+    /// strings remain readable through Person during the staged migration.
+    public var sourceRecords: [SourceRecord] = []
+    public var parentLinks: [ParentLink] = []
+    /// Unrecognized level-1 HEAD branches are retained separately because HEAD is an
+    /// app-owned record and therefore cannot live in `unknownRecords`.
+    public var headUnknownBranches: [[String]] = []
+    /// The ordered syntax tree of the most recently imported/loaded GEDCOM.
+    public var gedcomDocument: GEDCOMDocument?
+    /// Diagnostics from the most recent import. This is informational after import;
+    /// it never replaces validation of the live tree.
+    public var importReport: ImportReport?
+    /// Validation findings present when a tree was loaded. Their exact identities are
+    /// allowed to persist, while changed/new errors receive new identities and block.
+    public var acceptedBaselineIssueIDs: Set<String> = []
     /// Whole top-level GEDCOM records the app doesn't model (SOUR, SUBM, REPO, NOTE
     /// records, …), kept as raw lines and re-emitted verbatim before TRLR so importing
     /// then re-exporting a foreign file doesn't drop them.
@@ -224,6 +240,80 @@ public final class FamilyTree: Identifiable, Codable {
                 unions.append(Union(childrenIds: [person.id, targetId]))
             }
         }
+        reconcileParentLinks()
+    }
+
+    /// Copy a snapshot's content into this live instance (shared across many views),
+    /// then bump `layoutVersion` so canvases recompute. Identity and `createdAt` stay.
+    public func applyContent(of snapshot: FamilyTree) {
+        schemaVersion = snapshot.schemaVersion
+        name = snapshot.name
+        subtitle = snapshot.subtitle
+        homePersonId = snapshot.homePersonId
+        rootUnionId = snapshot.rootUnionId
+        people = snapshot.people
+        unions = snapshot.unions
+        sourceRecords = snapshot.sourceRecords
+        parentLinks = snapshot.parentLinks
+        headUnknownBranches = snapshot.headUnknownBranches
+        unknownRecords = snapshot.unknownRecords
+        gedcomDocument = snapshot.gedcomDocument
+        importReport = snapshot.importReport
+        acceptedBaselineIssueIDs = snapshot.acceptedBaselineIssueIDs
+        updatedAt = Date()
+        layoutVersion += 1
+    }
+
+    /// Ensure every parent/child pair represented by a family union has an explicit
+    /// parentage record. Existing non-biological classifications are never replaced.
+    public func reconcileParentLinks() {
+        let peopleIDs = Set(people.map(\.id))
+        let validTriples = Set(unions.flatMap { union in
+            union.childrenIds.flatMap { childID in
+                union.partnerIds.map { parentID in
+                    ParentLinkKey(parentID: parentID, childID: childID, unionID: union.id)
+                }
+            }
+        })
+        parentLinks.removeAll { link in
+            !peopleIDs.contains(link.parentID) || !peopleIDs.contains(link.childID) ||
+                !validTriples.contains(ParentLinkKey(parentID: link.parentID, childID: link.childID, unionID: link.unionID))
+        }
+        let existing = Set(parentLinks.map { ParentLinkKey(parentID: $0.parentID, childID: $0.childID, unionID: $0.unionID) })
+        for key in validTriples where !existing.contains(key) {
+            parentLinks.append(ParentLink(
+                parentID: key.parentID,
+                childID: key.childID,
+                unionID: key.unionID,
+                kind: .biological
+            ))
+        }
+    }
+
+    /// Migrate old person-level source strings into shared records using exact trimmed
+    /// equality only. The legacy text is kept until the compatibility UI is removed.
+    public func migrateLegacySources() {
+        var byTitle = Dictionary(uniqueKeysWithValues: sourceRecords.map { ($0.title.trimmingCharacters(in: .whitespacesAndNewlines), $0.id) })
+        for person in people {
+            let legacySources = person.sources
+            for raw in legacySources {
+                let title = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !title.isEmpty else { continue }
+                let sourceID: UUID
+                if let existing = byTitle[title] {
+                    sourceID = existing
+                } else {
+                    let source = SourceRecord(title: title)
+                    sourceRecords.append(source)
+                    byTitle[title] = source.id
+                    sourceID = source.id
+                }
+                if !person.citations.contains(where: { $0.sourceID == sourceID }) {
+                    person.citations.append(Citation(sourceID: sourceID))
+                }
+            }
+            if !legacySources.isEmpty { person.sources = [] }
+        }
     }
 
     /// Put `id` into whichever partner slot of `union` is free (partner1 first).
@@ -236,18 +326,26 @@ public final class FamilyTree: Identifiable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle, homePersonId, rootUnionId, people, unions, createdAt, updatedAt
+        case schemaVersion, sourceRecords, parentLinks, headUnknownBranches, gedcomDocument, importReport, acceptedBaselineIssueIDs
         case unknownRecords
     }
 
     public required init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(UUID.self, forKey: .id)
+        schemaVersion = try c.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         name = try c.decode(String.self, forKey: .name)
         subtitle = try c.decodeIfPresent(String.self, forKey: .subtitle)
         homePersonId = try c.decodeIfPresent(UUID.self, forKey: .homePersonId)
         rootUnionId = try c.decodeIfPresent(UUID.self, forKey: .rootUnionId)
         people = try c.decode([Person].self, forKey: .people)
         unions = try c.decode([Union].self, forKey: .unions)
+        sourceRecords = try c.decodeIfPresent([SourceRecord].self, forKey: .sourceRecords) ?? []
+        parentLinks = try c.decodeIfPresent([ParentLink].self, forKey: .parentLinks) ?? []
+        headUnknownBranches = try c.decodeIfPresent([[String]].self, forKey: .headUnknownBranches) ?? []
+        gedcomDocument = try c.decodeIfPresent(GEDCOMDocument.self, forKey: .gedcomDocument)
+        importReport = try c.decodeIfPresent(ImportReport.self, forKey: .importReport)
+        acceptedBaselineIssueIDs = try c.decodeIfPresent(Set<String>.self, forKey: .acceptedBaselineIssueIDs) ?? []
         unknownRecords = try c.decodeIfPresent([[String]].self, forKey: .unknownRecords) ?? []
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
@@ -256,14 +354,27 @@ public final class FamilyTree: Identifiable, Codable {
     public func encode(to encoder: Encoder) throws {
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(id, forKey: .id)
+        try c.encode(schemaVersion, forKey: .schemaVersion)
         try c.encode(name, forKey: .name)
         try c.encodeIfPresent(subtitle, forKey: .subtitle)
         try c.encodeIfPresent(homePersonId, forKey: .homePersonId)
         try c.encodeIfPresent(rootUnionId, forKey: .rootUnionId)
         try c.encode(people, forKey: .people)
         try c.encode(unions, forKey: .unions)
+        if !sourceRecords.isEmpty { try c.encode(sourceRecords, forKey: .sourceRecords) }
+        if !parentLinks.isEmpty { try c.encode(parentLinks, forKey: .parentLinks) }
+        if !headUnknownBranches.isEmpty { try c.encode(headUnknownBranches, forKey: .headUnknownBranches) }
+        try c.encodeIfPresent(gedcomDocument, forKey: .gedcomDocument)
+        try c.encodeIfPresent(importReport, forKey: .importReport)
+        if !acceptedBaselineIssueIDs.isEmpty { try c.encode(acceptedBaselineIssueIDs, forKey: .acceptedBaselineIssueIDs) }
         if !unknownRecords.isEmpty { try c.encode(unknownRecords, forKey: .unknownRecords) }
         try c.encode(createdAt, forKey: .createdAt)
         try c.encode(updatedAt, forKey: .updatedAt)
     }
+}
+
+private struct ParentLinkKey: Hashable {
+    let parentID: UUID
+    let childID: UUID
+    let unionID: UUID?
 }

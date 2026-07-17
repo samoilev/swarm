@@ -14,17 +14,26 @@ struct AddPersonView: View {
     @State private var maidenName = ""
     @State private var sex: Person.Sex = .unknown
     @State private var birthDate = ""
+    @State private var birthDateEnd = ""
+    @State private var birthQualifier: GenealogyDate.Qualifier = .exact
     @State private var birthPlace = ""
     @State private var birthCoords = ""
+    @State private var selectedBirthPlace: PlaceEntry?
     @State private var deathDate = ""
+    @State private var deathDateEnd = ""
+    @State private var deathQualifier: GenealogyDate.Qualifier = .exact
     @State private var deathPlace = ""
     @State private var deathCoords = ""
+    @State private var selectedDeathPlace: PlaceEntry?
     @State private var isLiving = true
     @State private var burialPlace = ""
     @State private var burialCoords = ""
+    @State private var selectedBurialPlace: PlaceEntry?
     @State private var occupation = ""
     @State private var education = ""
     @State private var notes = ""
+    @State private var saveError: String?
+    @State private var isSaving = false
 
     /// Any number of relatives can be linked at once. Each row names a role (read
     /// from the new person's perspective) and an existing person who fills it.
@@ -84,8 +93,16 @@ struct AddPersonView: View {
                         }.padding(.bottom, 12)
 
                         SectionHeader(title: "Рождение")
-                        SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8).zIndex(1)
+                        SepiaDateField(
+                            label: "ДАТА",
+                            text: $birthDate,
+                            qualifier: $birthQualifier,
+                            endText: $birthDateEnd
+                        ).padding(.bottom, 8)
+                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") {
+                            selectedBirthPlace = $0
+                            prefillCoords(for: $0, into: $birthCoords)
+                        }.padding(.bottom, 8).zIndex(1)
                         SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
 
                         SectionHeader(title: "Смерть и погребение")
@@ -94,10 +111,21 @@ struct AddPersonView: View {
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
-                            SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8).zIndex(1)
+                            SepiaDateField(
+                                label: "ДАТА",
+                                text: $deathDate,
+                                qualifier: $deathQualifier,
+                                endText: $deathDateEnd
+                            ).padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+                                selectedDeathPlace = $0
+                                prefillCoords(for: $0, into: $deathCoords)
+                            }.padding(.bottom, 8).zIndex(1)
                             SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
-                            SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—") {
+                                selectedBurialPlace = $0
+                                prefillCoords(for: $0, into: $burialCoords)
+                            }.padding(.bottom, 8).zIndex(1)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
 
@@ -144,15 +172,36 @@ struct AddPersonView: View {
                     Spacer()
                     Button("Добавить") { addPerson() }
                         .buttonStyle(SepiaButtonStyle(isActive: true))
+                        .disabled(isSaving)
                         .disabled(givenNames.isEmpty && surname.isEmpty)
                 }
                 .padding(16)
             }
         }
         .frame(width: 540, height: 680)
+        .alert("Не удалось добавить персону", isPresented: Binding(
+            get: { saveError != nil },
+            set: { if !$0 { saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
+        }
     }
 
     private func addPerson() {
+        let parsedBirth = parsedDate(text: birthDate, end: birthDateEnd, qualifier: birthQualifier)
+        let parsedDeath = isLiving ? nil : parsedDate(text: deathDate, end: deathDateEnd, qualifier: deathQualifier)
+        guard birthDate.isEmpty || parsedBirth != nil,
+              isLiving || deathDate.isEmpty || parsedDeath != nil else {
+            saveError = "Исправьте некорректные даты перед сохранением."
+            return
+        }
+        guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
+            saveError = "Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне."
+            return
+        }
+        let before = try? JSONEncoder().encode(tree)
         let person = Person(
             givenNames: givenNames,
             patronymic: patronymic.isEmpty ? nil : patronymic,
@@ -168,18 +217,29 @@ struct AddPersonView: View {
             education: education.isEmpty ? nil : education,
             notes: notes.isEmpty ? nil : notes
         )
+        person.setStructuredDate(parsedBirth, for: .birth)
+        person.setStructuredDate(parsedDeath, for: .death)
 
         if let c = parseGraveCoords(birthCoords) {
             person.birthLat = c.lat
             person.birthLon = c.lon
         }
+        if let selectedBirthPlace, selectedBirthPlace.displayName == birthPlace {
+            person.setStructuredPlace(selectedBirthPlace.placeReference, for: .birth)
+        }
         if !isLiving, let c = parseGraveCoords(deathCoords) {
             person.deathLat = c.lat
             person.deathLon = c.lon
         }
+        if !isLiving, let selectedDeathPlace, selectedDeathPlace.displayName == deathPlace {
+            person.setStructuredPlace(selectedDeathPlace.placeReference, for: .death)
+        }
         if !isLiving, let c = parseGraveCoords(burialCoords) {
             person.burialLat = c.lat
             person.burialLon = c.lon
+        }
+        if !isLiving, let selectedBurialPlace, selectedBurialPlace.displayName == burialPlace {
+            person.setStructuredPlace(selectedBurialPlace.placeReference, for: .burial)
         }
 
         tree.people.append(person)
@@ -193,15 +253,33 @@ struct AddPersonView: View {
 
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.saveTree(tree)
-        onAdded(person)
-        dismiss()
+        isSaving = true
+        Task { @MainActor in
+            defer { isSaving = false }
+            do {
+                _ = try await store.saveTree(tree)
+                onAdded(person)
+                dismiss()
+            } catch {
+                if let before, let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) {
+                    tree.people = snapshot.people
+                    tree.unions = snapshot.unions
+                    tree.sourceRecords = snapshot.sourceRecords
+                    tree.parentLinks = snapshot.parentLinks
+                    tree.homePersonId = snapshot.homePersonId
+                    tree.rootUnionId = snapshot.rootUnionId
+                    tree.layoutVersion += 1
+                    store.refreshMediaFolders(for: tree)
+                }
+                saveError = error.localizedDescription
+            }
+        }
     }
 
     /// Resolve a picked place to coordinates and fill the bound field. Only fires when
     /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-    private func prefillCoords(for place: String, into coords: Binding<String>) {
-        if let c = GeocodingService.shared.coordinateSync(for: place) {
+    private func prefillCoords(for place: PlaceEntry, into coords: Binding<String>) {
+        if let c = GeocodingService.shared.coordinate(for: place) {
             coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude)
         }
     }
@@ -211,5 +289,23 @@ struct AddPersonView: View {
         let parts = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
         guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else { return nil }
         return (lat, lon)
+    }
+
+    private func parsedDate(
+        text: String,
+        end: String,
+        qualifier: GenealogyDate.Qualifier
+    ) -> GenealogyDate? {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        let range = qualifier == .between || qualifier == .fromTo
+        let value = GenealogyDate(userInput: text, qualifier: qualifier, endValue: range ? end : nil)
+        return value.isValid ? value : nil
+    }
+
+    private func validCoordinateText(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
+        guard let coordinates = parseGraveCoords(trimmed) else { return false }
+        return (-90 ... 90).contains(coordinates.lat) && (-180 ... 180).contains(coordinates.lon)
     }
 }

@@ -9,6 +9,7 @@ struct InspectorPanel: View {
     @Binding var width: CGFloat
     var onEdit: ((Person) -> Void)?
     var onDelete: ((Person) -> Void)?
+    var onMakeHome: ((Person) -> Void)?
 
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
@@ -138,16 +139,24 @@ struct InspectorPanel: View {
         let stroke = tinted ? Color.white.opacity(0.25) : SepiaTheme.cardLine
 
         VStack(spacing: 4) {
+            if tree.homePersonId != person.id, let onMakeHome {
+                actionBtn("house", fg: fg, bg: bg, stroke: stroke) { onMakeHome(person) }
+                    .help("Сделать домашней персоной")
+                    .accessibilityLabel("Сделать домашней персоной")
+            }
             if let onDelete {
                 actionBtn("trash", fg: tinted ? .red.opacity(0.85) : .red.opacity(0.7), bg: bg, stroke: stroke) { onDelete(person) }
                     .help("Удалить")
+                    .accessibilityLabel("Удалить персону")
             }
             if let onEdit {
                 actionBtn("pencil", fg: fg, bg: bg, stroke: stroke) { onEdit(person) }
                     .help("Редактировать")
+                    .accessibilityLabel("Редактировать")
             }
             actionBtn("xmark", fg: fg, bg: bg, stroke: stroke) { self.person = nil }
                 .help("Закрыть")
+                .accessibilityLabel("Закрыть карточку")
         }
     }
 
@@ -290,23 +299,25 @@ struct InspectorPanel: View {
         }
     }
 
+    // Label above value, matching `FieldRow` — a fixed label column here made these
+    // rows the only ones in the panel whose text started further right.
     private func relRow(_ tag: String, _ p: Person) -> some View {
-        HStack(spacing: 8) {
+        VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
-                .lineLimit(1).minimumScaleFactor(0.85)
-                .frame(width: 72, alignment: .leading)
             Button(p.listName) {
                 if let current = self.person { history.append(current) }
                 internalNav = true
                 self.person = p
             }
             .buttonStyle(.plain)
-            .font(SepiaTheme.body(size: 13.5))
+            .font(SepiaTheme.body(size: 14))
             .foregroundColor(SepiaTheme.ink)
+            .multilineTextAlignment(.leading)
             .underline(color: SepiaTheme.accent2.opacity(0.5))
         }
-        .padding(.bottom, 6)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.bottom, 12)
     }
 }
 

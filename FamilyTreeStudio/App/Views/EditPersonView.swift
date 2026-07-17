@@ -21,14 +21,23 @@ struct EditPersonView: View {
     @State private var maidenName: String = ""
     @State private var sex: Person.Sex = .unknown
     @State private var birthDate: String = ""
+    @State private var birthDateEnd: String = ""
+    @State private var birthQualifier: GenealogyDate.Qualifier = .exact
+    @State private var originalBirthDate: GenealogyDate?
     @State private var birthPlace: String = ""
     @State private var birthCoords: String = ""
+    @State private var selectedBirthPlace: PlaceEntry?
     @State private var deathDate: String = ""
+    @State private var deathDateEnd: String = ""
+    @State private var deathQualifier: GenealogyDate.Qualifier = .exact
+    @State private var originalDeathDate: GenealogyDate?
     @State private var deathPlace: String = ""
     @State private var deathCoords: String = ""
+    @State private var selectedDeathPlace: PlaceEntry?
     @State private var isLiving: Bool = true
     @State private var burialPlace: String = ""
     @State private var burialCoords: String = ""
+    @State private var selectedBurialPlace: PlaceEntry?
     @State private var occupation: String = ""
     @State private var education: String = ""
     @State private var notes: String = ""
@@ -38,6 +47,35 @@ struct EditPersonView: View {
     @State private var showAttachmentImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
+    @State private var editSession: EditSession?
+    @State private var preparedAttachmentIDs: Set<UUID> = []
+    @State private var saveError: String?
+    @State private var isSaving = false
+    @State private var didCommit = false
+    @State private var sourceTitle = ""
+    @State private var sourceAuthor = ""
+    @State private var selectedSourceID: UUID?
+    @State private var citationPage = ""
+    @State private var citationDetail = ""
+    @State private var citationTranscription = ""
+    @State private var citationConfidence = ""
+    @State private var citationNotes = ""
+    @State private var evidenceTarget: EvidenceTarget = .person
+    @State private var evidenceObjectID: UUID?
+
+    enum EvidenceTarget: String, CaseIterable, Identifiable {
+        case person = "Персона"
+        case primaryName = "Основное имя"
+        case birth = "Рождение"
+        case death = "Смерть"
+        case relationship = "Родительская связь"
+        case union = "Союз"
+        case attachment = "Вложение"
+        var id: String { rawValue }
+    }
+
+    private var editingTree: FamilyTree { editSession?.draftTree ?? tree }
+    private var editingPerson: Person { editingTree.person(byId: person.id) ?? person }
 
     enum AddRelType: String, CaseIterable {
         case none = "—"
@@ -58,7 +96,7 @@ struct EditPersonView: View {
                         .font(SepiaTheme.display(size: 22))
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
-                    Button { dismiss() } label: {
+                    Button { cancelEditing() } label: {
                         Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
                             .frame(width: 32, height: 32)
                             .contentShape(Rectangle())
@@ -93,8 +131,16 @@ struct EditPersonView: View {
                         }.padding(.bottom, 12)
 
                         SectionHeader(title: "Рождение")
-                        SepiaDateField(label: "ДАТА", text: $birthDate).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") { prefillCoords(for: $0, into: $birthCoords) }.padding(.bottom, 8).zIndex(1)
+                        SepiaDateField(
+                            label: "ДАТА",
+                            text: $birthDate,
+                            qualifier: $birthQualifier,
+                            endText: $birthDateEnd
+                        ).padding(.bottom, 8)
+                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") {
+                            selectedBirthPlace = $0
+                            prefillCoords(for: $0, into: $birthCoords)
+                        }.padding(.bottom, 8).zIndex(1)
                         SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
 
                         SectionHeader(title: "Смерть и погребение")
@@ -103,10 +149,21 @@ struct EditPersonView: View {
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
-                            SepiaDateField(label: "ДАТА", text: $deathDate).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") { prefillCoords(for: $0, into: $deathCoords) }.padding(.bottom, 8).zIndex(1)
+                            SepiaDateField(
+                                label: "ДАТА",
+                                text: $deathDate,
+                                qualifier: $deathQualifier,
+                                endText: $deathDateEnd
+                            ).padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+                                selectedDeathPlace = $0
+                                prefillCoords(for: $0, into: $deathCoords)
+                            }.padding(.bottom, 8).zIndex(1)
                             SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
-                            SepiaTextField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—").padding(.bottom, 8)
+                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—") {
+                                selectedBurialPlace = $0
+                                prefillCoords(for: $0, into: $burialCoords)
+                            }.padding(.bottom, 8).zIndex(1)
                             SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
                         }
 
@@ -115,7 +172,11 @@ struct EditPersonView: View {
                         SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
                         SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
 
+                        evidenceEditor
+
                         attachmentsEditor
+
+                        unionsEditor
 
                         relationshipsEditor
                     }
@@ -125,10 +186,11 @@ struct EditPersonView: View {
                 Divider().overlay(SepiaTheme.toolbarLine)
 
                 HStack {
-                    Button("Отмена") { dismiss() }.buttonStyle(SepiaButtonStyle())
+                    Button("Отмена") { cancelEditing() }.buttonStyle(SepiaButtonStyle())
                     Spacer()
                     Button("Сохранить") { savePerson() }
                         .buttonStyle(SepiaButtonStyle(isActive: true))
+                        .disabled(isSaving)
                         .disabled(givenNames.isEmpty && surname.isEmpty)
                 }
                 .padding(16)
@@ -136,6 +198,17 @@ struct EditPersonView: View {
         }
         .frame(width: 540, height: 720)
         .onAppear { loadPerson() }
+        .onDisappear {
+            if !didCommit { discardPreparedAttachments() }
+        }
+        .alert("Не удалось сохранить", isPresented: Binding(
+            get: { saveError != nil },
+            set: { if !$0 { saveError = nil } }
+        )) {
+            Button("OK", role: .cancel) { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
+        }
         .sheet(isPresented: Binding(get: { cropSource != nil }, set: { if !$0 { cropSource = nil } })) {
             if let img = cropSource {
                 PhotoCropView(image: img,
@@ -147,15 +220,174 @@ struct EditPersonView: View {
 
     // MARK: - Relationships Editor
 
+    private var evidenceEditor: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "Источники и доказательства")
+
+            HStack(spacing: 8) {
+                SepiaTextField(label: "НОВЫЙ ИСТОЧНИК", text: $sourceTitle, placeholder: "Название")
+                SepiaTextField(label: "АВТОР", text: $sourceAuthor, placeholder: "—")
+            }
+            Button("Добавить в библиотеку") { addSource() }
+                .buttonStyle(SepiaButtonStyle())
+                .disabled(sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            if editingTree.sourceRecords.isEmpty {
+                Text("Сначала добавьте источник.").font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
+            } else {
+                Picker("Источник", selection: $selectedSourceID) {
+                    Text("Выбрать…").tag(nil as UUID?)
+                    ForEach(editingTree.sourceRecords) { Text($0.title).tag($0.id as UUID?) }
+                }.pickerStyle(.menu)
+
+                if let sourceID = selectedSourceID,
+                   let sourceIndex = editingTree.sourceRecords.firstIndex(where: { $0.id == sourceID }) {
+                    sourceRecordFields(index: sourceIndex)
+                }
+
+                HStack {
+                    Picker("Для факта", selection: $evidenceTarget) {
+                        ForEach(EvidenceTarget.allCases) { Text($0.rawValue).tag($0) }
+                    }.pickerStyle(.menu)
+                    if !evidenceObjects.isEmpty {
+                        Picker("Запись", selection: $evidenceObjectID) {
+                            Text("Выбрать…").tag(nil as UUID?)
+                            ForEach(evidenceObjects, id: \.id) { Text($0.label).tag($0.id as UUID?) }
+                        }.pickerStyle(.menu)
+                    }
+                }
+                HStack(spacing: 8) {
+                    SepiaTextField(label: "СТРАНИЦА", text: $citationPage, placeholder: "—")
+                    SepiaTextField(label: "ДЕТАЛЬ", text: $citationDetail, placeholder: "—")
+                    SepiaTextField(label: "НАДЁЖНОСТЬ", text: $citationConfidence, placeholder: "0–3 / текст")
+                }
+                SepiaNotesField(label: "РАСШИФРОВКА", text: $citationTranscription, placeholder: "Точная запись из источника…")
+                SepiaNotesField(label: "ЗАМЕТКА К ССЫЛКЕ", text: $citationNotes, placeholder: "—")
+                Button("Привязать ссылку") { addCitation() }
+                    .buttonStyle(SepiaButtonStyle(isActive: true))
+                    .disabled(selectedSourceID == nil || (requiresEvidenceObject && evidenceObjectID == nil))
+            }
+        }.padding(.bottom, 12)
+    }
+
+    private func sourceRecordFields(index: Int) -> some View {
+        VStack(spacing: 8) {
+            SepiaTextField(label: "НАЗВАНИЕ", text: Binding(
+                get: { editingTree.sourceRecords[index].title },
+                set: { editingTree.sourceRecords[index].title = $0 }
+            ), placeholder: "—")
+            HStack(spacing: 8) {
+                SepiaTextField(label: "АВТОР", text: optionalSourceBinding(index, \.author), placeholder: "—")
+                SepiaTextField(label: "ПУБЛИКАЦИЯ", text: optionalSourceBinding(index, \.publication), placeholder: "—")
+            }
+            HStack(spacing: 8) {
+                SepiaTextField(label: "ХРАНИЛИЩЕ", text: optionalSourceBinding(index, \.repository), placeholder: "—")
+                SepiaTextField(label: "ШИФР", text: optionalSourceBinding(index, \.callNumber), placeholder: "—")
+            }
+            SepiaNotesField(label: "ЗАМЕТКИ", text: optionalSourceBinding(index, \.notes), placeholder: "—")
+        }
+    }
+
+    private func optionalSourceBinding(_ index: Int, _ keyPath: WritableKeyPath<SourceRecord, String?>) -> Binding<String> {
+        Binding(
+            get: { editingTree.sourceRecords[index][keyPath: keyPath] ?? "" },
+            set: { editingTree.sourceRecords[index][keyPath: keyPath] = $0.isEmpty ? nil : $0 }
+        )
+    }
+
+    private var evidenceObjects: [(id: UUID, label: String)] {
+        switch evidenceTarget {
+        case .relationship:
+            editingTree.parentLinks.filter { $0.parentID == editingPerson.id || $0.childID == editingPerson.id }.map { link in
+                let otherID = link.parentID == editingPerson.id ? link.childID : link.parentID
+                return (link.id, editingTree.person(byId: otherID)?.listName ?? "Связь")
+            }
+        case .union:
+            editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) || $0.childrenIds.contains(editingPerson.id) }
+                .map { ($0.id, unionLabel($0)) }
+        case .attachment:
+            editingPerson.attachments.map { ($0.id, $0.originalName) }
+        default: []
+        }
+    }
+
+    private var requiresEvidenceObject: Bool { [.relationship, .union, .attachment].contains(evidenceTarget) }
+
+    private func addSource() {
+        let title = sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        let source = SourceRecord(title: title, author: sourceAuthor.isEmpty ? nil : sourceAuthor)
+        editingTree.sourceRecords.append(source)
+        selectedSourceID = source.id
+        sourceTitle = ""; sourceAuthor = ""
+    }
+
+    private func addCitation() {
+        guard let sourceID = selectedSourceID else { return }
+        let citation = Citation(
+            sourceID: sourceID,
+            page: citationPage.nilIfEmpty,
+            detail: citationDetail.nilIfEmpty,
+            transcription: citationTranscription.nilIfEmpty,
+            confidence: citationConfidence.nilIfEmpty,
+            notes: citationNotes.nilIfEmpty
+        )
+        switch evidenceTarget {
+        case .person:
+            editingPerson.citations.append(citation)
+        case .primaryName:
+            if let index = editingPerson.names.firstIndex(where: \.isPrimary) ?? editingPerson.names.indices.first {
+                editingPerson.names[index].citations.append(citation)
+            }
+        case .birth, .death:
+            let kind: GenealogyEvent.Kind = evidenceTarget == .birth ? .birth : .death
+            var event = editingPerson.event(ofKind: kind) ?? GenealogyEvent(kind: kind)
+            event.citations.append(citation)
+            editingPerson.replaceEvent(event)
+        case .relationship:
+            if let id = evidenceObjectID, let index = editingTree.parentLinks.firstIndex(where: { $0.id == id }) {
+                editingTree.parentLinks[index].citations.append(citation)
+            }
+        case .union:
+            if let id = evidenceObjectID, let union = editingTree.unions.first(where: { $0.id == id }) { union.citations.append(citation) }
+        case .attachment:
+            if let id = evidenceObjectID, let index = editingPerson.attachments.firstIndex(where: { $0.id == id }) {
+                editingPerson.attachments[index].citations.append(citation)
+            }
+        }
+        citationPage = ""; citationDetail = ""; citationTranscription = ""; citationConfidence = ""; citationNotes = ""
+    }
+
+    private var unionsEditor: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SectionHeader(title: "Союзы и дети")
+            let unions = editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) }
+            if unions.isEmpty {
+                Text("Союзы не заданы").font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.inkSoft)
+            } else {
+                ForEach(unions, id: \.id) { union in
+                    UnionDraftEditor(union: union, tree: editingTree, subject: editingPerson)
+                    Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
+                }
+            }
+        }.padding(.bottom, 12)
+    }
+
+    private func unionLabel(_ union: Union) -> String {
+        let names = union.partnerIds.compactMap { editingTree.person(byId: $0)?.listName }
+        return names.isEmpty ? "Семейная запись" : names.joined(separator: " + ")
+    }
+
     private var relationshipsEditor: some View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: "Родство")
 
-            let idx = FamilyIndex(tree: tree)
-            let parents = idx.parentsOf(person)
-            let spouses = idx.spousesOf(person)
-            let children = idx.childrenOf(person)
-            let siblings = idx.siblingsOf(person)
+            let editPerson = editingPerson
+            let idx = FamilyIndex(tree: editingTree)
+            let parents = idx.parentsOf(editPerson)
+            let spouses = idx.spousesOf(editPerson)
+            let children = idx.childrenOf(editPerson)
+            let siblings = idx.siblingsOf(editPerson)
 
             // Current relationships
             if let f = parents.father { relEditRow("Отец", f) { removeParent(f) } }
@@ -208,8 +440,8 @@ struct EditPersonView: View {
     }
 
     private var availablePeople: [Person] {
-        tree.people
-            .filter { $0.id != person.id }
+        editingTree.people
+            .filter { $0.id != editingPerson.id }
             .sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
     }
 
@@ -237,66 +469,66 @@ struct EditPersonView: View {
     // MARK: - Relationship Actions
 
     private func removeParent(_ parent: Person) {
-        for union in tree.unions {
-            if union.childrenIds.contains(person.id) && union.partnerIds.contains(parent.id) {
+        let editPerson = editingPerson
+        for union in editingTree.unions {
+            if union.childrenIds.contains(editPerson.id) && union.partnerIds.contains(parent.id) {
                 if union.partnerIds.count <= 1 && union.childrenIds.count <= 1 {
-                    tree.unions.removeAll { $0.id == union.id }
+                    editingTree.unions.removeAll { $0.id == union.id }
                 } else if union.partnerIds.count > 1 {
                     if union.partner1Id == parent.id { union.partner1Id = nil }
                     else if union.partner2Id == parent.id { union.partner2Id = nil }
                 } else {
-                    union.childrenIds.removeAll { $0 == person.id }
+                    union.childrenIds.removeAll { $0 == editPerson.id }
                 }
                 break
             }
         }
-        tree.optimizeRoot()
-        tree.updatedAt = Date()
-        store.saveTree(tree)
+        editingTree.optimizeRoot()
+        editingTree.reconcileParentLinks()
     }
 
     private func removeSpouse(_ spouse: Person) {
-        tree.unions.removeAll { union in
-            union.partnerIds.contains(person.id) && union.partnerIds.contains(spouse.id) && union.childrenIds.isEmpty
+        let editPerson = editingPerson
+        editingTree.unions.removeAll { union in
+            union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) && union.childrenIds.isEmpty
         }
         // If union has children, just remove the partner link
-        for union in tree.unions {
-            if union.partnerIds.contains(person.id) && union.partnerIds.contains(spouse.id) {
+        for union in editingTree.unions {
+            if union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) {
                 if union.partner1Id == spouse.id { union.partner1Id = nil }
                 else if union.partner2Id == spouse.id { union.partner2Id = nil }
                 break
             }
         }
-        tree.optimizeRoot()
-        tree.updatedAt = Date()
-        store.saveTree(tree)
+        editingTree.optimizeRoot()
+        editingTree.reconcileParentLinks()
     }
 
     private func removeChild(_ child: Person) {
-        for union in tree.unions {
-            if union.partnerIds.contains(person.id) && union.childrenIds.contains(child.id) {
+        let editPerson = editingPerson
+        for union in editingTree.unions {
+            if union.partnerIds.contains(editPerson.id) && union.childrenIds.contains(child.id) {
                 union.childrenIds.removeAll { $0 == child.id }
                 if union.childrenIds.isEmpty && union.partnerIds.count <= 1 {
-                    tree.unions.removeAll { $0.id == union.id }
+                    editingTree.unions.removeAll { $0.id == union.id }
                 }
                 break
             }
         }
-        tree.optimizeRoot()
-        tree.updatedAt = Date()
-        store.saveTree(tree)
+        editingTree.optimizeRoot()
+        editingTree.reconcileParentLinks()
     }
 
     private func removeSibling(_ sibling: Person) {
-        for union in tree.unions {
-            if union.childrenIds.contains(person.id) && union.childrenIds.contains(sibling.id) {
+        let editPerson = editingPerson
+        for union in editingTree.unions {
+            if union.childrenIds.contains(editPerson.id) && union.childrenIds.contains(sibling.id) {
                 union.childrenIds.removeAll { $0 == sibling.id }
                 break
             }
         }
-        tree.optimizeRoot()
-        tree.updatedAt = Date()
-        store.saveTree(tree)
+        editingTree.optimizeRoot()
+        editingTree.reconcileParentLinks()
     }
 
     private func addRelationship() {
@@ -309,13 +541,11 @@ struct EditPersonView: View {
         case .sibling: kind = .sibling
         case .none: return
         }
-        tree.addRelation(kind, person: person, target: targetId)
+        editingTree.addRelation(kind, person: editingPerson, target: targetId)
 
         addRelType = .none
         addRelPersonId = nil
-        tree.optimizeRoot()
-        tree.updatedAt = Date()
-        store.saveTree(tree)
+        editingTree.optimizeRoot()
     }
 
     // MARK: - Attachments Editor
@@ -324,12 +554,12 @@ struct EditPersonView: View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: "Файлы")
 
-            if person.attachments.isEmpty {
+            if editingPerson.attachments.isEmpty {
                 Text("Файлы не прикреплены")
                     .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             } else {
-                ForEach(person.attachments) { att in
+                ForEach(editingPerson.attachments) { att in
                     attachmentEditRow(att)
                 }
             }
@@ -347,7 +577,7 @@ struct EditPersonView: View {
     }
 
     private func attachmentEditRow(_ att: Attachment) -> some View {
-        let url = store.attachmentURL(att, in: tree)
+        let url = store.previewURL(for: att, in: tree)
         return HStack(spacing: 10) {
             Button { NSWorkspace.shared.open(url) } label: {
                 HStack(spacing: 10) {
@@ -367,7 +597,7 @@ struct EditPersonView: View {
 
             Spacer(minLength: 0)
 
-            Button { store.removeAttachment(att, from: person, in: tree) } label: {
+            Button { removeDraftAttachment(att) } label: {
                 Image(systemName: "minus.circle.fill")
                     .font(.system(size: 14)).foregroundColor(.red.opacity(0.7))
                     .frame(width: 24, height: 24).contentShape(Rectangle())
@@ -381,10 +611,19 @@ struct EditPersonView: View {
     private func attachFiles(_ urls: [URL]) {
         for url in urls {
             do {
-                _ = try store.addAttachment(to: person, in: tree, sourceURL: url)
+                let attachment = try store.prepareAttachment(in: tree, sourceURL: url)
+                editingPerson.attachments.append(attachment)
+                preparedAttachmentIDs.insert(attachment.id)
             } catch {
                 log.error("Failed to attach \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
+        }
+    }
+
+    private func removeDraftAttachment(_ attachment: Attachment) {
+        editingPerson.attachments.removeAll { $0.id == attachment.id }
+        if preparedAttachmentIDs.remove(attachment.id) != nil {
+            store.discardPreparedAttachment(attachment, in: tree)
         }
     }
 
@@ -465,8 +704,8 @@ struct EditPersonView: View {
 
     /// Resolve a picked place to coordinates and fill the bound field. Only fires when
     /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-    private func prefillCoords(for place: String, into coords: Binding<String>) {
-        if let c = GeocodingService.shared.coordinateSync(for: place) {
+    private func prefillCoords(for place: PlaceEntry, into coords: Binding<String>) {
+        if let c = GeocodingService.shared.coordinate(for: place) {
             coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude)
         }
     }
@@ -493,60 +732,422 @@ struct EditPersonView: View {
     }
 
     private func loadPerson() {
-        givenNames = person.givenNames
-        patronymic = person.patronymic ?? ""
-        surname = person.surname
-        maidenName = person.maidenName ?? ""
-        sex = person.sex
-        birthDate = person.birthDate ?? ""
-        birthPlace = person.birthPlace ?? ""
-        birthCoords = formatCoords(person.birthLat, person.birthLon)
-        deathDate = person.deathDate ?? ""
-        deathPlace = person.deathPlace ?? ""
-        deathCoords = formatCoords(person.deathLat, person.deathLon)
-        isLiving = person.isLiving
-        burialPlace = person.burialPlace ?? ""
-        if let lat = person.burialLat, let lon = person.burialLon {
+        if editSession == nil { editSession = try? EditSession(tree: tree) }
+        let source = editingPerson
+        givenNames = source.givenNames
+        patronymic = source.patronymic ?? ""
+        surname = source.surname
+        maidenName = source.maidenName ?? ""
+        sex = source.sex
+        let loadedBirth = displayDate(source.event(ofKind: .birth)?.date)
+        originalBirthDate = source.event(ofKind: .birth)?.date
+        birthDate = loadedBirth.text
+        birthDateEnd = loadedBirth.end
+        birthQualifier = loadedBirth.qualifier
+        birthPlace = source.birthPlace ?? ""
+        birthCoords = formatCoords(source.birthLat, source.birthLon)
+        let loadedDeath = displayDate(source.event(ofKind: .death)?.date)
+        originalDeathDate = source.event(ofKind: .death)?.date
+        deathDate = loadedDeath.text
+        deathDateEnd = loadedDeath.end
+        deathQualifier = loadedDeath.qualifier
+        deathPlace = source.deathPlace ?? ""
+        deathCoords = formatCoords(source.deathLat, source.deathLon)
+        isLiving = source.isLiving
+        burialPlace = source.burialPlace ?? ""
+        if let lat = source.burialLat, let lon = source.burialLon {
             burialCoords = "\(lat), \(lon)"
         } else {
             burialCoords = ""
         }
-        occupation = person.occupation ?? ""
-        education = person.education ?? ""
-        notes = person.notes ?? ""
-        photoData = person.photoData
+        occupation = source.occupation ?? ""
+        education = source.education ?? ""
+        notes = source.notes ?? ""
+        photoData = source.photoData
     }
 
     private func savePerson() {
+        guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
+            saveError = "Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне."
+            return
+        }
+        let parsedBirthDate = parsedDate(text: birthDate, end: birthDateEnd, qualifier: birthQualifier, original: originalBirthDate)
+        let parsedDeathDate = isLiving ? nil : parsedDate(
+            text: deathDate,
+            end: deathDateEnd,
+            qualifier: deathQualifier,
+            original: originalDeathDate
+        )
+        if (!birthDate.isEmpty && parsedBirthDate == nil) || (!isLiving && !deathDate.isEmpty && parsedDeathDate == nil) {
+            saveError = "Исправьте некорректные даты перед сохранением."
+            return
+        }
+        let before = try? JSONEncoder().encode(tree)
+        let draft = editingTree
+        let draftPerson = editingPerson
+        tree.unions = draft.unions
+        tree.parentLinks = draft.parentLinks
+        tree.sourceRecords = draft.sourceRecords
+        person.attachments = draftPerson.attachments
+        person.citations = draftPerson.citations
+        person.names = draftPerson.names
+        person.events = draftPerson.events
         person.givenNames = givenNames
         person.patronymic = patronymic.isEmpty ? nil : patronymic
         person.surname = surname
         person.maidenName = maidenName.isEmpty ? nil : maidenName
         person.sex = sex
         person.birthDate = birthDate.isEmpty ? nil : FamilyDate.normalize(birthDate)
+        person.setStructuredDate(parsedBirthDate, for: .birth)
         person.birthPlace = birthPlace.isEmpty ? nil : birthPlace
         let birthCoord = parseGraveCoords(birthCoords)
         person.birthLat = birthCoord?.lat
         person.birthLon = birthCoord?.lon
+        if let selectedBirthPlace, selectedBirthPlace.displayName == birthPlace {
+            person.setStructuredPlace(selectedBirthPlace.placeReference, for: .birth)
+        }
         person.deathDate = isLiving ? nil : (deathDate.isEmpty ? nil : FamilyDate.normalize(deathDate))
+        person.setStructuredDate(parsedDeathDate, for: .death)
         person.deathPlace = isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace)
         let deathCoord = isLiving ? nil : parseGraveCoords(deathCoords)
         person.deathLat = deathCoord?.lat
         person.deathLon = deathCoord?.lon
+        if let selectedDeathPlace, selectedDeathPlace.displayName == deathPlace, !isLiving {
+            person.setStructuredPlace(selectedDeathPlace.placeReference, for: .death)
+        }
         person.isLiving = isLiving
         person.burialPlace = burialPlace.isEmpty ? nil : burialPlace
         let graveCoords = isLiving ? nil : parseGraveCoords(burialCoords)
         person.burialLat = graveCoords?.lat
         person.burialLon = graveCoords?.lon
+        if let selectedBurialPlace, selectedBurialPlace.displayName == burialPlace, !isLiving {
+            person.setStructuredPlace(selectedBurialPlace.placeReference, for: .burial)
+        }
         person.occupation = occupation.isEmpty ? nil : occupation
         person.education = education.isEmpty ? nil : education
         person.notes = notes.isEmpty ? nil : notes
-        person.photoData = photoData
+        if photoData != person.photoData { person.photoData = photoData }
         person.updatedAt = Date()
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.saveTree(tree)
-        onSaved?(person)
+        isSaving = true
+        Task { @MainActor in
+            defer { isSaving = false }
+            do {
+                _ = try await store.saveTree(tree)
+                didCommit = true
+                preparedAttachmentIDs.removeAll()
+                onSaved?(person)
+                dismiss()
+            } catch {
+                if let before, let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) {
+                    apply(snapshot: snapshot)
+                }
+                saveError = error.localizedDescription
+            }
+        }
+    }
+
+    private func validCoordinateText(_ value: String) -> Bool {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return true }
+        guard let coordinates = parseGraveCoords(trimmed) else { return false }
+        return (-90 ... 90).contains(coordinates.lat) && (-180 ... 180).contains(coordinates.lon)
+    }
+
+    private func parsedDate(
+        text: String,
+        end: String,
+        qualifier: GenealogyDate.Qualifier,
+        original: GenealogyDate?
+    ) -> GenealogyDate? {
+        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        if let original, original.start == nil, text == original.rawValue, qualifier == original.qualifier {
+            return original
+        }
+        let range = qualifier == .between || qualifier == .fromTo
+        let value = GenealogyDate(userInput: text, qualifier: qualifier, endValue: range ? end : nil)
+        return value.isValid ? value : nil
+    }
+
+    private func displayDate(_ date: GenealogyDate?) -> (text: String, end: String, qualifier: GenealogyDate.Qualifier) {
+        guard let date else { return ("", "", .exact) }
+        return (date.start?.displayValue ?? date.rawValue, date.end?.displayValue ?? "", date.qualifier)
+    }
+
+    private func cancelEditing() {
+        discardPreparedAttachments()
         dismiss()
+    }
+
+    private func discardPreparedAttachments() {
+        for attachment in editingPerson.attachments where preparedAttachmentIDs.contains(attachment.id) {
+            store.discardPreparedAttachment(attachment, in: tree)
+        }
+        preparedAttachmentIDs.removeAll()
+    }
+
+    private func apply(snapshot: FamilyTree) {
+        tree.name = snapshot.name
+        tree.subtitle = snapshot.subtitle
+        tree.homePersonId = snapshot.homePersonId
+        tree.rootUnionId = snapshot.rootUnionId
+        if let source = snapshot.person(byId: person.id) {
+            person.givenNames = source.givenNames
+            person.patronymic = source.patronymic
+            person.surname = source.surname
+            person.maidenName = source.maidenName
+            person.sex = source.sex
+            person.birthDate = source.birthDate
+            person.birthPlace = source.birthPlace
+            person.birthLat = source.birthLat
+            person.birthLon = source.birthLon
+            person.deathDate = source.deathDate
+            person.deathPlace = source.deathPlace
+            person.deathLat = source.deathLat
+            person.deathLon = source.deathLon
+            person.isLiving = source.isLiving
+            person.burialPlace = source.burialPlace
+            person.burialLat = source.burialLat
+            person.burialLon = source.burialLon
+            person.occupation = source.occupation
+            person.education = source.education
+            person.notes = source.notes
+            person.names = source.names
+            person.events = source.events
+            person.citations = source.citations
+            person.attachments = source.attachments
+            person.photoFilename = source.photoFilename
+            person.gedcomXref = source.gedcomXref
+            person.unknownBranches = source.unknownBranches
+            person.eventExtras = source.eventExtras
+        }
+        tree.unions = snapshot.unions
+        tree.sourceRecords = snapshot.sourceRecords
+        tree.parentLinks = snapshot.parentLinks
+        tree.headUnknownBranches = snapshot.headUnknownBranches
+        tree.unknownRecords = snapshot.unknownRecords
+        tree.gedcomDocument = snapshot.gedcomDocument
+        tree.importReport = snapshot.importReport
+        tree.acceptedBaselineIssueIDs = snapshot.acceptedBaselineIssueIDs
+        tree.layoutVersion += 1
+        store.refreshMediaFolders(for: tree)
+    }
+}
+
+private struct UnionDraftEditor: View {
+    let union: Union
+    let tree: FamilyTree
+    let subject: Person
+    @State private var childToAdd: UUID?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(partnerNames).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                    Text("\(union.childrenIds.count) детей · \(union.citations.count) ссылок")
+                        .font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
+                }
+                Spacer()
+            }
+
+            Picker("Партнёр", selection: partnerBinding) {
+                Text("Не указан").tag(nil as UUID?)
+                ForEach(availablePartners, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
+            }
+            .pickerStyle(.menu)
+
+            UnionEventDraftEditor(kind: .partnership, union: union, attachments: subject.attachments)
+            UnionEventDraftEditor(kind: .marriage, union: union, attachments: subject.attachments)
+            UnionEventDraftEditor(kind: .separation, union: union, attachments: subject.attachments)
+            UnionEventDraftEditor(kind: .divorce, union: union, attachments: subject.attachments)
+
+            Text("ДЕТИ И ТИП РОДИТЕЛЬСТВА")
+                .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundStyle(SepiaTheme.inkSoft)
+            ForEach(union.childrenIds, id: \.self) { childID in
+                HStack {
+                    Text(tree.person(byId: childID)?.listName ?? "Неизвестная персона")
+                        .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+                    Spacer()
+                    Picker("Тип", selection: parentageBinding(childID: childID)) {
+                        ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
+                    }.pickerStyle(.menu).frame(width: 150)
+                    Button(role: .destructive) {
+                        union.childrenIds.removeAll { $0 == childID }
+                        tree.parentLinks.removeAll { $0.unionID == union.id && $0.childID == childID }
+                    } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain)
+                }
+            }
+            HStack {
+                Picker("Добавить ребёнка", selection: $childToAdd) {
+                    Text("Выбрать…").tag(nil as UUID?)
+                    ForEach(availableChildren, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
+                }.pickerStyle(.menu)
+                Button("Добавить") { addChild() }.buttonStyle(SepiaButtonStyle()).disabled(childToAdd == nil)
+            }
+        }
+        .padding(12)
+        .background(SepiaTheme.cardBg.opacity(0.65))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(SepiaTheme.cardLine, lineWidth: 1))
+    }
+
+    private var partnerNames: String {
+        union.partnerIds.compactMap { tree.person(byId: $0)?.listName }.joined(separator: " + ")
+    }
+
+    private var availableChildren: [Person] {
+        tree.people.filter { !union.partnerIds.contains($0.id) && !union.childrenIds.contains($0.id) }
+            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+    }
+
+    private var availablePartners: [Person] {
+        tree.people.filter { $0.id != subject.id && !union.childrenIds.contains($0.id) }
+            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+    }
+
+    private var partnerBinding: Binding<UUID?> {
+        Binding(
+            get: { union.partnerIds.first { $0 != subject.id } },
+            set: { partnerID in
+                if union.partner1Id == subject.id { union.partner2Id = partnerID }
+                else if union.partner2Id == subject.id { union.partner1Id = partnerID }
+                else {
+                    union.partner1Id = subject.id
+                    union.partner2Id = partnerID
+                }
+            }
+        )
+    }
+
+    private func parentageBinding(childID: UUID) -> Binding<ParentageKind> {
+        Binding(
+            get: {
+                tree.parentLinks.first(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID })?.kind ?? .biological
+            },
+            set: { kind in
+                if let index = tree.parentLinks.firstIndex(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID }) {
+                    tree.parentLinks[index].kind = kind
+                } else {
+                    tree.parentLinks.append(ParentLink(parentID: subject.id, childID: childID, unionID: union.id, kind: kind))
+                }
+            }
+        )
+    }
+
+    private func addChild() {
+        guard let childToAdd else { return }
+        union.childrenIds.append(childToAdd)
+        for parentID in union.partnerIds {
+            tree.parentLinks.append(ParentLink(parentID: parentID, childID: childToAdd, unionID: union.id))
+        }
+        self.childToAdd = nil
+    }
+}
+
+private struct UnionEventDraftEditor: View {
+    let kind: GenealogyEvent.Kind
+    let union: Union
+    let attachments: [Attachment]
+    @State private var enabled: Bool
+    @State private var dateText: String
+    @State private var endText: String
+    @State private var qualifier: GenealogyDate.Qualifier
+    @State private var placeText: String
+    @State private var selectedPlace: PlaceEntry?
+    @State private var notes: String
+    @State private var mediaIDs: Set<String>
+
+    init(kind: GenealogyEvent.Kind, union: Union, attachments: [Attachment]) {
+        self.kind = kind
+        self.union = union
+        self.attachments = attachments
+        let event = union.event(ofKind: kind)
+        _enabled = State(initialValue: event != nil)
+        _dateText = State(initialValue: event?.date?.start?.displayValue ?? event?.date?.rawValue ?? "")
+        _endText = State(initialValue: event?.date?.end?.displayValue ?? "")
+        _qualifier = State(initialValue: event?.date?.qualifier ?? .exact)
+        _placeText = State(initialValue: event?.place?.displayName ?? "")
+        _notes = State(initialValue: event?.notes ?? "")
+        _mediaIDs = State(initialValue: Set(event?.mediaIDs ?? []))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Toggle(eventTitle, isOn: $enabled).toggleStyle(.checkbox)
+                .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+            if enabled {
+                SepiaDateField(label: "ДАТА", text: $dateText, qualifier: $qualifier, endText: $endText)
+                PlacePickerField(label: "МЕСТО", text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }
+                SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "—")
+                if !attachments.isEmpty {
+                    Menu("Медиа (\(mediaIDs.count))") {
+                        ForEach(attachments) { attachment in
+                            Toggle(attachment.originalName, isOn: Binding(
+                                get: { mediaIDs.contains(attachment.id.uuidString) },
+                                set: { selected in
+                                    if selected { mediaIDs.insert(attachment.id.uuidString) }
+                                    else { mediaIDs.remove(attachment.id.uuidString) }
+                                    commit()
+                                }
+                            ))
+                        }
+                    }.menuStyle(.borderlessButton)
+                }
+            }
+        }
+        .onChange(of: enabled) { _, _ in commit() }
+        .onChange(of: dateText) { _, _ in commit() }
+        .onChange(of: endText) { _, _ in commit() }
+        .onChange(of: qualifier) { _, _ in commit() }
+        .onChange(of: placeText) { _, _ in commit() }
+        .onChange(of: notes) { _, _ in commit() }
+    }
+
+    private var eventTitle: String {
+        switch kind {
+        case .partnership: "Партнёрство"
+        case .marriage: "Брак"
+        case .separation: "Раздельное проживание"
+        case .divorce: "Развод"
+        default: kind.rawValue
+        }
+    }
+
+    private func commit() {
+        guard enabled else {
+            union.events.removeAll { $0.kind == kind }
+            if kind == .marriage { union.marriageDate = nil; union.marriagePlace = nil }
+            if [.divorce, .separation].contains(kind), union.status == kind.rawValue { union.status = nil }
+            return
+        }
+        let range = qualifier == .between || qualifier == .fromTo
+        let date = dateText.nilIfEmpty.map { GenealogyDate(userInput: $0, qualifier: qualifier, endValue: range ? endText : nil) }
+        let place: PlaceReference? = if let selectedPlace, selectedPlace.displayName == placeText {
+            selectedPlace.placeReference
+        } else {
+            placeText.nilIfEmpty.map { PlaceReference(displayName: $0, isCustom: true) }
+        }
+        let old = union.event(ofKind: kind)
+        let event = GenealogyEvent(
+            id: old?.id ?? UUID(),
+            kind: kind,
+            value: old?.value,
+            date: date,
+            place: place,
+            notes: notes.nilIfEmpty,
+            citations: old?.citations ?? [],
+            mediaIDs: Array(mediaIDs).sorted(),
+            rawGEDCOMBranches: old?.rawGEDCOMBranches ?? []
+        )
+        union.replaceEvent(event)
+    }
+}
+
+private extension String {
+    var nilIfEmpty: String? {
+        let value = trimmingCharacters(in: .whitespacesAndNewlines)
+        return value.isEmpty ? nil : value
     }
 }

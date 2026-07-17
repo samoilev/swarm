@@ -12,6 +12,8 @@ struct OnboardingView: View {
     @State private var sex: Person.Sex = .unknown
     @State private var birthPlace: String = ""
     @State private var deathPlace: String = ""
+    @State private var selectedBirthPlace: PlaceEntry?
+    @State private var selectedDeathPlace: PlaceEntry?
     @FocusState private var focusedField: Field?
 
     enum Field: Hashable { case treeName, subtitle, givenNames, patronymic, surname }
@@ -114,14 +116,24 @@ struct OnboardingView: View {
                 .font(SepiaTheme.body(size: 13))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .padding(.top, 8)
-            PlacePickerField(label: "МЕСТО РОЖДЕНИЯ", text: $birthPlace, placeholder: "напр. Москва, Россия")
-            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—")
+            PlacePickerField(label: "МЕСТО РОЖДЕНИЯ", text: $birthPlace, placeholder: "напр. Москва, Россия") {
+                selectedBirthPlace = $0
+            }
+            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+                selectedDeathPlace = $0
+            }
         }
     }
 
     private func createTree() {
         let tree = FamilyTree(name: treeName, subtitle: subtitle.isEmpty ? nil : subtitle)
         let person = Person(givenNames: givenNames, patronymic: patronymic.isEmpty ? nil : patronymic, surname: surname, sex: sex, birthPlace: birthPlace.isEmpty ? nil : birthPlace, deathPlace: deathPlace.isEmpty ? nil : deathPlace)
+        if let selectedBirthPlace, selectedBirthPlace.displayName == birthPlace {
+            person.setStructuredPlace(selectedBirthPlace.placeReference, for: .birth)
+        }
+        if let selectedDeathPlace, selectedDeathPlace.displayName == deathPlace {
+            person.setStructuredPlace(selectedDeathPlace.placeReference, for: .death)
+        }
         tree.people.append(person)
         tree.homePersonId = person.id
         onComplete(tree)
@@ -210,11 +222,28 @@ struct SepiaNotesField: View {
     }
 }
 
-/// Date field that only accepts ДД.ММ.ГГГГ, ММ.ГГГГ, or ГГГГ
+/// Structured date editor. It validates real Gregorian dates and keeps GEDCOM
+/// qualifiers/ranges explicit instead of encoding them into an ambiguous text field.
 struct SepiaDateField: View {
     let label: String
     @Binding var text: String
+    @Binding var qualifier: GenealogyDate.Qualifier
+    @Binding var endText: String
     var placeholder: String = "ДД.ММ.ГГГГ"
+
+    init(
+        label: String,
+        text: Binding<String>,
+        qualifier: Binding<GenealogyDate.Qualifier> = .constant(.exact),
+        endText: Binding<String> = .constant(""),
+        placeholder: String = "ДД.ММ.ГГГГ"
+    ) {
+        self.label = label
+        _text = text
+        _qualifier = qualifier
+        _endText = endText
+        self.placeholder = placeholder
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -222,86 +251,49 @@ struct SepiaDateField: View {
                 .font(SepiaTheme.ui(size: 9.5))
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
-            TextField(placeholder, text: $text)
-                .textFieldStyle(.roundedBorder)
-                .font(SepiaTheme.body(size: 15))
-                .foregroundColor(SepiaTheme.ink)
-                .colorMultiply(Color(hex: "f5eed8"))
-                .onChange(of: text) { _, newValue in
-                    let filtered = filterDateInput(newValue)
-                    if filtered != newValue {
-                        text = filtered
+            HStack(spacing: 8) {
+                Picker("", selection: $qualifier) {
+                    ForEach(GenealogyDate.Qualifier.allCases, id: \.rawValue) { value in
+                        Text(value.displayName).tag(value)
                     }
                 }
-            if !text.isEmpty && !isValidDateFormat(text) {
-                Text("Формат: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ")
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .frame(width: 145)
+
+                dateTextField(text: $text, placeholder: placeholder)
+                if isRange {
+                    Text(qualifier == .between ? "и" : "по")
+                        .font(SepiaTheme.body(size: 12))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                    dateTextField(text: $endText, placeholder: placeholder)
+                }
+            }
+            if !text.isEmpty && !isValidDate {
+                Text("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ")
                     .font(SepiaTheme.ui(size: 9))
                     .foregroundColor(.red.opacity(0.8))
             }
         }
     }
 
-    /// Allow only digits and dots, auto-insert dots, limit length
-    private func filterDateInput(_ input: String) -> String {
-        // Remove anything that's not a digit or dot
-        var cleaned = String(input.filter { $0.isNumber || $0 == "." })
-
-        // Remove leading dots
-        while cleaned.hasPrefix(".") {
-            cleaned.removeFirst()
-        }
-
-        // Remove consecutive dots
-        while cleaned.contains("..") {
-            cleaned = cleaned.replacingOccurrences(of: "..", with: ".")
-        }
-
-        // Limit: max 10 chars (DD.MM.YYYY)
-        if cleaned.count > 10 {
-            cleaned = String(cleaned.prefix(10))
-        }
-
-        // Limit to max 2 dots
-        let dots = cleaned.filter { $0 == "." }
-        if dots.count > 2 {
-            // Keep only up to second dot
-            var dotCount = 0
-            var result = ""
-            for ch in cleaned {
-                if ch == "." {
-                    dotCount += 1
-                    if dotCount > 2 { break }
-                }
-                result.append(ch)
-            }
-            cleaned = result
-        }
-
-        return cleaned
+    private var isRange: Bool {
+        qualifier == .between || qualifier == .fromTo
     }
 
-    private func isValidDateFormat(_ input: String) -> Bool {
-        let str = input.trimmingCharacters(in: .whitespaces)
-        if str.isEmpty { return true }
+    private var isValidDate: Bool {
+        GenealogyDate(
+            userInput: text,
+            qualifier: qualifier,
+            endValue: isRange ? endText : nil
+        ).isValid
+    }
 
-        // ГГГГ
-        if str.range(of: #"^\d{4}$"#, options: .regularExpression) != nil { return true }
-        // ММ.ГГГГ
-        if str.range(of: #"^\d{1,2}\.\d{4}$"#, options: .regularExpression) != nil {
-            let parts = str.components(separatedBy: ".")
-            if let m = Int(parts[0]), m >= 1, m <= 12 { return true }
-        }
-        // ДД.ММ.ГГГГ
-        if str.range(of: #"^\d{1,2}\.\d{1,2}\.\d{4}$"#, options: .regularExpression) != nil {
-            let parts = str.components(separatedBy: ".")
-            if let d = Int(parts[0]), let m = Int(parts[1]), d >= 1, d <= 31, m >= 1, m <= 12 { return true }
-        }
-        // Partial input (still typing)
-        if str.range(of: #"^\d{1,2}\.?$"#, options: .regularExpression) != nil { return true }
-        if str.range(of: #"^\d{1,2}\.\d{1,2}\.?$"#, options: .regularExpression) != nil { return true }
-        if str.range(of: #"^\d{1,2}\.\d{1,4}$"#, options: .regularExpression) != nil { return true }
-        if str.range(of: #"^\d{1,4}$"#, options: .regularExpression) != nil { return true }
-
-        return false
+    private func dateTextField(text: Binding<String>, placeholder: String) -> some View {
+        TextField(placeholder, text: text)
+            .textFieldStyle(.roundedBorder)
+            .font(SepiaTheme.body(size: 15))
+            .foregroundColor(SepiaTheme.ink)
+            .colorMultiply(Color(hex: "f5eed8"))
     }
 }

@@ -1,0 +1,23 @@
+0 HEAD
+1 SOUR MyHeritage
+2 VERS 1.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Анна /Тестова/
+2 GIVN Анна
+2 SURN Тестова
+1 _UID foreign-uid-must-remain-foreign
+1 BIRT
+2 DATE BET 1900 AND 1902
+2 PLAC Минск, Беларусь
+2 NOTE приблизительная запись
+1 OBJE
+2 FILE Media/portrait.jpg
+2 TITL Анонимизированный портрет
+1 RIN mh-person-1
+0 @N1@ NOTE
+1 CONC Внешняя заметка сохраняется
+0 TRLR

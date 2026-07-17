@@ -7,6 +7,19 @@ import SwiftUI
 /// come from the person's cached lat/lon or the local GeoNames DB (offline only).
 struct PersonMiniMap: View {
     let person: Person
+    @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
+
+    var body: some View {
+        if providerRaw == MapProviderSetting.appleMaps.rawValue {
+            ApplePersonMiniMap(person: person)
+        } else {
+            OfflinePersonMiniMap(person: person)
+        }
+    }
+}
+
+struct ApplePersonMiniMap: View {
+    let person: Person
 
     @State private var birth: CLLocationCoordinate2D?
     @State private var death: CLLocationCoordinate2D?

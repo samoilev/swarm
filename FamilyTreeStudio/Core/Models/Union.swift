@@ -6,10 +6,13 @@ public final class Union: Identifiable, Codable, Hashable {
     public var id: UUID
     public var partner1Id: UUID?
     public var partner2Id: UUID?
-    public var marriageDate: String?
-    public var marriagePlace: String?
-    public var status: String?
+    public var marriageDate: String? { didSet { synchronizeMarriageFromLegacy() } }
+    public var marriagePlace: String? { didSet { synchronizeMarriageFromLegacy() } }
+    public var status: String? { didSet { synchronizeStatusFromLegacy() } }
     public var childrenIds: [UUID]
+    public var events: [GenealogyEvent]
+    public var citations: [Citation]
+    @ObservationIgnored private var isSynchronizingStructured = false
 
     // MARK: - GEDCOM interop preservation (see Person for the rationale)
 
@@ -37,11 +40,84 @@ public final class Union: Identifiable, Codable, Hashable {
         self.marriagePlace = marriagePlace
         self.status = status
         self.childrenIds = childrenIds
+        var initialEvents: [GenealogyEvent] = []
+        if marriageDate?.isEmpty == false || marriagePlace?.isEmpty == false {
+            initialEvents.append(GenealogyEvent(
+                kind: .marriage,
+                date: marriageDate.map { GenealogyDate(userInput: $0) },
+                place: marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+            ))
+        }
+        if status == "divorced" { initialEvents.append(GenealogyEvent(kind: .divorce)) }
+        else if status == "separated" { initialEvents.append(GenealogyEvent(kind: .separation)) }
+        else if let status, !status.isEmpty { initialEvents.append(GenealogyEvent(kind: .partnership, value: status)) }
+        self.events = initialEvents
+        self.citations = []
         self.createdAt = Date()
     }
 
     public var partnerIds: [UUID] {
         [partner1Id, partner2Id].compactMap { $0 }
+    }
+
+    public func event(ofKind kind: GenealogyEvent.Kind) -> GenealogyEvent? {
+        events.first(where: { $0.kind == kind })
+    }
+
+    public func replaceEvent(_ event: GenealogyEvent) {
+        isSynchronizingStructured = true
+        defer { isSynchronizingStructured = false }
+        if let index = events.firstIndex(where: { $0.id == event.id || $0.kind == event.kind }) {
+            events[index] = event
+        } else {
+            events.append(event)
+        }
+        if event.kind == .marriage {
+            marriageDate = event.date?.displayValue
+            marriagePlace = event.place?.displayName
+        } else if event.kind == .divorce {
+            status = "divorced"
+        } else if event.kind == .separation {
+            status = "separated"
+        }
+    }
+
+    public func setStructuredEvent(_ event: GenealogyEvent) {
+        isSynchronizingStructured = true
+        defer { isSynchronizingStructured = false }
+        if let index = events.firstIndex(where: { $0.kind == event.kind }) { events[index] = event }
+        else { events.append(event) }
+    }
+
+    private func synchronizeMarriageFromLegacy() {
+        guard !isSynchronizingStructured else { return }
+        let hasValue = marriageDate?.isEmpty == false || marriagePlace?.isEmpty == false
+        if let index = events.firstIndex(where: { $0.kind == .marriage }) {
+            if hasValue {
+                events[index].date = marriageDate.map { GenealogyDate(userInput: $0) }
+                events[index].place = marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+            } else {
+                events.remove(at: index)
+            }
+        } else if hasValue {
+            events.append(GenealogyEvent(
+                kind: .marriage,
+                date: marriageDate.map { GenealogyDate(userInput: $0) },
+                place: marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+            ))
+        }
+    }
+
+    private func synchronizeStatusFromLegacy() {
+        guard !isSynchronizingStructured else { return }
+        events.removeAll { [.divorce, .separation, .partnership].contains($0.kind) }
+        switch status {
+        case "divorced": events.append(GenealogyEvent(kind: .divorce))
+        case "separated": events.append(GenealogyEvent(kind: .separation))
+        case let value?:
+            if !value.isEmpty { events.append(GenealogyEvent(kind: .partnership, value: value)) }
+        case nil: break
+        }
     }
 
     // MARK: - Hashable
@@ -57,7 +133,7 @@ public final class Union: Identifiable, Codable, Hashable {
     // MARK: - Codable
 
     enum CodingKeys: String, CodingKey {
-        case id, partner1Id, partner2Id, marriageDate, marriagePlace, status, childrenIds, createdAt
+        case id, partner1Id, partner2Id, marriageDate, marriagePlace, status, childrenIds, events, citations, createdAt
         case gedcomXref, unknownBranches, marriageExtras
     }
 
@@ -70,10 +146,22 @@ public final class Union: Identifiable, Codable, Hashable {
         marriagePlace = try c.decodeIfPresent(String.self, forKey: .marriagePlace)
         status = try c.decodeIfPresent(String.self, forKey: .status)
         childrenIds = try c.decode([UUID].self, forKey: .childrenIds)
+        events = try c.decodeIfPresent([GenealogyEvent].self, forKey: .events) ?? []
+        citations = try c.decodeIfPresent([Citation].self, forKey: .citations) ?? []
+        createdAt = try c.decode(Date.self, forKey: .createdAt)
+        if events.isEmpty {
+            if marriageDate?.isEmpty == false || marriagePlace?.isEmpty == false {
+                events.append(GenealogyEvent(
+                    kind: .marriage,
+                    date: marriageDate.map { GenealogyDate(userInput: $0) },
+                    place: marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+                ))
+            }
+            if status == "divorced" { events.append(GenealogyEvent(kind: .divorce)) }
+        }
         gedcomXref = try c.decodeIfPresent(String.self, forKey: .gedcomXref)
         unknownBranches = try c.decodeIfPresent([[String]].self, forKey: .unknownBranches) ?? []
         marriageExtras = try c.decodeIfPresent([String].self, forKey: .marriageExtras) ?? []
-        createdAt = try c.decode(Date.self, forKey: .createdAt)
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -85,6 +173,8 @@ public final class Union: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(marriagePlace, forKey: .marriagePlace)
         try c.encodeIfPresent(status, forKey: .status)
         try c.encode(childrenIds, forKey: .childrenIds)
+        if !events.isEmpty { try c.encode(events, forKey: .events) }
+        if !citations.isEmpty { try c.encode(citations, forKey: .citations) }
         try c.encodeIfPresent(gedcomXref, forKey: .gedcomXref)
         if !unknownBranches.isEmpty { try c.encode(unknownBranches, forKey: .unknownBranches) }
         if !marriageExtras.isEmpty { try c.encode(marriageExtras, forKey: .marriageExtras) }

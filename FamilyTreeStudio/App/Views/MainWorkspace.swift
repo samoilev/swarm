@@ -27,6 +27,7 @@ struct MainWorkspace: View {
     @State private var fanLevels: Int = 4
     @State private var showPhotos: Bool = true
     @State private var showSaveError = false
+    @State private var showMerge = false
     /// One-time teaching hint for the ⌘-click dual-select kinship feature.
     @AppStorage("dualSelectHintSeen") private var dualSelectHintSeen = false
     @State private var undo = TreeUndoController()
@@ -37,9 +38,17 @@ struct MainWorkspace: View {
     /// Command-hints row: expanded (full row) while browsing, auto-collapsed to an icon
     /// when a card is open (re-openable by clicking the icon).
     @State private var hintsExpanded = true
+    @State private var workspaceIndex: TreeWorkspaceIndexes
 
-    enum ViewMode: String { case tree, fan, map }
+    enum ViewMode: String, CaseIterable { case tree, fan, map, people, timeline, places, review }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
+
+    init(tree: FamilyTree, store: TreeStore, onBack: @escaping () -> Void) {
+        self.tree = tree
+        self.store = store
+        self.onBack = onBack
+        _workspaceIndex = State(initialValue: TreeWorkspaceIndexes(tree: tree))
+    }
 
     var body: some View {
         ZStack {
@@ -56,11 +65,28 @@ struct MainWorkspace: View {
                             TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
                         } else if viewMode == .fan {
                             FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
-                        } else {
+                        } else if viewMode == .map {
                             MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                        } else if viewMode == .people {
+                            PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
+                        } else if viewMode == .timeline {
+                            TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                        } else if viewMode == .places {
+                            PlacesWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                        } else {
+                            ReviewWorkspaceView(
+                                tree: tree,
+                                index: workspaceIndex,
+                                selectedPerson: $selectedPerson,
+                                onEdit: { editingPerson = $0 },
+                                onDeleteDuplicate: { person in
+                                    personToDelete = person
+                                    showDeleteConfirm = true
+                                }
+                            )
                         }
 
-                        if tree.people.isEmpty {
+                        if tree.people.isEmpty, [.tree, .fan, .map].contains(viewMode) {
                             emptyTreeState
                         }
                     }
@@ -77,6 +103,8 @@ struct MainWorkspace: View {
                         }, onDelete: { person in
                             personToDelete = person
                             showDeleteConfirm = true
+                        }, onMakeHome: { person in
+                            makeHome(person)
                         })
                         .transition(.move(edge: .trailing))
                     }
@@ -106,13 +134,21 @@ struct MainWorkspace: View {
         .sheet(isPresented: $showAddSheet) {
             AddPersonView(tree: tree, store: store) { newPerson in
                 selectedPerson = newPerson
+                workspaceIndex.update(person: newPerson, in: tree)
                 showToast("Добавлен: \(newPerson.listName)")
             }
         }
         .sheet(item: $editingPerson) { person in
             EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
+                workspaceIndex.update(person: saved, in: tree)
                 showToast("Сохранено: \(saved.listName)")
             })
+        }
+        .sheet(isPresented: $showMerge) {
+            TreeMergeView(localTree: tree, store: store) {
+                workspaceIndex.rebuild(tree: tree)
+                showToast("Слияние проверено и сохранено")
+            }
         }
         .alert("Удалить персону?", isPresented: $showDeleteConfirm) {
             Button("Отмена", role: .cancel) { personToDelete = nil }
@@ -503,7 +539,7 @@ struct MainWorkspace: View {
             if viewMode == .fan {
                 fanLevelControls
             }
-            zoomControls
+            if [.tree, .fan, .map].contains(viewMode) { zoomControls }
         }
     }
 
@@ -537,6 +573,18 @@ struct MainWorkspace: View {
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
             .help("Карта мест жизни")
             .accessibilityLabel("Карта мест жизни")
+
+            Menu {
+                Button { viewMode = .people } label: { Label("Люди", systemImage: "person.3") }
+                Button { viewMode = .timeline } label: { Label("Хронология", systemImage: "calendar") }
+                Button { viewMode = .places } label: { Label("Места", systemImage: "mappin.and.ellipse") }
+                Button { viewMode = .review } label: { Label("Проверка", systemImage: "checklist") }
+            } label: {
+                Image(systemName: [.people, .timeline, .places, .review].contains(viewMode) ? "square.grid.2x2.fill" : "square.grid.2x2")
+            }
+            .menuStyle(.borderlessButton)
+            .fixedSize()
+            .help("Рабочие пространства")
         }
     }
 
@@ -613,6 +661,10 @@ struct MainWorkspace: View {
                 Label("Дерево", systemImage: "rectangle.connected.to.line.below").tag(ViewMode.tree)
                 Label("Веер предков", systemImage: "chart.pie").tag(ViewMode.fan)
                 Label("Карта", systemImage: "map").tag(ViewMode.map)
+                Label("Люди", systemImage: "person.3").tag(ViewMode.people)
+                Label("Хронология", systemImage: "calendar").tag(ViewMode.timeline)
+                Label("Места", systemImage: "mappin.and.ellipse").tag(ViewMode.places)
+                Label("Проверка", systemImage: "checklist").tag(ViewMode.review)
             }
             if viewMode == .tree {
                 Picker("Направление", selection: $direction) {
@@ -663,6 +715,10 @@ struct MainWorkspace: View {
                 .buttonStyle(SepiaButtonStyle())
                 .help("Экспорт карточек в PDF или GEDCOM")
                 .accessibilityLabel("Экспорт карточек в PDF или GEDCOM")
+            Button { showMerge = true } label: { Image(systemName: "arrow.triangle.merge") }
+                .buttonStyle(SepiaButtonStyle())
+                .help("Слить с локальным GEDCOM")
+                .accessibilityLabel("Слить с локальным GEDCOM")
         }
     }
 
@@ -696,6 +752,7 @@ struct MainWorkspace: View {
 
         // Remove person
         tree.people.removeAll { $0.id == person.id }
+        tree.parentLinks.removeAll { $0.parentID == person.id || $0.childID == person.id }
 
         // Clear selection and highlight
         selectedPerson = nil
@@ -704,9 +761,19 @@ struct MainWorkspace: View {
 
         tree.optimizeRoot()
         tree.updatedAt = Date()
-        store.saveTree(tree)
-        undo.commit(tree)
-        showToast("Удалён: \(name)")
+        Task { @MainActor in
+            do {
+                _ = try await store.saveTree(tree)
+                workspaceIndex.rebuild(tree: tree)
+                undo.commit(tree)
+                showToast("Удалён: \(name)")
+            } catch {
+                undo.cancel(tree)
+                reconcileSelectionAfterRestore()
+                workspaceIndex.rebuild(tree: tree)
+                showSaveError = true
+            }
+        }
     }
 
     private func performUndo() {
@@ -714,15 +781,35 @@ struct MainWorkspace: View {
         // the editor's in-flight changes.
         guard !undo.isSessionActive, undo.undo(tree) else { return }
         reconcileSelectionAfterRestore()
-        store.saveTree(tree)
-        showToast("Отменено")
+        Task { @MainActor in
+            do {
+                _ = try await store.saveTree(tree)
+                workspaceIndex.rebuild(tree: tree)
+                showToast("Отменено")
+            } catch {
+                _ = undo.redo(tree)
+                reconcileSelectionAfterRestore()
+                workspaceIndex.rebuild(tree: tree)
+                showSaveError = true
+            }
+        }
     }
 
     private func performRedo() {
         guard !undo.isSessionActive, undo.redo(tree) else { return }
         reconcileSelectionAfterRestore()
-        store.saveTree(tree)
-        showToast("Повторено")
+        Task { @MainActor in
+            do {
+                _ = try await store.saveTree(tree)
+                workspaceIndex.rebuild(tree: tree)
+                showToast("Повторено")
+            } catch {
+                _ = undo.undo(tree)
+                reconcileSelectionAfterRestore()
+                workspaceIndex.rebuild(tree: tree)
+                showSaveError = true
+            }
+        }
     }
 
     /// A restore swaps in fresh Person instances, so the selection (which holds old
@@ -740,6 +827,21 @@ struct MainWorkspace: View {
         toastMessage = message
         announce(message)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { toastMessage = nil }
+    }
+
+    private func makeHome(_ person: Person) {
+        let previous = tree.homePersonId
+        tree.homePersonId = person.id
+        Task { @MainActor in
+            do {
+                _ = try await store.saveTree(tree)
+                fitRequest += 1
+                showToast("Домашняя персона: \(person.listName)")
+            } catch {
+                tree.homePersonId = previous
+                showSaveError = true
+            }
+        }
     }
 
     /// Speak a transient status message to VoiceOver — the toast is visual-only,

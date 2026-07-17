@@ -1,0 +1,31 @@
+0 HEAD
+1 SOUR Ancestry.com Family Trees
+2 VERS 2026
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @P1@ INDI
+1 NAME Мария /Примерова/
+2 TYPE birth
+2 GIVN Мария
+2 SURN Примерова
+1 BIRT
+2 DATE BEF 1910
+2 PLAC Казань, Татарстан, Россия
+2 SOUR @S1@
+3 PAGE запись 42
+1 _APID 1,0000::42
+0 @P2@ INDI
+1 NAME Иван /Примеров/
+0 @F1@ FAM
+1 HUSB @P2@
+1 WIFE @P1@
+1 MARR
+2 DATE FROM 1928 TO 1929
+2 PLAC Казань, Татарстан, Россия
+1 DIV
+2 DATE AFT 1940
+0 @S1@ SOUR
+1 TITL Анонимизированная перепись
+0 TRLR

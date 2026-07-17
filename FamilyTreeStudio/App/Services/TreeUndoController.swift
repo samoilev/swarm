@@ -38,6 +38,14 @@ final class TreeUndoController {
         redoStack.removeAll()
     }
 
+    /// Abort an in-flight mutation and restore the exact session snapshot. Used when
+    /// transactional persistence fails after the in-memory mutation was prepared.
+    func cancel(_ tree: FamilyTree) {
+        guard let base = sessionBase else { return }
+        sessionBase = nil
+        apply(base, to: tree)
+    }
+
     /// Restore the previous state into the live tree. Returns false when nothing is
     /// on the undo stack so the caller can skip the save/toast.
     @discardableResult
@@ -60,13 +68,6 @@ final class TreeUndoController {
     /// views), then bump `layoutVersion` so the canvases recompute their layout.
     private func apply(_ data: Data, to tree: FamilyTree) {
         guard let snapshot = try? Self.decoder.decode(FamilyTree.self, from: data) else { return }
-        tree.name = snapshot.name
-        tree.subtitle = snapshot.subtitle
-        tree.people = snapshot.people
-        tree.unions = snapshot.unions
-        tree.homePersonId = snapshot.homePersonId
-        tree.rootUnionId = snapshot.rootUnionId
-        tree.updatedAt = Date()
-        tree.layoutVersion += 1
+        tree.applyContent(of: snapshot)
     }
 }

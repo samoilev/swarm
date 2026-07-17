@@ -1,4 +1,6 @@
+import CryptoKit
 import Foundation
+import Observation
 import os
 
 private let log = Logger(subsystem: "com.familytreestudio.app", category: "TreeStore")
@@ -29,6 +31,15 @@ public final class TreeStore {
     /// library surfaces this to the user. Cleared by the view once shown.
     public var lastLoadError: String?
 
+    /// Old-format items discovered by `load()`, each naming the tree and file it refers
+    /// to. Pending migration is not a load failure — those trees are readable — so it is
+    /// surfaced separately from `lastLoadError`.
+    public private(set) var pendingMigrations: [PendingMigration] = []
+    public var pendingMigrationCount: Int { pendingMigrations.count }
+    /// Production leaves this nil. Integration tests inject failures at transaction
+    /// boundaries to prove the previously committed bundle remains usable.
+    @ObservationIgnored public var faultInjector: ((PersistenceFaultPoint) throws -> Void)?
+
     private let storageFolder: URL
 
     /// The root storage directory (for "Reveal in Finder" when a load fails).
@@ -36,14 +47,38 @@ public final class TreeStore {
 
     /// Maps tree UUID → its folder URL.
     private var folderMap: [UUID: URL] = [:]
+    private var legacyFileMap: [UUID: URL] = [:]
 
     private static let gedName = "tree.ged"
     private static let mediaName = "Media"
     private static let attachmentsName = "Attachments"
     private static let archivedName = "Archived"
+    private static let recoveryName = "Recovery"
+    private static let pendingName = ".Pending"
+    private static let metadataName = ".FamilyTreeStudio"
+    private static let historyName = "History"
+    private static let trashName = "Trash"
+    private static let manifestName = "manifest.json"
     /// Verbatim copy of an imported file, kept as a safety net and never treated as
     /// the tree's own working .ged (excluded from load/save/reconcile).
     private static let originalImportName = "original-import.ged"
+
+    private struct PendingAttachment {
+        let temporaryURL: URL
+        let storedName: String
+    }
+
+    private struct PendingImport {
+        let originalGEDCOM: URL
+        let mediaFolder: URL
+        let attachmentsFolder: URL
+    }
+
+    private var pendingAttachmentAdds: [UUID: [PendingAttachment]] = [:]
+    private var pendingAttachmentDeletes: [UUID: Set<String>] = [:]
+    private var pendingImports: [UUID: PendingImport] = [:]
+    private var pendingBundleRestores: [UUID: URL] = [:]
+    private var pendingTrashRemovals: [UUID: Set<String>] = [:]
 
     /// Default init: stores trees in ~/Library/Application Support/FamilyTreeStudio/.
     /// Tests pass an explicit `storageFolder` (a temp dir) to exercise the migration
@@ -56,7 +91,13 @@ public final class TreeStore {
             let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
             appFolder = appSupport.appendingPathComponent("FamilyTreeStudio", isDirectory: true)
         }
-        try? FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
+        do {
+            try FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
+        } catch {
+            self.storageFolder = appFolder
+            lastLoadError = "Не удалось открыть папку хранилища: \(error.localizedDescription)"
+            return
+        }
         self.storageFolder = appFolder
         load()
     }
@@ -66,18 +107,20 @@ public final class TreeStore {
     public func load() {
         trees = []
         folderMap = [:]
+        legacyFileMap = [:]
+        pendingMigrations = []
 
         let fm = FileManager.default
 
-        // Bring any old flat-layout trees into the per-folder layout first.
-        migrateLegacyLayoutIfNeeded()
-
+        // Discovery is read-only. Legacy files are listed and migrated only through
+        // the explicit, backup-protected `performPendingMigrations()` operation.
         guard let entries = try? fm.contentsOfDirectory(at: storageFolder, includingPropertiesForKeys: [.isDirectoryKey]) else { return }
 
         // A tree folder is any directory (other than Archived) containing a .ged file.
         let treeFolders = entries.filter { url in
             guard (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true else { return false }
-            guard url.lastPathComponent != Self.archivedName else { return false }
+            guard ![Self.archivedName, Self.recoveryName, Self.pendingName].contains(url.lastPathComponent),
+                  !url.lastPathComponent.hasPrefix(".") else { return false }
             return gedFile(in: url) != nil
         }
 
@@ -86,16 +129,22 @@ public final class TreeStore {
         for folder in treeFolders.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
             guard let ged = gedFile(in: folder) else { continue }
             do {
-                let parsed = try GEDCOMParser.parse(from: ged)
-                let tree = FamilyTree(name: parsed.name, subtitle: parsed.subtitle)
+                let imported = try GEDCOMCodec.parse(ged)
+                let parsed = imported.tree
+                let tree = parsed
+                let originalImport = folder.appendingPathComponent(Self.originalImportName)
+                if fm.fileExists(atPath: originalImport.path) {
+                    tree.acceptedBaselineIssueIDs = Set(
+                        TreeValidator.validate(tree).filter { $0.severity == .error }.map(\.id)
+                    )
+                }
                 // Identity: the embedded _TREEID is authoritative; fall back to a UUID
                 // folder name (old layout) and finally to the freshly-generated id.
-                tree.id = parsed.treeId ?? UUID(uuidString: folder.lastPathComponent) ?? tree.id
-                tree.homePersonId = parsed.homePersonId
-                tree.rootUnionId = parsed.rootUnionId
-                tree.people = parsed.people
-                tree.unions = parsed.unions
-                tree.unknownRecords = parsed.unknownRecords
+                if let folderID = UUID(uuidString: folder.lastPathComponent),
+                   let text = try? String(contentsOf: ged, encoding: .utf8),
+                   !text.contains("1 _TREEID ") {
+                    tree.id = folderID
+                }
 
                 trees.append(tree)
                 folderMap[tree.id] = folder
@@ -104,7 +153,7 @@ public final class TreeStore {
                 // readable folder + matching filename with the id embedded — once.
                 let folderIsUUID = UUID(uuidString: folder.lastPathComponent) != nil
                 let gedIsReadable = ged.lastPathComponent == gedURL(in: folder).lastPathComponent
-                if parsed.treeId == nil || folderIsUUID || !gedIsReadable {
+                if tree.schemaVersion < 2 || folderIsUUID || !gedIsReadable {
                     needsReconcile.append(tree)
                 }
             } catch {
@@ -113,10 +162,28 @@ public final class TreeStore {
             }
         }
 
+        // Legacy flat GEDCOM files remain visible but untouched. Saving is blocked
+        // until the user runs the explicit migration transaction.
+        for ged in entries.filter({ $0.pathExtension.lowercased() == "ged" }).sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
+            do {
+                let imported = try GEDCOMCodec.parse(ged)
+                let tree = imported.tree
+                if let legacyID = UUID(uuidString: ged.deletingPathExtension().lastPathComponent) { tree.id = legacyID }
+                pendingMigrations.append(PendingMigration(title: tree.name, source: .legacyFile, url: ged))
+                guard !trees.contains(where: { $0.id == tree.id }) else { continue }
+                let media = storageFolder.appendingPathComponent("Media_\(ged.deletingPathExtension().lastPathComponent)", isDirectory: true)
+                for person in tree.people { person.mediaFolderURL = media }
+                trees.append(tree)
+                legacyFileMap[tree.id] = ged
+            } catch {
+                failedFolders.append(ged.lastPathComponent)
+            }
+        }
+
         // Surface folders that look like a tree (have Media/ or Attachments/) but lack a
         // .ged — e.g. a save or migration that failed midway — rather than silently
         // dropping them, so the data is at least diagnosable instead of invisible.
-        for url in entries where url.lastPathComponent != Self.archivedName {
+        for url in entries where ![Self.archivedName, Self.recoveryName, Self.pendingName].contains(url.lastPathComponent) && !url.lastPathComponent.hasPrefix(".") {
             guard (try? url.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true,
                   gedFile(in: url) == nil else { continue }
             let hasMedia = fm.fileExists(atPath: url.appendingPathComponent(Self.mediaName).path)
@@ -127,68 +194,243 @@ public final class TreeStore {
             }
         }
 
-        // One-time: rename UUID/"tree.ged" layouts to readable names and embed _TREEID.
         for tree in needsReconcile {
-            saveTree(tree)
+            pendingMigrations.append(
+                PendingMigration(title: tree.name, source: .treeFolder, url: folderMap[tree.id] ?? storageFolder)
+            )
         }
 
-        // Migration: if old JSON exists and no trees were loaded, import it
+        // Legacy JSON is also reported but never mutated during discovery.
         let legacyURL = storageFolder.appendingPathComponent("trees.json")
         if trees.isEmpty && fm.fileExists(atPath: legacyURL.path) {
-            migrateFromJSON(legacyURL)
+            pendingMigrations.append(PendingMigration(title: "Все деревья", source: .legacyJSON, url: legacyURL))
         }
 
         // Surface any unreadable trees: a folder that silently fails to load looks
         // exactly like data the user lost, so tell them which ones and where to look.
+        // Pending migrations are deliberately *not* reported here — those trees opened
+        // fine, and calling that an error taught the user to distrust a working app.
         if failedFolders.isEmpty {
             lastLoadError = nil
         } else {
             let list = failedFolders.map { "• \($0)" }.joined(separator: "\n")
-            lastLoadError = "Не удалось прочитать \(failedFolders.count) дерев(о/а):\n\(list)\n\nФайлы не тронуты — откройте папку хранилища, чтобы проверить их."
+            lastLoadError = "Эти файлы не удалось прочитать:\n\(list)\n\n"
+                + "Они лежат в папке архивов и не изменены. "
+                + "Откройте «Показать в Finder», чтобы посмотреть или скопировать их."
         }
     }
 
-    /// Migrate the old flat layout (`<UUID>.ged` + `Media_<UUID>/` at the storage
-    /// root) into per-tree folders (`<UUID>/tree.ged` + `<UUID>/Media/`). Idempotent.
-    /// This also fixes a long-standing bug where photos written to `Media_<UUID>/`
-    /// were read back from a sibling `Media/` that never existed.
-    private func migrateLegacyLayoutIfNeeded() {
+    /// Run every discovered migration explicitly. Each existing tree is protected by
+    /// a permanent pre-v2 bundle backup; flat-layout and JSON sources move into the
+    /// Recovery area only after their imported replacement verifies successfully.
+    @discardableResult
+    public func performPendingMigrations() throws -> [SaveReceipt] {
         let fm = FileManager.default
-        guard let entries = try? fm.contentsOfDirectory(at: storageFolder, includingPropertiesForKeys: nil) else { return }
-        let legacyGeds = entries.filter { $0.pathExtension.lowercased() == "ged" }
-        for ged in legacyGeds {
+        var receipts: [SaveReceipt] = []
+
+        // Existing per-tree folders: transactional save performs the folder/file
+        // rename and creates the pre-v2 recovery copy first.
+        for tree in trees {
+            if legacyFileMap[tree.id] != nil { continue }
+            let folder = folder(for: tree)
+            let needsMigration = tree.schemaVersion < 2 || UUID(uuidString: folder.lastPathComponent) != nil ||
+                gedFile(in: folder)?.lastPathComponent != gedURL(in: folder).lastPathComponent
+            if needsMigration { try receipts.append(persistTree(tree)) }
+        }
+
+        let entries = try fm.contentsOfDirectory(at: storageFolder, includingPropertiesForKeys: nil)
+        let legacyRoot = storageFolder
+            .appendingPathComponent(Self.recoveryName, isDirectory: true)
+            .appendingPathComponent("Legacy", isDirectory: true)
+        for ged in entries where ged.pathExtension.lowercased() == "ged" {
+            let parsed = try GEDCOMCodec.parse(ged).tree
             let stem = ged.deletingPathExtension().lastPathComponent
-            let folderName = UUID(uuidString: stem) != nil ? stem : UUID().uuidString
-            let folder = storageFolder.appendingPathComponent(folderName, isDirectory: true)
-            let destGed = folder.appendingPathComponent(Self.gedName)
-            // Already migrated (a tree.ged exists) → leave it be.
-            if fm.fileExists(atPath: destGed.path) { continue }
-            do {
-                try fm.createDirectory(at: folder, withIntermediateDirectories: true)
-                try fm.moveItem(at: ged, to: destGed)
-            } catch {
-                // Leave the legacy file untouched so it can be retried; don't move its
-                // Media either, or we'd strand the .ged without its photos.
-                log.error("Migration: could not move \(ged.lastPathComponent, privacy: .public), keeping legacy layout: \(error.localizedDescription, privacy: .public)")
-                continue
-            }
+            if let legacyID = UUID(uuidString: stem) { parsed.id = legacyID }
+            let tree = trees.first(where: { legacyFileMap[$0.id] == ged }) ?? parsed
+            legacyFileMap[tree.id] = nil
+            if folderMap[tree.id] != nil { tree.id = UUID() }
             let oldMedia = storageFolder.appendingPathComponent("Media_\(stem)", isDirectory: true)
-            guard fm.fileExists(atPath: oldMedia.path) else { continue }
-            let newMedia = folder.appendingPathComponent(Self.mediaName, isDirectory: true)
-            if fm.fileExists(atPath: newMedia.path) {
-                // Destination already exists — merge file-by-file instead of failing
-                // (moveItem throws on an existing destination), then drop the old folder.
-                if let mediaFiles = try? fm.contentsOfDirectory(at: oldMedia, includingPropertiesForKeys: nil) {
-                    for f in mediaFiles {
-                        let d = newMedia.appendingPathComponent(f.lastPathComponent)
-                        if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
-                    }
-                }
-                try? fm.removeItem(at: oldMedia)
-            } else {
-                do { try fm.moveItem(at: oldMedia, to: newMedia) }
-                catch { log.error("Migration: could not move media for \(stem, privacy: .public): \(error.localizedDescription, privacy: .public)") }
+            pendingImports[tree.id] = PendingImport(
+                originalGEDCOM: ged,
+                mediaFolder: oldMedia,
+                attachmentsFolder: storageFolder.appendingPathComponent("Attachments_\(stem)", isDirectory: true)
+            )
+            receipts.append(try persistTree(tree))
+            if !trees.contains(where: { $0 === tree }) { trees.append(tree) }
+
+            let destination = uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-\(stem)", isDirectory: true), isDirectory: true)
+            try fm.createDirectory(at: destination, withIntermediateDirectories: true)
+            try fm.moveItem(at: ged, to: destination.appendingPathComponent(ged.lastPathComponent))
+            if fm.fileExists(atPath: oldMedia.path) {
+                try fm.moveItem(at: oldMedia, to: destination.appendingPathComponent(oldMedia.lastPathComponent))
             }
+        }
+
+        let json = storageFolder.appendingPathComponent("trees.json")
+        if fm.fileExists(atPath: json.path) {
+            let oldTrees = try JSONDecoder().decode([FamilyTree].self, from: Data(contentsOf: json))
+            for tree in oldTrees {
+                if trees.contains(where: { $0.id == tree.id }) { tree.id = UUID() }
+                let receipt = try persistTree(tree)
+                receipts.append(receipt)
+                trees.append(tree)
+            }
+            try fm.createDirectory(at: legacyRoot, withIntermediateDirectories: true)
+            try fm.moveItem(at: json, to: uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-trees.json")))
+        }
+
+        load()
+        return receipts
+    }
+
+    public func recoveryItems(for tree: FamilyTree? = nil) -> [RecoveryItem] {
+        var result: [RecoveryItem] = []
+        let selectedTrees = tree.map { [$0] } ?? trees
+        for candidate in selectedTrees {
+            let folder = folder(for: candidate)
+            let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
+            let history = metadata.appendingPathComponent(Self.historyName, isDirectory: true)
+            let trash = metadata.appendingPathComponent(Self.trashName, isDirectory: true)
+            result += recoveryItems(in: history, kind: .revision)
+            result += recoveryItems(in: trash, kind: .deletedFile)
+            let migration = storageFolder.appendingPathComponent(Self.recoveryName, isDirectory: true)
+                .appendingPathComponent(candidate.id.uuidString, isDirectory: true)
+            result += recoveryItems(in: migration, kind: .migrationBackup)
+        }
+        let archived = storageFolder.appendingPathComponent(Self.archivedName, isDirectory: true)
+        result += recoveryItems(in: archived, kind: .archivedTree)
+        return result.sorted { $0.createdAt > $1.createdAt }
+    }
+
+    /// Create a verified, indefinitely retained full-bundle snapshot. Merge and other
+    /// high-risk workflows call this before mutating the in-memory tree.
+    @discardableResult
+    public func createVerifiedBackup(for tree: FamilyTree, label: String) throws -> URL {
+        let fm = FileManager.default
+        let source = folder(for: tree)
+        guard fm.fileExists(atPath: source.path) else { throw TreeStoreError.treeFolderMissing }
+        let safeLabel = sanitizedFileName(label).replacingOccurrences(of: " ", with: "-")
+        let recovery = storageFolder
+            .appendingPathComponent(Self.recoveryName, isDirectory: true)
+            .appendingPathComponent(tree.id.uuidString, isDirectory: true)
+        try fm.createDirectory(at: recovery, withIntermediateDirectories: true)
+        let destination = uniqueURL(
+            recovery.appendingPathComponent("\(timestamp())-\(safeLabel)", isDirectory: true),
+            isDirectory: true
+        )
+        do {
+            try fm.copyItem(at: source, to: destination)
+            let backupHashes = try hashes(in: destination, includeRecoveryData: false)
+            try verify(hashes: backupHashes, in: destination)
+            try writeManifest(generationID: UUID(), hashes: backupHashes, in: destination)
+            return destination
+        } catch {
+            try? fm.removeItem(at: destination)
+            throw error
+        }
+    }
+
+    public func restoreRevision(_ item: RecoveryItem, to tree: FamilyTree) async throws -> SaveReceipt {
+        guard item.kind == .revision, FileManager.default.fileExists(atPath: item.url.path) else {
+            throw TreeStoreError.recoveryItemMissing
+        }
+        let before = try JSONEncoder().encode(tree)
+        do {
+            let imported = try GEDCOMCodec.parse(item.url)
+            applySnapshot(imported.tree, to: tree)
+            return try persistTree(tree)
+        } catch {
+            if let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) { applySnapshot(snapshot, to: tree) }
+            throw error
+        }
+    }
+
+    @discardableResult
+    public func restoreArchivedTree(_ item: RecoveryItem) throws -> FamilyTree {
+        guard item.kind == .archivedTree, FileManager.default.fileExists(atPath: item.url.path) else {
+            throw TreeStoreError.recoveryItemMissing
+        }
+        guard let archivedGEDCOM = gedFile(in: item.url) else { throw TreeStoreError.treeFolderMissing }
+        let expectedID = try GEDCOMCodec.parse(archivedGEDCOM).tree.id
+        let destination = uniqueFolderURL(named: item.url.lastPathComponent, excluding: nil)
+        let originalArchiveURL = item.url
+        try FileManager.default.moveItem(at: originalArchiveURL, to: destination)
+        load()
+        if let restored = trees.first(where: { $0.id == expectedID }) { return restored }
+        do {
+            try FileManager.default.moveItem(at: destination, to: originalArchiveURL)
+        } catch {
+            lastLoadError = "Архив не удалось подключить; его папка сохранена: \(destination.path)"
+        }
+        load()
+        throw TreeStoreError.treeFolderMissing
+    }
+
+    public func restoreFullBackup(_ item: RecoveryItem, to tree: FamilyTree) async throws -> SaveReceipt {
+        guard item.kind == .migrationBackup,
+              let gedcom = gedFile(in: item.url),
+              FileManager.default.fileExists(atPath: gedcom.path) else {
+            throw TreeStoreError.recoveryItemMissing
+        }
+        let beforeData = try JSONEncoder().encode(tree)
+        _ = try createVerifiedBackup(for: tree, label: "pre-restore")
+        do {
+            let imported = try GEDCOMCodec.parse(gedcom)
+            applySnapshot(imported.tree, to: tree)
+            pendingBundleRestores[tree.id] = item.url
+            return try persistTree(tree)
+        } catch {
+            pendingBundleRestores[tree.id] = nil
+            if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) { applySnapshot(before, to: tree) }
+            throw error
+        }
+    }
+
+    public func restoreDeletedFile(
+        _ item: RecoveryItem,
+        to person: Person,
+        in tree: FamilyTree,
+        asPortrait: Bool
+    ) async throws -> SaveReceipt {
+        guard item.kind == .deletedFile, FileManager.default.fileExists(atPath: item.url.path) else {
+            throw TreeStoreError.recoveryItemMissing
+        }
+        let beforeData = try JSONEncoder().encode(tree)
+        var preparedForRollback: Attachment?
+        do {
+            if asPortrait {
+                let data = try Data(contentsOf: item.url)
+                let ext = item.url.pathExtension.isEmpty ? "jpg" : item.url.pathExtension
+                person.photoFilename = "restored-\(UUID().uuidString).\(ext)"
+                person.photoData = data
+            } else {
+                let components = item.displayName.components(separatedBy: "--Original--")
+                let stored = components[0].components(separatedBy: "--Attachments--").last ?? item.displayName
+                let original = components.count > 1 ? (decodedFilename(components[1]) ?? stored) : stored
+                let prepared = try prepareAttachment(in: tree, sourceURL: item.url)
+                preparedForRollback = prepared
+                var renamed = prepared
+                renamed.originalName = original
+                person.attachments.append(renamed)
+            }
+            pendingTrashRemovals[tree.id, default: []].insert(item.url.lastPathComponent)
+            return try persistTree(tree)
+        } catch {
+            if let preparedForRollback { discardPreparedAttachment(preparedForRollback, in: tree) }
+            pendingTrashRemovals[tree.id] = nil
+            if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) { applySnapshot(before, to: tree) }
+            throw error
+        }
+    }
+
+    private func recoveryItems(in folder: URL, kind: RecoveryItem.Kind) -> [RecoveryItem] {
+        guard let urls = try? FileManager.default.contentsOfDirectory(
+            at: folder,
+            includingPropertiesForKeys: [.contentModificationDateKey]
+        ) else { return [] }
+        return urls.map { url in
+            let date = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
+            return RecoveryItem(kind: kind, url: url, createdAt: date, displayName: url.lastPathComponent)
         }
     }
 
@@ -196,52 +438,160 @@ public final class TreeStore {
 
     public func save() {
         for tree in trees {
-            saveTree(tree)
+            _ = saveTree(tree)
         }
     }
 
-    public func saveTree(_ tree: FamilyTree) {
-        let fm = FileManager.default
-        tree.updatedAt = Date()
-        let folder = reconcileFolder(for: tree)
-        let ged = gedURL(in: folder)
-        // Drop any stale .ged left from a previous name so only the readable one remains.
-        // Never touch the preserved original-import.ged safety copy.
-        if let files = try? fm.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) {
-            for f in files where f.pathExtension.lowercased() == "ged"
-                && f.lastPathComponent != ged.lastPathComponent
-                && f.lastPathComponent != Self.originalImportName {
-                try? fm.removeItem(at: f)
-            }
+    /// Source-compatibility bridge for older integrations. App workflows call the
+    /// async throwing overload and react to its receipt.
+    @discardableResult
+    public func saveTree(_ tree: FamilyTree) -> SaveReceipt? {
+        if legacyFileMap[tree.id] != nil {
+            lastSaveError = "Сначала выполните безопасную миграцию этого дерева в разделе восстановления."
+            return nil
         }
-        let mediaFolder = folder.appendingPathComponent(Self.mediaName, isDirectory: true)
-        let result = GEDCOMSerializer.serialize(tree: tree)
         do {
-            try result.gedcom.write(to: ged, atomically: true, encoding: .utf8)
-            writePhotos(result.photos, to: mediaFolder)
-            folderMap[tree.id] = folder
-            // Portraits are now on disk: point each person at the media folder (so reads
-            // load lazily) and clear the dirty flag (so an unchanged photo isn't rewritten
-            // on the next save). Only changed photos are ever re-serialized after this.
-            for person in tree.people {
-                person.mediaFolderURL = mediaFolder
-                person.photoIsDirty = false
-            }
+            let receipt = try persistTree(tree)
+            lastSaveError = nil
+            return receipt
         } catch {
-            // Surface the failure: in a data-authoring app a silent write error
-            // means undetectable data loss. Views observe `lastSaveError`.
             log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
             lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
+            return nil
         }
     }
 
-    /// Write only the photos whose bytes changed, so editing one field doesn't
-    /// rewrite every portrait on disk. The filename↔person mapping is owned by the
-    /// serializer (`Result.photos`), keeping it consistent with the GEDCOM refs.
-    private func writePhotos(_ photos: [GEDCOMSerializer.Photo], to mediaFolder: URL) {
-        guard !photos.isEmpty else { return }
+    public func saveTree(_ tree: FamilyTree) async throws -> SaveReceipt {
+        do {
+            if legacyFileMap[tree.id] != nil { throw TreeStoreError.migrationRequired }
+            let receipt = try persistTree(tree)
+            lastSaveError = nil
+            return receipt
+        } catch {
+            log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
+            lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
+            throw error
+        }
+    }
+
+    private func persistTree(_ tree: FamilyTree) throws -> SaveReceipt {
         let fm = FileManager.default
-        try? fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
+        let generationID = UUID()
+        let previousUpdatedAt = tree.updatedAt
+        tree.updatedAt = Date()
+        tree.schemaVersion = 2
+        tree.reconcileParentLinks()
+        tree.migrateLegacySources()
+
+        let current = folderMap[tree.id].flatMap { fm.fileExists(atPath: $0.path) ? $0 : nil }
+        let validation = TreeValidator.validate(tree, context: TreeValidationContext(
+            acceptedBaselineIssueIDs: tree.acceptedBaselineIssueIDs,
+            treeFolderURL: current
+        ))
+        let blocking = validation.filter(\.isBlocking)
+        guard blocking.isEmpty else { throw TreeStoreError.validationFailed(issues: blocking) }
+        let target = uniqueFolderURL(named: sanitizedFileName(tree.name), excluding: current)
+        let staging = storageFolder.appendingPathComponent(".staging-\(generationID.uuidString)", isDirectory: true)
+        var committed = false
+        defer {
+            if !committed { tree.updatedAt = previousUpdatedAt }
+            if fm.fileExists(atPath: staging.path) { try? fm.removeItem(at: staging) }
+        }
+
+        if let current {
+            try fm.copyItem(at: current, to: staging)
+        } else {
+            try fm.createDirectory(at: staging, withIntermediateDirectories: true)
+        }
+        if let restore = pendingBundleRestores[tree.id] {
+            try copyDirectoryContents(from: restore, to: staging)
+        }
+
+        let recoveryURL = try createPreMigrationBackupIfNeeded(tree: tree, currentFolder: current)
+        if let current, let previousGEDCOM = gedFile(in: current) {
+            try addHistoryRevision(previousGEDCOM, toStaging: staging)
+        }
+        try applyPendingImport(for: tree, to: staging)
+
+        // Remove only working GEDCOM files from the staged copy. The verbatim import
+        // copy is a protected safety artifact.
+        if let files = try? fm.contentsOfDirectory(at: staging, includingPropertiesForKeys: nil) {
+            for file in files where file.pathExtension.lowercased() == "ged" && file.lastPathComponent != Self.originalImportName {
+                try fm.removeItem(at: file)
+            }
+        }
+
+        try restoreReferencedFilesFromTrash(tree: tree, in: staging)
+        let serialized = try GEDCOMCodec.serialize(tree: tree, document: tree.gedcomDocument)
+        let stagedGEDCOM = staging.appendingPathComponent("\(target.lastPathComponent).ged")
+        try inject(.gedcomWrite)
+        try serialized.gedcom.write(to: stagedGEDCOM, atomically: true, encoding: .utf8)
+        let stagedMedia = staging.appendingPathComponent(Self.mediaName, isDirectory: true)
+        try writePhotos(serialized.photos, to: stagedMedia)
+        try applyPendingAttachments(for: tree, to: staging)
+        let previousAttachmentNames: [String: String] = if let current, let previousGEDCOM = gedFile(in: current),
+                                                           let previous = try? GEDCOMCodec.parse(previousGEDCOM) {
+            Dictionary(uniqueKeysWithValues: previous.tree.people.flatMap(\.attachments).map { ($0.storedName, $0.originalName) })
+        } else { [:] }
+        try moveUnreferencedFilesToTrash(
+            tree: tree,
+            serializedPhotos: serialized.photos,
+            originalAttachmentNames: previousAttachmentNames,
+            in: staging
+        )
+        if let removals = pendingTrashRemovals[tree.id] {
+            let trash = staging.appendingPathComponent(Self.metadataName, isDirectory: true)
+                .appendingPathComponent(Self.trashName, isDirectory: true)
+            for name in removals {
+                let file = trash.appendingPathComponent(name)
+                if fm.fileExists(atPath: file.path) { try fm.removeItem(at: file) }
+            }
+        }
+        try pruneRecoveryData(in: staging)
+
+        let activeHashes = try hashes(in: staging, includeRecoveryData: false)
+        try writeManifest(generationID: generationID, hashes: activeHashes, in: staging)
+        try verify(hashes: activeHashes, in: staging)
+
+        var warnings: [String] = []
+        try commitStaging(staging, replacing: current, at: target, warnings: &warnings)
+        committed = true
+        folderMap[tree.id] = target
+        tree.acceptedBaselineIssueIDs.formIntersection(Set(validation.map(\.id)))
+
+        let mediaFolder = target.appendingPathComponent(Self.mediaName, isDirectory: true)
+        let newPhotoNames = Dictionary(uniqueKeysWithValues: serialized.photos.map { ($0.personID, $0.filename) })
+        for person in tree.people {
+            if person.photoFilename == nil, let filename = newPhotoNames[person.id] { person.photoFilename = filename }
+            person.mediaFolderURL = mediaFolder
+            person.photoIsDirty = false
+        }
+        pendingAttachmentDeletes[tree.id] = nil
+        if let additions = pendingAttachmentAdds.removeValue(forKey: tree.id) {
+            for addition in additions { try? fm.removeItem(at: addition.temporaryURL) }
+        }
+        pendingImports[tree.id] = nil
+        pendingBundleRestores[tree.id] = nil
+        pendingTrashRemovals[tree.id] = nil
+        cleanupPendingFolderIfEmpty()
+
+        return SaveReceipt(
+            finalURL: target,
+            generationID: generationID,
+            fileCount: activeHashes.count,
+            hashes: activeHashes,
+            warnings: warnings,
+            recoverySnapshotURL: recoveryURL
+        )
+    }
+
+    /// Write only changed photos. Every failure is propagated to the transaction so
+    /// the live tree remains untouched and dirty flags remain set.
+    private func writePhotos(_ photos: [GEDCOMSerializer.Photo], to mediaFolder: URL) throws {
+        guard !photos.isEmpty else { return }
+        try inject(.portraitWrite)
+        let fm = FileManager.default
+        try fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
         for photo in photos {
             let dest = mediaFolder.appendingPathComponent(photo.filename)
             // Skip if an identical file already exists (cheap size check, then bytes).
@@ -250,20 +600,337 @@ public final class TreeStore {
                let existing = try? Data(contentsOf: dest), existing == photo.data {
                 continue
             }
-            try? photo.data.write(to: dest)
+            try photo.data.write(to: dest, options: .atomic)
         }
     }
 
-    public func addTree(_ tree: FamilyTree) {
-        trees.append(tree)
-        saveTree(tree)
+    private struct BundleManifest: Codable {
+        let generationID: UUID
+        let createdAt: Date
+        let hashes: [String: String]
     }
 
-    public func deleteTree(_ tree: FamilyTree) {
-        trees.removeAll(where: { $0.id == tree.id })
-        // Remove the whole tree folder (.ged + Media/ + Attachments/).
-        try? FileManager.default.removeItem(at: folder(for: tree))
-        folderMap.removeValue(forKey: tree.id)
+    private func createPreMigrationBackupIfNeeded(tree: FamilyTree, currentFolder: URL?) throws -> URL? {
+        let fm = FileManager.default
+        guard let currentFolder, let currentGEDCOM = gedFile(in: currentFolder),
+              let content = try? String(contentsOf: currentGEDCOM, encoding: .utf8),
+              !content.contains("1 _FTSVER 2") else { return nil }
+
+        let treeRecovery = storageFolder
+            .appendingPathComponent(Self.recoveryName, isDirectory: true)
+            .appendingPathComponent(tree.id.uuidString, isDirectory: true)
+        try fm.createDirectory(at: treeRecovery, withIntermediateDirectories: true)
+        let existing = try fm.contentsOfDirectory(at: treeRecovery, includingPropertiesForKeys: nil)
+            .filter { $0.lastPathComponent.hasSuffix("-pre-v2") }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        if let first = existing.first { return first }
+
+        let destination = treeRecovery.appendingPathComponent("\(timestamp())-pre-v2", isDirectory: true)
+        do {
+            try fm.copyItem(at: currentFolder, to: destination)
+            let backupHashes = try hashes(in: destination, includeRecoveryData: false)
+            try verify(hashes: backupHashes, in: destination)
+            try writeManifest(generationID: UUID(), hashes: backupHashes, in: destination)
+            return destination
+        } catch {
+            try? fm.removeItem(at: destination)
+            throw error
+        }
+    }
+
+    private func addHistoryRevision(_ sourceGEDCOM: URL, toStaging staging: URL) throws {
+        let fm = FileManager.default
+        let history = staging
+            .appendingPathComponent(Self.metadataName, isDirectory: true)
+            .appendingPathComponent(Self.historyName, isDirectory: true)
+        try fm.createDirectory(at: history, withIntermediateDirectories: true)
+        let destination = uniqueURL(history.appendingPathComponent("\(timestamp()).ged"))
+        let sourceHash = try sha256(sourceGEDCOM)
+        let latest = try fm.contentsOfDirectory(at: history, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension.lowercased() == "ged" }
+            .sorted { $0.lastPathComponent > $1.lastPathComponent }
+            .first
+        if let latest, try sha256(latest) == sourceHash { return }
+        try fm.copyItem(at: sourceGEDCOM, to: destination)
+    }
+
+    private func applyPendingImport(for tree: FamilyTree, to staging: URL) throws {
+        guard let pending = pendingImports[tree.id] else { return }
+        let fm = FileManager.default
+        let originalDestination = staging.appendingPathComponent(Self.originalImportName)
+        try inject(.originalImportCopy)
+        if fm.fileExists(atPath: originalDestination.path) { try fm.removeItem(at: originalDestination) }
+        try fm.copyItem(at: pending.originalGEDCOM, to: originalDestination)
+        guard try sha256(pending.originalGEDCOM) == sha256(originalDestination) else {
+            throw TreeStoreError.verificationFailed(path: Self.originalImportName)
+        }
+        if fm.fileExists(atPath: pending.mediaFolder.path) {
+            try copyDirectoryContents(
+                from: pending.mediaFolder,
+                to: staging.appendingPathComponent(Self.mediaName, isDirectory: true)
+            )
+        }
+        if fm.fileExists(atPath: pending.attachmentsFolder.path) {
+            try copyDirectoryContents(
+                from: pending.attachmentsFolder,
+                to: staging.appendingPathComponent(Self.attachmentsName, isDirectory: true)
+            )
+        }
+    }
+
+    private func applyPendingAttachments(for tree: FamilyTree, to staging: URL) throws {
+        guard let additions = pendingAttachmentAdds[tree.id], !additions.isEmpty else { return }
+        let folder = staging.appendingPathComponent(Self.attachmentsName, isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for addition in additions {
+            let destination = folder.appendingPathComponent(addition.storedName)
+            if FileManager.default.fileExists(atPath: destination.path) { try FileManager.default.removeItem(at: destination) }
+            try FileManager.default.copyItem(at: addition.temporaryURL, to: destination)
+            guard try sha256(addition.temporaryURL) == sha256(destination) else {
+                throw TreeStoreError.verificationFailed(path: "Attachments/\(addition.storedName)")
+            }
+        }
+    }
+
+    private func restoreReferencedFilesFromTrash(tree: FamilyTree, in staging: URL) throws {
+        let attachmentNames = Set(tree.people.flatMap(\.attachments).map(\.storedName))
+        let photoNames = Set(tree.people.compactMap(\.photoFilename))
+        try restore(names: attachmentNames, category: Self.attachmentsName, in: staging)
+        try restore(names: photoNames, category: Self.mediaName, in: staging)
+    }
+
+    private func restore(names: Set<String>, category: String, in staging: URL) throws {
+        guard !names.isEmpty else { return }
+        let fm = FileManager.default
+        let activeFolder = staging.appendingPathComponent(category, isDirectory: true)
+        let trash = staging
+            .appendingPathComponent(Self.metadataName, isDirectory: true)
+            .appendingPathComponent(Self.trashName, isDirectory: true)
+        guard fm.fileExists(atPath: trash.path) else { return }
+        let trashFiles = try fm.contentsOfDirectory(at: trash, includingPropertiesForKeys: nil)
+            .sorted { $0.lastPathComponent > $1.lastPathComponent }
+        for name in names {
+            let active = activeFolder.appendingPathComponent(name)
+            guard !fm.fileExists(atPath: active.path),
+                  let recovery = trashFiles.first(where: { $0.lastPathComponent.contains("--\(category)--\(name)") }) else { continue }
+            try fm.createDirectory(at: activeFolder, withIntermediateDirectories: true)
+            try fm.moveItem(at: recovery, to: active)
+        }
+    }
+
+    private func moveUnreferencedFilesToTrash(
+        tree: FamilyTree,
+        serializedPhotos: [GEDCOMSerializer.Photo],
+        originalAttachmentNames: [String: String],
+        in staging: URL
+    ) throws {
+        let attachmentNames = Set(tree.people.flatMap(\.attachments).map(\.storedName))
+        let photoNames = Set(tree.people.compactMap(\.photoFilename))
+            .union(serializedPhotos.map(\.filename))
+        try moveUnreferenced(
+            in: Self.attachmentsName,
+            expected: attachmentNames,
+            originalNames: originalAttachmentNames,
+            staging: staging
+        )
+        try moveUnreferenced(in: Self.mediaName, expected: photoNames, originalNames: [:], staging: staging)
+    }
+
+    private func moveUnreferenced(
+        in category: String,
+        expected: Set<String>,
+        originalNames: [String: String],
+        staging: URL
+    ) throws {
+        let fm = FileManager.default
+        let active = staging.appendingPathComponent(category, isDirectory: true)
+        guard fm.fileExists(atPath: active.path) else { return }
+        let trash = staging
+            .appendingPathComponent(Self.metadataName, isDirectory: true)
+            .appendingPathComponent(Self.trashName, isDirectory: true)
+        let files = try fm.contentsOfDirectory(at: active, includingPropertiesForKeys: [.isRegularFileKey])
+        for file in files where !expected.contains(file.lastPathComponent) && !file.lastPathComponent.hasPrefix(".") {
+            try fm.createDirectory(at: trash, withIntermediateDirectories: true)
+            var base = "\(timestamp())--\(category)--\(file.lastPathComponent)"
+            if let original = originalNames[file.lastPathComponent] {
+                base += "--Original--\(encodedFilename(original))"
+            }
+            let destination = uniqueURL(trash.appendingPathComponent(base))
+            try fm.moveItem(at: file, to: destination)
+        }
+    }
+
+    private func pruneRecoveryData(in staging: URL) throws {
+        try inject(.historyPrune)
+        let fm = FileManager.default
+        let metadata = staging.appendingPathComponent(Self.metadataName, isDirectory: true)
+        let history = metadata.appendingPathComponent(Self.historyName, isDirectory: true)
+        if fm.fileExists(atPath: history.path) {
+            let revisions = try fm.contentsOfDirectory(at: history, includingPropertiesForKeys: nil)
+                .filter { $0.pathExtension.lowercased() == "ged" }
+                .sorted { $0.lastPathComponent > $1.lastPathComponent }
+            for old in revisions.dropFirst(50) { try fm.removeItem(at: old) }
+        }
+
+        let trash = metadata.appendingPathComponent(Self.trashName, isDirectory: true)
+        if fm.fileExists(atPath: trash.path) {
+            let cutoff = Date().addingTimeInterval(-30 * 24 * 60 * 60)
+            let files = try fm.contentsOfDirectory(at: trash, includingPropertiesForKeys: [.contentModificationDateKey])
+            for file in files {
+                let date = try file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate ?? .distantFuture
+                if date < cutoff { try fm.removeItem(at: file) }
+            }
+        }
+    }
+
+    private func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
+        let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
+        try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
+        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes)
+        let data = try JSONEncoder.pretty.encode(manifest)
+        try data.write(to: metadata.appendingPathComponent(Self.manifestName), options: .atomic)
+    }
+
+    private func hashes(in folder: URL, includeRecoveryData: Bool) throws -> [String: String] {
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(
+            at: folder,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsPackageDescendants]
+        ) else { throw TreeStoreError.treeFolderMissing }
+
+        var result: [String: String] = [:]
+        let basePath = folder.resolvingSymlinksInPath().path
+        for case let file as URL in enumerator {
+            guard try file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
+            let filePath = file.resolvingSymlinksInPath().path
+            guard filePath.hasPrefix(basePath + "/") else {
+                throw TreeStoreError.verificationFailed(path: file.lastPathComponent)
+            }
+            let relative = String(filePath.dropFirst(basePath.count + 1))
+            if relative == "\(Self.metadataName)/\(Self.manifestName)" { continue }
+            if !includeRecoveryData,
+               relative.hasPrefix("\(Self.metadataName)/\(Self.historyName)/") ||
+               relative.hasPrefix("\(Self.metadataName)/\(Self.trashName)/") { continue }
+            result[relative] = try sha256(file)
+        }
+        return result
+    }
+
+    private func verify(hashes expected: [String: String], in folder: URL) throws {
+        let actual = try hashes(in: folder, includeRecoveryData: false)
+        for (path, digest) in expected where actual[path] != digest {
+            throw TreeStoreError.verificationFailed(path: path)
+        }
+        guard Set(actual.keys) == Set(expected.keys) else {
+            let path = Set(actual.keys).symmetricDifference(Set(expected.keys)).sorted().first ?? folder.path
+            throw TreeStoreError.verificationFailed(path: path)
+        }
+    }
+
+    private func commitStaging(
+        _ staging: URL,
+        replacing current: URL?,
+        at target: URL,
+        warnings: inout [String]
+    ) throws {
+        let fm = FileManager.default
+        try inject(.directorySwap)
+        guard let current, fm.fileExists(atPath: current.path) else {
+            try fm.moveItem(at: staging, to: target)
+            return
+        }
+
+        let rollback = storageFolder.appendingPathComponent(".rollback-\(UUID().uuidString)", isDirectory: true)
+        try fm.moveItem(at: current, to: rollback)
+        do {
+            try fm.moveItem(at: staging, to: target)
+        } catch {
+            try? fm.moveItem(at: rollback, to: current)
+            throw TreeStoreError.commitFailed(reason: error.localizedDescription)
+        }
+        do {
+            try fm.removeItem(at: rollback)
+        } catch {
+            warnings.append("Старая резервная папка не удалена: \(rollback.lastPathComponent)")
+        }
+    }
+
+    private func copyDirectoryContents(from source: URL, to destination: URL) throws {
+        let fm = FileManager.default
+        try fm.createDirectory(at: destination, withIntermediateDirectories: true)
+        for item in try fm.contentsOfDirectory(at: source, includingPropertiesForKeys: [.isDirectoryKey]) {
+            let target = destination.appendingPathComponent(item.lastPathComponent)
+            let isDirectory = try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true
+            if isDirectory {
+                try copyDirectoryContents(from: item, to: target)
+            } else {
+                if fm.fileExists(atPath: target.path) { try fm.removeItem(at: target) }
+                try fm.copyItem(at: item, to: target)
+            }
+        }
+    }
+
+    private func sha256(_ url: URL) throws -> String {
+        let digest = try SHA256.hash(data: Data(contentsOf: url))
+        return digest.map { String(format: "%02x", $0) }.joined()
+    }
+
+    private func timestamp() -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        formatter.dateFormat = "yyyyMMdd-HHmmss-SSS"
+        return formatter.string(from: Date())
+    }
+
+    private func encodedFilename(_ value: String) -> String {
+        Data(value.utf8).base64EncodedString().replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "=", with: "")
+    }
+
+    private func decodedFilename(_ value: String) -> String? {
+        var base64 = value.replacingOccurrences(of: "_", with: "/").replacingOccurrences(of: "-", with: "+")
+        while base64.count % 4 != 0 { base64 += "=" }
+        guard let data = Data(base64Encoded: base64) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func inject(_ point: PersistenceFaultPoint) throws {
+        try faultInjector?(point)
+    }
+
+    private func cleanupPendingFolderIfEmpty() {
+        let folder = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+        guard let items = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil),
+              items.isEmpty else { return }
+        try? FileManager.default.removeItem(at: folder)
+    }
+
+    public func addTree(_ tree: FamilyTree) {
+        guard saveTree(tree) != nil else { return }
+        if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
+    }
+
+    public func addTreeVerified(_ tree: FamilyTree) async throws -> SaveReceipt {
+        let receipt = try await saveTree(tree)
+        if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
+        return receipt
+    }
+
+    @discardableResult
+    public func deleteTree(_ tree: FamilyTree) -> Bool {
+        let source = folder(for: tree)
+        do {
+            var trashed: NSURL?
+            try FileManager.default.trashItem(at: source, resultingItemURL: &trashed)
+            trees.removeAll(where: { $0.id == tree.id })
+            folderMap.removeValue(forKey: tree.id)
+            return true
+        } catch {
+            lastSaveError = "Не удалось переместить «\(tree.name)» в Корзину: \(error.localizedDescription)"
+            return false
+        }
     }
 
     /// Rename a tree's title and subtitle, then persist to its .ged file.
@@ -273,7 +940,24 @@ public final class TreeStore {
         tree.name = trimmedName
         let trimmedSub = subtitle?.trimmingCharacters(in: .whitespacesAndNewlines)
         tree.subtitle = (trimmedSub?.isEmpty ?? true) ? nil : trimmedSub
-        saveTree(tree)
+        _ = saveTree(tree)
+    }
+
+    public func renameTreeVerified(_ tree: FamilyTree, name: String, subtitle: String?) async throws -> SaveReceipt {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: "Название не может быть пустым.") }
+        let previousName = tree.name
+        let previousSubtitle = tree.subtitle
+        tree.name = trimmedName
+        let trimmedSub = subtitle?.trimmingCharacters(in: .whitespacesAndNewlines)
+        tree.subtitle = (trimmedSub?.isEmpty ?? true) ? nil : trimmedSub
+        do {
+            return try await saveTree(tree)
+        } catch {
+            tree.name = previousName
+            tree.subtitle = previousSubtitle
+            throw error
+        }
     }
 
     /// Remove a tree from the library but keep its files: the whole tree folder is
@@ -283,13 +967,17 @@ public final class TreeStore {
     public func archiveTree(_ tree: FamilyTree) -> URL {
         let fm = FileManager.default
         let archiveFolder = storageFolder.appendingPathComponent(Self.archivedName, isDirectory: true)
-        try? fm.createDirectory(at: archiveFolder, withIntermediateDirectories: true)
-
         let src = folder(for: tree)
         let dest = uniqueURL(archiveFolder.appendingPathComponent(sanitizedFileName(tree.name), isDirectory: true), isDirectory: true)
-        try? fm.moveItem(at: src, to: dest)
-        folderMap.removeValue(forKey: tree.id)
-        trees.removeAll { $0.id == tree.id }
+        do {
+            try fm.createDirectory(at: archiveFolder, withIntermediateDirectories: true)
+            try fm.moveItem(at: src, to: dest)
+            folderMap.removeValue(forKey: tree.id)
+            trees.removeAll { $0.id == tree.id }
+        } catch {
+            lastSaveError = "Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)"
+            return src
+        }
         return dest
     }
 
@@ -299,118 +987,140 @@ public final class TreeStore {
     /// Returns the bundle URL.
     @discardableResult
     public func exportTree(_ tree: FamilyTree, toDirectory directory: URL) throws -> URL {
+        try exportTreeVerified(tree, toDirectory: directory).finalURL
+    }
+
+    public func exportTree(_ tree: FamilyTree, to directory: URL) async throws -> ExportReceipt {
+        try exportTreeVerified(tree, toDirectory: directory)
+    }
+
+    private func exportTreeVerified(_ tree: FamilyTree, toDirectory directory: URL) throws -> ExportReceipt {
         let fm = FileManager.default
+        guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
         let name = sanitizedFileName(tree.name)
         let bundle = uniqueURL(directory.appendingPathComponent(name, isDirectory: true), isDirectory: true)
-        try fm.createDirectory(at: bundle, withIntermediateDirectories: true)
+        let generationID = UUID()
+        let staging = directory.appendingPathComponent(".export-\(generationID.uuidString)", isDirectory: true)
+        defer { if fm.fileExists(atPath: staging.path) { try? fm.removeItem(at: staging) } }
+        try fm.createDirectory(at: staging, withIntermediateDirectories: true)
         let srcFolder = folder(for: tree)
 
-        // .ged — copy the stored file verbatim when available, otherwise serialize fresh.
-        let gedDest = bundle.appendingPathComponent("\(name).ged")
+        // The committed GEDCOM and active file folders are copied without private
+        // revision history or deleted-file Trash.
+        let gedDest = staging.appendingPathComponent("\(bundle.lastPathComponent).ged")
         if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path) {
+            try inject(.exportCopy)
             try fm.copyItem(at: gedSrc, to: gedDest)
         } else {
-            let result = GEDCOMSerializer.serialize(tree: tree)
+            let result = try GEDCOMCodec.serialize(tree: tree, document: tree.gedcomDocument)
             try result.gedcom.write(to: gedDest, atomically: true, encoding: .utf8)
-            writePhotos(result.photos, to: bundle.appendingPathComponent(Self.mediaName))
+            try writePhotos(result.photos, to: staging.appendingPathComponent(Self.mediaName))
         }
 
-        // Photos and attachments — copy the folders verbatim so refs resolve on re-import.
         for sub in [Self.mediaName, Self.attachmentsName] {
             let src = srcFolder.appendingPathComponent(sub, isDirectory: true)
             if fm.fileExists(atPath: src.path) {
-                try? fm.copyItem(at: src, to: bundle.appendingPathComponent(sub, isDirectory: true))
+                let destination = staging.appendingPathComponent(sub, isDirectory: true)
+                if fm.fileExists(atPath: destination.path) { try copyDirectoryContents(from: src, to: destination) }
+                else { try fm.copyItem(at: src, to: destination) }
             }
         }
-        return bundle
+        let original = srcFolder.appendingPathComponent(Self.originalImportName)
+        if fm.fileExists(atPath: original.path) {
+            try fm.copyItem(at: original, to: staging.appendingPathComponent(Self.originalImportName))
+        }
+        let exportHashes = try hashes(in: staging, includeRecoveryData: false)
+        try writeManifest(generationID: generationID, hashes: exportHashes, in: staging)
+        try verify(hashes: exportHashes, in: staging)
+        try fm.moveItem(at: staging, to: bundle)
+        return SaveReceipt(
+            finalURL: bundle,
+            generationID: generationID,
+            fileCount: exportHashes.count,
+            hashes: exportHashes
+        )
     }
 
     // MARK: - Import external .ged file
 
-    public func importGEDCOM(from url: URL) throws -> FamilyTree {
-        let parsed = try GEDCOMParser.parse(from: url)
-        let tree = FamilyTree(name: parsed.name, subtitle: parsed.subtitle)
-        tree.homePersonId = parsed.homePersonId
-        tree.rootUnionId = parsed.rootUnionId
-        tree.people = parsed.people
-        tree.unions = parsed.unions
-        tree.unknownRecords = parsed.unknownRecords
-
-        // Copy the source file's sibling Media/ folder into the new tree folder BEFORE
-        // saving. Photo bytes are no longer loaded into memory on parse (they load
-        // lazily), so the portraits must be carried over as files here rather than being
-        // re-serialized from memory.
+    /// Copy an external GEDCOM and its sibling media folders into private temporary
+    /// storage before previewing it. The original is never edited in place.
+    public func prepareImportPreview(from source: URL) throws -> URL {
         let fm = FileManager.default
-        let srcMedia = url.deletingLastPathComponent().appendingPathComponent(Self.mediaName, isDirectory: true)
-
-        addTree(tree) // creates the tree folder and writes tree.ged
-
-        let destMedia = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
-        if fm.fileExists(atPath: srcMedia.path),
-           let files = try? fm.contentsOfDirectory(at: srcMedia, includingPropertiesForKeys: nil) {
-            try? fm.createDirectory(at: destMedia, withIntermediateDirectories: true)
-            for f in files {
-                let d = destMedia.appendingPathComponent(f.lastPathComponent)
-                if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
+        let root = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+            .appendingPathComponent("Import-\(UUID().uuidString)", isDirectory: true)
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        do {
+            let destination = root.appendingPathComponent(source.lastPathComponent)
+            try fm.copyItem(at: source, to: destination)
+            guard try sha256(source) == sha256(destination) else {
+                throw TreeStoreError.verificationFailed(path: source.lastPathComponent)
             }
-        }
-        // Repoint each person's lazy-load folder at the tree's own Media/ (the source
-        // URL may be a one-shot, security-scoped pick that won't be readable later).
-        for person in tree.people { person.mediaFolderURL = destMedia }
-
-        // Keep the imported file byte-for-byte as `original-import.ged`, never rewritten.
-        // Even though the parser now preserves unknown structures (T19), an exact copy of
-        // what the user handed us is the ultimate safety net against any interop surprise.
-        let originalDest = folder(for: tree).appendingPathComponent("original-import.ged")
-        try? fm.copyItem(at: url, to: originalDest)
-
-        // Carry over attached files: unlike photos they aren't held in memory, so copy
-        // them from the source bundle's Attachments/ folder. Best-effort (sandbox may
-        // restrict sibling access on import); the tree itself imports regardless.
-        let srcAttachments = url.deletingLastPathComponent().appendingPathComponent(Self.attachmentsName, isDirectory: true)
-        if fm.fileExists(atPath: srcAttachments.path),
-           let files = try? fm.contentsOfDirectory(at: srcAttachments, includingPropertiesForKeys: nil) {
-            let dest = attachmentsFolderURL(for: tree)
-            try? fm.createDirectory(at: dest, withIntermediateDirectories: true)
-            for f in files {
-                try? fm.copyItem(at: f, to: dest.appendingPathComponent(f.lastPathComponent))
+            let base = source.deletingLastPathComponent()
+            for name in [Self.mediaName, Self.attachmentsName] {
+                let sibling = base.appendingPathComponent(name, isDirectory: true)
+                if fm.fileExists(atPath: sibling.path) {
+                    try fm.copyItem(at: sibling, to: root.appendingPathComponent(name, isDirectory: true))
+                }
             }
+            return destination
+        } catch {
+            try? fm.removeItem(at: root)
+            throw error
         }
-        return tree
     }
 
-    // MARK: - Export .ged to a user-chosen location
+    public func discardImportPreview(at gedcom: URL) {
+        let pendingRoot = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true).standardizedFileURL
+        let folder = gedcom.deletingLastPathComponent().standardizedFileURL
+        guard folder.path.hasPrefix(pendingRoot.path + "/") else { return }
+        try? FileManager.default.removeItem(at: folder)
+        cleanupPendingFolderIfEmpty()
+    }
 
-    public func exportGEDCOM(tree: FamilyTree, to url: URL) throws {
-        let fm = FileManager.default
-        let dir = url.deletingLastPathComponent()
-        let mediaFolder = dir.appendingPathComponent(Self.mediaName, isDirectory: true)
-        let result = GEDCOMSerializer.serialize(tree: tree)
-        // The .ged write is the contract — surface its failure to the caller.
-        try result.gedcom.write(to: url, atomically: true, encoding: .utf8)
-        // Write any changed-in-memory portraits, then copy the rest of the tree's Media/
-        // folder verbatim (unchanged photos aren't held in memory any more).
-        writePhotos(result.photos, to: mediaFolder)
-        let storedMedia = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
-        if fm.fileExists(atPath: storedMedia.path),
-           let files = try? fm.contentsOfDirectory(at: storedMedia, includingPropertiesForKeys: nil) {
-            try? fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
-            for f in files {
-                let d = mediaFolder.appendingPathComponent(f.lastPathComponent)
-                if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
-            }
+    public func importGEDCOM(from url: URL) throws -> FamilyTree {
+        try importGEDCOMVerified(from: url).tree
+    }
+
+    public func importGEDCOM(from url: URL) async throws -> ImportResult {
+        try importGEDCOMVerified(from: url)
+    }
+
+    private func importGEDCOMVerified(from url: URL) throws -> ImportResult {
+        var result = try GEDCOMCodec.parse(url)
+        guard result.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: result.report) }
+        let tree = result.tree
+        if trees.contains(where: { $0.id == tree.id }) {
+            tree.id = UUID()
+            result.report.diagnostics.append(ImportDiagnostic(
+                id: "import.duplicate-tree-id",
+                severity: .warning,
+                message: "Идентификатор уже существовал в библиотеке; импортированной копии назначен новый."
+            ))
         }
-
-        // Carry attachments next to the .ged so its _ATTC references resolve on re-import.
-        let attSrc = attachmentsFolderURL(for: tree)
-        if fm.fileExists(atPath: attSrc.path),
-           let files = try? fm.contentsOfDirectory(at: attSrc, includingPropertiesForKeys: nil) {
-            let attDest = dir.appendingPathComponent(Self.attachmentsName, isDirectory: true)
-            try? fm.createDirectory(at: attDest, withIntermediateDirectories: true)
-            for f in files {
-                let d = attDest.appendingPathComponent(f.lastPathComponent)
-                if !fm.fileExists(atPath: d.path) { try? fm.copyItem(at: f, to: d) }
-            }
+        let importedIssues = TreeValidator.validate(tree)
+        tree.acceptedBaselineIssueIDs = Set(importedIssues.filter { $0.severity == .error }.map(\.id))
+        for issue in importedIssues where issue.severity == .error {
+            result.report.diagnostics.append(ImportDiagnostic(
+                id: "import.validation.\(issue.id)",
+                severity: .warning,
+                message: "Импортированная проблема сохранена для проверки: \(issue.message)"
+            ))
+        }
+        tree.importReport = result.report
+        let base = url.deletingLastPathComponent()
+        pendingImports[tree.id] = PendingImport(
+            originalGEDCOM: url,
+            mediaFolder: base.appendingPathComponent(Self.mediaName, isDirectory: true),
+            attachmentsFolder: base.appendingPathComponent(Self.attachmentsName, isDirectory: true)
+        )
+        do {
+            _ = try persistTree(tree)
+            if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
+            return result
+        } catch {
+            pendingImports[tree.id] = nil
+            throw error
         }
     }
 
@@ -418,8 +1128,15 @@ public final class TreeStore {
     /// swaps in freshly-decoded Person instances (which carry the photo *filename* but not
     /// the transient folder URL), so call this after a restore to keep portraits loadable.
     public func refreshMediaFolders(for tree: FamilyTree) {
-        let mediaFolder = folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
+        let mediaFolder = legacyFileMap[tree.id].map {
+            storageFolder.appendingPathComponent("Media_\($0.deletingPathExtension().lastPathComponent)", isDirectory: true)
+        } ?? folder(for: tree).appendingPathComponent(Self.mediaName, isDirectory: true)
         for person in tree.people { person.mediaFolderURL = mediaFolder }
+    }
+
+    private func applySnapshot(_ snapshot: FamilyTree, to tree: FamilyTree) {
+        tree.applyContent(of: snapshot)
+        refreshMediaFolders(for: tree)
     }
 
     // MARK: - Attachments
@@ -434,44 +1151,54 @@ public final class TreeStore {
         attachmentsFolderURL(for: tree).appendingPathComponent(attachment.storedName)
     }
 
-    /// Copy a user-picked file into the tree's Attachments/ folder, link it to the
-    /// person, and persist. `sourceURL` may be security-scoped (from a file picker).
-    @discardableResult
-    public func addAttachment(to person: Person, in tree: FamilyTree, sourceURL: URL) throws -> Attachment {
+    /// Copy a security-scoped file into the private pending area without touching the
+    /// live tree bundle. Editors append the returned metadata to their draft and the
+    /// next successful save commits the bytes.
+    public func prepareAttachment(in tree: FamilyTree, sourceURL: URL) throws -> Attachment {
         let fm = FileManager.default
-        let folder = attachmentsFolderURL(for: tree)
-        try fm.createDirectory(at: folder, withIntermediateDirectories: true)
-
+        let pendingFolder = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+        try fm.createDirectory(at: pendingFolder, withIntermediateDirectories: true)
         let originalName = sourceURL.lastPathComponent
         let ext = sourceURL.pathExtension
         let storedName = ext.isEmpty ? UUID().uuidString : "\(UUID().uuidString).\(ext)"
-        let dest = folder.appendingPathComponent(storedName)
-
+        let temporary = pendingFolder.appendingPathComponent(storedName)
         let scoped = sourceURL.startAccessingSecurityScopedResource()
         defer { if scoped { sourceURL.stopAccessingSecurityScopedResource() } }
-        try fm.copyItem(at: sourceURL, to: dest)
+        try fm.copyItem(at: sourceURL, to: temporary)
+        pendingAttachmentAdds[tree.id, default: []].append(PendingAttachment(temporaryURL: temporary, storedName: storedName))
+        return Attachment(storedName: storedName, originalName: originalName)
+    }
 
-        let attachment = Attachment(storedName: storedName, originalName: originalName)
-        person.attachments.append(attachment)
-        person.updatedAt = Date()
-        saveTree(tree)
-        return attachment
+    public func discardPreparedAttachment(_ attachment: Attachment, in tree: FamilyTree) {
+        guard let pending = pendingAttachmentAdds[tree.id]?.first(where: { $0.storedName == attachment.storedName }) else { return }
+        pendingAttachmentAdds[tree.id]?.removeAll { $0.storedName == attachment.storedName }
+        try? FileManager.default.removeItem(at: pending.temporaryURL)
+        cleanupPendingFolderIfEmpty()
+    }
+
+    public func previewURL(for attachment: Attachment, in tree: FamilyTree) -> URL {
+        if let pending = pendingAttachmentAdds[tree.id]?.first(where: { $0.storedName == attachment.storedName }) {
+            return pending.temporaryURL
+        }
+        return attachmentURL(attachment, in: tree)
     }
 
     /// Remove an attachment's file from disk, unlink it from the person, and persist.
     public func removeAttachment(_ attachment: Attachment, from person: Person, in tree: FamilyTree) {
-        try? FileManager.default.removeItem(at: attachmentURL(attachment, in: tree))
+        let originalIndex = person.attachments.firstIndex(where: { $0.id == attachment.id })
         person.attachments.removeAll { $0.id == attachment.id }
+        pendingAttachmentDeletes[tree.id, default: []].insert(attachment.storedName)
         person.updatedAt = Date()
-        saveTree(tree)
+        if saveTree(tree) == nil {
+            if let originalIndex { person.attachments.insert(attachment, at: min(originalIndex, person.attachments.count)) }
+            pendingAttachmentDeletes[tree.id]?.remove(attachment.storedName)
+        }
     }
 
     /// Delete every attachment file belonging to a person (used when the person is
     /// removed). Does not persist — the caller saves the tree afterward.
     public func deleteAttachmentFiles(of person: Person, in tree: FamilyTree) {
-        for attachment in person.attachments {
-            try? FileManager.default.removeItem(at: attachmentURL(attachment, in: tree))
-        }
+        pendingAttachmentDeletes[tree.id, default: []].formUnion(person.attachments.map(\.storedName))
     }
 
     // MARK: - Helpers
@@ -479,6 +1206,7 @@ public final class TreeStore {
     /// Public access to the tree's .ged file (e.g. for "Reveal in Finder"); falls back
     /// to the folder itself if the file can't be located.
     public func gedFileURL(for tree: FamilyTree) -> URL {
+        if let legacy = legacyFileMap[tree.id] { return legacy }
         let folder = folder(for: tree)
         return gedFile(in: folder) ?? folder
     }
@@ -570,22 +1298,13 @@ public final class TreeStore {
         }
     }
 
-    // MARK: - Legacy JSON Migration
+}
 
-    private func migrateFromJSON(_ jsonURL: URL) {
-        do {
-            let data = try Data(contentsOf: jsonURL)
-            let oldTrees = try JSONDecoder().decode([FamilyTree].self, from: data)
-            for tree in oldTrees {
-                trees.append(tree)
-                saveTree(tree)
-            }
-            // Rename old file as backup
-            let backup = jsonURL.appendingPathExtension("bak")
-            try? FileManager.default.moveItem(at: jsonURL, to: backup)
-            log.notice("Migrated \(oldTrees.count) tree(s) from JSON to GEDCOM")
-        } catch {
-            log.error("JSON migration failed: \(error.localizedDescription, privacy: .public)")
-        }
+private extension JSONEncoder {
+    static var pretty: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 }

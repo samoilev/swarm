@@ -5,9 +5,9 @@ struct PlacePickerField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
-    /// Called with the chosen place's display name when a suggestion is picked from
-    /// the list (not on manual typing), so the caller can pre-fill coordinates.
-    var onSelect: ((String) -> Void)?
+    /// Called with the exact selected record. Coordinates and stable identity travel
+    /// with the selection; callers never need to parse the formatted display string.
+    var onSelect: ((PlaceEntry) -> Void)?
 
     @State private var suggestions: [PlaceEntry] = []
     @State private var showSuggestions = false
@@ -58,6 +58,11 @@ struct PlacePickerField: View {
                 }
             }
         }
+        .onAppear {
+            db.whenReady {
+                if isFocused { updateSuggestions(text) }
+            }
+        }
     }
 
     private var suggestionsDropdown: some View {
@@ -69,7 +74,7 @@ struct PlacePickerField: View {
                     Button {
                         text = place.displayName
                         showSuggestions = false
-                        onSelect?(place.displayName)
+                        onSelect?(place)
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(place.name)
