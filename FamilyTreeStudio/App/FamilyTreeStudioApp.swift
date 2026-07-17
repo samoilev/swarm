@@ -4,9 +4,15 @@ import SwiftUI
 
 @main
 struct FamilyTreeStudioApp: App {
-    @State private var store = TreeStore()
+    @State private var store: TreeStore
 
     init() {
+        let arguments = ProcessInfo.processInfo.arguments
+        let storageFolder: URL? = arguments.firstIndex(of: "--storage-folder").flatMap { index in
+            guard arguments.indices.contains(index + 1) else { return nil }
+            return URL(fileURLWithPath: arguments[index + 1], isDirectory: true)
+        }
+        _store = State(initialValue: TreeStore(storageFolder: storageFolder))
         NSApplication.shared.setActivationPolicy(.regular)
         if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
            let icon = NSImage(contentsOf: iconURL) {
@@ -67,6 +73,11 @@ struct FamilyTreeStudioApp: App {
                 }
                 .keyboardShortcut("0")
             }
+        }
+
+        Settings {
+            MapPrivacySettingsView()
+                .preferredColorScheme(.light)
         }
     }
 }

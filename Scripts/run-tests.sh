@@ -13,11 +13,12 @@ if [[ "$DEVDIR" == *CommandLineTools* ]]; then
     FW="$DEVDIR/Library/Developer/Frameworks"
     IL="$DEVDIR/Library/Developer/usr/lib"
     exec swift test \
+        --no-parallel \
         -Xswiftc -F -Xswiftc "$FW" \
         -Xlinker -F -Xlinker "$FW" \
         -Xlinker -rpath -Xlinker "$FW" \
         -Xlinker -rpath -Xlinker "$IL" \
         "$@"
 else
-    exec swift test "$@"
+    exec swift test --no-parallel "$@"
 fi

@@ -5,6 +5,7 @@ import Testing
 /// Integration tests for TreeStore's persistence, migration and folder-reconcile
 /// logic. Each test runs against a throwaway temp directory (injected via
 /// `TreeStore(storageFolder:)`), so nothing touches the real Application Support.
+@Suite(.serialized)
 struct TreeStoreTests {
 
     /// A unique temp directory that is removed when the test's `Temp` goes away.
@@ -209,8 +210,57 @@ struct TreeStoreTests {
         #expect(tree.name == "Старое дерево")
         #expect(tree.id == id) // _TREEID preserved through migration
 
-        // The flat .ged was folded into a per-tree folder with its Media alongside.
+        // Discovery is read-only: the old bytes remain untouched until the user runs
+        // the explicit, backup-protected migration transaction.
+        #expect(store.pendingMigrationCount == 1)
+        #expect(fm.fileExists(atPath: temp.url.appendingPathComponent("\(id.uuidString).ged").path))
+
+        // A pending migration is not a load failure — this tree opened. Reporting it as
+        // one told the user their file hadn't been read, which was false and unactionable.
+        #expect(store.lastLoadError == nil)
+        let pending = try #require(store.pendingMigrations.first)
+        #expect(pending.title == "Старое дерево") // names the tree, not just a count
+        #expect(pending.source == .legacyFile)
+        #expect(pending.url.lastPathComponent == "\(id.uuidString).ged")
+
+        let receipts = try store.performPendingMigrations()
+        #expect(receipts.count == 1)
+
+        // Only after the verified transaction is the flat source moved into Recovery.
         let entries = Set((try? fm.contentsOfDirectory(atPath: temp.url.path)) ?? [])
         #expect(!entries.contains("\(id.uuidString).ged")) // flat file consumed
+        #expect(store.pendingMigrationCount == 0)
+    }
+
+    @Test func oldFolderLayoutIsPendingMigrationNotLoadFailure() throws {
+        let temp = Temp()
+        let fm = FileManager.default
+        // Old folder layout: <UUID>/tree.ged instead of a readable folder + filename.
+        let id = UUID()
+        let folder = temp.url.appendingPathComponent(id.uuidString, isDirectory: true)
+        try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+        let ged = """
+        0 HEAD
+        1 _TREEID \(id.uuidString)
+        1 _NAME Юлия и Лев
+        0 @I1@ INDI
+        1 NAME Тимофей /Соколов/
+        1 SEX M
+        0 TRLR
+        """
+        try ged.write(to: folder.appendingPathComponent("tree.ged"), atomically: true, encoding: .utf8)
+
+        let store = TreeStore(storageFolder: temp.url)
+        // The tree opens and is fully usable; only its on-disk layout is old.
+        #expect(store.trees.count == 1)
+        #expect(store.lastLoadError == nil)
+        #expect(store.pendingMigrations.count == 1)
+        let pending = try #require(store.pendingMigrations.first)
+        #expect(pending.title == "Юлия и Лев")
+        #expect(pending.source == .treeFolder)
+
+        try store.performPendingMigrations()
+        #expect(store.pendingMigrations.isEmpty)
+        #expect(store.lastLoadError == nil)
     }
 }

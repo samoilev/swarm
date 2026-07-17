@@ -102,6 +102,13 @@ public final class GeocodingService {
         return nil
     }
 
+    /// Coordinate lookup for an explicit place selection. No display-string parsing or
+    /// ambiguity guessing is involved.
+    public func coordinate(for place: PlaceEntry) -> CLLocationCoordinate2D? {
+        guard let latitude = place.latitude, let longitude = place.longitude else { return nil }
+        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
+
     /// Try various strategies to find the place name in the database.
     private func lookupInDatabase(_ key: String) -> CLLocationCoordinate2D? {
         // Direct match on the full string (works for single city names in GeoNames).

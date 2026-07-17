@@ -8,6 +8,23 @@ struct MapChartView: View {
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
 
+    @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
+
+    var body: some View {
+        if providerRaw == MapProviderSetting.appleMaps.rawValue {
+            AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+        } else {
+            OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+        }
+    }
+}
+
+struct AppleMapChartView: View {
+    let tree: FamilyTree
+    @Binding var zoom: CGFloat
+    @Binding var selectedPerson: Person?
+    @Binding var fitRequest: Int
+
     @State private var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 55, longitude: 40),
         span: MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 60)

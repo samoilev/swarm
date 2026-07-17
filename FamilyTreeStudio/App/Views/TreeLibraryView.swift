@@ -24,6 +24,7 @@ struct TreeLibraryView: View {
     @State private var errorMessage: String?
     /// Set from `store.lastLoadError` when trees on disk failed to parse at launch.
     @State private var showLoadError = false
+    @State private var showRecovery = false
 
     var body: some View {
         ZStack {
@@ -45,6 +46,10 @@ struct TreeLibraryView: View {
                 // Action toolbar — always visible above the grid
                 HStack(spacing: 10) {
                     Spacer()
+                    Button(action: { showRecovery = true }) {
+                        Label("Восстановление", systemImage: "clock.arrow.circlepath")
+                    }
+                    .buttonStyle(SepiaButtonStyle())
                     Button(action: { onImport?() }) {
                         Label("Импорт GEDCOM", systemImage: "square.and.arrow.down")
                     }
@@ -58,6 +63,8 @@ struct TreeLibraryView: View {
                 .padding(.vertical, 12)
 
                 Divider().overlay(SepiaTheme.line)
+
+                migrationBanner
 
                 if trees.isEmpty {
                     Spacer()
@@ -124,10 +131,15 @@ struct TreeLibraryView: View {
             TextField("Название", text: $renameName)
             TextField("Подзаголовок (необязательно)", text: $renameSubtitle)
             Button("Сохранить") {
-                if let tree = treeToRename {
-                    store.renameTree(tree, name: renameName, subtitle: renameSubtitle)
+                guard let tree = treeToRename else { return }
+                Task { @MainActor in
+                    do {
+                        _ = try await store.renameTreeVerified(tree, name: renameName, subtitle: renameSubtitle)
+                    } catch {
+                        errorMessage = error.localizedDescription
+                    }
+                    treeToRename = nil
                 }
-                treeToRename = nil
             }
             Button("Отмена", role: .cancel) { treeToRename = nil }
         } message: {
@@ -138,14 +150,18 @@ struct TreeLibraryView: View {
             treeToExport = nil
             switch result {
             case .success(let directory):
-                let scoped = directory.startAccessingSecurityScopedResource()
-                defer { if scoped { directory.stopAccessingSecurityScopedResource() } }
-                do {
-                    let bundle = try store.exportTree(tree, toDirectory: directory)
-                    store.deleteTree(tree) // originals copied out — remove from the app
-                    NSWorkspace.shared.activateFileViewerSelecting([bundle])
-                } catch {
-                    errorMessage = "Не удалось экспортировать дерево.\n\n\(error.localizedDescription)"
+                Task { @MainActor in
+                    let scoped = directory.startAccessingSecurityScopedResource()
+                    defer { if scoped { directory.stopAccessingSecurityScopedResource() } }
+                    do {
+                        let receipt = try await store.exportTree(tree, to: directory)
+                        guard store.deleteTree(tree) else {
+                            throw TreeStoreError.commitFailed(reason: store.lastSaveError ?? "Экспорт проверен, но исходное дерево не перемещено в Корзину.")
+                        }
+                        NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
+                    } catch {
+                        errorMessage = "Не удалось экспортировать дерево.\n\n\(error.localizedDescription)"
+                    }
                 }
             case .failure(let error):
                 errorMessage = error.localizedDescription
@@ -161,12 +177,53 @@ struct TreeLibraryView: View {
                 NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
                 store.lastLoadError = nil
             }
-            Button("OK", role: .cancel) { store.lastLoadError = nil }
+            Button("Закрыть", role: .cancel) { store.lastLoadError = nil }
         } message: {
             Text(store.lastLoadError ?? "")
         }
         .onAppear { if store.lastLoadError != nil { showLoadError = true } }
         .onChange(of: store.lastLoadError) { _, newValue in showLoadError = (newValue != nil) }
+        .sheet(isPresented: $showRecovery) { RecoveryView(store: store) }
+    }
+
+    /// Old-format archives open and read fine — only saving is gated — so this is a calm
+    /// inline notice naming the affected trees, not a launch alert.
+    @ViewBuilder private var migrationBanner: some View {
+        if !store.pendingMigrations.isEmpty {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 15))
+                    .foregroundColor(SepiaTheme.accent2)
+                    .padding(.top, 1)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(migrationHeadline)
+                        .font(SepiaTheme.body(size: 13.5))
+                        .foregroundColor(SepiaTheme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Открывать и просматривать можно уже сейчас. Обновление нужно, чтобы сохранять изменения — оно делает резервную копию и не удаляет исходные файлы.")
+                        .font(SepiaTheme.ui(size: 11))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 12)
+                Button("Обновить формат…") { showRecovery = true }
+                    .buttonStyle(SepiaButtonStyle(isActive: true))
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 12)
+            .background(SepiaTheme.cardBg)
+            .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.line).frame(height: 1) }
+        }
+    }
+
+    private var migrationHeadline: String {
+        let names = Set(store.pendingMigrations.map(\.title)).sorted().map { "«\($0)»" }
+        let subject = switch names.count {
+        case 0: ""
+        case 1, 2: names.joined(separator: ", ")
+        default: "\(names.prefix(2).joined(separator: ", ")) и ещё \(names.count - 2)"
+        }
+        return "\(subject) — в старом формате хранения"
     }
 
     private func startRename(_ tree: FamilyTree) {
@@ -231,6 +288,7 @@ struct TreeCardView: View {
                         .menuIndicator(.hidden)
                         .fixedSize()
                         .help("Действия с деревом")
+                        .accessibilityLabel("Действия с деревом")
                     }
                     .padding(.top, 2)
                 }

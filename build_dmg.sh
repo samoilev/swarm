@@ -12,7 +12,7 @@ BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
 BINARY="$BUILD_DIR/FamilyTreeStudio"
 # Two SwiftPM resource bundles after the FamilyTreeCore split:
 #   - App bundle: AppIcon.icns (loaded via Bundle.module in the app target)
-#   - Core bundle: places.tsv / geonames_ussr.tsv (loaded via Bundle.module in FamilyTreeCore)
+#   - Core bundle: local place indexes and offline map vectors
 APP_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeStudio.bundle"
 CORE_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeCore.bundle"
 ICON_SRC="$PROJECT_DIR/FamilyTreeStudio/App/Resources/AppIcon.icns"
@@ -21,6 +21,7 @@ APP_BUNDLE="$DMG_DIR/$APP_NAME.app"
 
 echo "=== Building release binary ==="
 cd "$PROJECT_DIR"
+./Scripts/run-tests.sh
 swift build -c release
 
 echo "=== Creating .app bundle ==="
@@ -78,7 +79,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
                 <string>ged</string>
             </array>
             <key>CFBundleTypeRole</key>
-            <string>Editor</string>
+            <string>Viewer</string>
             <key>LSItemContentTypes</key>
             <array>
                 <string>public.gedcom</string>
@@ -108,6 +109,13 @@ else
     echo "Ad-hoc signed (local use only; not notarizable)"
 fi
 
+echo "=== Verifying app bundle ==="
+test -x "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio"
+plutil -lint "$APP_BUNDLE/Contents/Info.plist"
+codesign --verify --deep --strict "$APP_BUNDLE"
+echo "Architecture: $(lipo -archs "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio")"
+echo "Signing: $(codesign -dv --verbose=2 "$APP_BUNDLE" 2>&1 | grep -E 'Signature|Authority|TeamIdentifier' | tr '\n' ' ')"
+
 # Create DMG
 echo "=== Creating DMG ==="
 DMG_NAME="Родословная-Студия-${VERSION}.dmg"
@@ -128,6 +136,10 @@ hdiutil create -volname "$APP_NAME" \
     "$DMG_PATH"
 
 rm -rf "$DMG_TEMP"
+
+echo "=== Verifying DMG ==="
+hdiutil verify "$DMG_PATH"
+shasum -a 256 "$DMG_PATH" | tee "$DMG_PATH.sha256"
 
 # Notarize + staple when credentials are available (requires Developer ID signing).
 # Provide either a stored notarytool keychain profile via NOTARY_PROFILE, or

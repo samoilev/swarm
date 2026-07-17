@@ -4,25 +4,33 @@ import Observation
 @Observable
 public final class Person: Identifiable, Codable, Hashable {
     public var id: UUID
-    public var givenNames: String
-    public var patronymic: String?
-    public var surname: String
-    public var maidenName: String?
+    public var givenNames: String { didSet { synchronizePrimaryNameFromLegacy() } }
+    public var patronymic: String? { didSet { synchronizePrimaryNameFromLegacy() } }
+    public var surname: String { didSet { synchronizePrimaryNameFromLegacy() } }
+    public var maidenName: String? { didSet { synchronizePrimaryNameFromLegacy() } }
     public var sex: Sex
 
-    public var birthDate: String?
-    public var birthPlace: String?
+    public var birthDate: String? { didSet { synchronizeDateFromLegacy(.birth, value: birthDate) } }
+    public var birthPlace: String? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
 
-    public var deathDate: String?
-    public var deathPlace: String?
+    public var deathDate: String? { didSet { synchronizeDateFromLegacy(.death, value: deathDate) } }
+    public var deathPlace: String? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
     public var isLiving: Bool
 
-    public var burialPlace: String?
+    public var burialPlace: String? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
 
-    public var occupation: String?
-    public var education: String?
+    public var occupation: String? { didSet { synchronizeValueFromLegacy(.occupation, value: occupation) } }
+    public var education: String? { didSet { synchronizeValueFromLegacy(.education, value: education) } }
     public var notes: String?
-    public var sources: [String]
+    public internal(set) var sources: [String]
+
+    /// Canonical structured genealogy records. The legacy scalar properties above are
+    /// compatibility accessors during the staged UI migration and update these arrays
+    /// through their observers.
+    public var names: [PersonName]
+    public var events: [GenealogyEvent]
+    public var citations: [Citation]
+    @ObservationIgnored private var isSynchronizingStructured = false
 
     /// The portrait's filename inside the tree's `Media/` folder. The bytes are loaded
     /// lazily (see `photoData`) so opening a library doesn't pull every photo into RAM.
@@ -67,13 +75,13 @@ public final class Person: Identifiable, Codable, Hashable {
     public var attachments: [Attachment] = []
 
     // Cached coordinates for map pins
-    public var birthLat: Double?
-    public var birthLon: Double?
-    public var deathLat: Double?
-    public var deathLon: Double?
+    public var birthLat: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
+    public var birthLon: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
+    public var deathLat: Double? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
+    public var deathLon: Double? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
     // Precise grave/burial coordinates (entered manually, not geocoded)
-    public var burialLat: Double?
-    public var burialLon: Double?
+    public var burialLat: Double? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
+    public var burialLon: Double? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
 
     // MARK: - GEDCOM interop preservation
 
@@ -146,6 +154,22 @@ public final class Person: Identifiable, Codable, Hashable {
         self.education = education
         self.notes = notes
         self.sources = sources
+        self.names = [PersonName(
+            givenNames: givenNames,
+            patronymic: patronymic,
+            surname: surname,
+            maidenName: maidenName
+        )]
+        self.events = Self.initialEvents(
+            birthDate: birthDate,
+            birthPlace: birthPlace,
+            deathDate: deathDate,
+            deathPlace: deathPlace,
+            burialPlace: burialPlace,
+            occupation: occupation,
+            education: education
+        )
+        self.citations = []
         // Only touch photo state when bytes are actually supplied, so a plain new
         // person isn't flagged dirty (which would force an unnecessary photo rewrite).
         if let photoData { loadedPhoto = .some(photoData); photoIsDirty = true }
@@ -168,6 +192,155 @@ public final class Person: Identifiable, Codable, Hashable {
 
     public var displaySurname: String {
         surname.isEmpty ? (maidenName ?? "") : surname
+    }
+
+    // MARK: - Structured compatibility
+
+    public func event(ofKind kind: GenealogyEvent.Kind) -> GenealogyEvent? {
+        events.first(where: { $0.kind == kind })
+    }
+
+    public func replaceEvent(_ event: GenealogyEvent) {
+        isSynchronizingStructured = true
+        defer { isSynchronizingStructured = false }
+        if let index = events.firstIndex(where: { $0.id == event.id || $0.kind == event.kind }) {
+            events[index] = event
+        } else {
+            events.append(event)
+        }
+        applyStructuredEventToLegacy(event)
+    }
+
+    /// Called by the GEDCOM parser so qualifiers/ranges remain canonical while the
+    /// old UI can continue displaying its normalized compatibility value.
+    public func setStructuredDate(_ date: GenealogyDate?, for kind: GenealogyEvent.Kind) {
+        isSynchronizingStructured = true
+        defer { isSynchronizingStructured = false }
+        updateEvent(kind: kind) { $0.date = date }
+    }
+
+    public func setStructuredPlace(_ place: PlaceReference?, for kind: GenealogyEvent.Kind) {
+        isSynchronizingStructured = true
+        defer { isSynchronizingStructured = false }
+        updateEvent(kind: kind) { $0.place = place }
+        switch kind {
+        case .birth:
+            birthPlace = place?.displayName; birthLat = place?.latitude; birthLon = place?.longitude
+        case .death:
+            deathPlace = place?.displayName; deathLat = place?.latitude; deathLon = place?.longitude
+        case .burial:
+            burialPlace = place?.displayName; burialLat = place?.latitude; burialLon = place?.longitude
+        default: break
+        }
+    }
+
+    private func synchronizePrimaryNameFromLegacy() {
+        guard !isSynchronizingStructured else { return }
+        if names.isEmpty {
+            names = [PersonName()]
+        }
+        let index = names.firstIndex(where: \.isPrimary) ?? 0
+        names[index].isPrimary = true
+        names[index].givenNames = givenNames
+        names[index].patronymic = patronymic
+        names[index].surname = surname
+        names[index].maidenName = maidenName
+    }
+
+    private func synchronizeDateFromLegacy(_ kind: GenealogyEvent.Kind, value: String?) {
+        guard !isSynchronizingStructured else { return }
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines)
+        updateEvent(kind: kind) { event in
+            event.date = (trimmed?.isEmpty == false) ? GenealogyDate(userInput: trimmed!) : nil
+        }
+        removeEventIfEmpty(kind)
+    }
+
+    private func synchronizePlaceFromLegacy(_ kind: GenealogyEvent.Kind, value: String?, lat: Double?, lon: Double?) {
+        guard !isSynchronizingStructured else { return }
+        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        updateEvent(kind: kind) { event in
+            if trimmed.isEmpty, lat == nil, lon == nil {
+                event.place = nil
+            } else {
+                var place = event.place ?? PlaceReference(displayName: trimmed, isCustom: true)
+                place.displayName = trimmed
+                place.latitude = lat
+                place.longitude = lon
+                if place.datasetID == nil { place.isCustom = true }
+                event.place = place
+            }
+        }
+        removeEventIfEmpty(kind)
+    }
+
+    private func synchronizeValueFromLegacy(_ kind: GenealogyEvent.Kind, value: String?) {
+        guard !isSynchronizingStructured else { return }
+        updateEvent(kind: kind) { $0.value = value }
+        removeEventIfEmpty(kind)
+    }
+
+    private func updateEvent(kind: GenealogyEvent.Kind, mutate: (inout GenealogyEvent) -> Void) {
+        if let index = events.firstIndex(where: { $0.kind == kind }) {
+            mutate(&events[index])
+        } else {
+            var event = GenealogyEvent(kind: kind)
+            mutate(&event)
+            events.append(event)
+        }
+    }
+
+    private func removeEventIfEmpty(_ kind: GenealogyEvent.Kind) {
+        events.removeAll { event in
+            event.kind == kind && event.value == nil && event.date == nil && event.place == nil &&
+                event.notes == nil && event.citations.isEmpty && event.mediaIDs.isEmpty && event.rawGEDCOMBranches.isEmpty
+        }
+    }
+
+    private func applyStructuredEventToLegacy(_ event: GenealogyEvent) {
+        switch event.kind {
+        case .birth:
+            birthDate = event.date?.displayValue; birthPlace = event.place?.displayName
+            birthLat = event.place?.latitude; birthLon = event.place?.longitude
+        case .death:
+            deathDate = event.date?.displayValue; deathPlace = event.place?.displayName
+            deathLat = event.place?.latitude; deathLon = event.place?.longitude
+        case .burial:
+            burialPlace = event.place?.displayName; burialLat = event.place?.latitude; burialLon = event.place?.longitude
+        case .occupation: occupation = event.value
+        case .education: education = event.value
+        default: break
+        }
+    }
+
+    private static func initialEvents(
+        birthDate: String?,
+        birthPlace: String?,
+        deathDate: String?,
+        deathPlace: String?,
+        burialPlace: String?,
+        occupation: String?,
+        education: String?
+    ) -> [GenealogyEvent] {
+        var result: [GenealogyEvent] = []
+        func add(_ kind: GenealogyEvent.Kind, date: String? = nil, place: String? = nil, value: String? = nil) {
+            let trimmedDate = date?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedPlace = place?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedValue = value?.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard trimmedDate?.isEmpty == false || trimmedPlace?.isEmpty == false || trimmedValue?.isEmpty == false else { return }
+            result.append(GenealogyEvent(
+                kind: kind,
+                value: trimmedValue,
+                date: trimmedDate.map { GenealogyDate(userInput: $0) },
+                place: trimmedPlace.map { PlaceReference(displayName: $0, isCustom: true) }
+            ))
+        }
+        add(.birth, date: birthDate, place: birthPlace)
+        add(.death, date: deathDate, place: deathPlace)
+        add(.burial, place: burialPlace)
+        add(.occupation, value: occupation)
+        add(.education, value: education)
+        return result
     }
 
     public var lifespan: String {
@@ -212,6 +385,7 @@ public final class Person: Identifiable, Codable, Hashable {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving
         case burialPlace, occupation, education, notes, sources, photoData, photoFilename, attachments
+        case names, events, citations
         case birthLat, birthLon, deathLat, deathLon, burialLat, burialLon
         case gedcomXref, unknownBranches, eventExtras
         case createdAt, updatedAt
@@ -235,6 +409,22 @@ public final class Person: Identifiable, Codable, Hashable {
         education = try c.decodeIfPresent(String.self, forKey: .education)
         notes = try c.decodeIfPresent(String.self, forKey: .notes)
         sources = try c.decode([String].self, forKey: .sources)
+        names = try c.decodeIfPresent([PersonName].self, forKey: .names) ?? [PersonName(
+            givenNames: c.decode(String.self, forKey: .givenNames),
+            patronymic: c.decodeIfPresent(String.self, forKey: .patronymic),
+            surname: c.decode(String.self, forKey: .surname),
+            maidenName: c.decodeIfPresent(String.self, forKey: .maidenName)
+        )]
+        events = try c.decodeIfPresent([GenealogyEvent].self, forKey: .events) ?? Self.initialEvents(
+            birthDate: c.decodeIfPresent(String.self, forKey: .birthDate),
+            birthPlace: c.decodeIfPresent(String.self, forKey: .birthPlace),
+            deathDate: c.decodeIfPresent(String.self, forKey: .deathDate),
+            deathPlace: c.decodeIfPresent(String.self, forKey: .deathPlace),
+            burialPlace: c.decodeIfPresent(String.self, forKey: .burialPlace),
+            occupation: c.decodeIfPresent(String.self, forKey: .occupation),
+            education: c.decodeIfPresent(String.self, forKey: .education)
+        )
+        citations = try c.decodeIfPresent([Citation].self, forKey: .citations) ?? []
         photoFilename = try c.decodeIfPresent(String.self, forKey: .photoFilename)
         // Legacy JSON stored the bytes inline; if present, take them (marked dirty so
         // the next save writes them into Media/ and the GEDCOM). New snapshots carry
@@ -274,6 +464,9 @@ public final class Person: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(education, forKey: .education)
         try c.encodeIfPresent(notes, forKey: .notes)
         try c.encode(sources, forKey: .sources)
+        try c.encode(names, forKey: .names)
+        if !events.isEmpty { try c.encode(events, forKey: .events) }
+        if !citations.isEmpty { try c.encode(citations, forKey: .citations) }
         // Persist only the portrait's filename, never the bytes — this keeps undo
         // snapshots (which use Codable) free of megabytes of image data.
         try c.encodeIfPresent(photoFilename, forKey: .photoFilename)

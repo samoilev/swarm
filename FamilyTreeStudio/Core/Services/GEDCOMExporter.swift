@@ -7,6 +7,7 @@ public struct GEDCOMSerializer {
     /// A person portrait the GEDCOM references, paired with the filename used in its
     /// `OBJE`/`FILE` line. The caller persists the bytes — serialization stays pure.
     public struct Photo: Equatable {
+        public let personID: UUID
         public let filename: String
         public let data: Data
     }
@@ -29,25 +30,48 @@ public struct GEDCOMSerializer {
         // and hand out fresh, collision-free ids to app-created records.
         let indiXref = assignXrefs(ids: tree.people.map(\.id), existing: tree.people.map(\.gedcomXref), prefix: "I")
         let famXref = assignXrefs(ids: tree.unions.map(\.id), existing: tree.unions.map(\.gedcomXref), prefix: "F")
+        let sourceXref = assignXrefs(
+            ids: tree.sourceRecords.map(\.id),
+            existing: tree.sourceRecords.map(\.gedcomXref),
+            prefix: "S"
+        )
+        let attachmentByID = Dictionary(uniqueKeysWithValues: tree.people.flatMap(\.attachments).map { ($0.id.uuidString, $0) })
 
         var lines: [String] = []
         var photos: [Photo] = []
 
         // HEAD
         lines.append("0 HEAD")
-        lines.append("1 SOUR FamilyTreeStudio")
-        lines.append("2 NAME Родословная Студия")
-        lines.append("2 VERS 1.0")
-        lines.append("1 GEDC")
-        lines.append("2 VERS 5.5.1")
-        lines.append("2 FORM LINEAGE-LINKED")
-        lines.append("1 CHAR UTF-8")
-        let df = DateFormatter()
-        df.dateFormat = "d MMM yyyy"
-        df.locale = Locale(identifier: "en_US_POSIX")
-        lines.append("1 DATE \(df.string(from: Date()).uppercased())")
+        if tree.headUnknownBranches.isEmpty {
+            lines.append("1 SOUR FamilyTreeStudio")
+            lines.append("2 NAME Родословная Студия")
+            lines.append("2 VERS 2.0")
+            lines.append("1 GEDC")
+            lines.append("2 VERS 5.5.1")
+            lines.append("2 FORM LINEAGE-LINKED")
+            lines.append("1 CHAR UTF-8")
+            let df = DateFormatter()
+            df.dateFormat = "d MMM yyyy"
+            df.locale = Locale(identifier: "en_US_POSIX")
+            lines.append("1 DATE \(df.string(from: Date()).uppercased())")
+        } else {
+            // Imported HEAD provenance and metadata stay byte-for-byte intact. Add
+            // required declarations only when the source omitted them.
+            for branch in tree.headUnknownBranches { lines.append(contentsOf: branch) }
+            let tags = Set(tree.headUnknownBranches.compactMap { branch -> String? in
+                guard let first = branch.first else { return nil }
+                return first.split(separator: " ").dropFirst().first.map(String.init)
+            })
+            if !tags.contains("GEDC") {
+                lines.append("1 GEDC")
+                lines.append("2 VERS 5.5.1")
+                lines.append("2 FORM LINEAGE-LINKED")
+            }
+            if !tags.contains("CHAR") { lines.append("1 CHAR UTF-8") }
+        }
         // Custom metadata
         lines.append("1 _TREEID \(tree.id.uuidString)")
+        lines.append("1 _FTSVER 2")
         lines.append("1 _NAME \(tree.name)")
         if let sub = tree.subtitle, !sub.isEmpty {
             lines.append("1 _SUBTITLE \(sub)")
@@ -63,56 +87,70 @@ public struct GEDCOMSerializer {
         for p in tree.people {
             guard let xref = indiXref[p.id] else { continue }
             lines.append("0 @\(xref)@ INDI")
+            lines.append("1 _FTSID \(p.id.uuidString)")
 
-            // NAME — use maiden name as birth surname if available. Strip any slash from
-            // the parts: a "/" in a given name would corrupt the NAME line's structure.
-            let given = sanitizeNamePart(p.givenNames)
-            let birthSurname = sanitizeNamePart(p.maidenName ?? p.surname)
-            lines.append("1 NAME \(given) /\(birthSurname)/")
-
-            // Married name (if maiden differs from current surname)
-            if let maiden = p.maidenName, !maiden.isEmpty, maiden != p.surname {
-                lines.append("2 _MARNM \(given) /\(sanitizeNamePart(p.surname))/")
-            }
-
-            // Patronymic (custom tag)
-            if let patr = p.patronymic, !patr.isEmpty {
-                lines.append("1 _PATR \(patr)")
+            // Structured names. The first/primary name remains compatible with the
+            // historical _PATR/_MARNM extensions used by this app.
+            let names = p.names.isEmpty ? [PersonName(
+                givenNames: p.givenNames,
+                patronymic: p.patronymic,
+                surname: p.surname,
+                maidenName: p.maidenName
+            )] : p.names
+            for (index, name) in names.enumerated() {
+                appendName(name, primary: index == 0 || name.isPrimary, sourceXref: sourceXref, to: &lines)
             }
 
             if p.sex != .unknown { lines.append("1 SEX \(p.sex.rawValue)") }
 
-            // Birth
-            let hasBirthCoord = p.birthLat != nil && p.birthLon != nil
-            let birthExtras = p.eventExtras["BIRT"] ?? []
-            if p.birthDate != nil || (p.birthPlace?.isEmpty == false) || hasBirthCoord || !birthExtras.isEmpty {
-                lines.append("1 BIRT")
-                if let d = p.birthDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
-                appendPlace(p.birthPlace, lat: p.birthLat, lon: p.birthLon, to: &lines)
-                lines.append(contentsOf: birthExtras)
-            }
+            appendPersonEvent(
+                p.event(ofKind: .birth),
+                kind: .birth,
+                fallbackDate: p.birthDate,
+                fallbackPlace: p.birthPlace,
+                fallbackLat: p.birthLat,
+                fallbackLon: p.birthLon,
+                extras: p.eventExtras["BIRT"] ?? [],
+                force: false,
+                sourceXref: sourceXref,
+                to: &lines
+            )
+            appendPersonEvent(
+                p.event(ofKind: .death),
+                kind: .death,
+                fallbackDate: p.deathDate,
+                fallbackPlace: p.deathPlace,
+                fallbackLat: p.deathLat,
+                fallbackLon: p.deathLon,
+                extras: p.eventExtras["DEAT"] ?? [],
+                force: !p.isLiving,
+                sourceXref: sourceXref,
+                to: &lines
+            )
+            appendPersonEvent(
+                p.event(ofKind: .burial),
+                kind: .burial,
+                fallbackDate: nil,
+                fallbackPlace: p.burialPlace,
+                fallbackLat: p.burialLat,
+                fallbackLon: p.burialLon,
+                extras: p.eventExtras["BURI"] ?? [],
+                force: false,
+                sourceXref: sourceXref,
+                to: &lines
+            )
 
-            // Death
-            let deathExtras = p.eventExtras["DEAT"] ?? []
-            if !p.isLiving || !deathExtras.isEmpty {
-                lines.append("1 DEAT")
-                if let d = p.deathDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
-                appendPlace(p.deathPlace, lat: p.deathLat, lon: p.deathLon, to: &lines)
-                lines.append(contentsOf: deathExtras)
+            // Repeatable occupation/education and other structured person events.
+            let scalarKinds: Set<GenealogyEvent.Kind> = [.occupation, .education, .residence, .immigration, .military, .custom]
+            for event in p.events where scalarKinds.contains(event.kind) {
+                appendGeneralEvent(event, sourceXref: sourceXref, to: &lines)
             }
-
-            // Burial (place and/or precise grave coordinates)
-            let hasBurialCoord = p.burialLat != nil && p.burialLon != nil
-            let burialExtras = p.eventExtras["BURI"] ?? []
-            if (p.burialPlace?.isEmpty == false) || hasBurialCoord || !burialExtras.isEmpty {
-                lines.append("1 BURI")
-                appendPlace(p.burialPlace, lat: p.burialLat, lon: p.burialLon, to: &lines)
-                lines.append(contentsOf: burialExtras)
+            if !p.events.contains(where: { $0.kind == .occupation }), let o = p.occupation, !o.isEmpty {
+                appendValue(1, "OCCU", value: o, to: &lines)
             }
-
-            // Occupation & Education
-            if let o = p.occupation, !o.isEmpty { appendValue(1, "OCCU", value: o, to: &lines) }
-            if let e = p.education, !e.isEmpty { appendValue(1, "EDUC", value: e, to: &lines) }
+            if !p.events.contains(where: { $0.kind == .education }), let e = p.education, !e.isEmpty {
+                appendValue(1, "EDUC", value: e, to: &lines)
+            }
 
             // Notes (multi-line via CONT; long lines split further via CONC)
             if let n = p.notes, !n.isEmpty {
@@ -123,9 +161,13 @@ public struct GEDCOMSerializer {
                 }
             }
 
-            // Sources (kept as single lines: citation text is short in practice)
-            for s in p.sources {
-                lines.append("1 SOUR \(s)")
+            appendCitations(p.citations, level: 1, sourceXref: sourceXref, to: &lines)
+            let linkedTitles = Set(p.citations.compactMap { citation in
+                tree.sourceRecords.first(where: { $0.id == citation.sourceID })?.title
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+            })
+            for source in p.sources where !linkedTitles.contains(source.trimmingCharacters(in: .whitespacesAndNewlines)) {
+                appendValue(1, "SOUR", value: source, to: &lines)
             }
 
             // Photo — referenced by filename here. The bytes are returned in
@@ -138,7 +180,7 @@ public struct GEDCOMSerializer {
                 lines.append("2 FILE \(filename)")
                 lines.append("2 FORM \(filename.lowercased().hasSuffix(".png") ? "PNG" : "JPEG")")
                 if p.photoIsDirty, let bytes = p.photoData {
-                    photos.append(Photo(filename: filename, data: bytes))
+                    photos.append(Photo(personID: p.id, filename: filename, data: bytes))
                 }
             }
 
@@ -148,6 +190,8 @@ public struct GEDCOMSerializer {
                 lines.append("1 _ATTC")
                 lines.append("2 FILE Attachments/\(att.storedName)")
                 lines.append("2 TITL \(att.originalName)")
+                if let notes = att.notes, !notes.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: notes, to: &lines) }
+                appendCitations(att.citations, level: 2, sourceXref: sourceXref, to: &lines)
             }
 
             // Family links
@@ -156,6 +200,14 @@ public struct GEDCOMSerializer {
             }
             if let pu = idx.childOf[p.id], let fx = famXref[pu.id] {
                 lines.append("1 FAMC @\(fx)@")
+                let kinds = Set(tree.parentLinks.filter { $0.childID == p.id && $0.unionID == pu.id }.map(\.kind))
+                let kind = kinds.count == 1 ? kinds.first! : (kinds.isEmpty ? .biological : .uncertain)
+                switch kind {
+                case .biological, .adoptive, .foster:
+                    lines.append("2 PEDI \(kind.gedcomValue)")
+                case .step, .uncertain:
+                    lines.append("2 _PEDI \(kind.gedcomValue)")
+                }
             }
 
             // Preserved unmodeled level-1 branches from an imported file, verbatim.
@@ -166,6 +218,7 @@ public struct GEDCOMSerializer {
         for u in tree.unions {
             guard let fx = famXref[u.id] else { continue }
             lines.append("0 @\(fx)@ FAM")
+            lines.append("1 _FTSID \(u.id.uuidString)")
 
             // Determine HUSB/WIFE by sex
             var husb: UUID? = nil, wife: UUID? = nil
@@ -193,33 +246,245 @@ public struct GEDCOMSerializer {
                 if let x = indiXref[cid] { lines.append("1 CHIL @\(x)@") }
             }
 
-            // Marriage
-            if u.marriageDate != nil || u.marriagePlace != nil || !u.marriageExtras.isEmpty {
-                lines.append("1 MARR")
-                if let d = u.marriageDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(d))") }
-                if let pl = u.marriagePlace { lines.append("2 PLAC \(pl)") }
-                lines.append(contentsOf: u.marriageExtras)
+            if let marriage = u.event(ofKind: .marriage) {
+                appendUnionEvent(marriage, extras: u.marriageExtras, sourceXref: sourceXref, attachments: attachmentByID, to: &lines)
+            } else if u.marriageDate != nil || u.marriagePlace != nil || !u.marriageExtras.isEmpty {
+                appendUnionEvent(GenealogyEvent(
+                    kind: .marriage,
+                    date: u.marriageDate.map { GenealogyDate(userInput: $0) },
+                    place: u.marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+                ), extras: u.marriageExtras, sourceXref: sourceXref, attachments: attachmentByID, to: &lines)
             }
-
-            // Divorce / status
-            if let st = u.status, !st.isEmpty {
-                if st == "divorced" {
-                    lines.append("1 DIV")
-                } else {
-                    lines.append("1 _STAT \(st)")
-                }
+            if let divorce = u.event(ofKind: .divorce) {
+                appendUnionEvent(divorce, extras: [], sourceXref: sourceXref, attachments: attachmentByID, to: &lines)
+            } else if u.status == "divorced" {
+                lines.append("1 DIV")
             }
+            if let separation = u.event(ofKind: .separation) {
+                appendUnionEvent(separation, extras: [], sourceXref: sourceXref, attachments: attachmentByID, to: &lines)
+            }
+            if let partnership = u.event(ofKind: .partnership) {
+                appendUnionEvent(partnership, extras: [], sourceXref: sourceXref, attachments: attachmentByID, to: &lines)
+            } else if let status = u.status, !status.isEmpty, status != "divorced", status != "separated" {
+                lines.append("1 _STAT \(status)")
+            }
+            appendCitations(u.citations, level: 1, sourceXref: sourceXref, to: &lines)
 
             // Preserved unmodeled level-1 branches from an imported file, verbatim.
             for branch in u.unknownBranches { lines.append(contentsOf: branch) }
         }
 
-        // Whole top-level records the app doesn't model (SOUR, SUBM, …), re-emitted
+        // Structured top-level sources.
+        for source in tree.sourceRecords {
+            guard let xref = sourceXref[source.id] else { continue }
+            appendSourceRecord(source, xref: xref, to: &lines)
+        }
+
+        // Whole top-level records the app doesn't model (SUBM, REPO, NOTE, …), re-emitted
         // verbatim so a foreign file survives import → re-export.
-        for record in tree.unknownRecords { lines.append(contentsOf: record) }
+        let modeledSourceXrefs = Set(tree.sourceRecords.compactMap(\.gedcomXref))
+        for record in tree.unknownRecords {
+            let first = record.first ?? ""
+            let isModeledSource = modeledSourceXrefs.contains { first.contains("@\($0)@ SOUR") }
+            if !isModeledSource { lines.append(contentsOf: record) }
+        }
 
         lines.append("0 TRLR")
         return Result(gedcom: lines.joined(separator: "\n"), photos: photos)
+    }
+
+    // MARK: - Structured records
+
+    private static func appendName(
+        _ name: PersonName,
+        primary: Bool,
+        sourceXref: [UUID: String],
+        to lines: inout [String]
+    ) {
+        let given = sanitizeNamePart(name.givenNames)
+        let surname = sanitizeNamePart(name.maidenName ?? name.surname)
+        lines.append("1 NAME \(given) /\(surname)/")
+        if !primary || name.kind != .birth { lines.append("2 TYPE \(gedcomNameType(name.kind))") }
+        if !name.givenNames.isEmpty { appendValue(2, "GIVN", value: name.givenNames, to: &lines) }
+        if !name.surname.isEmpty { appendValue(2, "SURN", value: name.surname, to: &lines) }
+        if let prefix = name.prefix, !prefix.isEmpty { appendValue(2, "NPFX", value: prefix, to: &lines) }
+        if let suffix = name.suffix, !suffix.isEmpty { appendValue(2, "NSFX", value: suffix, to: &lines) }
+        if let nickname = name.nickname, !nickname.isEmpty { appendValue(2, "NICK", value: nickname, to: &lines) }
+        if let patronymic = name.patronymic, !patronymic.isEmpty {
+            appendValue(2, "_PATR", value: patronymic, to: &lines)
+        }
+        if primary, let maiden = name.maidenName, !maiden.isEmpty, maiden != name.surname {
+            lines.append("2 _MARNM \(given) /\(sanitizeNamePart(name.surname))/")
+        }
+        appendCitations(name.citations, level: 2, sourceXref: sourceXref, to: &lines)
+        for branch in name.rawGEDCOMBranches { lines.append(contentsOf: branch) }
+    }
+
+    private static func gedcomNameType(_ kind: PersonName.Kind) -> String {
+        switch kind {
+        case .birth: "birth"
+        case .married: "married"
+        case .alsoKnownAs: "aka"
+        case .religious: "religious"
+        case .immigration: "immigration"
+        case .other: "other"
+        }
+    }
+
+    private static func appendPersonEvent(
+        _ event: GenealogyEvent?,
+        kind: GenealogyEvent.Kind,
+        fallbackDate: String?,
+        fallbackPlace: String?,
+        fallbackLat: Double?,
+        fallbackLon: Double?,
+        extras: [String],
+        force: Bool,
+        sourceXref: [UUID: String],
+        to lines: inout [String]
+    ) {
+        let date = event?.date
+        let place = event?.place
+        let eventExtras = filteredLegacyExtras(extras, replacingNotes: event?.notes != nil, replacingSources: !(event?.citations.isEmpty ?? true))
+        let hasContent = force || date != nil || fallbackDate != nil || place != nil ||
+            fallbackPlace?.isEmpty == false || fallbackLat != nil || fallbackLon != nil ||
+            event?.notes?.isEmpty == false || !(event?.citations.isEmpty ?? true) || !eventExtras.isEmpty
+        guard hasContent else { return }
+
+        lines.append("1 \(kind.gedcomTag)")
+        if let date { lines.append("2 DATE \(date.canonicalGEDCOMValue)") }
+        else if let fallbackDate { lines.append("2 DATE \(FamilyDate.toGEDCOM(fallbackDate))") }
+        appendPlace(
+            place?.displayName ?? fallbackPlace,
+            lat: place?.latitude ?? fallbackLat,
+            lon: place?.longitude ?? fallbackLon,
+            to: &lines
+        )
+        if let type = event?.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
+        if let note = event?.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        appendCitations(event?.citations ?? [], level: 2, sourceXref: sourceXref, to: &lines)
+        lines.append(contentsOf: eventExtras)
+        for branch in event?.rawGEDCOMBranches ?? [] { lines.append(contentsOf: branch) }
+    }
+
+    private static func appendGeneralEvent(
+        _ event: GenealogyEvent,
+        sourceXref: [UUID: String],
+        to lines: inout [String]
+    ) {
+        let hasSubstructure = event.date != nil || event.place != nil || event.notes?.isEmpty == false ||
+            !event.citations.isEmpty || !event.rawGEDCOMBranches.isEmpty || event.typeName != nil
+        if !hasSubstructure, let value = event.value, !value.isEmpty {
+            appendValue(1, event.kind.gedcomTag, value: value, to: &lines)
+            return
+        }
+        if let value = event.value, !value.isEmpty { appendValue(1, event.kind.gedcomTag, value: value, to: &lines) }
+        else { lines.append("1 \(event.kind.gedcomTag)") }
+        if event.kind == .custom, let type = event.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
+        if let date = event.date { lines.append("2 DATE \(date.canonicalGEDCOMValue)") }
+        if let place = event.place { appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, to: &lines) }
+        if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
+        for branch in event.rawGEDCOMBranches { lines.append(contentsOf: branch) }
+    }
+
+    private static func appendUnionEvent(
+        _ event: GenealogyEvent,
+        extras: [String],
+        sourceXref: [UUID: String],
+        attachments: [String: Attachment],
+        to lines: inout [String]
+    ) {
+        lines.append("1 \(event.kind.gedcomTag)")
+        if let date = event.date { lines.append("2 DATE \(date.canonicalGEDCOMValue)") }
+        if let place = event.place { appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, to: &lines) }
+        if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
+        for mediaID in event.mediaIDs {
+            guard let attachment = attachments[mediaID] else { continue }
+            lines.append("2 _ATTC")
+            appendValue(3, "FILE", value: "Attachments/\(attachment.storedName)", to: &lines)
+            appendValue(3, "TITL", value: attachment.originalName, to: &lines)
+        }
+        lines.append(contentsOf: filteredLegacyExtras(extras, replacingNotes: event.notes != nil, replacingSources: !event.citations.isEmpty))
+        for branch in event.rawGEDCOMBranches { lines.append(contentsOf: branch) }
+    }
+
+    private static func appendCitations(
+        _ citations: [Citation],
+        level: Int,
+        sourceXref: [UUID: String],
+        to lines: inout [String]
+    ) {
+        for citation in citations {
+            guard let xref = sourceXref[citation.sourceID] else {
+                for branch in citation.rawGEDCOMBranches { lines.append(contentsOf: branch) }
+                continue
+            }
+            lines.append("\(level) SOUR @\(xref)@")
+            if let page = citation.page, !page.isEmpty { appendValue(level + 1, "PAGE", value: page, to: &lines) }
+            if let detail = citation.detail, !detail.isEmpty { appendValue(level + 1, "EVEN", value: detail, to: &lines) }
+            if let text = citation.transcription, !text.isEmpty {
+                lines.append("\(level + 1) DATA")
+                appendMultiline(level: level + 2, tag: "TEXT", value: text, to: &lines)
+            }
+            if let confidence = citation.confidence, !confidence.isEmpty {
+                appendValue(level + 1, "QUAY", value: confidence, to: &lines)
+            }
+            if let notes = citation.notes, !notes.isEmpty {
+                appendMultiline(level: level + 1, tag: "NOTE", value: notes, to: &lines)
+            }
+        }
+    }
+
+    private static func appendSourceRecord(_ source: SourceRecord, xref: String, to lines: inout [String]) {
+        lines.append("0 @\(xref)@ SOUR")
+        lines.append("1 _FTSID \(source.id.uuidString)")
+        appendValue(1, "TITL", value: source.title, to: &lines)
+        if let author = source.author, !author.isEmpty { appendValue(1, "AUTH", value: author, to: &lines) }
+        if let publication = source.publication, !publication.isEmpty { appendValue(1, "PUBL", value: publication, to: &lines) }
+        if let repository = source.repository, !repository.isEmpty {
+            if repository.first == "@", repository.last == "@" { lines.append("1 REPO \(repository)") }
+            else { appendValue(1, "REPO", value: repository, to: &lines) }
+        }
+        if let callNumber = source.callNumber, !callNumber.isEmpty { appendValue(1, "CALN", value: callNumber, to: &lines) }
+        if let notes = source.notes, !notes.isEmpty { appendMultiline(level: 1, tag: "NOTE", value: notes, to: &lines) }
+        for branch in source.rawGEDCOMBranches { lines.append(contentsOf: branch) }
+    }
+
+    private static func appendMultiline(level: Int, tag: String, value: String, to lines: inout [String]) {
+        let parts = value.components(separatedBy: "\n")
+        appendValue(level, tag, value: parts.first ?? "", to: &lines)
+        for line in parts.dropFirst() { appendValue(level + 1, "CONT", value: line, to: &lines) }
+    }
+
+    /// Remove preserved legacy NOTE/SOUR branches only when their structured
+    /// equivalents are being emitted. All other imported substructure is untouched.
+    private static func filteredLegacyExtras(
+        _ extras: [String],
+        replacingNotes: Bool,
+        replacingSources: Bool
+    ) -> [String] {
+        var result: [String] = []
+        var skippedRootLevel: Int?
+        for raw in extras {
+            let tokens = raw.split(separator: " ", maxSplits: 2).map(String.init)
+            guard tokens.count >= 2, let level = Int(tokens[0]) else {
+                if skippedRootLevel == nil { result.append(raw) }
+                continue
+            }
+            if let root = skippedRootLevel {
+                if level > root { continue }
+                skippedRootLevel = nil
+            }
+            let tag = tokens[1]
+            if (replacingNotes && tag == "NOTE") || (replacingSources && tag == "SOUR") {
+                skippedRootLevel = level
+                continue
+            }
+            result.append(raw)
+        }
+        return result
     }
 
     // MARK: - Xref assignment

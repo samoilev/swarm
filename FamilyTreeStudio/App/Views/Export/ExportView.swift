@@ -1,7 +1,6 @@
 import AppKit
 import FamilyTreeCore
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct ExportView: View {
     let tree: FamilyTree
@@ -12,7 +11,7 @@ struct ExportView: View {
     var showPhotos: Bool = true
     @Environment(\.dismiss) private var dismiss
 
-    // Native file export (PDF cards via .fileExporter; GEDCOM via NSSavePanel).
+    // Native file export (PDF cards via .fileExporter; verified tree bundle via NSOpenPanel).
     @State private var exportDoc: RenderedFileDocument?
     @State private var exportName = ""
     @State private var showExporter = false
@@ -55,13 +54,13 @@ struct ExportView: View {
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                     .disabled(selectedIds.isEmpty)
 
-                    Button { exportGEDCOM() } label: {
-                        Label("Экспорт GEDCOM (.ged)", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
+                    Button { exportVerifiedTree() } label: {
+                        Label("Проверенный GEDCOM-архив", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                 }
 
-                Text("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди (подсветка родства). GEDCOM — стандартный файл для Ancestry, Gramps или MacFamilyTree.")
+                Text("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди. Архив GEDCOM сохраняет и проверяет файл дерева, портреты и вложения в отдельной папке.")
                     .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -102,17 +101,20 @@ struct ExportView: View {
         showExporter = true
     }
 
-    /// GEDCOM export stays on NSSavePanel: it writes sibling `Media/` and `Attachments/`
-    /// folders next to the chosen .ged file, which doesn't fit the single-file
-    /// FileWrapper model used by .fileExporter (the app is effectively non-sandboxed).
-    private func exportGEDCOM() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType(filenameExtension: "ged") ?? .plainText]
-        panel.nameFieldStringValue = "\(fileSlug).ged"
+    private func exportVerifiedTree() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = "Экспортировать"
         panel.begin { r in
-            if r == .OK, let url = panel.url {
+            guard r == .OK, let directory = panel.url else { return }
+            Task { @MainActor in
                 do {
-                    try store.exportGEDCOM(tree: tree, to: url)
+                    let receipt = try await store.exportTree(tree, to: directory)
+                    NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
+                    dismiss()
                 } catch {
                     exportError = error.localizedDescription
                 }

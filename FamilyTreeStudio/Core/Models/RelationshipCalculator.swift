@@ -25,8 +25,33 @@ public struct RelationshipCalculator {
 
         // Direct spouse — must be checked before anything else.
         if idx.spousesOf(personA).contains(where: { $0.id == personB.id }) {
-            return RelationshipResult(name: personB.sex == .male ? "Муж" : "Жена",
+            return RelationshipResult(name: gendered(personB, male: "Муж", female: "Жена", neutral: "Супруг/супруга"),
                                       path: [personA.id, personB.id], description: "")
+        }
+
+        if let link = tree.parentLinks.first(where: { $0.parentID == personB.id && $0.childID == personA.id }) {
+            return RelationshipResult(
+                name: parentName(personB, kind: link.kind),
+                path: [personA.id, personB.id],
+                description: link.kind.displayName
+            )
+        }
+        if let link = tree.parentLinks.first(where: { $0.parentID == personA.id && $0.childID == personB.id }) {
+            return RelationshipResult(
+                name: childName(personB, kind: link.kind),
+                path: [personA.id, personB.id],
+                description: link.kind.displayName
+            )
+        }
+        let parents = idx.parentsOf(personA)
+        let parentPeople = [parents.father, parents.mother].compactMap { $0 }
+        if !parentPeople.contains(where: { $0.id == personB.id }),
+           parentPeople.contains(where: { parent in idx.spousesOf(parent).contains(where: { $0.id == personB.id }) }) {
+            return RelationshipResult(
+                name: gendered(personB, male: "Отчим", female: "Мачеха", neutral: "Неродной родитель"),
+                path: [personA.id, personB.id],
+                description: "Производная связь через союз с родителем"
+            )
         }
 
         // Find path using BFS in family graph (used for the description / highlight)
@@ -162,25 +187,23 @@ public struct RelationshipCalculator {
     }
 
     private func nameRelationship(stepsUp: Int, stepsDown: Int, from personA: Person, to personB: Person) -> String {
-        let sexB = personB.sex
-
         // Direct ancestor/descendant
         if stepsDown == 0 {
             switch stepsUp {
-            case 1: return sexB == .male ? "Отец" : "Мать"
-            case 2: return sexB == .male ? "Дед" : "Бабушка"
-            case 3: return sexB == .male ? "Прадед" : "Прабабушка"
-            case 4: return sexB == .male ? "Прапрадед" : "Прапрабабушка"
+            case 1: return gendered(personB, male: "Отец", female: "Мать", neutral: "Родитель")
+            case 2: return gendered(personB, male: "Дед", female: "Бабушка", neutral: "Родитель родителя")
+            case 3: return gendered(personB, male: "Прадед", female: "Прабабушка", neutral: "Прародитель")
+            case 4: return gendered(personB, male: "Прапрадед", female: "Прапрабабушка", neutral: "Пра-прародитель")
             default: return "\(stepsUp)-й предок"
             }
         }
 
         if stepsUp == 0 {
             switch stepsDown {
-            case 1: return sexB == .male ? "Сын" : "Дочь"
-            case 2: return sexB == .male ? "Внук" : "Внучка"
-            case 3: return sexB == .male ? "Правнук" : "Правнучка"
-            case 4: return sexB == .male ? "Праправнук" : "Праправнучка"
+            case 1: return gendered(personB, male: "Сын", female: "Дочь", neutral: "Ребёнок")
+            case 2: return gendered(personB, male: "Внук", female: "Внучка", neutral: "Внук/внучка")
+            case 3: return gendered(personB, male: "Правнук", female: "Правнучка", neutral: "Правнук/правнучка")
+            case 4: return gendered(personB, male: "Праправнук", female: "Праправнучка", neutral: "Праправнук/праправнучка")
             default: return "\(stepsDown)-й потомок"
             }
         }
@@ -192,28 +215,28 @@ public struct RelationshipCalculator {
 
         // Uncle/Aunt - Nephew/Niece
         if stepsUp == 1 && stepsDown == 2 {
-            return sexB == .male ? "Племянник" : "Племянница"
+            return gendered(personB, male: "Племянник", female: "Племянница", neutral: "Племянник/племянница")
         }
         if stepsUp == 2 && stepsDown == 1 {
-            return sexB == .male ? "Дядя" : "Тётя"
+            return gendered(personB, male: "Дядя", female: "Тётя", neutral: "Дядя/тётя")
         }
 
         // Great uncle/aunt - grand nephew/niece
         if stepsUp == 1 && stepsDown == 3 {
-            return sexB == .male ? "Внучатый племянник" : "Внучатая племянница"
+            return gendered(personB, male: "Внучатый племянник", female: "Внучатая племянница", neutral: "Внучатый племянник/племянница")
         }
         if stepsUp == 3 && stepsDown == 1 {
-            return sexB == .male ? "Двоюродный дед" : "Двоюродная бабушка"
+            return gendered(personB, male: "Двоюродный дед", female: "Двоюродная бабушка", neutral: "Двоюродный прародитель")
         }
 
         // Cousins
         if stepsUp == stepsDown {
             let degree = stepsUp - 1
             switch degree {
-            case 1: return sexB == .male ? "Двоюродный брат" : "Двоюродная сестра"
-            case 2: return sexB == .male ? "Троюродный брат" : "Троюродная сестра"
-            case 3: return sexB == .male ? "Четвероюродный брат" : "Четвероюродная сестра"
-            default: return "\(degree + 1)-юродный \(sexB == .male ? "брат" : "сестра")"
+            case 1: return gendered(personB, male: "Двоюродный брат", female: "Двоюродная сестра", neutral: "Двоюродный брат/сестра")
+            case 2: return gendered(personB, male: "Троюродный брат", female: "Троюродная сестра", neutral: "Троюродный брат/сестра")
+            case 3: return gendered(personB, male: "Четвероюродный брат", female: "Четвероюродная сестра", neutral: "Четвероюродный брат/сестра")
+            default: return "\(degree + 1)-юродный родственник"
             }
         }
 
@@ -221,20 +244,49 @@ public struct RelationshipCalculator {
         if stepsUp >= 2 && stepsDown >= 2 {
             let degree = min(stepsUp, stepsDown) - 1
             let cousinName: String = switch degree {
-            case 1: sexB == .male ? "Двоюродный" : "Двоюродная"
-            case 2: sexB == .male ? "Троюродный" : "Троюродная"
+            case 1: personB.sex == .male ? "Двоюродный" : personB.sex == .female ? "Двоюродная" : "Двоюродный/двоюродная"
+            case 2: personB.sex == .male ? "Троюродный" : personB.sex == .female ? "Троюродная" : "Троюродный/троюродная"
             default: "\(degree + 1)-юродный"
             }
-            let relType = sexB == .male ? "племянник" : "племянница"
+            let relType = gendered(personB, male: "племянник", female: "племянница", neutral: "племянник/племянница")
             if stepsDown > stepsUp {
                 return "\(cousinName) \(relType)"
             } else {
-                let relType2 = sexB == .male ? "дядя" : "тётя"
+                let relType2 = gendered(personB, male: "дядя", female: "тётя", neutral: "дядя/тётя")
                 return "\(cousinName) \(relType2)"
             }
         }
 
         return "Дальний родственник"
+    }
+
+    private func parentName(_ person: Person, kind: ParentageKind) -> String {
+        switch kind {
+        case .biological: gendered(person, male: "Отец", female: "Мать", neutral: "Родитель")
+        case .adoptive: gendered(person, male: "Приёмный отец", female: "Приёмная мать", neutral: "Приёмный родитель")
+        case .foster: gendered(person, male: "Опекун", female: "Опекун", neutral: "Опекун")
+        case .step: gendered(person, male: "Отчим", female: "Мачеха", neutral: "Неродной родитель")
+        case .uncertain: gendered(person, male: "Предполагаемый отец", female: "Предполагаемая мать", neutral: "Предполагаемый родитель")
+        }
+    }
+
+    private func childName(_ person: Person, kind: ParentageKind) -> String {
+        let base = gendered(person, male: "сын", female: "дочь", neutral: "ребёнок")
+        switch kind {
+        case .biological: return base.prefix(1).uppercased() + String(base.dropFirst())
+        case .adoptive: return "Приёмный \(base)"
+        case .foster: return "Ребёнок под опекой"
+        case .step: return gendered(person, male: "Пасынок", female: "Падчерица", neutral: "Неродной ребёнок")
+        case .uncertain: return "Предполагаемый \(base)"
+        }
+    }
+
+    private func gendered(_ person: Person, male: String, female: String, neutral: String) -> String {
+        switch person.sex {
+        case .male: male
+        case .female: female
+        case .unknown: neutral
+        }
     }
 
     // MARK: - In-Law Relationships

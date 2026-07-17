@@ -9,8 +9,8 @@ product
 Russian-speaking people building and preserving their family history — from one
 person digitizing a grandparent's notes to someone maintaining a tree across many
 generations. They work at home on their own Mac, often from old photographs,
-documents, and memory, and they care about privacy: the app is fully offline and
-nothing about their family ever leaves the device.
+documents, and memory, and they care about privacy: the family record itself never
+leaves the Mac, and the map can be switched to a fully offline one.
 
 The job to be done: record relatives accurately (with correct Russian kinship
 terms), see how everyone connects (tree diagram, ancestor fan chart, map of
@@ -19,8 +19,8 @@ tree in and out of other genealogy tools without losing anything via GEDCOM.
 
 ## Product Purpose
 
-A native macOS app to build, visualize, and export family trees, with GEDCOM
-5.5.1 as the source of truth and everything running fully offline.
+A native macOS app to build, validate, recover, visualize, merge, and export family
+trees, with GEDCOM 5.5.1 as the source of truth and offline-first local storage.
 
 Success looks like a trustworthy, lasting home for family history: Russian kinship
 naming that's actually correct (direct lineage, full/half siblings, cousins incl.
@@ -57,8 +57,11 @@ decorative nostalgia or period kitsch. Three words: **warm, archival, trustworth
    cousins) is the product, not a nice-to-have.
 4. **Quiet confidence.** Calm, unhurried surfaces; the tool recedes so the family
    comes forward. Resist dashboard busy-ness and competing emphasis.
-5. **Private by default.** The app is a vault: fully offline, nothing leaves the
-   device. The design should reinforce that sense of safekeeping, not undercut it.
+5. **The record stays home.** Editing, search, place lookup, validation and storage are
+   offline. The map defaults to Apple Maps, which sends only what its network map service
+   requires for the viewed region — never intentionally the genealogy record or
+   annotations — and Settings offers a fully offline vector map for anyone who wants no
+   network at all.
 
 ## Accessibility & Inclusion
 
