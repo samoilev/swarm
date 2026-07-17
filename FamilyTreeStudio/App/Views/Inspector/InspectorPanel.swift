@@ -299,8 +299,8 @@ struct InspectorPanel: View {
         }
     }
 
-    // Label above value, matching `FieldRow` — a fixed label column here made these
-    // rows the only ones in the panel whose text started further right.
+    /// Label above value, matching `FieldRow` — a fixed label column here made these
+    /// rows the only ones in the panel whose text started further right.
     private func relRow(_ tag: String, _ p: Person) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())

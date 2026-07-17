@@ -255,7 +255,7 @@ public final class TreeStore {
                 mediaFolder: oldMedia,
                 attachmentsFolder: storageFolder.appendingPathComponent("Attachments_\(stem)", isDirectory: true)
             )
-            receipts.append(try persistTree(tree))
+            try receipts.append(persistTree(tree))
             if !trees.contains(where: { $0 === tree }) { trees.append(tree) }
 
             let destination = uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-\(stem)", isDirectory: true), isDirectory: true)
