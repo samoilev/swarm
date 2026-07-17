@@ -119,8 +119,8 @@ struct RecoveryView: View {
             Text(selectedTree == nil ? "Выберите архив" : "Пока нечего восстанавливать")
                 .font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
             Text(selectedTree == nil
-                 ? "Выберите дерево выше, чтобы увидеть его версии и удалённые файлы."
-                 : "Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы.")
+                ? "Выберите дерево выше, чтобы увидеть его версии и удалённые файлы."
+                : "Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы.")
                 .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                 .multilineTextAlignment(.center)
         }
@@ -205,8 +205,8 @@ struct RecoveryView: View {
                 .buttonStyle(SepiaButtonStyle())
                 .disabled(isWorking || (item.kind == .deletedFile && restoreTargets[item.id] == nil))
                 .help(item.kind == .deletedFile && restoreTargets[item.id] == nil
-                      ? "Сначала выберите, в чью карточку вернуть файл"
-                      : actionLabel(item.kind))
+                    ? "Сначала выберите, в чью карточку вернуть файл"
+                    : actionLabel(item.kind))
         }
         .padding(10)
         .background(SepiaTheme.cardBg)
