@@ -53,7 +53,7 @@ public enum L10n {
                 value += literal.replacingOccurrences(of: "%", with: "%%")
             }
 
-            public mutating func appendInterpolation<T>(_ expression: T) {
+            public mutating func appendInterpolation(_ expression: some Any) {
                 value += "%@"
                 arguments.append(String(describing: expression) as NSString)
             }
@@ -113,15 +113,14 @@ public enum L10n {
 
     private static func englishOrdinal(_ value: Int) -> String {
         let remainder100 = value % 100
-        let suffix: String
-        if (11 ... 13).contains(remainder100) {
-            suffix = "th"
+        let suffix = if (11 ... 13).contains(remainder100) {
+            "th"
         } else {
             switch value % 10 {
-            case 1: suffix = "st"
-            case 2: suffix = "nd"
-            case 3: suffix = "rd"
-            default: suffix = "th"
+            case 1: "st"
+            case 2: "nd"
+            case 3: "rd"
+            default: "th"
             }
         }
         return "\(value)\(suffix)"
