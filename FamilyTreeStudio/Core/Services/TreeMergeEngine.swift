@@ -63,9 +63,9 @@ public enum TreeMergeError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .wrongDestination: "Предпросмотр слияния относится к другому дереву."
-        case .snapshotFailed: "Не удалось создать снимок для отката слияния."
-        case let .attachmentMissing(name): "Файл вложения не найден: \(name)."
+        case .wrongDestination: L10n.tr("Предпросмотр слияния относится к другому дереву.")
+        case .snapshotFailed: L10n.tr("Не удалось создать снимок для отката слияния.")
+        case let .attachmentMissing(name): L10n.tr("Файл вложения не найден: \(name).")
         }
     }
 }
@@ -90,7 +90,7 @@ public final class TreeMergeEngine {
                     localPersonID: localPerson.id,
                     incomingPersonID: candidate.id,
                     kind: .stableID,
-                    reasons: ["совпадает _FTSID"]
+                    reasons: [L10n.tr("совпадает _FTSID")]
                 ))
                 matchedLocal.insert(localPerson.id)
                 matchedIncoming.insert(candidate.id)
@@ -105,7 +105,7 @@ public final class TreeMergeEngine {
                     localPersonID: localPerson.id,
                     incomingPersonID: candidate.id,
                     kind: .sharedTreeXref,
-                    reasons: ["совпадает xref в одном _TREEID"]
+                    reasons: [L10n.tr("совпадает xref в одном _TREEID")]
                 ))
                 matchedLocal.insert(localPerson.id)
                 matchedIncoming.insert(candidate.id)
@@ -280,14 +280,14 @@ public final class TreeMergeEngine {
         guard !leftName.isEmpty, leftName == rightName,
               let leftBirth = localPerson.event(ofKind: .birth)?.date?.year,
               leftBirth == incomingPerson.event(ofKind: .birth)?.date?.year else { return [] }
-        var reasons = ["совпадают имя и год рождения"]
+        var reasons = [L10n.tr("совпадают имя и год рождения")]
 
         let leftPlaces = Set(localPerson.events.compactMap { $0.place.map { TreeWorkspaceIndexes.normalize($0.displayName) } })
         let rightPlaces = Set(incomingPerson.events.compactMap { $0.place.map { TreeWorkspaceIndexes.normalize($0.displayName) } })
-        if !leftPlaces.intersection(rightPlaces).isEmpty { reasons.append("совпадает место") }
+        if !leftPlaces.intersection(rightPlaces).isEmpty { reasons.append(L10n.tr("совпадает место")) }
         if let death = localPerson.event(ofKind: .death)?.date?.year,
-           death == incomingPerson.event(ofKind: .death)?.date?.year { reasons.append("совпадает год смерти") }
-        if corroboratingRelative(localPerson, incomingPerson, local: local, incoming: incoming) { reasons.append("совпадает родственник") }
+           death == incomingPerson.event(ofKind: .death)?.date?.year { reasons.append(L10n.tr("совпадает год смерти")) }
+        if corroboratingRelative(localPerson, incomingPerson, local: local, incoming: incoming) { reasons.append(L10n.tr("совпадает родственник")) }
         return reasons
     }
 

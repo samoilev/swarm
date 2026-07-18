@@ -70,12 +70,12 @@ public struct RecoveryItem: Identifiable, Hashable, Sendable {
             if parts.count > 1, let decoded = Self.decodeFilename(parts[1]) { return decoded }
             return parts[0].components(separatedBy: "--").last ?? displayName
         case .revision:
-            return "Сохранение"
+            return L10n.tr("Сохранение")
         case .migrationBackup:
-            if displayName.hasSuffix("pre-v2") { return "Перед обновлением формата" }
-            if displayName.hasSuffix("pre-merge") { return "Перед слиянием" }
-            if displayName.hasSuffix("pre-restore") { return "Перед восстановлением" }
-            return "Полная копия архива"
+            if displayName.hasSuffix("pre-v2") { return L10n.tr("Перед обновлением формата") }
+            if displayName.hasSuffix("pre-merge") { return L10n.tr("Перед слиянием") }
+            if displayName.hasSuffix("pre-restore") { return L10n.tr("Перед восстановлением") }
+            return L10n.tr("Полная копия архива")
         case .archivedTree:
             return displayName
         }
@@ -103,9 +103,9 @@ public struct PendingMigration: Identifiable, Hashable, Sendable {
 
         public var label: String {
             switch self {
-            case .treeFolder: "Обновление до текущего формата папки"
-            case .legacyFile: "Отдельный файл GEDCOM старого формата"
-            case .legacyJSON: "Старая база trees.json"
+            case .treeFolder: L10n.tr("Обновление до текущего формата папки")
+            case .legacyFile: L10n.tr("Отдельный файл GEDCOM старого формата")
+            case .legacyJSON: L10n.tr("Старая база trees.json")
             }
         }
     }
@@ -134,19 +134,19 @@ public enum TreeStoreError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .treeFolderMissing:
-            "Папка дерева не найдена."
+            L10n.tr("Папка дерева не найдена.")
         case let .verificationFailed(path):
-            "Проверка записанного файла не пройдена: \(path)."
+            L10n.tr("Проверка записанного файла не пройдена: \(path).")
         case let .commitFailed(reason):
-            "Не удалось завершить безопасное сохранение: \(reason)."
+            L10n.tr("Не удалось завершить безопасное сохранение: \(reason).")
         case .invalidImport:
-            "GEDCOM содержит ошибки, блокирующие импорт."
+            L10n.tr("GEDCOM содержит ошибки, блокирующие импорт.")
         case let .validationFailed(issues):
-            "Сохранение заблокировано: \(issues.first?.message ?? "обнаружена ошибка данных")."
+            L10n.tr("Сохранение заблокировано: \(issues.first?.message ?? L10n.tr("обнаружена ошибка данных")).")
         case .recoveryItemMissing:
-            "Элемент восстановления больше не существует."
+            L10n.tr("Элемент восстановления больше не существует.")
         case .migrationRequired:
-            "Перед сохранением требуется безопасная миграция старого формата."
+            L10n.tr("Перед сохранением требуется безопасная миграция старого формата.")
         }
     }
 }

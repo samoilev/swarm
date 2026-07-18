@@ -68,8 +68,9 @@ decorative nostalgia or period kitsch. Three words: **warm, archival, trustworth
 - **Commitment: WCAG AA contrast** across the sepia palette. The warm near-white
   backgrounds (`paper`, `cardBg`, `panelBg`) paired with muted inks (`inkSoft`,
   `line`) are the real risk; hold body text to ≥4.5:1 and large/UI text to ≥3:1.
-- **Russian-language UI.** Interface text and kinship terminology must stay
-  idiomatic; copy is written in Russian first, not translated mechanically.
+- **Bilingual UI (Russian and English).** Russian remains the default and source
+  language. Both interfaces must stay idiomatic, including kinship terminology,
+  generated labels, accessibility text, error states, and exported presentation copy.
 - **Known consideration (not yet a commitment):** the male/female card tints
   (`cardBgMale` / `cardBgFemale`, `cardLineMale` / `cardLineFemale`) currently
   signal sex through color alone, which color-blind users may not perceive. Worth a

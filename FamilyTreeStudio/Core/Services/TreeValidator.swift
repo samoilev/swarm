@@ -61,9 +61,9 @@ public enum TreeValidator {
         let unionIDs = Set(tree.unions.map(\.id))
         let sourceIDs = Set(tree.sourceRecords.map(\.id))
 
-        addDuplicateIDs(tree.people.map(\.id), kind: "person", title: "Повтор идентификатора персоны", to: &issues)
-        addDuplicateIDs(tree.unions.map(\.id), kind: "union", title: "Повтор идентификатора семьи", to: &issues)
-        addDuplicateIDs(tree.sourceRecords.map(\.id), kind: "source", title: "Повтор идентификатора источника", to: &issues)
+        addDuplicateIDs(tree.people.map(\.id), kind: "person", title: L10n.tr("Повтор идентификатора персоны"), to: &issues)
+        addDuplicateIDs(tree.unions.map(\.id), kind: "union", title: L10n.tr("Повтор идентификатора семьи"), to: &issues)
+        addDuplicateIDs(tree.sourceRecords.map(\.id), kind: "source", title: L10n.tr("Повтор идентификатора источника"), to: &issues)
         addSimilarSources(tree.sourceRecords, into: &issues)
 
         for union in tree.unions {
@@ -71,8 +71,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).dangling-partner.\(partner)",
                     code: "relationship.dangling-person",
-                    title: "Не найдена персона",
-                    message: "Семейная связь ссылается на отсутствующую персону.",
+                    title: L10n.tr("Не найдена персона"),
+                    message: L10n.tr("Семейная связь ссылается на отсутствующую персону."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -81,8 +81,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).dangling-child.\(child)",
                     code: "relationship.dangling-person",
-                    title: "Не найден ребёнок",
-                    message: "Семейная запись ссылается на отсутствующего ребёнка.",
+                    title: L10n.tr("Не найден ребёнок"),
+                    message: L10n.tr("Семейная запись ссылается на отсутствующего ребёнка."),
                     unionID: union.id,
                     field: "children"
                 ))
@@ -91,8 +91,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).self-partner",
                     code: "relationship.self-link",
-                    title: "Связь с самим собой",
-                    message: "Одна персона не может занимать обе позиции партнёров.",
+                    title: L10n.tr("Связь с самим собой"),
+                    message: L10n.tr("Одна персона не может занимать обе позиции партнёров."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -101,8 +101,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).self-parent.\(child)",
                     code: "relationship.self-link",
-                    title: "Связь с самим собой",
-                    message: "Персона не может быть собственным родителем.",
+                    title: L10n.tr("Связь с самим собой"),
+                    message: L10n.tr("Персона не может быть собственным родителем."),
                     personID: child,
                     unionID: union.id,
                     field: "children"
@@ -115,8 +115,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "parent-link.\(link.id).self",
                     code: "relationship.self-link",
-                    title: "Связь с самим собой",
-                    message: "Персона не может быть собственным родителем.",
+                    title: L10n.tr("Связь с самим собой"),
+                    message: L10n.tr("Персона не может быть собственным родителем."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -126,8 +126,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "parent-link.\(link.id).dangling",
                     code: "relationship.dangling-person",
-                    title: "Неполная родительская связь",
-                    message: "Один из участников родительской связи отсутствует.",
+                    title: L10n.tr("Неполная родительская связь"),
+                    message: L10n.tr("Один из участников родительской связи отсутствует."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -139,8 +139,8 @@ public enum TreeValidator {
             issues.append(error(
                 id: "relationship.cycle.\(signature)",
                 code: "relationship.ancestry-cycle",
-                title: "Цикл предков",
-                message: "Цепочка родителей возвращается к исходной персоне.",
+                title: L10n.tr("Цикл предков"),
+                message: L10n.tr("Цепочка родителей возвращается к исходной персоне."),
                 personID: cycle.first,
                 field: "parentage"
             ))
@@ -155,8 +155,8 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "person.\(person.id).event.\(event.id).unpinned",
                     code: "place.unpinned",
-                    title: "Место без координат",
-                    message: "«\(event.place?.displayName ?? "")» не будет показано на карте.",
+                    title: L10n.tr("Место без координат"),
+                    message: L10n.tr("«\(event.place?.displayName ?? "")» не будет показано на карте."),
                     personID: person.id,
                     field: event.kind.rawValue
                 ))
@@ -167,8 +167,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "person.\(person.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
-                    title: "Источник не найден",
-                    message: "Ссылка доказательства указывает на отсутствующий источник.",
+                    title: L10n.tr("Источник не найден"),
+                    message: L10n.tr("Ссылка доказательства указывает на отсутствующий источник."),
                     personID: person.id,
                     field: "citations"
                 ))
@@ -180,8 +180,8 @@ public enum TreeValidator {
                         issues.append(warning(
                             id: "person.\(person.id).portrait.missing",
                             code: "file.missing",
-                            title: "Портрет не найден",
-                            message: "Файл портрета «\(photo)» отсутствует на диске.",
+                            title: L10n.tr("Портрет не найден"),
+                            message: L10n.tr("Файл портрета «\(photo)» отсутствует на диске."),
                             personID: person.id,
                             field: "portrait"
                         ))
@@ -193,8 +193,8 @@ public enum TreeValidator {
                         issues.append(warning(
                             id: "person.\(person.id).attachment.\(attachment.id).missing",
                             code: "file.missing",
-                            title: "Файл не найден",
-                            message: "Вложение «\(attachment.originalName)» отсутствует на диске.",
+                            title: L10n.tr("Файл не найден"),
+                            message: L10n.tr("Вложение «\(attachment.originalName)» отсутствует на диске."),
                             personID: person.id,
                             field: "attachments"
                         ))
@@ -210,8 +210,8 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "union.\(union.id).event.\(event.id).unpinned",
                     code: "place.unpinned",
-                    title: "Место без координат",
-                    message: "«\(event.place?.displayName ?? "")» не будет показано на карте.",
+                    title: L10n.tr("Место без координат"),
+                    message: L10n.tr("«\(event.place?.displayName ?? "")» не будет показано на карте."),
                     unionID: union.id,
                     field: event.kind.rawValue
                 ))
@@ -220,8 +220,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
-                    title: "Источник не найден",
-                    message: "Ссылка доказательства союза указывает на отсутствующий источник.",
+                    title: L10n.tr("Источник не найден"),
+                    message: L10n.tr("Ссылка доказательства союза указывает на отсутствующий источник."),
                     unionID: union.id,
                     field: "citations"
                 ))
@@ -233,8 +233,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "parent-link.\(link.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
-                    title: "Источник не найден",
-                    message: "Ссылка доказательства родства указывает на отсутствующий источник.",
+                    title: L10n.tr("Источник не найден"),
+                    message: L10n.tr("Ссылка доказательства родства указывает на отсутствующий источник."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -247,24 +247,24 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "gedcom.pointer.\(pointer)",
                     code: "gedcom.unresolved-pointer",
-                    title: "Неразрешённая ссылка GEDCOM",
-                    message: "Не найдена запись @\(pointer)@."
+                    title: L10n.tr("Неразрешённая ссылка GEDCOM"),
+                    message: L10n.tr("Не найдена запись @\(pointer)@.")
                 ))
             }
             for tag in report.preservedUnsupportedTags {
                 issues.append(warning(
                     id: "gedcom.unsupported.\(tag)",
                     code: "gedcom.preserved-unsupported",
-                    title: "Неподдерживаемая структура сохранена",
-                    message: "Тег \(tag) не редактируется, но будет сохранён при экспорте."
+                    title: L10n.tr("Неподдерживаемая структура сохранена"),
+                    message: L10n.tr("Тег \(tag) не редактируется, но будет сохранён при экспорте.")
                 ))
             }
             for path in report.missingMedia {
                 issues.append(warning(
                     id: "gedcom.media.missing.\(path)",
                     code: "file.missing",
-                    title: "Медиа GEDCOM не найдено",
-                    message: "Импортированный файл ссылается на отсутствующий путь «\(path)»."
+                    title: L10n.tr("Медиа GEDCOM не найдено"),
+                    message: L10n.tr("Импортированный файл ссылается на отсутствующий путь «\(path)».")
                 ))
             }
         }
@@ -294,7 +294,7 @@ public enum TreeValidator {
                 id: "id.duplicate.\(kind).\(id).occurrence.\(counts[id, default: 0])",
                 code: "identity.duplicate",
                 title: title,
-                message: "Идентификатор \(id.uuidString) используется более одного раза."
+                message: L10n.tr("Идентификатор \(id.uuidString) используется более одного раза.")
             ))
         }
     }
@@ -312,7 +312,7 @@ public enum TreeValidator {
             issues.append(warning(
                 id: "source.possible-duplicate.\(key)",
                 code: "source.possible-duplicate",
-                title: "Похожие источники",
+                title: L10n.tr("Похожие источники"),
                 message: candidates.map(\.title).joined(separator: ", "),
                 field: "sources"
             ))
@@ -331,8 +331,8 @@ public enum TreeValidator {
             issues.append(error(
                 id: "\(owner).event.\(event.id).invalid-date.\(date.rawValue)",
                 code: "date.invalid",
-                title: "Некорректная дата",
-                message: "Дата «\(date.rawValue)» не соответствует календарю или диапазону.",
+                title: L10n.tr("Некорректная дата"),
+                message: L10n.tr("Дата «\(date.rawValue)» не соответствует календарю или диапазону."),
                 personID: personID,
                 unionID: unionID,
                 field: event.kind.rawValue
@@ -355,8 +355,8 @@ public enum TreeValidator {
             issues.append(error(
                 id: "\(owner).event.\(event.id).invalid-coordinate.\(latitude).\(longitude)",
                 code: "place.invalid-coordinate",
-                title: "Некорректные координаты",
-                message: "Широта должна быть от −90 до 90, долгота — от −180 до 180.",
+                title: L10n.tr("Некорректные координаты"),
+                message: L10n.tr("Широта должна быть от −90 до 90, долгота — от −180 до 180."),
                 personID: personID,
                 unionID: unionID,
                 field: event.kind.rawValue
@@ -371,8 +371,8 @@ public enum TreeValidator {
             issues.append(warning(
                 id: "person.\(person.id).chronology.death-before-birth",
                 code: "chronology.death-before-birth",
-                title: "Хронология требует проверки",
-                message: "Год смерти раньше года рождения.",
+                title: L10n.tr("Хронология требует проверки"),
+                message: L10n.tr("Год смерти раньше года рождения."),
                 personID: person.id,
                 field: "death"
             ))
@@ -380,8 +380,8 @@ public enum TreeValidator {
             issues.append(warning(
                 id: "person.\(person.id).chronology.age-over-125",
                 code: "chronology.unusual-lifespan",
-                title: "Необычная продолжительность жизни",
-                message: "Разница между годами рождения и смерти превышает 125 лет.",
+                title: L10n.tr("Необычная продолжительность жизни"),
+                message: L10n.tr("Разница между годами рождения и смерти превышает 125 лет."),
                 personID: person.id,
                 field: "death"
             ))
@@ -431,7 +431,7 @@ public enum TreeValidator {
             issues.append(warning(
                 id: "duplicate-person.\(key)",
                 code: "person.possible-duplicate",
-                title: "Возможные дубликаты",
+                title: L10n.tr("Возможные дубликаты"),
                 message: people.map(\.listName).joined(separator: ", "),
                 personID: people.first?.id,
                 field: "identity"

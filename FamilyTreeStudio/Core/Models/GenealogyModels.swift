@@ -30,14 +30,14 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
 
         public var displayName: String {
             switch self {
-            case .exact: "Точная"
-            case .about: "Около"
-            case .before: "До"
-            case .after: "После"
-            case .estimated: "Предположительно"
-            case .calculated: "Вычислено"
-            case .between: "Между"
-            case .fromTo: "С — по"
+            case .exact: L10n.tr("Точная")
+            case .about: L10n.tr("Около")
+            case .before: L10n.tr("До")
+            case .after: L10n.tr("После")
+            case .estimated: L10n.tr("Предположительно")
+            case .calculated: L10n.tr("Вычислено")
+            case .between: L10n.tr("Между")
+            case .fromTo: L10n.tr("С — по")
             }
         }
     }
@@ -186,16 +186,16 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
         guard let start else { return rawValue }
         let prefix = switch qualifier {
         case .exact: ""
-        case .about: "ок. "
-        case .before: "до "
-        case .after: "после "
-        case .estimated: "предп. "
-        case .calculated: "выч. "
-        case .between: "между "
-        case .fromTo: "с "
+        case .about: L10n.tr("ок. ")
+        case .before: L10n.tr("до ")
+        case .after: L10n.tr("после ")
+        case .estimated: L10n.tr("предп. ")
+        case .calculated: L10n.tr("выч. ")
+        case .between: L10n.tr("между ")
+        case .fromTo: L10n.tr("с ")
         }
         if let end {
-            let separator = qualifier == .between ? " и " : " по "
+            let separator = qualifier == .between ? L10n.tr(" и ") : L10n.tr(" по ")
             return prefix + start.displayValue + separator + end.displayValue
         }
         return prefix + start.displayValue
@@ -473,11 +473,11 @@ public enum ParentageKind: String, Codable, CaseIterable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .biological: "Биологическая"
-        case .adoptive: "Приёмная"
-        case .foster: "Опекунская"
-        case .step: "Сводная"
-        case .uncertain: "Предполагаемая"
+        case .biological: L10n.tr("Биологическая")
+        case .adoptive: L10n.tr("Приёмная")
+        case .foster: L10n.tr("Опекунская")
+        case .step: L10n.tr("Сводная")
+        case .uncertain: L10n.tr("Предполагаемая")
         }
     }
 

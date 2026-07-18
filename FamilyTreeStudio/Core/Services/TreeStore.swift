@@ -95,7 +95,7 @@ public final class TreeStore {
             try FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
         } catch {
             self.storageFolder = appFolder
-            lastLoadError = "Не удалось открыть папку хранилища: \(error.localizedDescription)"
+            lastLoadError = L10n.tr("Не удалось открыть папку хранилища: \(error.localizedDescription)")
             return
         }
         self.storageFolder = appFolder
@@ -203,7 +203,7 @@ public final class TreeStore {
         // Legacy JSON is also reported but never mutated during discovery.
         let legacyURL = storageFolder.appendingPathComponent("trees.json")
         if trees.isEmpty && fm.fileExists(atPath: legacyURL.path) {
-            pendingMigrations.append(PendingMigration(title: "Все деревья", source: .legacyJSON, url: legacyURL))
+            pendingMigrations.append(PendingMigration(title: L10n.tr("Все деревья"), source: .legacyJSON, url: legacyURL))
         }
 
         // Surface any unreadable trees: a folder that silently fails to load looks
@@ -214,9 +214,9 @@ public final class TreeStore {
             lastLoadError = nil
         } else {
             let list = failedFolders.map { "• \($0)" }.joined(separator: "\n")
-            lastLoadError = "Эти файлы не удалось прочитать:\n\(list)\n\n"
-                + "Они лежат в папке архивов и не изменены. "
-                + "Откройте «Показать в Finder», чтобы посмотреть или скопировать их."
+            lastLoadError = L10n.tr("Эти файлы не удалось прочитать:\n\(list)\n\n")
+                + L10n.tr("Они лежат в папке архивов и не изменены. ")
+                + L10n.tr("Откройте «Показать в Finder», чтобы посмотреть или скопировать их.")
         }
     }
 
@@ -360,7 +360,7 @@ public final class TreeStore {
         do {
             try FileManager.default.moveItem(at: destination, to: originalArchiveURL)
         } catch {
-            lastLoadError = "Архив не удалось подключить; его папка сохранена: \(destination.path)"
+            lastLoadError = L10n.tr("Архив не удалось подключить; его папка сохранена: \(destination.path)")
         }
         load()
         throw TreeStoreError.treeFolderMissing
@@ -447,7 +447,7 @@ public final class TreeStore {
     @discardableResult
     public func saveTree(_ tree: FamilyTree) -> SaveReceipt? {
         if legacyFileMap[tree.id] != nil {
-            lastSaveError = "Сначала выполните безопасную миграцию этого дерева в разделе восстановления."
+            lastSaveError = L10n.tr("Сначала выполните безопасную миграцию этого дерева в разделе восстановления.")
             return nil
         }
         do {
@@ -456,7 +456,7 @@ public final class TreeStore {
             return receipt
         } catch {
             log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
+            lastSaveError = L10n.tr("Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)")
             return nil
         }
     }
@@ -469,7 +469,7 @@ public final class TreeStore {
             return receipt
         } catch {
             log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            lastSaveError = "Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)"
+            lastSaveError = L10n.tr("Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)")
             throw error
         }
     }
@@ -852,7 +852,7 @@ public final class TreeStore {
         do {
             try fm.removeItem(at: rollback)
         } catch {
-            warnings.append("Старая резервная папка не удалена: \(rollback.lastPathComponent)")
+            warnings.append(L10n.tr("Старая резервная папка не удалена: \(rollback.lastPathComponent)"))
         }
     }
 
@@ -928,7 +928,7 @@ public final class TreeStore {
             folderMap.removeValue(forKey: tree.id)
             return true
         } catch {
-            lastSaveError = "Не удалось переместить «\(tree.name)» в Корзину: \(error.localizedDescription)"
+            lastSaveError = L10n.tr("Не удалось переместить «\(tree.name)» в Корзину: \(error.localizedDescription)")
             return false
         }
     }
@@ -945,7 +945,7 @@ public final class TreeStore {
 
     public func renameTreeVerified(_ tree: FamilyTree, name: String, subtitle: String?) async throws -> SaveReceipt {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: "Название не может быть пустым.") }
+        guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: L10n.tr("Название не может быть пустым.")) }
         let previousName = tree.name
         let previousSubtitle = tree.subtitle
         tree.name = trimmedName
@@ -975,7 +975,7 @@ public final class TreeStore {
             folderMap.removeValue(forKey: tree.id)
             trees.removeAll { $0.id == tree.id }
         } catch {
-            lastSaveError = "Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)"
+            lastSaveError = L10n.tr("Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)")
             return src
         }
         return dest
@@ -1095,7 +1095,7 @@ public final class TreeStore {
             result.report.diagnostics.append(ImportDiagnostic(
                 id: "import.duplicate-tree-id",
                 severity: .warning,
-                message: "Идентификатор уже существовал в библиотеке; импортированной копии назначен новый."
+                message: L10n.tr("Идентификатор уже существовал в библиотеке; импортированной копии назначен новый.")
             ))
         }
         let importedIssues = TreeValidator.validate(tree)
@@ -1104,7 +1104,7 @@ public final class TreeStore {
             result.report.diagnostics.append(ImportDiagnostic(
                 id: "import.validation.\(issue.id)",
                 severity: .warning,
-                message: "Импортированная проблема сохранена для проверки: \(issue.message)"
+                message: L10n.tr("Импортированная проблема сохранена для проверки: \(issue.message)")
             ))
         }
         tree.importReport = result.report
@@ -1277,7 +1277,7 @@ public final class TreeStore {
         let cleaned = raw.components(separatedBy: illegal)
             .joined(separator: "-")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? "Дерево" : cleaned
+        return cleaned.isEmpty ? L10n.tr("Дерево") : cleaned
     }
 
     /// Append " 2", " 3", … to `url`'s name until it points at a non-existent path.

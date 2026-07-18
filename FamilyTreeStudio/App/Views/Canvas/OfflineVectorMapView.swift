@@ -36,9 +36,9 @@ struct OfflineVectorMapView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "mappin.slash")
                             .font(.system(size: 28))
-                        Text("Нет мест с координатами")
+                        Text(L10n.tr("Нет мест с координатами"))
                             .font(SepiaTheme.body(size: 14))
-                        Text("Выберите место из справочника или укажите координаты вручную")
+                        Text(L10n.tr("Выберите место из справочника или укажите координаты вручную"))
                             .font(SepiaTheme.ui(size: 11))
                     }
                     .foregroundColor(SepiaTheme.inkSoft)
@@ -48,7 +48,7 @@ struct OfflineVectorMapView: View {
             .clipped()
             .background(Color(hex: "e8e0c8"))
             .overlay(alignment: .topLeading) {
-                Label("Офлайн", systemImage: "network.slash")
+                Label(L10n.tr("Офлайн"), systemImage: "network.slash")
                     .font(SepiaTheme.ui(size: 10))
                     .foregroundColor(SepiaTheme.inkSoft)
                     .padding(7)
@@ -73,10 +73,10 @@ struct OfflineVectorMapView: View {
             }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Офлайн-карта мест семьи")
+        .accessibilityLabel(L10n.tr("Офлайн-карта мест семьи"))
         .accessibilityRepresentation {
             VStack {
-                Text("Места семьи")
+                Text(L10n.tr("Места семьи"))
                 ForEach(annotations) { annotation in
                     Button("\(annotation.personName): \(annotation.placeName), \(annotation.kind.label)") {
                         selectedPerson = tree.person(byId: annotation.personID)
@@ -330,9 +330,9 @@ struct OfflineVectorMapView: View {
 
     private var legend: some View {
         HStack(spacing: 12) {
-            legendItem("Рождение", color: SepiaTheme.pinBirth)
-            legendItem("Смерть", color: SepiaTheme.pinDeath)
-            legendItem("Захоронение", color: SepiaTheme.pinBurial)
+            legendItem(L10n.tr("Рождение"), color: SepiaTheme.pinBirth)
+            legendItem(L10n.tr("Смерть"), color: SepiaTheme.pinDeath)
+            legendItem(L10n.tr("Захоронение"), color: SepiaTheme.pinBurial)
         }
         .padding(8)
         .background(SepiaTheme.paper.opacity(0.92))
@@ -373,7 +373,7 @@ struct OfflinePersonMiniMap: View {
                         .accessibilityLabel("\(point.kind.label): \(point.placeName)")
                 }
                 if points.isEmpty {
-                    Text("Место не отмечено")
+                    Text(L10n.tr("Место не отмечено"))
                         .font(SepiaTheme.body(size: 12))
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
@@ -453,7 +453,7 @@ private struct OfflineMapCluster: Identifiable {
     var color: Color { annotations.first?.kind.color ?? SepiaTheme.accent }
     var accessibilityLabel: String {
         if annotations.count == 1 { return "\(annotations[0].personName), \(annotations[0].kind.label)" }
-        return "\(annotations.count) событий в одном месте"
+        return L10n.tr("\(annotations.count) событий в одном месте")
     }
 }
 
@@ -472,9 +472,9 @@ private enum OfflineMapPinKind: String {
 
     var label: String {
         switch self {
-        case .birth: "Рождение"
-        case .death: "Смерть"
-        case .burial: "Захоронение"
+        case .birth: L10n.tr("Рождение")
+        case .death: L10n.tr("Смерть")
+        case .burial: L10n.tr("Захоронение")
         }
     }
 }
@@ -486,10 +486,10 @@ private enum OfflineWorldOutline {
     }
 
     static let labels: [Label] = [
-        Label(name: "Москва", coordinate: OfflineCoordinate(latitude: 55.7558, longitude: 37.6173)),
-        Label(name: "Санкт-Петербург", coordinate: OfflineCoordinate(latitude: 59.9343, longitude: 30.3351)),
-        Label(name: "Киев", coordinate: OfflineCoordinate(latitude: 50.4501, longitude: 30.5234)),
-        Label(name: "Минск", coordinate: OfflineCoordinate(latitude: 53.9006, longitude: 27.5590)),
-        Label(name: "Алматы", coordinate: OfflineCoordinate(latitude: 43.2389, longitude: 76.8897)),
+        Label(name: L10n.tr("Москва"), coordinate: OfflineCoordinate(latitude: 55.7558, longitude: 37.6173)),
+        Label(name: L10n.tr("Санкт-Петербург"), coordinate: OfflineCoordinate(latitude: 59.9343, longitude: 30.3351)),
+        Label(name: L10n.tr("Киев"), coordinate: OfflineCoordinate(latitude: 50.4501, longitude: 30.5234)),
+        Label(name: L10n.tr("Минск"), coordinate: OfflineCoordinate(latitude: 53.9006, longitude: 27.5590)),
+        Label(name: L10n.tr("Алматы"), coordinate: OfflineCoordinate(latitude: 43.2389, longitude: 76.8897)),
     ]
 }

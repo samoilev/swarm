@@ -23,7 +23,7 @@ struct ExportView: View {
 
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
-                    Text("Экспорт").font(SepiaTheme.display(size: 22)).foregroundColor(SepiaTheme.ink)
+                    Text(L10n.tr("Экспорт")).font(SepiaTheme.display(size: 22)).foregroundColor(SepiaTheme.ink)
                     Spacer()
                     Button { dismiss() } label: {
                         Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
@@ -34,33 +34,33 @@ struct ExportView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(tree.name.isEmpty ? "Дерево" : tree.name)
+                    Text(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name)
                         .font(SepiaTheme.display(size: 17)).fontWeight(.semibold).foregroundColor(SepiaTheme.ink)
                         .lineLimit(1)
-                    Text("\(tree.people.count) чел.")
+                    Text(L10n.tr("\(tree.people.count) чел."))
                         .font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
                 }
 
                 VStack(spacing: 10) {
                     Button { exportPDF(selected: false) } label: {
-                        Label("PDF — всё дерево", systemImage: "tree").frame(maxWidth: .infinity)
+                        Label(L10n.tr("PDF — всё дерево"), systemImage: "tree").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
                     .disabled(tree.people.isEmpty)
 
                     Button { exportPDF(selected: true) } label: {
-                        Label("PDF — выделенная часть", systemImage: "scope").frame(maxWidth: .infinity)
+                        Label(L10n.tr("PDF — выделенная часть"), systemImage: "scope").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                     .disabled(selectedIds.isEmpty)
 
                     Button { exportVerifiedTree() } label: {
-                        Label("Проверенный GEDCOM-архив", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
+                        Label(L10n.tr("Проверенный GEDCOM-архив"), systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
                     }
                     .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                 }
 
-                Text("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди. Архив GEDCOM сохраняет и проверяет файл дерева, портреты и вложения в отдельной папке.")
+                Text(L10n.tr("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди. Архив GEDCOM сохраняет и проверяет файл дерева, портреты и вложения в отдельной папке."))
                     .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -79,7 +79,7 @@ struct ExportView: View {
         ) { result in
             if case .failure(let error) = result { exportError = error.localizedDescription }
         }
-        .alert("Не удалось сохранить файл", isPresented: Binding(
+        .alert(L10n.tr("Не удалось сохранить файл"), isPresented: Binding(
             get: { exportError != nil },
             set: { if !$0 { exportError = nil } }
         )) {
@@ -107,7 +107,7 @@ struct ExportView: View {
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "Экспортировать"
+        panel.prompt = L10n.tr("Экспортировать")
         panel.begin { r in
             guard r == .OK, let directory = panel.url else { return }
             Task { @MainActor in

@@ -1,4 +1,5 @@
 import AppKit
+import FamilyTreeCore
 import SwiftUI
 
 /// Lets the user pick a portrait (3:4) rectangle from a freshly-chosen photo before it
@@ -20,9 +21,9 @@ struct PhotoCropView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text("Кадрировать фото").font(SepiaTheme.display(size: 18)).foregroundColor(SepiaTheme.ink)
+                Text(L10n.tr("Кадрировать фото")).font(SepiaTheme.display(size: 18)).foregroundColor(SepiaTheme.ink)
                 Spacer()
-                Text("Перетащите рамку, потяните угол для размера")
+                Text(L10n.tr("Перетащите рамку, потяните угол для размера"))
                     .font(SepiaTheme.body(size: 11)).foregroundColor(SepiaTheme.inkSoft)
             }
             .padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 12)
@@ -74,9 +75,9 @@ struct PhotoCropView: View {
             Divider().overlay(SepiaTheme.toolbarLine)
 
             HStack {
-                Button("Отмена") { onCancel() }.buttonStyle(SepiaButtonStyle())
+                Button(L10n.tr("Отмена")) { onCancel() }.buttonStyle(SepiaButtonStyle())
                 Spacer()
-                Button("Готово") { if let c = cropped() { onConfirm(c) } }
+                Button(L10n.tr("Готово")) { if let c = cropped() { onConfirm(c) } }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
             }
             .padding(16)

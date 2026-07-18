@@ -37,23 +37,23 @@ struct RecoveryView: View {
                     } else {
                         group(
                             .revision,
-                            title: "Предыдущие версии",
-                            explanation: "Состояние дерева после каждого сохранения. Хранятся последние 50."
+                            title: L10n.tr("Предыдущие версии"),
+                            explanation: L10n.tr("Состояние дерева после каждого сохранения. Хранятся последние 50.")
                         )
                         group(
                             .deletedFile,
-                            title: "Удалённые файлы",
-                            explanation: "Фотографии и документы, убранные из карточек. Доступны 30 дней, затем удаляются."
+                            title: L10n.tr("Удалённые файлы"),
+                            explanation: L10n.tr("Фотографии и документы, убранные из карточек. Доступны 30 дней, затем удаляются.")
                         )
                         group(
                             .migrationBackup,
-                            title: "Полные копии архива",
-                            explanation: "Снимок всего дерева перед крупной операцией — обновлением формата, слиянием. Хранятся бессрочно."
+                            title: L10n.tr("Полные копии архива"),
+                            explanation: L10n.tr("Снимок всего дерева перед крупной операцией — обновлением формата, слиянием. Хранятся бессрочно.")
                         )
                         group(
                             .archivedTree,
-                            title: "Архивированные деревья",
-                            explanation: "Деревья, убранные из библиотеки вместе с файлами. Можно вернуть обратно."
+                            title: L10n.tr("Архивированные деревья"),
+                            explanation: L10n.tr("Деревья, убранные из библиотеки вместе с файлами. Можно вернуть обратно.")
                         )
                     }
                 }
@@ -77,9 +77,9 @@ struct RecoveryView: View {
             refresh()
         }
         .onChange(of: selectedTreeID) { _, _ in restoreTargets = [:]; refresh() }
-        .alert("Не удалось восстановить", isPresented: Binding(
+        .alert(L10n.tr("Не удалось восстановить"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
-        )) { Button("Закрыть", role: .cancel) {} } message: { Text(errorMessage ?? "") }
+        )) { Button(L10n.tr("Закрыть"), role: .cancel) {} } message: { Text(errorMessage ?? "") }
     }
 
     // MARK: - Chrome
@@ -87,8 +87,8 @@ struct RecoveryView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 3) {
-                Text("Восстановление").font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
-                Text("Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения.")
+                Text(L10n.tr("Восстановление")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
+                Text(L10n.tr("Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения."))
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 560, alignment: .leading)
@@ -96,18 +96,18 @@ struct RecoveryView: View {
             Spacer()
             Button { dismiss() } label: { Image(systemName: "xmark") }
                 .buttonStyle(SepiaIconButtonStyle())
-                .accessibilityLabel("Закрыть восстановление")
+                .accessibilityLabel(L10n.tr("Закрыть восстановление"))
         }.padding(20)
     }
 
     private var treePicker: some View {
         HStack(spacing: 12) {
-            Picker("Архив", selection: $selectedTreeID) {
-                Text("Все архивы").tag(nil as UUID?)
+            Picker(L10n.tr("Архив"), selection: $selectedTreeID) {
+                Text(L10n.tr("Все архивы")).tag(nil as UUID?)
                 ForEach(store.trees, id: \.id) { Text($0.name).tag($0.id as UUID?) }
             }
             .frame(width: 280)
-            .help("Выберите дерево, историю которого нужно посмотреть")
+            .help(L10n.tr("Выберите дерево, историю которого нужно посмотреть"))
             Spacer()
         }.padding(16)
     }
@@ -116,11 +116,11 @@ struct RecoveryView: View {
         VStack(spacing: 8) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
-            Text(selectedTree == nil ? "Выберите архив" : "Пока нечего восстанавливать")
+            Text(selectedTree == nil ? L10n.tr("Выберите архив") : L10n.tr("Пока нечего восстанавливать"))
                 .font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
             Text(selectedTree == nil
-                ? "Выберите дерево выше, чтобы увидеть его версии и удалённые файлы."
-                : "Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы.")
+                ? L10n.tr("Выберите дерево выше, чтобы увидеть его версии и удалённые файлы.")
+                : L10n.tr("Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы."))
                 .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                 .multilineTextAlignment(.center)
         }
@@ -133,8 +133,8 @@ struct RecoveryView: View {
     @ViewBuilder private var migrationSection: some View {
         if !store.pendingMigrations.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                sectionTitle("Обновление формата", count: store.pendingMigrations.count)
-                Text("Эти файлы записаны в старом формате. Они открываются и читаются, но сохранить в них изменения нельзя, пока формат не обновлён.")
+                sectionTitle(L10n.tr("Обновление формата"), count: store.pendingMigrations.count)
+                Text(L10n.tr("Эти файлы записаны в старом формате. Они открываются и читаются, но сохранить в них изменения нельзя, пока формат не обновлён."))
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -150,7 +150,7 @@ struct RecoveryView: View {
                                 .lineLimit(1).truncationMode(.head)
                         }
                         Spacer()
-                        Button("Показать в Finder") { reveal(migration.url) }
+                        Button(L10n.tr("Показать в Finder")) { reveal(migration.url) }
                             .buttonStyle(SepiaButtonStyle())
                     }
                     .padding(10)
@@ -159,9 +159,9 @@ struct RecoveryView: View {
                 }
 
                 HStack(spacing: 10) {
-                    Button("Обновить всё (\(store.pendingMigrations.count))") { runMigrations() }
+                    Button(L10n.tr("Обновить всё (\(store.pendingMigrations.count))")) { runMigrations() }
                         .buttonStyle(SepiaButtonStyle(isActive: true)).disabled(isWorking)
-                    Text("Перед обновлением создаётся полная резервная копия. Исходные файлы не удаляются — они переезжают в раздел копий ниже.")
+                    Text(L10n.tr("Перед обновлением создаётся полная резервная копия. Исходные файлы не удаляются — они переезжают в раздел копий ниже."))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -205,7 +205,7 @@ struct RecoveryView: View {
                 .buttonStyle(SepiaButtonStyle())
                 .disabled(isWorking || (item.kind == .deletedFile && restoreTargets[item.id] == nil))
                 .help(item.kind == .deletedFile && restoreTargets[item.id] == nil
-                    ? "Сначала выберите, в чью карточку вернуть файл"
+                    ? L10n.tr("Сначала выберите, в чью карточку вернуть файл")
                     : actionLabel(item.kind))
         }
         .padding(10)
@@ -219,18 +219,18 @@ struct RecoveryView: View {
     @ViewBuilder
     private func personPicker(for item: RecoveryItem) -> some View {
         if let tree = selectedTree {
-            Picker("Вернуть в карточку", selection: Binding(
+            Picker(L10n.tr("Вернуть в карточку"), selection: Binding(
                 get: { restoreTargets[item.id] },
                 set: { restoreTargets[item.id] = $0 }
             )) {
-                Text("Выберите персону…").tag(nil as UUID?)
+                Text(L10n.tr("Выберите персону…")).tag(nil as UUID?)
                 ForEach(tree.people.sorted(by: { $0.listName < $1.listName }), id: \.id) {
                     Text($0.listName).tag($0.id as UUID?)
                 }
             }
             .labelsHidden()
             .frame(width: 210)
-            .accessibilityLabel("Вернуть файл в карточку персоны")
+            .accessibilityLabel(L10n.tr("Вернуть файл в карточку персоны"))
         }
     }
 
@@ -252,20 +252,20 @@ struct RecoveryView: View {
                 case .revision:
                     guard let tree = selectedTree else { return }
                     _ = try await store.restoreRevision(item, to: tree)
-                    statusMessage = "Версия от \(item.createdAt.formatted(date: .abbreviated, time: .shortened)) восстановлена."
+                    statusMessage = L10n.tr("Версия от \(item.createdAt.formatted(date: .abbreviated, time: .shortened)) восстановлена.")
                 case .deletedFile:
                     guard let tree = selectedTree,
                           let id = restoreTargets[item.id],
                           let person = tree.person(byId: id) else { return }
                     _ = try await store.restoreDeletedFile(item, to: person, in: tree, asPortrait: item.isPortrait)
-                    statusMessage = "«\(item.displayTitle)» возвращён в карточку: \(person.listName)."
+                    statusMessage = L10n.tr("«\(item.displayTitle)» возвращён в карточку: \(person.listName).")
                 case .migrationBackup:
                     guard let tree = selectedTree else { return }
                     _ = try await store.restoreFullBackup(item, to: tree)
-                    statusMessage = "Архив восстановлен из копии «\(item.displayTitle)»."
+                    statusMessage = L10n.tr("Архив восстановлен из копии «\(item.displayTitle)».")
                 case .archivedTree:
                     let restored = try store.restoreArchivedTree(item)
-                    statusMessage = "«\(restored.name)» снова в библиотеке."
+                    statusMessage = L10n.tr("«\(restored.name)» снова в библиотеке.")
                 }
                 refresh()
             } catch { errorMessage = error.localizedDescription }
@@ -278,7 +278,7 @@ struct RecoveryView: View {
         Task { @MainActor in
             do {
                 let receipts = try store.performPendingMigrations()
-                statusMessage = "Формат обновлён. Обновлено файлов: \(receipts.count). Резервные копии — в разделе «Полные копии архива»."
+                statusMessage = L10n.tr("Формат обновлён. Обновлено файлов: \(receipts.count). Резервные копии — в разделе «Полные копии архива».")
                 if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
                 refresh()
             } catch { errorMessage = error.localizedDescription }
@@ -288,10 +288,10 @@ struct RecoveryView: View {
 
     private func actionLabel(_ kind: RecoveryItem.Kind) -> String {
         switch kind {
-        case .revision: "Вернуть эту версию"
-        case .deletedFile: "Вернуть файл"
-        case .migrationBackup: "Восстановить"
-        case .archivedTree: "Вернуть в библиотеку"
+        case .revision: L10n.tr("Вернуть эту версию")
+        case .deletedFile: L10n.tr("Вернуть файл")
+        case .migrationBackup: L10n.tr("Восстановить")
+        case .archivedTree: L10n.tr("Вернуть в библиотеку")
         }
     }
 

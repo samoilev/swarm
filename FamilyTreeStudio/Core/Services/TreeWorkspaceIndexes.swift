@@ -88,7 +88,7 @@ public final class TreeWorkspaceIndexes {
         let combined = ([person.fullName, person.listName] + places).joined(separator: " ")
         return PersonSearchEntry(
             personID: person.id,
-            displayName: person.listName.isEmpty ? "Без имени" : person.listName,
+            displayName: person.listName.isEmpty ? L10n.tr("Без имени") : person.listName,
             normalizedText: normalize(combined),
             birthYear: person.event(ofKind: .birth)?.date?.year,
             deathYear: person.event(ofKind: .death)?.date?.year,
@@ -106,7 +106,7 @@ public final class TreeWorkspaceIndexes {
                 unionID: nil,
                 relatedPersonIDs: [person.id],
                 eventID: event.id,
-                personName: person.listName.isEmpty ? "Без имени" : person.listName,
+                personName: person.listName.isEmpty ? L10n.tr("Без имени") : person.listName,
                 kind: event.kind,
                 date: event.date,
                 place: event.place,
@@ -119,7 +119,7 @@ public final class TreeWorkspaceIndexes {
         tree.unions.flatMap { union in
             let relatedIDs = Array(Set(union.partnerIds + union.childrenIds))
             let names = union.partnerIds.compactMap { tree.person(byId: $0)?.listName }
-            let title = names.isEmpty ? "Семейная запись" : names.joined(separator: " + ")
+            let title = names.isEmpty ? L10n.tr("Семейная запись") : names.joined(separator: " + ")
             return union.events.map { event in
                 TimelineEntry(
                     personID: union.partnerIds.first ?? union.childrenIds.first,

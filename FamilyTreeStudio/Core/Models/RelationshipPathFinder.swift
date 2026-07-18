@@ -20,7 +20,7 @@ public struct RelationshipPathFinder {
     /// Find shortest path between two people via BFS on the family graph
     public func findPath(from person1Id: UUID, to person2Id: UUID) -> PathResult? {
         guard person1Id != person2Id else {
-            return PathResult(path: [person1Id], ids: [person1Id], labels: [person1Id: "Я"])
+            return PathResult(path: [person1Id], ids: [person1Id], labels: [person1Id: L10n.tr("Я")])
         }
 
         // BFS
@@ -96,7 +96,7 @@ public struct RelationshipPathFinder {
 
         for personId in path where personId != person1Id {
             guard let p = index.byId[personId] else { continue }
-            let name = calc.relationship(from: p1, to: p)?.name ?? "Родственник"
+            let name = calc.relationship(from: p1, to: p)?.name ?? L10n.tr("Родственник")
             if personId == lastId {
                 labels[personId] = "② " + name
             } else {

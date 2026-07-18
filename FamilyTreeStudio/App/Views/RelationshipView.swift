@@ -16,7 +16,7 @@ struct RelationshipView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text("СВЯЗЬ МЕЖДУ РОДСТВЕННИКАМИ")
+                Text(L10n.tr("СВЯЗЬ МЕЖДУ РОДСТВЕННИКАМИ"))
                     .font(SepiaTheme.ui(size: 11))
                     .tracking(1.5)
                     .foregroundColor(SepiaTheme.accent2)
@@ -36,25 +36,25 @@ struct RelationshipView: View {
             VStack(spacing: 16) {
                 // Person A picker
                 personPicker(
-                    label: "ПЕРВЫЙ ЧЕЛОВЕК",
+                    label: L10n.tr("ПЕРВЫЙ ЧЕЛОВЕК"),
                     search: $searchA,
                     selected: $personA,
-                    placeholder: "Выберите первого..."
+                    placeholder: L10n.tr("Выберите первого...")
                 )
 
                 // Person B picker
                 personPicker(
-                    label: "ВТОРОЙ ЧЕЛОВЕК",
+                    label: L10n.tr("ВТОРОЙ ЧЕЛОВЕК"),
                     search: $searchB,
                     selected: $personB,
-                    placeholder: "Выберите второго..."
+                    placeholder: L10n.tr("Выберите второго...")
                 )
 
                 // Calculate button
                 Button {
                     calculateRelationship()
                 } label: {
-                    Label("Определить связь", systemImage: "arrow.triangle.branch")
+                    Label(L10n.tr("Определить связь"), systemImage: "arrow.triangle.branch")
                 }
                 .buttonStyle(SepiaButtonStyle(isActive: true))
                 .disabled(personA == nil || personB == nil)
@@ -183,7 +183,7 @@ struct RelationshipView: View {
             }
 
             if result.path.count > 1 {
-                Text("Шагов в дереве: \(result.path.count - 1)")
+                Text(L10n.tr("Шагов в дереве: \(result.path.count - 1)"))
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }

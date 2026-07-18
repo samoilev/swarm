@@ -19,8 +19,8 @@ struct TreeMergeView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Объединение деревьев").font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
-                    Text("Добавить людей и факты из другого GEDCOM в «\(localTree.name)», не создавая дубликатов.")
+                    Text(L10n.tr("Объединение деревьев")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
+                    Text(L10n.tr("Добавить людей и факты из другого GEDCOM в «\(localTree.name)», не создавая дубликатов."))
                         .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 560, alignment: .leading)
@@ -35,19 +35,19 @@ struct TreeMergeView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         summary(preview)
                         mergeSection(
-                            "Точно один и тот же человек",
+                            L10n.tr("Точно один и тот же человек"),
                             count: preview.automaticMatches.count,
-                            explanation: "Опознаны по идентификатору, записанному в самом файле. Объединятся автоматически."
+                            explanation: L10n.tr("Опознаны по идентификатору, записанному в самом файле. Объединятся автоматически.")
                         ) {
                             ForEach(preview.automaticMatches) { match in matchRow(match, selected: true, toggle: nil) }
                         }
                         mergeSection(
-                            "Возможно, один и тот же человек",
+                            L10n.tr("Возможно, один и тот же человек"),
                             count: preview.heuristicSuggestions.count,
-                            explanation: "Совпали имя, год рождения и ещё один факт. Отметьте тех, кого считаете одним человеком; остальные добавятся как новые."
+                            explanation: L10n.tr("Совпали имя, год рождения и ещё один факт. Отметьте тех, кого считаете одним человеком; остальные добавятся как новые.")
                         ) {
                             if preview.heuristicSuggestions.isEmpty {
-                                Text("Похожих людей не нашлось.").font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
+                                Text(L10n.tr("Похожих людей не нашлось.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
                             }
                             ForEach(preview.heuristicSuggestions) { match in
                                 matchRow(match, selected: preview.acceptedHeuristicMatchIDs.contains(match.id)) {
@@ -56,9 +56,9 @@ struct TreeMergeView: View {
                             }
                         }
                         mergeSection(
-                            "Расхождения в фактах",
+                            L10n.tr("Расхождения в фактах"),
                             count: preview.conflicts.count,
-                            explanation: "Один и тот же факт записан по-разному в двух деревьях. Выберите, что оставить."
+                            explanation: L10n.tr("Один и тот же факт записан по-разному в двух деревьях. Выберите, что оставить.")
                         ) {
                             ForEach(preview.conflicts.indices, id: \.self) { index in conflictRow(index) }
                         }
@@ -68,25 +68,25 @@ struct TreeMergeView: View {
                 Spacer()
                 VStack(spacing: 14) {
                     Image(systemName: "arrow.triangle.merge").font(.system(size: 44)).foregroundStyle(SepiaTheme.inkSoft)
-                    Text("Выберите файл для объединения").font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
-                    Text("Если родственник прислал своё дерево или вы выгрузили его из другого сервиса, объединение перенесёт недостающих людей, даты и источники в ваш архив. Совпадающие персоны сольются в одну, а не задвоятся.")
+                    Text(L10n.tr("Выберите файл для объединения")).font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
+                    Text(L10n.tr("Если родственник прислал своё дерево или вы выгрузили его из другого сервиса, объединение перенесёт недостающих людей, даты и источники в ваш архив. Совпадающие персоны сольются в одну, а не задвоятся."))
                         .font(SepiaTheme.body(size: 12.5)).foregroundStyle(SepiaTheme.inkSoft)
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 460)
-                    Text("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется.")
+                    Text(L10n.tr("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется."))
                         .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
-                    Button("Выбрать файл…") { showImporter = true }.buttonStyle(SepiaButtonStyle(isActive: true))
+                    Button(L10n.tr("Выбрать файл…")) { showImporter = true }.buttonStyle(SepiaButtonStyle(isActive: true))
                 }
                 Spacer()
             }
 
             Divider().overlay(SepiaTheme.toolbarLine)
             HStack {
-                Button("Отмена", action: close).buttonStyle(SepiaButtonStyle())
+                Button(L10n.tr("Отмена"), action: close).buttonStyle(SepiaButtonStyle())
                 Spacer()
                 if preview != nil {
-                    Button("Применить с резервной копией") { applyMerge() }
+                    Button(L10n.tr("Применить с резервной копией")) { applyMerge() }
                         .buttonStyle(SepiaButtonStyle(isActive: true)).disabled(isApplying)
                 }
             }.padding(16)
@@ -97,7 +97,7 @@ struct TreeMergeView: View {
             if case let .success(url) = result { loadPreview(url) }
             if case let .failure(error) = result { errorMessage = error.localizedDescription }
         }
-        .alert("Слияние не выполнено", isPresented: Binding(
+        .alert(L10n.tr("Слияние не выполнено"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
         )) { Button("OK", role: .cancel) {} } message: { Text(errorMessage ?? "") }
         .onDisappear { if let pendingURL { store.discardImportPreview(at: pendingURL) } }
@@ -105,10 +105,10 @@ struct TreeMergeView: View {
 
     private func summary(_ preview: MergePreview) -> some View {
         HStack(spacing: 28) {
-            metric("Входящих персон", preview.incomingTree.people.count)
-            metric("Надёжных совпадений", preview.automaticMatches.count)
-            metric("Предложений", preview.heuristicSuggestions.count)
-            metric("Новых персон", preview.incomingOnlyPersonIDs.count)
+            metric(L10n.tr("Входящих персон"), preview.incomingTree.people.count)
+            metric(L10n.tr("Надёжных совпадений"), preview.automaticMatches.count)
+            metric(L10n.tr("Предложений"), preview.heuristicSuggestions.count)
+            metric(L10n.tr("Новых персон"), preview.incomingOnlyPersonIDs.count)
             Spacer()
         }
     }
@@ -154,9 +154,9 @@ struct TreeMergeView: View {
 
     private func conflictRow(_ index: Int) -> some View {
         HStack {
-            Text(preview?.conflicts[index].field ?? "Факт").font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+            Text(preview?.conflicts[index].field ?? L10n.tr("Факт")).font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
             Spacer()
-            Picker("Выбор", selection: Binding(
+            Picker(L10n.tr("Выбор"), selection: Binding(
                 get: { preview?.conflicts[index].choice ?? .both },
                 set: { choice in
                     guard var value = preview, value.conflicts.indices.contains(index) else { return }
@@ -164,9 +164,9 @@ struct TreeMergeView: View {
                     preview = value
                 }
             )) {
-                Text("Локальное").tag(MergeFactChoice.local)
-                Text("Входящее").tag(MergeFactChoice.incoming)
-                Text("Оба").tag(MergeFactChoice.both)
+                Text(L10n.tr("Локальное")).tag(MergeFactChoice.local)
+                Text(L10n.tr("Входящее")).tag(MergeFactChoice.incoming)
+                Text(L10n.tr("Оба")).tag(MergeFactChoice.both)
             }.pickerStyle(.segmented).frame(width: 260)
         }.padding(10).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 7))
     }

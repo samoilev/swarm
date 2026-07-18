@@ -19,6 +19,15 @@ public struct RelationshipCalculator {
     // MARK: - Public
 
     public func relationship(from personA: Person, to personB: Person) -> RelationshipResult? {
+        guard let result = russianRelationship(from: personA, to: personB) else { return nil }
+        return RelationshipResult(
+            name: L10n.dynamic(result.name),
+            path: result.path,
+            description: L10n.dynamic(result.description)
+        )
+    }
+
+    private func russianRelationship(from personA: Person, to personB: Person) -> RelationshipResult? {
         guard personA.id != personB.id else {
             return RelationshipResult(name: "Это тот же человек", path: [personA.id], description: "")
         }

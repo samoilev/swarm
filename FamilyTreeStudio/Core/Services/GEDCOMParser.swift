@@ -59,7 +59,7 @@ public struct GEDCOMParser {
         let lines = gedcom.components(separatedBy: .newlines)
         let records = splitRecords(lines: lines)
 
-        var treeName = "Без названия"
+        var treeName = L10n.tr("Без названия")
         var treeSubtitle: String? = nil
         var treeId: UUID? = nil
         var schemaVersion = 1
@@ -353,7 +353,7 @@ public struct GEDCOMParser {
     }
 
     private static func parseSource(record: [String], uuid: UUID, xref: String) -> SourceRecord {
-        var title = "Источник без названия"
+        var title = L10n.tr("Источник без названия")
         var author: String?
         var publication: String?
         var repository: String?

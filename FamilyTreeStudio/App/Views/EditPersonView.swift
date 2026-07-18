@@ -63,26 +63,36 @@ struct EditPersonView: View {
     @State private var evidenceTarget: EvidenceTarget = .person
     @State private var evidenceObjectID: UUID?
 
-    enum EvidenceTarget: String, CaseIterable, Identifiable {
-        case person = "Персона"
-        case primaryName = "Основное имя"
-        case birth = "Рождение"
-        case death = "Смерть"
-        case relationship = "Родительская связь"
-        case union = "Союз"
-        case attachment = "Вложение"
-        var id: String { rawValue }
+    enum EvidenceTarget: CaseIterable, Identifiable {
+        case person, primaryName, birth, death, relationship, union, attachment
+        var id: Self { self }
+        var displayName: String {
+            switch self {
+            case .person: L10n.tr("Персона")
+            case .primaryName: L10n.tr("Основное имя")
+            case .birth: L10n.tr("Рождение")
+            case .death: L10n.tr("Смерть")
+            case .relationship: L10n.tr("Родительская связь")
+            case .union: L10n.tr("Союз")
+            case .attachment: L10n.tr("Вложение")
+            }
+        }
     }
 
     private var editingTree: FamilyTree { editSession?.draftTree ?? tree }
     private var editingPerson: Person { editingTree.person(byId: person.id) ?? person }
 
-    enum AddRelType: String, CaseIterable {
-        case none = "—"
-        case parent = "Добавить родителя"
-        case spouse = "Добавить супруга"
-        case child = "Добавить ребёнка"
-        case sibling = "Добавить брата/сестру"
+    enum AddRelType: CaseIterable {
+        case none, parent, spouse, child, sibling
+        var displayName: String {
+            switch self {
+            case .none: "—"
+            case .parent: L10n.tr("Добавить родителя")
+            case .spouse: L10n.tr("Добавить супруга")
+            case .child: L10n.tr("Добавить ребёнка")
+            case .sibling: L10n.tr("Добавить брата/сестру")
+            }
+        }
     }
 
     var body: some View {
@@ -92,7 +102,7 @@ struct EditPersonView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Редактировать")
+                    Text(L10n.tr("Редактировать"))
                         .font(SepiaTheme.display(size: 22))
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
@@ -111,17 +121,17 @@ struct EditPersonView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         photoEditor
 
-                        SectionHeader(title: "Личность")
+                        SectionHeader(title: L10n.tr("Личность"))
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
-                            SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
-                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
+                            SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                            SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                            SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
                         }.padding(.bottom, 12)
 
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ДЕВИЧЬЯ ФАМИЛИЯ", text: $maidenName, placeholder: "—")
+                            SepiaTextField(label: L10n.tr("ДЕВИЧЬЯ ФАМИЛИЯ"), text: $maidenName, placeholder: "—")
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("ПОЛ").font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
+                                Text(L10n.tr("ПОЛ")).font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
                                 HStack(spacing: 6) {
                                     ForEach(Person.Sex.allCases, id: \.rawValue) { s in
                                         Button(s.russianName) { sex = s }.buttonStyle(SepiaButtonStyle(isActive: sex == s))
@@ -130,47 +140,47 @@ struct EditPersonView: View {
                             }
                         }.padding(.bottom, 12)
 
-                        SectionHeader(title: "Рождение")
+                        SectionHeader(title: L10n.tr("Рождение"))
                         SepiaDateField(
-                            label: "ДАТА",
+                            label: L10n.tr("ДАТА"),
                             text: $birthDate,
                             qualifier: $birthQualifier,
                             endText: $birthDateEnd
                         ).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") {
+                        PlacePickerField(label: L10n.tr("МЕСТО"), text: $birthPlace, placeholder: L10n.tr("Город, область, страна")) {
                             selectedBirthPlace = $0
                             prefillCoords(for: $0, into: $birthCoords)
                         }.padding(.bottom, 8).zIndex(1)
-                        SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
+                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
 
-                        SectionHeader(title: "Смерть и погребение")
+                        SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
-                            Text("Жив(а)").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
+                            Text(L10n.tr("Жив(а)")).font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
                             SepiaDateField(
-                                label: "ДАТА",
+                                label: L10n.tr("ДАТА"),
                                 text: $deathDate,
                                 qualifier: $deathQualifier,
                                 endText: $deathDateEnd
                             ).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+                            PlacePickerField(label: L10n.tr("МЕСТО СМЕРТИ"), text: $deathPlace, placeholder: "—") {
                                 selectedDeathPlace = $0
                                 prefillCoords(for: $0, into: $deathCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—") {
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 8)
+                            PlacePickerField(label: L10n.tr("МЕСТО ЗАХОРОНЕНИЯ"), text: $burialPlace, placeholder: "—") {
                                 selectedBurialPlace = $0
                                 prefillCoords(for: $0, into: $burialCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
                         }
 
-                        SectionHeader(title: "Жизнь")
-                        SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
-                        SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
-                        SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
+                        SectionHeader(title: L10n.tr("Жизнь"))
+                        SepiaTextField(label: L10n.tr("ПРОФЕССИЯ"), text: $occupation, placeholder: "—").padding(.bottom, 8)
+                        SepiaTextField(label: L10n.tr("ОБРАЗОВАНИЕ"), text: $education, placeholder: "—").padding(.bottom, 8)
+                        SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: L10n.tr("Свободный текст…")).padding(.bottom, 12)
 
                         evidenceEditor
 
@@ -186,9 +196,9 @@ struct EditPersonView: View {
                 Divider().overlay(SepiaTheme.toolbarLine)
 
                 HStack {
-                    Button("Отмена") { cancelEditing() }.buttonStyle(SepiaButtonStyle())
+                    Button(L10n.tr("Отмена")) { cancelEditing() }.buttonStyle(SepiaButtonStyle())
                     Spacer()
-                    Button("Сохранить") { savePerson() }
+                    Button(L10n.tr("Сохранить")) { savePerson() }
                         .buttonStyle(SepiaButtonStyle(isActive: true))
                         .disabled(isSaving)
                         .disabled(givenNames.isEmpty && surname.isEmpty)
@@ -201,7 +211,7 @@ struct EditPersonView: View {
         .onDisappear {
             if !didCommit { discardPreparedAttachments() }
         }
-        .alert("Не удалось сохранить", isPresented: Binding(
+        .alert(L10n.tr("Не удалось сохранить"), isPresented: Binding(
             get: { saveError != nil },
             set: { if !$0 { saveError = nil } }
         )) {
@@ -222,21 +232,21 @@ struct EditPersonView: View {
 
     private var evidenceEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: "Источники и доказательства")
+            SectionHeader(title: L10n.tr("Источники и доказательства"))
 
             HStack(spacing: 8) {
-                SepiaTextField(label: "НОВЫЙ ИСТОЧНИК", text: $sourceTitle, placeholder: "Название")
-                SepiaTextField(label: "АВТОР", text: $sourceAuthor, placeholder: "—")
+                SepiaTextField(label: L10n.tr("НОВЫЙ ИСТОЧНИК"), text: $sourceTitle, placeholder: L10n.tr("Название"))
+                SepiaTextField(label: L10n.tr("АВТОР"), text: $sourceAuthor, placeholder: "—")
             }
-            Button("Добавить в библиотеку") { addSource() }
+            Button(L10n.tr("Добавить в библиотеку")) { addSource() }
                 .buttonStyle(SepiaButtonStyle())
                 .disabled(sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             if editingTree.sourceRecords.isEmpty {
-                Text("Сначала добавьте источник.").font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
+                Text(L10n.tr("Сначала добавьте источник.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
             } else {
-                Picker("Источник", selection: $selectedSourceID) {
-                    Text("Выбрать…").tag(nil as UUID?)
+                Picker(L10n.tr("Источник"), selection: $selectedSourceID) {
+                    Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                     ForEach(editingTree.sourceRecords) { Text($0.title).tag($0.id as UUID?) }
                 }.pickerStyle(.menu)
 
@@ -246,24 +256,24 @@ struct EditPersonView: View {
                 }
 
                 HStack {
-                    Picker("Для факта", selection: $evidenceTarget) {
-                        ForEach(EvidenceTarget.allCases) { Text($0.rawValue).tag($0) }
+                    Picker(L10n.tr("Для факта"), selection: $evidenceTarget) {
+                        ForEach(EvidenceTarget.allCases) { Text($0.displayName).tag($0) }
                     }.pickerStyle(.menu)
                     if !evidenceObjects.isEmpty {
-                        Picker("Запись", selection: $evidenceObjectID) {
-                            Text("Выбрать…").tag(nil as UUID?)
+                        Picker(L10n.tr("Запись"), selection: $evidenceObjectID) {
+                            Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                             ForEach(evidenceObjects, id: \.id) { Text($0.label).tag($0.id as UUID?) }
                         }.pickerStyle(.menu)
                     }
                 }
                 HStack(spacing: 8) {
-                    SepiaTextField(label: "СТРАНИЦА", text: $citationPage, placeholder: "—")
-                    SepiaTextField(label: "ДЕТАЛЬ", text: $citationDetail, placeholder: "—")
-                    SepiaTextField(label: "НАДЁЖНОСТЬ", text: $citationConfidence, placeholder: "0–3 / текст")
+                    SepiaTextField(label: L10n.tr("СТРАНИЦА"), text: $citationPage, placeholder: "—")
+                    SepiaTextField(label: L10n.tr("ДЕТАЛЬ"), text: $citationDetail, placeholder: "—")
+                    SepiaTextField(label: L10n.tr("НАДЁЖНОСТЬ"), text: $citationConfidence, placeholder: L10n.tr("0–3 / текст"))
                 }
-                SepiaNotesField(label: "РАСШИФРОВКА", text: $citationTranscription, placeholder: "Точная запись из источника…")
-                SepiaNotesField(label: "ЗАМЕТКА К ССЫЛКЕ", text: $citationNotes, placeholder: "—")
-                Button("Привязать ссылку") { addCitation() }
+                SepiaNotesField(label: L10n.tr("РАСШИФРОВКА"), text: $citationTranscription, placeholder: L10n.tr("Точная запись из источника…"))
+                SepiaNotesField(label: L10n.tr("ЗАМЕТКА К ССЫЛКЕ"), text: $citationNotes, placeholder: "—")
+                Button(L10n.tr("Привязать ссылку")) { addCitation() }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
                     .disabled(selectedSourceID == nil || (requiresEvidenceObject && evidenceObjectID == nil))
             }
@@ -272,19 +282,19 @@ struct EditPersonView: View {
 
     private func sourceRecordFields(index: Int) -> some View {
         VStack(spacing: 8) {
-            SepiaTextField(label: "НАЗВАНИЕ", text: Binding(
+            SepiaTextField(label: L10n.tr("НАЗВАНИЕ"), text: Binding(
                 get: { editingTree.sourceRecords[index].title },
                 set: { editingTree.sourceRecords[index].title = $0 }
             ), placeholder: "—")
             HStack(spacing: 8) {
-                SepiaTextField(label: "АВТОР", text: optionalSourceBinding(index, \.author), placeholder: "—")
-                SepiaTextField(label: "ПУБЛИКАЦИЯ", text: optionalSourceBinding(index, \.publication), placeholder: "—")
+                SepiaTextField(label: L10n.tr("АВТОР"), text: optionalSourceBinding(index, \.author), placeholder: "—")
+                SepiaTextField(label: L10n.tr("ПУБЛИКАЦИЯ"), text: optionalSourceBinding(index, \.publication), placeholder: "—")
             }
             HStack(spacing: 8) {
-                SepiaTextField(label: "ХРАНИЛИЩЕ", text: optionalSourceBinding(index, \.repository), placeholder: "—")
-                SepiaTextField(label: "ШИФР", text: optionalSourceBinding(index, \.callNumber), placeholder: "—")
+                SepiaTextField(label: L10n.tr("ХРАНИЛИЩЕ"), text: optionalSourceBinding(index, \.repository), placeholder: "—")
+                SepiaTextField(label: L10n.tr("ШИФР"), text: optionalSourceBinding(index, \.callNumber), placeholder: "—")
             }
-            SepiaNotesField(label: "ЗАМЕТКИ", text: optionalSourceBinding(index, \.notes), placeholder: "—")
+            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: optionalSourceBinding(index, \.notes), placeholder: "—")
         }
     }
 
@@ -300,7 +310,7 @@ struct EditPersonView: View {
         case .relationship:
             editingTree.parentLinks.filter { $0.parentID == editingPerson.id || $0.childID == editingPerson.id }.map { link in
                 let otherID = link.parentID == editingPerson.id ? link.childID : link.parentID
-                return (link.id, editingTree.person(byId: otherID)?.listName ?? "Связь")
+                return (link.id, editingTree.person(byId: otherID)?.listName ?? L10n.tr("Связь"))
             }
         case .union:
             editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) || $0.childrenIds.contains(editingPerson.id) }
@@ -360,10 +370,10 @@ struct EditPersonView: View {
 
     private var unionsEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: "Союзы и дети")
+            SectionHeader(title: L10n.tr("Союзы и дети"))
             let unions = editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) }
             if unions.isEmpty {
-                Text("Союзы не заданы").font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.inkSoft)
+                Text(L10n.tr("Союзы не заданы")).font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.inkSoft)
             } else {
                 ForEach(unions, id: \.id) { union in
                     UnionDraftEditor(union: union, tree: editingTree, subject: editingPerson)
@@ -375,12 +385,12 @@ struct EditPersonView: View {
 
     private func unionLabel(_ union: Union) -> String {
         let names = union.partnerIds.compactMap { editingTree.person(byId: $0)?.listName }
-        return names.isEmpty ? "Семейная запись" : names.joined(separator: " + ")
+        return names.isEmpty ? L10n.tr("Семейная запись") : names.joined(separator: " + ")
     }
 
     private var relationshipsEditor: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Родство")
+            SectionHeader(title: L10n.tr("Родство"))
 
             let editPerson = editingPerson
             let idx = FamilyIndex(tree: editingTree)
@@ -390,16 +400,16 @@ struct EditPersonView: View {
             let siblings = idx.siblingsOf(editPerson)
 
             // Current relationships
-            if let f = parents.father { relEditRow("Отец", f) { removeParent(f) } }
-            if let m = parents.mother { relEditRow("Мать", m) { removeParent(m) } }
-            ForEach(spouses, id: \.id) { s in relEditRow("Супруг", s) { removeSpouse(s) } }
-            ForEach(children, id: \.id) { c in relEditRow("Ребёнок", c) { removeChild(c) } }
+            if let f = parents.father { relEditRow(L10n.tr("Отец"), f) { removeParent(f) } }
+            if let m = parents.mother { relEditRow(L10n.tr("Мать"), m) { removeParent(m) } }
+            ForEach(spouses, id: \.id) { s in relEditRow(L10n.tr("Супруг"), s) { removeSpouse(s) } }
+            ForEach(children, id: \.id) { c in relEditRow(L10n.tr("Ребёнок"), c) { removeChild(c) } }
             ForEach(siblings, id: \.id) { s in
-                relEditRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s) { removeSibling(s) }
+                relEditRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат/сестра"), s) { removeSibling(s) }
             }
 
             if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
-                Text("Родственные связи не заданы")
+                Text(L10n.tr("Родственные связи не заданы"))
                     .font(SepiaTheme.body(size: 13))
                     .foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
@@ -410,8 +420,8 @@ struct EditPersonView: View {
 
             HStack(spacing: 8) {
                 Picker("", selection: $addRelType) {
-                    ForEach(AddRelType.allCases, id: \.rawValue) { t in
-                        Text(t.rawValue).tag(t)
+                    ForEach(AddRelType.allCases, id: \.self) { t in
+                        Text(t.displayName).tag(t)
                     }
                 }
                 .pickerStyle(.menu)
@@ -419,8 +429,8 @@ struct EditPersonView: View {
                 .font(SepiaTheme.body(size: 13))
 
                 if addRelType != .none {
-                    Picker("Кто:", selection: $addRelPersonId) {
-                        Text("Выбрать…").tag(nil as UUID?)
+                    Picker(L10n.tr("Кто:"), selection: $addRelPersonId) {
+                        Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                         ForEach(availablePeople, id: \.id) { p in
                             Text(p.listName).tag(p.id as UUID?)
                         }
@@ -432,7 +442,7 @@ struct EditPersonView: View {
             .padding(.bottom, 4)
 
             if addRelType != .none && addRelPersonId != nil {
-                Button("Связать") { addRelationship() }
+                Button(L10n.tr("Связать")) { addRelationship() }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
                     .padding(.top, 4)
             }
@@ -552,10 +562,10 @@ struct EditPersonView: View {
 
     private var attachmentsEditor: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: "Файлы")
+            SectionHeader(title: L10n.tr("Файлы"))
 
             if editingPerson.attachments.isEmpty {
-                Text("Файлы не прикреплены")
+                Text(L10n.tr("Файлы не прикреплены"))
                     .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             } else {
@@ -565,7 +575,7 @@ struct EditPersonView: View {
             }
 
             Button { showAttachmentImporter = true } label: {
-                Label("Прикрепить файл", systemImage: "paperclip")
+                Label(L10n.tr("Прикрепить файл"), systemImage: "paperclip")
             }
             .buttonStyle(SepiaButtonStyle())
             .padding(.top, 4)
@@ -586,14 +596,14 @@ struct EditPersonView: View {
                         Text(att.originalName)
                             .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
                             .lineLimit(1).truncationMode(.middle)
-                        Text(att.format.isEmpty ? "Файл" : att.format)
+                        Text(att.format.isEmpty ? L10n.tr("Файл") : att.format)
                             .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help("Открыть «\(att.originalName)»")
+            .help(L10n.tr("Открыть «\(att.originalName)»"))
 
             Spacer(minLength: 0)
 
@@ -603,7 +613,7 @@ struct EditPersonView: View {
                     .frame(width: 24, height: 24).contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .help("Удалить файл")
+            .help(L10n.tr("Удалить файл"))
         }
         .padding(.bottom, 8)
     }
@@ -629,7 +639,7 @@ struct EditPersonView: View {
 
     private var photoEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("ФОТО")
+            Text(L10n.tr("ФОТО"))
                 .font(SepiaTheme.ui(size: 10))
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
@@ -657,7 +667,7 @@ struct EditPersonView: View {
                     Button {
                         showPhotoImporter = true
                     } label: {
-                        Label("Выбрать фото", systemImage: "photo.on.rectangle")
+                        Label(L10n.tr("Выбрать фото"), systemImage: "photo.on.rectangle")
                     }
                     .buttonStyle(SepiaButtonStyle())
                     .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
@@ -668,7 +678,7 @@ struct EditPersonView: View {
                         Button(role: .destructive) {
                             photoData = nil
                         } label: {
-                            Label("Удалить", systemImage: "trash")
+                            Label(L10n.tr("Удалить"), systemImage: "trash")
                                 .foregroundColor(.red.opacity(0.8))
                         }
                         .buttonStyle(.plain)
@@ -768,7 +778,7 @@ struct EditPersonView: View {
 
     private func savePerson() {
         guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
-            saveError = "Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне."
+            saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
             return
         }
         let parsedBirthDate = parsedDate(text: birthDate, end: birthDateEnd, qualifier: birthQualifier, original: originalBirthDate)
@@ -779,7 +789,7 @@ struct EditPersonView: View {
             original: originalDeathDate
         )
         if (!birthDate.isEmpty && parsedBirthDate == nil) || (!isLiving && !deathDate.isEmpty && parsedDeathDate == nil) {
-            saveError = "Исправьте некорректные даты перед сохранением."
+            saveError = L10n.tr("Исправьте некорректные даты перед сохранением.")
             return
         }
         let before = try? JSONEncoder().encode(tree)
@@ -946,14 +956,14 @@ private struct UnionDraftEditor: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(partnerNames).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                    Text("\(union.childrenIds.count) детей · \(union.citations.count) ссылок")
+                    Text(L10n.tr("\(union.childrenIds.count) детей · \(union.citations.count) ссылок"))
                         .font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
                 }
                 Spacer()
             }
 
-            Picker("Партнёр", selection: partnerBinding) {
-                Text("Не указан").tag(nil as UUID?)
+            Picker(L10n.tr("Партнёр"), selection: partnerBinding) {
+                Text(L10n.tr("Не указан")).tag(nil as UUID?)
                 ForEach(availablePartners, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
             }
             .pickerStyle(.menu)
@@ -963,14 +973,14 @@ private struct UnionDraftEditor: View {
             UnionEventDraftEditor(kind: .separation, union: union, attachments: subject.attachments)
             UnionEventDraftEditor(kind: .divorce, union: union, attachments: subject.attachments)
 
-            Text("ДЕТИ И ТИП РОДИТЕЛЬСТВА")
+            Text(L10n.tr("ДЕТИ И ТИП РОДИТЕЛЬСТВА"))
                 .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundStyle(SepiaTheme.inkSoft)
             ForEach(union.childrenIds, id: \.self) { childID in
                 HStack {
-                    Text(tree.person(byId: childID)?.listName ?? "Неизвестная персона")
+                    Text(tree.person(byId: childID)?.listName ?? L10n.tr("Неизвестная персона"))
                         .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
                     Spacer()
-                    Picker("Тип", selection: parentageBinding(childID: childID)) {
+                    Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
                         ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
                     }.pickerStyle(.menu).frame(width: 150)
                     Button(role: .destructive) {
@@ -980,11 +990,11 @@ private struct UnionDraftEditor: View {
                 }
             }
             HStack {
-                Picker("Добавить ребёнка", selection: $childToAdd) {
-                    Text("Выбрать…").tag(nil as UUID?)
+                Picker(L10n.tr("Добавить ребёнка"), selection: $childToAdd) {
+                    Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                     ForEach(availableChildren, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
                 }.pickerStyle(.menu)
-                Button("Добавить") { addChild() }.buttonStyle(SepiaButtonStyle()).disabled(childToAdd == nil)
+                Button(L10n.tr("Добавить")) { addChild() }.buttonStyle(SepiaButtonStyle()).disabled(childToAdd == nil)
             }
         }
         .padding(12)
@@ -1078,11 +1088,11 @@ private struct UnionEventDraftEditor: View {
             Toggle(eventTitle, isOn: $enabled).toggleStyle(.checkbox)
                 .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
             if enabled {
-                SepiaDateField(label: "ДАТА", text: $dateText, qualifier: $qualifier, endText: $endText)
-                PlacePickerField(label: "МЕСТО", text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }
-                SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "—")
+                SepiaDateField(label: L10n.tr("ДАТА"), text: $dateText, qualifier: $qualifier, endText: $endText)
+                PlacePickerField(label: L10n.tr("МЕСТО"), text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }
+                SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: "—")
                 if !attachments.isEmpty {
-                    Menu("Медиа (\(mediaIDs.count))") {
+                    Menu(L10n.tr("Медиа (\(mediaIDs.count))")) {
                         ForEach(attachments) { attachment in
                             Toggle(attachment.originalName, isOn: Binding(
                                 get: { mediaIDs.contains(attachment.id.uuidString) },
@@ -1107,10 +1117,10 @@ private struct UnionEventDraftEditor: View {
 
     private var eventTitle: String {
         switch kind {
-        case .partnership: "Партнёрство"
-        case .marriage: "Брак"
-        case .separation: "Раздельное проживание"
-        case .divorce: "Развод"
+        case .partnership: L10n.tr("Партнёрство")
+        case .marriage: L10n.tr("Брак")
+        case .separation: L10n.tr("Раздельное проживание")
+        case .divorce: L10n.tr("Развод")
         default: kind.rawValue
         }
     }

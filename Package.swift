@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "FamilyTreeStudio",
+    defaultLocalization: "ru",
     platforms: [.macOS(.v14)],
     targets: [
         // Pure domain logic (Models + Services): no SwiftUI dependency, so it can be
@@ -12,6 +13,7 @@ let package = Package(
             path: "FamilyTreeStudio/Core",
             exclude: ["Resources/AppIcon_preview.png", "Resources/PLACE_DATA.md", "Resources/MAP_DATA.md"],
             resources: [
+                .process("Resources/Localization"),
                 .copy("Resources/places.tsv"),
                 .copy("Resources/geonames_ussr.tsv"),
                 .copy("Resources/place_index_v2.tsv"),

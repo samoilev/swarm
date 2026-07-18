@@ -35,7 +35,7 @@ public struct LineageCalculator {
             labels[spouse.id] = spouse.sex == .male ? "Муж" : "Жена"
         }
 
-        return LineageResult(ids: ids, labels: labels)
+        return LineageResult(ids: ids, labels: labels.mapValues(L10n.dynamic))
     }
 
     private func computeAncestors(personId: UUID, generation: Int, ids: inout Set<UUID>, labels: inout [UUID: String]) {
@@ -74,6 +74,14 @@ public struct LineageCalculator {
     }
 
     private func ancestorLabel(generation: Int, sex: Person.Sex) -> String {
+        if AppLanguage.current == .english {
+            switch generation {
+            case 1: return sex == .female ? "Mother" : "Father"
+            case 2: return sex == .female ? "Grandmother" : "Grandfather"
+            default:
+                return String(repeating: "great-", count: generation - 2) + (sex == .female ? "grandmother" : "grandfather")
+            }
+        }
         switch generation {
         case 1:
             return sex == .female ? "Мать" : "Отец"
@@ -90,6 +98,14 @@ public struct LineageCalculator {
     }
 
     private func descendantLabel(generation: Int, sex: Person.Sex) -> String {
+        if AppLanguage.current == .english {
+            switch generation {
+            case 1: return sex == .female ? "Daughter" : "Son"
+            case 2: return sex == .female ? "Granddaughter" : "Grandson"
+            default:
+                return String(repeating: "great-", count: generation - 2) + (sex == .female ? "granddaughter" : "grandson")
+            }
+        }
         switch generation {
         case 1:
             return sex == .female ? "Дочь" : "Сын"
@@ -109,6 +125,11 @@ public struct LineageCalculator {
     /// Зять/Невестка; deeper generations are qualified by whom they married,
     /// e.g. the husband of a granddaughter → «Муж внучки».
     private func childSpouseLabel(generation: Int, spouseSex: Person.Sex, descendantSex: Person.Sex) -> String {
+        if AppLanguage.current == .english {
+            if generation == 1 { return spouseSex == .female ? "Daughter-in-law" : "Son-in-law" }
+            let descendant = descendantLabel(generation: generation, sex: descendantSex).lowercased()
+            return (spouseSex == .female ? "Wife of " : "Husband of ") + descendant
+        }
         if generation == 1 {
             return spouseSex == .female ? "Невестка" : "Зять"
         }

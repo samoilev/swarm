@@ -109,9 +109,9 @@ public final class Person: Identifiable, Codable, Hashable {
 
         public var displayName: String {
             switch self {
-            case .male: "Муж"
-            case .female: "Жен"
-            case .unknown: "Не указан"
+            case .male: AppLanguage.current == .english ? "Male" : "Муж"
+            case .female: AppLanguage.current == .english ? "Female" : "Жен"
+            case .unknown: L10n.tr("Не указан")
             }
         }
 
@@ -362,9 +362,9 @@ public final class Person: Identifiable, Codable, Hashable {
         if !birthStr.isEmpty {
             if let result = FamilyDate.calculateAge(birth: birthDate, death: nil) {
                 let approx = result.approximate ? "~" : ""
-                return "р. \(birthStr) (\(approx)\(result.years))"
+                return L10n.tr("р. \(birthStr) (\(approx)\(result.years))")
             }
-            return "р. \(birthStr)"
+            return L10n.tr("р. \(birthStr)")
         }
         return ""
     }

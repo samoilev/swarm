@@ -68,7 +68,7 @@ struct ContentView: View {
             }
         }
         .onOpenURL { url in previewGEDCOM(from: url) }
-        .alert("Не удалось импортировать файл", isPresented: Binding(
+        .alert(L10n.tr("Не удалось импортировать файл"), isPresented: Binding(
             get: { importError != nil },
             set: { if !$0 { importError = nil } }
         )) {
@@ -87,7 +87,7 @@ struct ContentView: View {
             pendingImportURL = localCopy
             importPreview = result
         } catch {
-            importError = "Файл повреждён или имеет неподдерживаемый формат.\n\n\(error.localizedDescription)"
+            importError = L10n.tr("Файл повреждён или имеет неподдерживаемый формат.\n\n\(error.localizedDescription)")
         }
     }
 

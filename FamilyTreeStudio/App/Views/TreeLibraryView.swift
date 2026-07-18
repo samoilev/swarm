@@ -32,10 +32,10 @@ struct TreeLibraryView: View {
 
             VStack(spacing: 0) {
                 VStack(spacing: 8) {
-                    Text("Родословная")
+                    Text(L10n.tr("Родословная"))
                         .font(SepiaTheme.display(size: 32))
                         .foregroundColor(SepiaTheme.ink)
-                    Text("СЕМЕЙНЫЙ АРХИВ")
+                    Text(L10n.tr("СЕМЕЙНЫЙ АРХИВ"))
                         .font(SepiaTheme.ui(size: 10))
                         .tracking(3)
                         .foregroundColor(SepiaTheme.inkSoft)
@@ -47,15 +47,15 @@ struct TreeLibraryView: View {
                 HStack(spacing: 10) {
                     Spacer()
                     Button(action: { showRecovery = true }) {
-                        Label("Восстановление", systemImage: "clock.arrow.circlepath")
+                        Label(L10n.tr("Восстановление"), systemImage: "clock.arrow.circlepath")
                     }
                     .buttonStyle(SepiaButtonStyle())
                     Button(action: { onImport?() }) {
-                        Label("Импорт GEDCOM", systemImage: "square.and.arrow.down")
+                        Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
                     }
                     .buttonStyle(SepiaButtonStyle())
                     Button(action: onCreate) {
-                        Label("Новое дерево", systemImage: "plus")
+                        Label(L10n.tr("Новое дерево"), systemImage: "plus")
                     }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
                 }
@@ -72,10 +72,10 @@ struct TreeLibraryView: View {
                         Image(systemName: "tree")
                             .font(.system(size: 48))
                             .foregroundColor(SepiaTheme.inkSoft)
-                        Text("Деревьев пока нет")
+                        Text(L10n.tr("Деревьев пока нет"))
                             .font(SepiaTheme.body(size: 18))
                             .foregroundColor(SepiaTheme.ink)
-                        Text("Создайте первое родословное дерево")
+                        Text(L10n.tr("Создайте первое родословное дерево"))
                             .font(SepiaTheme.body(size: 14))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
@@ -102,35 +102,35 @@ struct TreeLibraryView: View {
         }
         .frame(minWidth: 600, minHeight: 400)
         .confirmationDialog(
-            "Удалить дерево «\(treeToDelete?.name ?? "")»?",
+            L10n.tr("Удалить дерево «\(treeToDelete?.name ?? "")»?"),
             isPresented: Binding(get: { treeToDelete != nil }, set: { if !$0 { treeToDelete = nil } }),
             titleVisibility: .visible
         ) {
-            Button("Удалить вместе с файлами", role: .destructive) {
+            Button(L10n.tr("Удалить вместе с файлами"), role: .destructive) {
                 if let tree = treeToDelete { store.deleteTree(tree) }
                 treeToDelete = nil
             }
-            Button("Архивировать (оставить файлы)") {
+            Button(L10n.tr("Архивировать (оставить файлы)")) {
                 if let tree = treeToDelete {
                     let url = store.archiveTree(tree)
                     NSWorkspace.shared.activateFileViewerSelecting([url])
                 }
                 treeToDelete = nil
             }
-            Button("Экспортировать копию и удалить…") {
+            Button(L10n.tr("Экспортировать копию и удалить…")) {
                 treeToExport = treeToDelete
                 treeToDelete = nil
                 // Defer so the dialog finishes dismissing before the open panel appears.
                 DispatchQueue.main.async { showExporter = true }
             }
-            Button("Отмена", role: .cancel) { treeToDelete = nil }
+            Button(L10n.tr("Отмена"), role: .cancel) { treeToDelete = nil }
         } message: {
-            Text("Выберите, что сделать с файлом GEDCOM и фотографиями этого дерева.")
+            Text(L10n.tr("Выберите, что сделать с файлом GEDCOM и фотографиями этого дерева."))
         }
-        .alert("Переименовать дерево", isPresented: Binding(get: { treeToRename != nil }, set: { if !$0 { treeToRename = nil } })) {
-            TextField("Название", text: $renameName)
-            TextField("Подзаголовок (необязательно)", text: $renameSubtitle)
-            Button("Сохранить") {
+        .alert(L10n.tr("Переименовать дерево"), isPresented: Binding(get: { treeToRename != nil }, set: { if !$0 { treeToRename = nil } })) {
+            TextField(L10n.tr("Название"), text: $renameName)
+            TextField(L10n.tr("Подзаголовок (необязательно)"), text: $renameSubtitle)
+            Button(L10n.tr("Сохранить")) {
                 guard let tree = treeToRename else { return }
                 Task { @MainActor in
                     do {
@@ -141,9 +141,9 @@ struct TreeLibraryView: View {
                     treeToRename = nil
                 }
             }
-            Button("Отмена", role: .cancel) { treeToRename = nil }
+            Button(L10n.tr("Отмена"), role: .cancel) { treeToRename = nil }
         } message: {
-            Text("Измените название и подзаголовок дерева.")
+            Text(L10n.tr("Измените название и подзаголовок дерева."))
         }
         .fileImporter(isPresented: $showExporter, allowedContentTypes: [.folder]) { result in
             guard let tree = treeToExport else { return }
@@ -156,28 +156,28 @@ struct TreeLibraryView: View {
                     do {
                         let receipt = try await store.exportTree(tree, to: directory)
                         guard store.deleteTree(tree) else {
-                            throw TreeStoreError.commitFailed(reason: store.lastSaveError ?? "Экспорт проверен, но исходное дерево не перемещено в Корзину.")
+                            throw TreeStoreError.commitFailed(reason: store.lastSaveError ?? L10n.tr("Экспорт проверен, но исходное дерево не перемещено в Корзину."))
                         }
                         NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
                     } catch {
-                        errorMessage = "Не удалось экспортировать дерево.\n\n\(error.localizedDescription)"
+                        errorMessage = L10n.tr("Не удалось экспортировать дерево.\n\n\(error.localizedDescription)")
                     }
                 }
             case .failure(let error):
                 errorMessage = error.localizedDescription
             }
         }
-        .alert("Ошибка", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
+        .alert(L10n.tr("Ошибка"), isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
             Button("OK", role: .cancel) { errorMessage = nil }
         } message: {
             Text(errorMessage ?? "")
         }
-        .alert("Некоторые деревья не открылись", isPresented: $showLoadError) {
-            Button("Показать в Finder") {
+        .alert(L10n.tr("Некоторые деревья не открылись"), isPresented: $showLoadError) {
+            Button(L10n.tr("Показать в Finder")) {
                 NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
                 store.lastLoadError = nil
             }
-            Button("Закрыть", role: .cancel) { store.lastLoadError = nil }
+            Button(L10n.tr("Закрыть"), role: .cancel) { store.lastLoadError = nil }
         } message: {
             Text(store.lastLoadError ?? "")
         }
@@ -200,13 +200,13 @@ struct TreeLibraryView: View {
                         .font(SepiaTheme.body(size: 13.5))
                         .foregroundColor(SepiaTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("Открывать и просматривать можно уже сейчас. Обновление нужно, чтобы сохранять изменения — оно делает резервную копию и не удаляет исходные файлы.")
+                    Text(L10n.tr("Открывать и просматривать можно уже сейчас. Обновление нужно, чтобы сохранять изменения — оно делает резервную копию и не удаляет исходные файлы."))
                         .font(SepiaTheme.ui(size: 11))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
-                Button("Обновить формат…") { showRecovery = true }
+                Button(L10n.tr("Обновить формат…")) { showRecovery = true }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
             }
             .padding(.horizontal, 24)
@@ -221,9 +221,9 @@ struct TreeLibraryView: View {
         let subject = switch names.count {
         case 0: ""
         case 1, 2: names.joined(separator: ", ")
-        default: "\(names.prefix(2).joined(separator: ", ")) и ещё \(names.count - 2)"
+        default: L10n.tr("\(names.prefix(2).joined(separator: ", ")) и ещё \(names.count - 2)")
         }
-        return "\(subject) — в старом формате хранения"
+        return L10n.tr("\(subject) — в старом формате хранения")
     }
 
     private func startRename(_ tree: FamilyTree) {
@@ -241,10 +241,10 @@ struct TreeCardView: View {
     var onDelete: (() -> Void)?
 
     @ViewBuilder private var menuItems: some View {
-        Button { onRename?() } label: { Label("Переименовать…", systemImage: "pencil") }
-        Button { onReveal?() } label: { Label("Показать в Finder", systemImage: "folder") }
+        Button { onRename?() } label: { Label(L10n.tr("Переименовать…"), systemImage: "pencil") }
+        Button { onReveal?() } label: { Label(L10n.tr("Показать в Finder"), systemImage: "folder") }
         Divider()
-        Button(role: .destructive) { onDelete?() } label: { Label("Удалить…", systemImage: "trash") }
+        Button(role: .destructive) { onDelete?() } label: { Label(L10n.tr("Удалить…"), systemImage: "trash") }
     }
 
     var body: some View {
@@ -273,7 +273,7 @@ struct TreeCardView: View {
                             .lineLimit(1)
                     }
                     HStack {
-                        Text("\(tree.people.count) чел.")
+                        Text(L10n.tr("\(tree.people.count) чел."))
                             .font(SepiaTheme.ui(size: 11))
                             .foregroundColor(SepiaTheme.inkSoft)
                         Spacer()
@@ -287,8 +287,8 @@ struct TreeCardView: View {
                         .menuStyle(.borderlessButton)
                         .menuIndicator(.hidden)
                         .fixedSize()
-                        .help("Действия с деревом")
-                        .accessibilityLabel("Действия с деревом")
+                        .help(L10n.tr("Действия с деревом"))
+                        .accessibilityLabel(L10n.tr("Действия с деревом"))
                     }
                     .padding(.top, 2)
                 }
