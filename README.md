@@ -15,6 +15,7 @@ vector map available in Settings.
   birth/death/burial places.
 - Russian kinship naming — direct lineage, full/half siblings, cousins (incl. removed),
   and in-laws (свёкор/тесть, деверь/шурин, золовка/свояченица, …).
+- Russian and English interface languages, selectable in Settings; Russian is the default.
 - Photos and arbitrary file attachments per person.
 - People, timeline, places, review, recovery, source/citation and structured-union
   workspaces designed for large local trees.

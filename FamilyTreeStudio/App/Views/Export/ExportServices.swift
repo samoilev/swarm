@@ -128,7 +128,7 @@ struct PersonCardsPDFExporter {
         drawBorder(ctx)
 
         // Title near the top (drawn in normal, un-rotated page space).
-        let title = scopeIds == nil ? (tree.name.isEmpty ? "Дерево" : tree.name) : "Выделенная часть дерева"
+        let title = scopeIds == nil ? (tree.name.isEmpty ? L10n.tr("Дерево") : tree.name) : L10n.tr("Выделенная часть дерева")
         let titleStr = NSAttributedString(string: title, attributes: [
             .font: NSFont.systemFont(ofSize: 16, weight: .semibold),
             .foregroundColor: NSColor(SepiaTheme.ink)
@@ -195,7 +195,7 @@ struct PersonCardsPDFExporter {
         ]
         NSAttributedString(string: person.listName, attributes: attr)
             .draw(at: NSPoint(x: margin, y: footerBaseline))
-        let brand = NSAttributedString(string: "Родословная Студия", attributes: attr)
+        let brand = NSAttributedString(string: L10n.tr("Родословная Студия"), attributes: attr)
         brand.draw(at: NSPoint(x: pageW - margin - brand.size().width, y: footerBaseline))
     }
 
@@ -231,7 +231,7 @@ struct PersonCardsPDFExporter {
         cursorY -= nameH + 3
 
         if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
-            let s = NSAttributedString(string: "урожд. \(maiden)", attributes: [
+            let s = NSAttributedString(string: L10n.tr("урожд. \(maiden)"), attributes: [
                 .font: NSFont.systemFont(ofSize: 12).withItalic(),
                 .foregroundColor: NSColor(SepiaTheme.inkSoft)
             ])
@@ -259,7 +259,7 @@ struct PersonCardsPDFExporter {
         return ruleY - 14
     }
 
-    private static func drawContinuationHeader(_ person: Person, suffix: String = "продолжение", textWidth: CGFloat) -> CGFloat {
+    private static func drawContinuationHeader(_ person: Person, suffix: String = L10n.tr("продолжение"), textWidth: CGFloat) -> CGFloat {
         let topEdge = pageH - margin
         let s = NSAttributedString(string: "\(person.listName) — \(suffix)", attributes: [
             .font: NSFont.systemFont(ofSize: 11).withItalic(),
@@ -309,41 +309,41 @@ struct PersonCardsPDFExporter {
             ]))
         }
 
-        section("Личность")
-        field("Имя", p.givenNames)
-        field("Отчество", p.patronymic)
-        field("Фамилия", p.surname)
-        field("Девичья фамилия", p.maidenName)
-        field("Пол", p.sex.displayName)
+        section(L10n.tr("Личность"))
+        field(L10n.tr("Имя"), p.givenNames)
+        field(L10n.tr("Отчество"), p.patronymic)
+        field(L10n.tr("Фамилия"), p.surname)
+        field(L10n.tr("Девичья фамилия"), p.maidenName)
+        field(L10n.tr("Пол"), p.sex.displayName)
 
         if p.birthDate?.isEmpty == false || p.birthPlace?.isEmpty == false {
-            section("Рождение")
-            field("Дата", p.birthDate)
-            field("Место", p.birthPlace)
+            section(L10n.tr("Рождение"))
+            field(L10n.tr("Дата"), p.birthDate)
+            field(L10n.tr("Место"), p.birthPlace)
         }
 
         let hasBurial = (p.burialPlace?.isEmpty == false) || (p.burialLat != nil && p.burialLon != nil)
         if !p.isLiving || hasBurial {
-            section("Смерть и погребение")
+            section(L10n.tr("Смерть и погребение"))
             if !p.isLiving {
-                field("Дата смерти", p.deathDate)
-                field("Место смерти", p.deathPlace)
+                field(L10n.tr("Дата смерти"), p.deathDate)
+                field(L10n.tr("Место смерти"), p.deathPlace)
             }
-            field("Место захоронения", p.burialPlace)
+            field(L10n.tr("Место захоронения"), p.burialPlace)
             if let lat = p.burialLat, let lon = p.burialLon {
-                field("Координаты могилы", String(format: "%.5f, %.5f", lat, lon))
+                field(L10n.tr("Координаты могилы"), String(format: "%.5f, %.5f", lat, lon))
             }
         }
 
         if p.occupation?.isEmpty == false || p.education?.isEmpty == false || p.notes?.isEmpty == false {
-            section("Жизнь")
-            field("Профессия", p.occupation)
-            field("Образование", p.education)
-            field("Заметки", p.notes)
+            section(L10n.tr("Жизнь"))
+            field(L10n.tr("Профессия"), p.occupation)
+            field(L10n.tr("Образование"), p.education)
+            field(L10n.tr("Заметки"), p.notes)
         }
 
         if !p.attachments.isEmpty {
-            section("Файлы")
+            section(L10n.tr("Файлы"))
             for a in p.attachments {
                 let fmt = a.format.isEmpty ? "" : " (\(a.format))"
                 bullet(a.originalName + fmt)
@@ -355,12 +355,12 @@ struct PersonCardsPDFExporter {
         let children = idx.childrenOf(p)
         let siblings = idx.siblingsOf(p)
         if parents.father != nil || parents.mother != nil || !spouses.isEmpty || !children.isEmpty || !siblings.isEmpty {
-            section("Родственные связи")
-            field("Отец", parents.father?.listName)
-            field("Мать", parents.mother?.listName)
-            if !spouses.isEmpty { field("Супруг(и)", spouses.map(\.listName).joined(separator: ", ")) }
-            if !children.isEmpty { field("Дети", children.map(\.listName).joined(separator: ", ")) }
-            if !siblings.isEmpty { field("Братья/сёстры", siblings.map(\.listName).joined(separator: ", ")) }
+            section(L10n.tr("Родственные связи"))
+            field(L10n.tr("Отец"), parents.father?.listName)
+            field(L10n.tr("Мать"), parents.mother?.listName)
+            if !spouses.isEmpty { field(L10n.tr("Супруг(и)"), spouses.map(\.listName).joined(separator: ", ")) }
+            if !children.isEmpty { field(L10n.tr("Дети"), children.map(\.listName).joined(separator: ", ")) }
+            if !siblings.isEmpty { field(L10n.tr("Братья/сёстры"), siblings.map(\.listName).joined(separator: ", ")) }
         }
 
         return result
@@ -406,7 +406,7 @@ struct PersonCardsPDFExporter {
             nsCtx.imageInterpolation = .high
             drawBackground(ctx, box: box)
             drawBorder(ctx)
-            cursorY = drawContinuationHeader(person, suffix: "изображения", textWidth: contentW)
+            cursorY = drawContinuationHeader(person, suffix: L10n.tr("изображения"), textWidth: contentW)
             pageOpen = true
             placedOnPage = false
         }

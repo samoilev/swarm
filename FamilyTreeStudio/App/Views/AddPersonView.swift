@@ -56,7 +56,7 @@ struct AddPersonView: View {
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Добавить родственника")
+                    Text(L10n.tr("Добавить родственника"))
                         .font(SepiaTheme.display(size: 22))
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
@@ -73,17 +73,17 @@ struct AddPersonView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        SectionHeader(title: "Личность")
+                        SectionHeader(title: L10n.tr("Личность"))
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
-                            SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
-                            SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
+                            SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                            SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                            SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
                         }.padding(.bottom, 12)
 
                         HStack(spacing: 12) {
-                            SepiaTextField(label: "ДЕВИЧЬЯ ФАМИЛИЯ", text: $maidenName, placeholder: "—")
+                            SepiaTextField(label: L10n.tr("ДЕВИЧЬЯ ФАМИЛИЯ"), text: $maidenName, placeholder: "—")
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("ПОЛ").font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
+                                Text(L10n.tr("ПОЛ")).font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
                                 HStack(spacing: 6) {
                                     ForEach(Person.Sex.allCases, id: \.rawValue) { s in
                                         Button(s.displayName) { sex = s }.buttonStyle(SepiaButtonStyle(isActive: sex == s))
@@ -92,51 +92,51 @@ struct AddPersonView: View {
                             }
                         }.padding(.bottom, 12)
 
-                        SectionHeader(title: "Рождение")
+                        SectionHeader(title: L10n.tr("Рождение"))
                         SepiaDateField(
-                            label: "ДАТА",
+                            label: L10n.tr("ДАТА"),
                             text: $birthDate,
                             qualifier: $birthQualifier,
                             endText: $birthDateEnd
                         ).padding(.bottom, 8)
-                        PlacePickerField(label: "МЕСТО", text: $birthPlace, placeholder: "Город, область, страна") {
+                        PlacePickerField(label: L10n.tr("МЕСТО"), text: $birthPlace, placeholder: L10n.tr("Город, область, страна")) {
                             selectedBirthPlace = $0
                             prefillCoords(for: $0, into: $birthCoords)
                         }.padding(.bottom, 8).zIndex(1)
-                        SepiaTextField(label: "КООРДИНАТЫ", text: $birthCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
+                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
 
-                        SectionHeader(title: "Смерть и погребение")
+                        SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
-                            Text("Жив(а)").font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
+                            Text(L10n.tr("Жив(а)")).font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
                             SepiaDateField(
-                                label: "ДАТА",
+                                label: L10n.tr("ДАТА"),
                                 text: $deathDate,
                                 qualifier: $deathQualifier,
                                 endText: $deathDateEnd
                             ).padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+                            PlacePickerField(label: L10n.tr("МЕСТО СМЕРТИ"), text: $deathPlace, placeholder: "—") {
                                 selectedDeathPlace = $0
                                 prefillCoords(for: $0, into: $deathCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: "КООРДИНАТЫ", text: $deathCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 8)
-                            PlacePickerField(label: "МЕСТО ЗАХОРОНЕНИЯ", text: $burialPlace, placeholder: "—") {
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 8)
+                            PlacePickerField(label: L10n.tr("МЕСТО ЗАХОРОНЕНИЯ"), text: $burialPlace, placeholder: "—") {
                                 selectedBurialPlace = $0
                                 prefillCoords(for: $0, into: $burialCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: "КООРДИНАТЫ МОГИЛЫ", text: $burialCoords, placeholder: "напр. 55.7558, 37.6173").padding(.bottom, 12)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
                         }
 
-                        SectionHeader(title: "Жизнь")
-                        SepiaTextField(label: "ПРОФЕССИЯ", text: $occupation, placeholder: "—").padding(.bottom, 8)
-                        SepiaTextField(label: "ОБРАЗОВАНИЕ", text: $education, placeholder: "—").padding(.bottom, 8)
-                        SepiaNotesField(label: "ЗАМЕТКИ", text: $notes, placeholder: "Свободный текст…").padding(.bottom, 12)
+                        SectionHeader(title: L10n.tr("Жизнь"))
+                        SepiaTextField(label: L10n.tr("ПРОФЕССИЯ"), text: $occupation, placeholder: "—").padding(.bottom, 8)
+                        SepiaTextField(label: L10n.tr("ОБРАЗОВАНИЕ"), text: $education, placeholder: "—").padding(.bottom, 8)
+                        SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: L10n.tr("Свободный текст…")).padding(.bottom, 12)
 
-                        SectionHeader(title: "Родственные связи")
+                        SectionHeader(title: L10n.tr("Родственные связи"))
                         if tree.people.isEmpty {
-                            Text("Добавьте людей в дерево, чтобы создавать связи")
+                            Text(L10n.tr("Добавьте людей в дерево, чтобы создавать связи"))
                                 .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
                         } else {
                             ForEach($pendingRels) { $rel in
@@ -145,7 +145,7 @@ struct AddPersonView: View {
                                         ForEach(RelationKind.allCases) { k in Text(k.displayName).tag(k) }
                                     }.labelsHidden().pickerStyle(.menu).frame(width: 130)
                                     Picker("", selection: $rel.personId) {
-                                        Text("Выбрать…").tag(nil as UUID?)
+                                        Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                                         ForEach(sortedPeople, id: \.id) { p in Text(p.listName).tag(p.id as UUID?) }
                                     }.labelsHidden().pickerStyle(.menu)
                                     Button { pendingRels.removeAll { $0.id == rel.id } } label: {
@@ -158,7 +158,7 @@ struct AddPersonView: View {
                                 .padding(.bottom, 6)
                             }
                             Button { pendingRels.append(PendingRelation()) } label: {
-                                Label("Добавить связь", systemImage: "plus")
+                                Label(L10n.tr("Добавить связь"), systemImage: "plus")
                             }.buttonStyle(SepiaButtonStyle()).padding(.top, 4)
                         }
                     }
@@ -168,9 +168,9 @@ struct AddPersonView: View {
                 Divider().overlay(SepiaTheme.toolbarLine)
 
                 HStack {
-                    Button("Отмена") { dismiss() }.buttonStyle(SepiaButtonStyle())
+                    Button(L10n.tr("Отмена")) { dismiss() }.buttonStyle(SepiaButtonStyle())
                     Spacer()
-                    Button("Добавить") { addPerson() }
+                    Button(L10n.tr("Добавить")) { addPerson() }
                         .buttonStyle(SepiaButtonStyle(isActive: true))
                         .disabled(isSaving)
                         .disabled(givenNames.isEmpty && surname.isEmpty)
@@ -179,7 +179,7 @@ struct AddPersonView: View {
             }
         }
         .frame(width: 540, height: 680)
-        .alert("Не удалось добавить персону", isPresented: Binding(
+        .alert(L10n.tr("Не удалось добавить персону"), isPresented: Binding(
             get: { saveError != nil },
             set: { if !$0 { saveError = nil } }
         )) {
@@ -194,11 +194,11 @@ struct AddPersonView: View {
         let parsedDeath = isLiving ? nil : parsedDate(text: deathDate, end: deathDateEnd, qualifier: deathQualifier)
         guard birthDate.isEmpty || parsedBirth != nil,
               isLiving || deathDate.isEmpty || parsedDeath != nil else {
-            saveError = "Исправьте некорректные даты перед сохранением."
+            saveError = L10n.tr("Исправьте некорректные даты перед сохранением.")
             return
         }
         guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
-            saveError = "Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне."
+            saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
             return
         }
         let before = try? JSONEncoder().encode(tree)

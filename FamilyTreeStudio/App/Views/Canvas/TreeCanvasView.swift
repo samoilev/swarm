@@ -491,7 +491,7 @@ private struct TreeContentLayer: View, Equatable {
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel(node.person.accessibilityDescription)
-                .accessibilityHint("Выбрать персону")
+                .accessibilityHint(L10n.tr("Выбрать персону"))
                 .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
                 .accessibilityAction { onSelect(node.person, false) }
             }
@@ -553,7 +553,7 @@ private struct TreeMinimap: View {
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardLine, lineWidth: 0.5))
         .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
-        .help("Обзор дерева — нажмите, чтобы перейти")
+        .help(L10n.tr("Обзор дерева — нажмите, чтобы перейти"))
         .accessibilityHidden(true)
     }
 }
@@ -763,7 +763,7 @@ struct PersonCardView: View, Equatable {
                     let nameDisplay = [person.givenNames, person.patronymic ?? ""]
                         .filter { !$0.isEmpty }
                         .joined(separator: " ")
-                    Text(nameDisplay.isEmpty ? "Неизвестно" : nameDisplay)
+                    Text(nameDisplay.isEmpty ? L10n.tr("Неизвестно") : nameDisplay)
                         .font(SepiaTheme.display(size: s(13.5)))
                         .fontWeight(.semibold)
                         .foregroundColor(SepiaTheme.ink)

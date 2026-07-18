@@ -10,10 +10,10 @@ public enum RelationKind: String, CaseIterable, Identifiable, Hashable {
 
     public var displayName: String {
         switch self {
-        case .parent: "Родитель"
-        case .spouse: "Супруг(а)"
-        case .child: "Ребёнок"
-        case .sibling: "Брат/сестра"
+        case .parent: L10n.tr("Родитель")
+        case .spouse: L10n.tr("Супруг(а)")
+        case .child: L10n.tr("Ребёнок")
+        case .sibling: L10n.tr("Брат/сестра")
         }
     }
 

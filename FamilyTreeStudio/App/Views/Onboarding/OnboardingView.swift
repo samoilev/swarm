@@ -26,10 +26,10 @@ struct OnboardingView: View {
 
             VStack(spacing: 0) {
                 VStack(spacing: 6) {
-                    Text("Создать родословное дерево")
+                    Text(L10n.tr("Создать родословное дерево"))
                         .font(SepiaTheme.display(size: 26))
                         .foregroundColor(SepiaTheme.ink)
-                    Text(step == 0 ? "Назовите вашу семейную запись" : "Добавьте первого человека")
+                    Text(step == 0 ? L10n.tr("Назовите вашу семейную запись") : L10n.tr("Добавьте первого человека"))
                         .font(SepiaTheme.body(size: 14))
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
@@ -57,19 +57,19 @@ struct OnboardingView: View {
                 Spacer()
 
                 HStack(spacing: 12) {
-                    Button("Отмена") { dismiss() }
+                    Button(L10n.tr("Отмена")) { dismiss() }
                         .buttonStyle(SepiaButtonStyle())
                     if step > 0 {
-                        Button("Назад") { withAnimation { step -= 1 } }
+                        Button(L10n.tr("Назад")) { withAnimation { step -= 1 } }
                             .buttonStyle(SepiaButtonStyle())
                     }
                     Spacer()
                     if step == 0 {
-                        Button("Далее") { withAnimation { step = 1 }; focusedField = .givenNames }
+                        Button(L10n.tr("Далее")) { withAnimation { step = 1 }; focusedField = .givenNames }
                             .buttonStyle(SepiaButtonStyle(isActive: true))
                             .disabled(treeName.isEmpty)
                     } else {
-                        Button("Создать") { createTree() }
+                        Button(L10n.tr("Создать")) { createTree() }
                             .buttonStyle(SepiaButtonStyle(isActive: true))
                             .disabled(givenNames.isEmpty && surname.isEmpty)
                     }
@@ -82,9 +82,9 @@ struct OnboardingView: View {
 
     private var treeNameStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SepiaTextField(label: "НАЗВАНИЕ СЕМЬИ", text: $treeName, placeholder: "напр. Семья Ивановых")
+            SepiaTextField(label: L10n.tr("НАЗВАНИЕ СЕМЬИ"), text: $treeName, placeholder: L10n.tr("напр. Семья Ивановых"))
                 .focused($focusedField, equals: .treeName)
-            SepiaTextField(label: "ПОДЗАГОЛОВОК (необяз.)", text: $subtitle, placeholder: "напр. Потомки Ивана и Марии")
+            SepiaTextField(label: L10n.tr("ПОДЗАГОЛОВОК (необяз.)"), text: $subtitle, placeholder: L10n.tr("напр. Потомки Ивана и Марии"))
                 .focused($focusedField, equals: .subtitle)
         }
         .onAppear { focusedField = .treeName }
@@ -93,15 +93,15 @@ struct OnboardingView: View {
     private var firstPersonStep: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack(spacing: 12) {
-                SepiaTextField(label: "ИМЯ", text: $givenNames, placeholder: "напр. Иван")
+                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
                     .focused($focusedField, equals: .givenNames)
-                SepiaTextField(label: "ОТЧЕСТВО", text: $patronymic, placeholder: "напр. Петрович")
+                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
                     .focused($focusedField, equals: .patronymic)
-                SepiaTextField(label: "ФАМИЛИЯ", text: $surname, placeholder: "напр. Иванов")
+                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
                     .focused($focusedField, equals: .surname)
             }
             VStack(alignment: .leading, spacing: 6) {
-                Text("ПОЛ")
+                Text(L10n.tr("ПОЛ"))
                     .font(SepiaTheme.ui(size: 9.5))
                     .tracking(1.5)
                     .foregroundColor(SepiaTheme.inkSoft)
@@ -112,14 +112,14 @@ struct OnboardingView: View {
                     }
                 }
             }
-            Text("Это будет первый человек в вашем дереве. Добавить родственников можно позже.")
+            Text(L10n.tr("Это будет первый человек в вашем дереве. Добавить родственников можно позже."))
                 .font(SepiaTheme.body(size: 13))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .padding(.top, 8)
-            PlacePickerField(label: "МЕСТО РОЖДЕНИЯ", text: $birthPlace, placeholder: "напр. Москва, Россия") {
+            PlacePickerField(label: L10n.tr("МЕСТО РОЖДЕНИЯ"), text: $birthPlace, placeholder: L10n.tr("напр. Москва, Россия")) {
                 selectedBirthPlace = $0
             }
-            PlacePickerField(label: "МЕСТО СМЕРТИ", text: $deathPlace, placeholder: "—") {
+            PlacePickerField(label: L10n.tr("МЕСТО СМЕРТИ"), text: $deathPlace, placeholder: "—") {
                 selectedDeathPlace = $0
             }
         }
@@ -229,14 +229,14 @@ struct SepiaDateField: View {
     @Binding var text: String
     @Binding var qualifier: GenealogyDate.Qualifier
     @Binding var endText: String
-    var placeholder: String = "ДД.ММ.ГГГГ"
+    var placeholder: String = L10n.tr("ДД.ММ.ГГГГ")
 
     init(
         label: String,
         text: Binding<String>,
         qualifier: Binding<GenealogyDate.Qualifier> = .constant(.exact),
         endText: Binding<String> = .constant(""),
-        placeholder: String = "ДД.ММ.ГГГГ"
+        placeholder: String = L10n.tr("ДД.ММ.ГГГГ")
     ) {
         self.label = label
         _text = text
@@ -263,14 +263,14 @@ struct SepiaDateField: View {
 
                 dateTextField(text: $text, placeholder: placeholder)
                 if isRange {
-                    Text(qualifier == .between ? "и" : "по")
+                    Text(qualifier == .between ? L10n.tr("и") : L10n.tr("по"))
                         .font(SepiaTheme.body(size: 12))
                         .foregroundColor(SepiaTheme.inkSoft)
                     dateTextField(text: $endText, placeholder: placeholder)
                 }
             }
             if !text.isEmpty && !isValidDate {
-                Text("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ")
+                Text(L10n.tr("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ"))
                     .font(SepiaTheme.ui(size: 9))
                     .foregroundColor(.red.opacity(0.8))
             }

@@ -151,7 +151,7 @@ struct AppleMapChartView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(group.label)
-        .accessibilityHint(count == 1 ? "Выбрать персону" : "Показать \(count) персон")
+        .accessibilityHint(count == 1 ? L10n.tr("Выбрать персону") : L10n.tr("Показать \(count) персон"))
         .accessibilityAction {
             if count == 1 {
                 selectedPerson = tree.people.first { $0.id == group.annotations[0].personId }
@@ -224,19 +224,19 @@ struct AppleMapChartView: View {
         HStack(spacing: 12) {
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinBirth).frame(width: 8, height: 8)
-                Text("Рождение")
+                Text(L10n.tr("Рождение"))
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinDeath).frame(width: 8, height: 8)
-                Text("Смерть")
+                Text(L10n.tr("Смерть"))
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinBurial).frame(width: 8, height: 8)
-                Text("Захоронение")
+                Text(L10n.tr("Захоронение"))
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }
@@ -426,9 +426,9 @@ enum MapPinType {
     /// Short label used in the grouped-pin popover.
     var shortLabel: String {
         switch self {
-        case .birth: "род."
-        case .death: "ум."
-        case .burial: "погр."
+        case .birth: L10n.tr("род.")
+        case .death: L10n.tr("ум.")
+        case .burial: L10n.tr("погр.")
         }
     }
 }

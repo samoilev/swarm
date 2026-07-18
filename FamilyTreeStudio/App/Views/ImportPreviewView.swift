@@ -16,8 +16,8 @@ struct ImportPreviewView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Предпросмотр импорта").font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
-                    Text("Исходный файл будет сохранён как original-import.ged")
+                    Text(L10n.tr("Предпросмотр импорта")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
+                    Text(L10n.tr("Исходный файл будет сохранён как original-import.ged"))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                 }
                 Spacer()
@@ -25,11 +25,11 @@ struct ImportPreviewView: View {
             Divider().overlay(SepiaTheme.toolbarLine)
 
             HStack(spacing: 28) {
-                metric("Персон", result.tree.people.count)
-                metric("Союзов", result.tree.unions.count)
-                metric("Источников", result.tree.sourceRecords.count)
-                metric("Ошибок", result.report.blockingErrors.count)
-                metric("Предупреждений", result.report.warnings.count)
+                metric(L10n.tr("Персон"), result.tree.people.count)
+                metric(L10n.tr("Союзов"), result.tree.unions.count)
+                metric(L10n.tr("Источников"), result.tree.sourceRecords.count)
+                metric(L10n.tr("Ошибок"), result.report.blockingErrors.count)
+                metric(L10n.tr("Предупреждений"), result.report.warnings.count)
                 Spacer()
             }.padding(18)
 
@@ -39,29 +39,29 @@ struct ImportPreviewView: View {
                         diagnosticRow(diagnostic)
                     }
                     if !result.report.preservedUnsupportedTags.isEmpty {
-                        reportRow("Сохранено без редактирования", result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
+                        reportRow(L10n.tr("Сохранено без редактирования"), result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
                     }
                     if !result.report.unresolvedPointers.isEmpty {
-                        reportRow("Неразрешённые ссылки", result.report.unresolvedPointers.sorted().joined(separator: ", "), icon: "link.badge.plus")
+                        reportRow(L10n.tr("Неразрешённые ссылки"), result.report.unresolvedPointers.sorted().joined(separator: ", "), icon: "link.badge.plus")
                     }
                     if !result.report.missingMedia.isEmpty {
-                        reportRow("Не найдены медиа", result.report.missingMedia.sorted().joined(separator: ", "), icon: "photo.badge.exclamationmark")
+                        reportRow(L10n.tr("Не найдены медиа"), result.report.missingMedia.sorted().joined(separator: ", "), icon: "photo.badge.exclamationmark")
                     }
                     if result.report.diagnostics.isEmpty, !needsConfirmation {
-                        reportRow("Проверка пройдена", "Структура читается, ссылки разрешены.", icon: "checkmark.seal.fill")
+                        reportRow(L10n.tr("Проверка пройдена"), L10n.tr("Структура читается, ссылки разрешены."), icon: "checkmark.seal.fill")
                     }
                 }.padding(18)
             }
 
             if needsConfirmation, result.report.blockingErrors.isEmpty {
-                Toggle("Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM", isOn: $confirmedWarnings)
+                Toggle(L10n.tr("Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM"), isOn: $confirmedWarnings)
                     .toggleStyle(.checkbox).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.ink).padding(.horizontal, 18)
             }
             Divider().overlay(SepiaTheme.toolbarLine)
             HStack {
-                Button("Отмена", action: onCancel).buttonStyle(SepiaButtonStyle())
+                Button(L10n.tr("Отмена"), action: onCancel).buttonStyle(SepiaButtonStyle())
                 Spacer()
-                Button("Импортировать проверенную копию", action: onImport)
+                Button(L10n.tr("Импортировать проверенную копию"), action: onImport)
                     .buttonStyle(SepiaButtonStyle(isActive: true))
                     .disabled(!result.report.blockingErrors.isEmpty || (needsConfirmation && !confirmedWarnings))
             }.padding(16)
@@ -79,7 +79,7 @@ struct ImportPreviewView: View {
 
     private func diagnosticRow(_ diagnostic: ImportDiagnostic) -> some View {
         reportRow(
-            diagnostic.severity == .error ? "Ошибка" : "Предупреждение",
+            diagnostic.severity == .error ? L10n.tr("Ошибка") : L10n.tr("Предупреждение"),
             diagnostic.message,
             icon: diagnostic.severity == .error ? "xmark.octagon.fill" : "exclamationmark.triangle.fill"
         )

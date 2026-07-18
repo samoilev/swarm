@@ -5,6 +5,7 @@ import SwiftUI
 @main
 struct FamilyTreeStudioApp: App {
     @State private var store: TreeStore
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
 
     init() {
         let arguments = ProcessInfo.processInfo.arguments
@@ -24,6 +25,7 @@ struct FamilyTreeStudioApp: App {
         WindowGroup {
             ContentView()
                 .environment(store)
+                .environment(\.locale, language.locale)
                 .preferredColorScheme(.light)
                 .onAppear {
                     NSApplication.shared.activate(ignoringOtherApps: true)
@@ -38,37 +40,37 @@ struct FamilyTreeStudioApp: App {
         .defaultSize(width: 1280, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button("Новое дерево") {
+                Button(L10n.tr("Новое дерево")) {
                     NotificationCenter.default.post(name: .newTreeRequested, object: nil)
                 }
                 .keyboardShortcut("n")
             }
             CommandGroup(replacing: .undoRedo) {
-                Button("Отменить") {
+                Button(L10n.tr("Отменить")) {
                     NotificationCenter.default.post(name: .undoRequested, object: nil)
                 }
                 .keyboardShortcut("z")
-                Button("Повторить") {
+                Button(L10n.tr("Повторить")) {
                     NotificationCenter.default.post(name: .redoRequested, object: nil)
                 }
                 .keyboardShortcut("z", modifiers: [.command, .shift])
             }
             CommandGroup(after: .textEditing) {
-                Button("Найти персону") {
+                Button(L10n.tr("Найти персону")) {
                     NotificationCenter.default.post(name: .findPersonRequested, object: nil)
                 }
                 .keyboardShortcut("f")
             }
             CommandGroup(after: .toolbar) {
-                Button("Увеличить масштаб") {
+                Button(L10n.tr("Увеличить масштаб")) {
                     NotificationCenter.default.post(name: .zoomInRequested, object: nil)
                 }
                 .keyboardShortcut("+")
-                Button("Уменьшить масштаб") {
+                Button(L10n.tr("Уменьшить масштаб")) {
                     NotificationCenter.default.post(name: .zoomOutRequested, object: nil)
                 }
                 .keyboardShortcut("-")
-                Button("По размеру экрана") {
+                Button(L10n.tr("По размеру экрана")) {
                     NotificationCenter.default.post(name: .zoomFitRequested, object: nil)
                 }
                 .keyboardShortcut("0")
@@ -77,8 +79,13 @@ struct FamilyTreeStudioApp: App {
 
         Settings {
             MapPrivacySettingsView()
+                .environment(\.locale, language.locale)
                 .preferredColorScheme(.light)
         }
+    }
+
+    private var language: AppLanguage {
+        AppLanguage(rawValue: languageRaw) ?? .default
     }
 }
 

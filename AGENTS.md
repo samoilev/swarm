@@ -56,6 +56,15 @@ Control that *looks* protective but enforce nothing worse than none — make fal
 - **Before deleting accreted defensive code, read its git history.** `git log`/`git blame` reveal *why* added. TT patches accreted across several commits to keep site working *despite* directive — that history confirm directive enforce nothing. Decide removal vs genuine fix deliberate, not mechanical.
 - **When you change a documented guardrail, update the guardrail in the same change** (see PSI guardrail #7) and add regression test lock new contract (e.g. live CSP-header assertion that no `trusted-types` directive ships).
 
+### 6) Bilingual UI Is Required
+
+Every UI change must account for both supported languages: Russian and English.
+
+- Russian remains the default and source language.
+- Add English for every new or changed user-facing string, including controls, menus, help and accessibility text, empty/error states, generated labels, and exported presentation copy.
+- Route UI copy through `L10n`; do not add an untranslated user-facing string literal.
+- Check both languages for layout fit and add or update localization tests when copy is generated dynamically.
+
 ## Core Principles
 
 - **Intent First**: Every decision flow from match intent correct

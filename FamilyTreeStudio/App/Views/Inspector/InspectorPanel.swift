@@ -95,13 +95,13 @@ struct InspectorPanel: View {
                     } label: {
                         HStack(spacing: 3) {
                             Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
-                            Text("Назад").font(SepiaTheme.ui(size: 11))
+                            Text(L10n.tr("Назад")).font(SepiaTheme.ui(size: 11))
                         }
                         .foregroundColor(SepiaTheme.accent2)
                     }
                     .buttonStyle(.plain)
-                    .help("Вернуться к предыдущей персоне")
-                    .accessibilityLabel("Назад к предыдущей персоне")
+                    .help(L10n.tr("Вернуться к предыдущей персоне"))
+                    .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
                     .padding(.bottom, 2)
                 }
                 Text(person.listName)
@@ -110,7 +110,7 @@ struct InspectorPanel: View {
                     .foregroundColor(SepiaTheme.ink)
                     .fixedSize(horizontal: false, vertical: true)
                 if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
-                    Text("урожд. \(maiden)")
+                    Text(L10n.tr("урожд. \(maiden)"))
                         .font(SepiaTheme.body(size: 12.5))
                         .italic()
                         .foregroundColor(SepiaTheme.inkSoft)
@@ -141,22 +141,22 @@ struct InspectorPanel: View {
         VStack(spacing: 4) {
             if tree.homePersonId != person.id, let onMakeHome {
                 actionBtn("house", fg: fg, bg: bg, stroke: stroke) { onMakeHome(person) }
-                    .help("Сделать домашней персоной")
-                    .accessibilityLabel("Сделать домашней персоной")
+                    .help(L10n.tr("Сделать домашней персоной"))
+                    .accessibilityLabel(L10n.tr("Сделать домашней персоной"))
             }
             if let onDelete {
                 actionBtn("trash", fg: tinted ? .red.opacity(0.85) : .red.opacity(0.7), bg: bg, stroke: stroke) { onDelete(person) }
-                    .help("Удалить")
-                    .accessibilityLabel("Удалить персону")
+                    .help(L10n.tr("Удалить"))
+                    .accessibilityLabel(L10n.tr("Удалить персону"))
             }
             if let onEdit {
                 actionBtn("pencil", fg: fg, bg: bg, stroke: stroke) { onEdit(person) }
-                    .help("Редактировать")
-                    .accessibilityLabel("Редактировать")
+                    .help(L10n.tr("Редактировать"))
+                    .accessibilityLabel(L10n.tr("Редактировать"))
             }
             actionBtn("xmark", fg: fg, bg: bg, stroke: stroke) { self.person = nil }
-                .help("Закрыть")
-                .accessibilityLabel("Закрыть карточку")
+                .help(L10n.tr("Закрыть"))
+                .accessibilityLabel(L10n.tr("Закрыть карточку"))
         }
     }
 
@@ -186,51 +186,51 @@ struct InspectorPanel: View {
     }
 
     private func identitySection(_ p: Person) -> some View {
-        fieldSection("Личность", [
-            ("ИМЕНА", p.givenNames),
-            ("ОТЧЕСТВО", p.patronymic ?? ""),
-            ("ФАМИЛИЯ", p.surname),
-            ("ДЕВИЧЬЯ", p.maidenName ?? ""),
-            ("ПОЛ", p.sex == .unknown ? "" : p.sex.displayName),
+        fieldSection(L10n.tr("Личность"), [
+            (L10n.tr("ИМЕНА"), p.givenNames),
+            (L10n.tr("ОТЧЕСТВО"), p.patronymic ?? ""),
+            (L10n.tr("ФАМИЛИЯ"), p.surname),
+            (L10n.tr("ДЕВИЧЬЯ"), p.maidenName ?? ""),
+            (L10n.tr("ПОЛ"), p.sex == .unknown ? "" : p.sex.displayName),
         ])
     }
 
     private func birthSection(_ p: Person) -> some View {
         var rows: [(String, String)] = [
-            ("ДАТА", p.birthDate ?? ""),
-            ("МЕСТО", p.birthPlace ?? ""),
+            (L10n.tr("ДАТА"), p.birthDate ?? ""),
+            (L10n.tr("МЕСТО"), p.birthPlace ?? ""),
         ]
         if let lat = p.birthLat, let lon = p.birthLon {
-            rows.append(("КООРДИНАТЫ", String(format: "%.5f, %.5f", lat, lon)))
+            rows.append((L10n.tr("КООРДИНАТЫ"), String(format: "%.5f, %.5f", lat, lon)))
         }
-        return fieldSection("Рождение", rows)
+        return fieldSection(L10n.tr("Рождение"), rows)
     }
 
     private func deathSection(_ p: Person) -> some View {
-        fieldSection("Смерть и погребение", deathRows(p))
+        fieldSection(L10n.tr("Смерть и погребение"), deathRows(p))
     }
 
     private func deathRows(_ p: Person) -> [(String, String)] {
         var rows: [(String, String)] = []
         if !p.isLiving {
-            rows.append(("ДАТА", p.deathDate ?? ""))
-            rows.append(("МЕСТО СМЕРТИ", p.deathPlace ?? ""))
+            rows.append((L10n.tr("ДАТА"), p.deathDate ?? ""))
+            rows.append((L10n.tr("МЕСТО СМЕРТИ"), p.deathPlace ?? ""))
             if let lat = p.deathLat, let lon = p.deathLon {
-                rows.append(("КООРДИНАТЫ", String(format: "%.5f, %.5f", lat, lon)))
+                rows.append((L10n.tr("КООРДИНАТЫ"), String(format: "%.5f, %.5f", lat, lon)))
             }
         }
-        rows.append(("ЗАХОРОНЕНИЕ", p.burialPlace ?? ""))
+        rows.append((L10n.tr("ЗАХОРОНЕНИЕ"), p.burialPlace ?? ""))
         if let lat = p.burialLat, let lon = p.burialLon {
-            rows.append(("КООРДИНАТЫ МОГИЛЫ", String(format: "%.5f, %.5f", lat, lon)))
+            rows.append((L10n.tr("КООРДИНАТЫ МОГИЛЫ"), String(format: "%.5f, %.5f", lat, lon)))
         }
         return rows
     }
 
     private func lifeSection(_ p: Person) -> some View {
-        fieldSection("Жизнь", [
-            ("ПРОФЕССИЯ", p.occupation ?? ""),
-            ("ОБРАЗОВАНИЕ", p.education ?? ""),
-            ("ЗАМЕТКИ", p.notes ?? ""),
+        fieldSection(L10n.tr("Жизнь"), [
+            (L10n.tr("ПРОФЕССИЯ"), p.occupation ?? ""),
+            (L10n.tr("ОБРАЗОВАНИЕ"), p.education ?? ""),
+            (L10n.tr("ЗАМЕТКИ"), p.notes ?? ""),
         ])
     }
 
@@ -240,7 +240,7 @@ struct InspectorPanel: View {
             || (p.birthLat != nil && p.birthLon != nil) || (p.deathLat != nil && p.deathLon != nil)
         if hasPlace {
             VStack(alignment: .leading, spacing: 0) {
-                SectionHeader(title: "Карта")
+                SectionHeader(title: L10n.tr("Карта"))
                 PersonMiniMap(person: p).padding(.bottom, 12)
             }
         }
@@ -250,7 +250,7 @@ struct InspectorPanel: View {
     private func attachmentsSection(_ p: Person) -> some View {
         if !p.attachments.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
-                SectionHeader(title: "Файлы")
+                SectionHeader(title: L10n.tr("Файлы"))
                 ForEach(p.attachments) { att in
                     let url = store.attachmentURL(att, in: tree)
                     Button { NSWorkspace.shared.open(url) } label: {
@@ -261,7 +261,7 @@ struct InspectorPanel: View {
                                     .font(SepiaTheme.body(size: 13))
                                     .foregroundColor(SepiaTheme.ink)
                                     .lineLimit(1).truncationMode(.middle)
-                                Text(att.format.isEmpty ? "Файл" : att.format)
+                                Text(att.format.isEmpty ? L10n.tr("Файл") : att.format)
                                     .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
                             }
                             Spacer(minLength: 0)
@@ -269,7 +269,7 @@ struct InspectorPanel: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
-                    .help("Открыть «\(att.originalName)»")
+                    .help(L10n.tr("Открыть «\(att.originalName)»"))
                     .padding(.bottom, 8)
                 }
             }
@@ -287,13 +287,13 @@ struct InspectorPanel: View {
             || !spouses.isEmpty || !children.isEmpty || !siblings.isEmpty
         if hasAny {
             VStack(alignment: .leading, spacing: 0) {
-                SectionHeader(title: "Родственные")
-                if let f = parents.father { relRow("Отец", f) }
-                if let m = parents.mother { relRow("Мать", m) }
-                ForEach(spouses, id: \.id) { s in relRow("Супруг", s) }
-                ForEach(children, id: \.id) { c in relRow("Ребёнок", c) }
+                SectionHeader(title: L10n.tr("Родственные"))
+                if let f = parents.father { relRow(L10n.tr("Отец"), f) }
+                if let m = parents.mother { relRow(L10n.tr("Мать"), m) }
+                ForEach(spouses, id: \.id) { s in relRow(L10n.tr("Супруг"), s) }
+                ForEach(children, id: \.id) { c in relRow(L10n.tr("Ребёнок"), c) }
                 ForEach(siblings, id: \.id) { s in
-                    relRow(s.sex == .male ? "Брат" : s.sex == .female ? "Сестра" : "Брат/сестра", s)
+                    relRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат/сестра"), s)
                 }
             }
         }

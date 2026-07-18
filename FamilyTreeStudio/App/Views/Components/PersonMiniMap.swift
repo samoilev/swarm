@@ -47,7 +47,7 @@ struct ApplePersonMiniMap: View {
                 .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
                 .overlay(alignment: .bottomLeading) { legend }
             } else if resolved {
-                placeholder(text: "Не удалось определить место на карте")
+                placeholder(text: L10n.tr("Не удалось определить место на карте"))
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8).fill(SepiaTheme.cardBg)
@@ -90,10 +90,10 @@ struct ApplePersonMiniMap: View {
     private var legend: some View {
         HStack(spacing: 8) {
             if birth != nil {
-                HStack(spacing: 3) { Circle().fill(SepiaTheme.pinBirth).frame(width: 6, height: 6); Text("Рожд.") }
+                HStack(spacing: 3) { Circle().fill(SepiaTheme.pinBirth).frame(width: 6, height: 6); Text(L10n.tr("Рожд.")) }
             }
             if death != nil {
-                HStack(spacing: 3) { Circle().fill(SepiaTheme.pinDeath).frame(width: 6, height: 6); Text("Смерть") }
+                HStack(spacing: 3) { Circle().fill(SepiaTheme.pinDeath).frame(width: 6, height: 6); Text(L10n.tr("Смерть")) }
             }
         }
         .font(SepiaTheme.ui(size: 9))

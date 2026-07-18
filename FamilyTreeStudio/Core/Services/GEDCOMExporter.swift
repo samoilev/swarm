@@ -44,7 +44,7 @@ public struct GEDCOMSerializer {
         lines.append("0 HEAD")
         if tree.headUnknownBranches.isEmpty {
             lines.append("1 SOUR FamilyTreeStudio")
-            lines.append("2 NAME Родословная Студия")
+            lines.append("2 NAME \(L10n.tr("Родословная Студия"))")
             lines.append("2 VERS 2.0")
             lines.append("1 GEDC")
             lines.append("2 VERS 5.5.1")

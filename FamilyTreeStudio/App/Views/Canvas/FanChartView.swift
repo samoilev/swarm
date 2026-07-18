@@ -31,7 +31,7 @@ struct FanChartView: View {
                         .accessibilityElement(children: .ignore)
                         .accessibilityHidden(wedge.person == nil)
                         .accessibilityLabel(wedge.person?.accessibilityDescription ?? "")
-                        .accessibilityHint("Выбрать персону")
+                        .accessibilityHint(L10n.tr("Выбрать персону"))
                         .accessibilityAddTraits(selectedPerson?.id == wedge.personId ? [.isButton, .isSelected] : .isButton)
                         .accessibilityAction {
                             if let pid = wedge.personId, let p = tree.person(byId: pid) { selectedPerson = p }

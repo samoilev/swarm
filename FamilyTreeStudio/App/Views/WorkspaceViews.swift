@@ -12,11 +12,16 @@ struct PeopleWorkspaceView: View {
     @State private var selectedPlace = ""
     @State private var sort: Sort = .name
 
-    enum Sort: String, CaseIterable, Identifiable {
-        case name = "По имени"
-        case birth = "По рождению"
-        case death = "По смерти"
-        var id: String { rawValue }
+    enum Sort: CaseIterable, Identifiable {
+        case name, birth, death
+        var id: Self { self }
+        var displayName: String {
+            switch self {
+            case .name: L10n.tr("По имени")
+            case .birth: L10n.tr("По рождению")
+            case .death: L10n.tr("По смерти")
+            }
+        }
     }
 
     private var entries: [PersonSearchEntry] {
@@ -35,17 +40,17 @@ struct PeopleWorkspaceView: View {
     }
 
     var body: some View {
-        workspaceSurface(title: "Люди", count: entries.count) {
+        workspaceSurface(title: L10n.tr("Люди"), count: entries.count) {
             HStack(spacing: 10) {
-                TextField("Имя, дата или место", text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
-                Picker("Сортировка", selection: $sort) {
-                    ForEach(Sort.allCases) { Text($0.rawValue).tag($0) }
+                TextField(L10n.tr("Имя, дата или место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
+                Picker(L10n.tr("Сортировка"), selection: $sort) {
+                    ForEach(Sort.allCases) { Text($0.displayName).tag($0) }
                 }.frame(width: 160)
-                Picker("Место", selection: $selectedPlace) {
-                    Text("Все места").tag("")
+                Picker(L10n.tr("Место"), selection: $selectedPlace) {
+                    Text(L10n.tr("Все места")).tag("")
                     ForEach(Array(Set(index.searchEntries.flatMap(\.places))).sorted(), id: \.self) { Text($0).tag($0) }
                 }.frame(width: 200)
-                Toggle("Только неполные", isOn: $missingOnly)
+                Toggle(L10n.tr("Только неполные"), isOn: $missingOnly)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -60,9 +65,9 @@ struct PeopleWorkspaceView: View {
                                     Text(lifeSummary(entry)).font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                                 }
                                 Spacer()
-                                if entry.hasMissingData { Label("Есть пропуски", systemImage: "exclamationmark.circle").font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent) }
+                                if entry.hasMissingData { Label(L10n.tr("Есть пропуски"), systemImage: "exclamationmark.circle").font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent) }
                                 Menu {
-                                    Button("Сделать домашней персоной") { onMakeHome(person) }
+                                    Button(L10n.tr("Сделать домашней персоной")) { onMakeHome(person) }
                                 } label: { Image(systemName: "ellipsis.circle").foregroundStyle(SepiaTheme.inkSoft) }
                                     .menuStyle(.borderlessButton).fixedSize()
                             }
@@ -101,15 +106,15 @@ struct TimelineWorkspaceView: View {
     }
 
     var body: some View {
-        workspaceSurface(title: "Хронология", count: entries.count) {
+        workspaceSurface(title: L10n.tr("Хронология"), count: entries.count) {
             HStack(spacing: 10) {
-                TextField("Персона или место", text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 300)
-                Picker("Событие", selection: $kind) {
-                    Text("Все события").tag(nil as GenealogyEvent.Kind?)
+                TextField(L10n.tr("Персона или место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 300)
+                Picker(L10n.tr("Событие"), selection: $kind) {
+                    Text(L10n.tr("Все события")).tag(nil as GenealogyEvent.Kind?)
                     ForEach(GenealogyEvent.Kind.allCases, id: \.self) { Text(eventName($0)).tag($0 as GenealogyEvent.Kind?) }
                 }.frame(width: 180)
-                TextField("С года", text: $fromYear).textFieldStyle(.roundedBorder).frame(width: 80)
-                TextField("По год", text: $toYear).textFieldStyle(.roundedBorder).frame(width: 80)
+                TextField(L10n.tr("С года"), text: $fromYear).textFieldStyle(.roundedBorder).frame(width: 80)
+                TextField(L10n.tr("По год"), text: $toYear).textFieldStyle(.roundedBorder).frame(width: 80)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -147,10 +152,10 @@ struct PlacesWorkspaceView: View {
     }
 
     var body: some View {
-        workspaceSurface(title: "Места", count: entries.count) {
+        workspaceSurface(title: L10n.tr("Места"), count: entries.count) {
             HStack(spacing: 12) {
-                TextField("Найти место", text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
-                Toggle("Только без координат", isOn: $unpinnedOnly)
+                TextField(L10n.tr("Найти место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
+                Toggle(L10n.tr("Только без координат"), isOn: $unpinnedOnly)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -160,7 +165,7 @@ struct PlacesWorkspaceView: View {
                             .foregroundStyle(entry.place.hasValidCoordinates ? SepiaTheme.pinBirth : SepiaTheme.accent)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(entry.place.displayName).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                            Text("\(entry.eventCount) событ. · \(entry.personIDs.count) чел.\(entry.place.isCustom ? " · пользовательское" : "")")
+                            Text(L10n.tr("\(entry.eventCount) событ. · \(entry.personIDs.count) чел.\(entry.place.isCustom ? L10n.tr(" · пользовательское") : "")"))
                                 .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                         }
                         Spacer()
@@ -192,18 +197,18 @@ struct ReviewWorkspaceView: View {
             "\(issue.severity.rawValue):\(issue.personID?.uuidString ?? "general")"
         }
         return grouped.map { key, values in
-            let personName = values.first?.personID.flatMap { tree.person(byId: $0)?.listName } ?? "Общие"
-            let severity = values.first?.severity == .error ? "Ошибки" : "Предупреждения"
+            let personName = values.first?.personID.flatMap { tree.person(byId: $0)?.listName } ?? L10n.tr("Общие")
+            let severity = values.first?.severity == .error ? L10n.tr("Ошибки") : L10n.tr("Предупреждения")
             return ReviewIssueGroup(id: key, title: "\(severity) · \(personName)", issues: values)
         }.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
     }
 
     var body: some View {
-        workspaceSurface(title: "Проверка", count: issues.count + index.duplicateSuggestions.count) {
+        workspaceSurface(title: L10n.tr("Проверка"), count: issues.count + index.duplicateSuggestions.count) {
             HStack {
-                Toggle("Только ошибки", isOn: $errorsOnly)
+                Toggle(L10n.tr("Только ошибки"), isOn: $errorsOnly)
                 Spacer()
-                Text("Ошибки блокируют только новые или ухудшенные изменения.")
+                Text(L10n.tr("Ошибки блокируют только новые или ухудшенные изменения."))
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
             }
         } content: {
@@ -235,10 +240,10 @@ struct ReviewWorkspaceView: View {
                 Image(systemName: issue.severity == .error ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
                     .foregroundStyle(issue.severity == .error ? Color.red.opacity(0.75) : SepiaTheme.accent2)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack { Text(issue.title).font(SepiaTheme.body(size: 15)); if issue.isBlocking { Text("БЛОКИРУЕТ").font(SepiaTheme.ui(size: 9)).foregroundStyle(.red) } }
+                    HStack { Text(issue.title).font(SepiaTheme.body(size: 15)); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(.red) } }
                     Text(issue.message).font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                     if let field = issue.field {
-                        Text("Открыть поле: \(field)").font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent2)
+                        Text(L10n.tr("Открыть поле: \(field)")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent2)
                     }
                     Text(issue.code).font(.system(size: 9, design: .monospaced)).foregroundStyle(SepiaTheme.inkSoft)
                 }.foregroundStyle(SepiaTheme.ink)
@@ -253,15 +258,15 @@ struct ReviewWorkspaceView: View {
         return HStack(spacing: 12) {
             Image(systemName: "person.2.badge.questionmark").foregroundStyle(SepiaTheme.accent2)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Возможный дубликат").font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                Text(L10n.tr("Возможный дубликат")).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
                 Text("\(first?.listName ?? "?") · \(second?.listName ?? "?")")
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                 Text(suggestion.reasons.joined(separator: ", ")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
             }
             Spacer()
-            if let first { Button("Открыть") { selectedPerson = first }.buttonStyle(.borderless) }
+            if let first { Button(L10n.tr("Открыть")) { selectedPerson = first }.buttonStyle(.borderless) }
             if let second {
-                Button("Удалить дубликат…", role: .destructive) { onDeleteDuplicate(second) }
+                Button(L10n.tr("Удалить дубликат…"), role: .destructive) { onDeleteDuplicate(second) }
                     .buttonStyle(.borderless)
             }
         }.padding(16)
@@ -294,18 +299,18 @@ private func workspaceSurface(
 
 private func eventName(_ kind: GenealogyEvent.Kind) -> String {
     switch kind {
-    case .birth: "Рождение"
-    case .death: "Смерть"
-    case .burial: "Погребение"
-    case .occupation: "Занятие"
-    case .education: "Образование"
-    case .marriage: "Брак"
-    case .partnership: "Партнёрство"
-    case .separation: "Раздельное проживание"
-    case .divorce: "Развод"
-    case .residence: "Проживание"
-    case .immigration: "Иммиграция"
-    case .military: "Военная служба"
-    case .custom: "Событие"
+    case .birth: L10n.tr("Рождение")
+    case .death: L10n.tr("Смерть")
+    case .burial: L10n.tr("Погребение")
+    case .occupation: L10n.tr("Занятие")
+    case .education: L10n.tr("Образование")
+    case .marriage: L10n.tr("Брак")
+    case .partnership: L10n.tr("Партнёрство")
+    case .separation: L10n.tr("Раздельное проживание")
+    case .divorce: L10n.tr("Развод")
+    case .residence: L10n.tr("Проживание")
+    case .immigration: L10n.tr("Иммиграция")
+    case .military: L10n.tr("Военная служба")
+    case .custom: L10n.tr("Событие")
     }
 }

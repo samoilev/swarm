@@ -38,13 +38,13 @@ public enum FamilyDate {
             return ""
         }
 
-        /// Formatted for user display in Russian
+        /// Formatted for user display in the selected app language.
         public var displayString: String {
             if let d = day, let m = month, let y = year {
-                let monthName = FamilyDate.russianMonthsShort[m - 1]
+                let monthName = FamilyDate.displayMonthsShort[m - 1]
                 return "\(d) \(monthName) \(y)"
             } else if let m = month, let y = year {
-                let monthName = FamilyDate.russianMonthsShort[m - 1]
+                let monthName = FamilyDate.displayMonthsShort[m - 1]
                 return "\(monthName) \(y)"
             } else if let y = year {
                 return "\(y)"
@@ -77,6 +77,10 @@ public enum FamilyDate {
         "jan", "feb", "mar", "apr", "may", "jun",
         "jul", "aug", "sep", "oct", "nov", "dec"
     ]
+
+    private static var displayMonthsShort: [String] {
+        AppLanguage.current == .english ? englishMonthsShort : russianMonthsShort
+    }
 
     // MARK: - Parse
 

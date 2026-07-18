@@ -81,10 +81,10 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         for (index, raw) in rawLines.enumerated() {
             let node = try parseLine(raw, lineNumber: index + 1)
             if index == 0, node.level != 0 {
-                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: "Первая запись должна иметь уровень 0")
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Первая запись должна иметь уровень 0"))
             }
             if index > 0, node.level > previousLevel + 1 {
-                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: "Пропущен уровень вложенности")
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Пропущен уровень вложенности"))
             }
             previousLevel = node.level
             flat.append(node)
@@ -94,7 +94,7 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         var records: [GEDCOMNode] = []
         while index < flat.count {
             guard flat[index].level == 0 else {
-                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: "Строка вне записи уровня 0")
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Строка вне записи уровня 0"))
             }
             records.append(buildNode(from: flat, index: &index))
         }
@@ -232,13 +232,13 @@ public enum GEDCOMCodecError: LocalizedError, Equatable {
     public var errorDescription: String? {
         switch self {
         case .emptyDocument:
-            "GEDCOM-файл пуст."
+            L10n.tr("GEDCOM-файл пуст.")
         case let .invalidLine(line, _):
-            "Некорректная строка GEDCOM: \(line)."
+            L10n.tr("Некорректная строка GEDCOM: \(line).")
         case let .invalidStructure(line, reason):
-            "Некорректная структура GEDCOM в строке \(line): \(reason)."
+            L10n.tr("Некорректная структура GEDCOM в строке \(line): \(reason).")
         case .missingHeader:
-            "В GEDCOM-файле отсутствует запись HEAD."
+            L10n.tr("В GEDCOM-файле отсутствует запись HEAD.")
         }
     }
 }
@@ -343,7 +343,7 @@ public enum GEDCOMCodec {
             diagnostics.append(ImportDiagnostic(
                 id: "gedcom.missing-trailer",
                 severity: .warning,
-                message: "В файле отсутствует завершающая запись TRLR; данные сохранены."
+                message: L10n.tr("В файле отсутствует завершающая запись TRLR; данные сохранены.")
             ))
         }
 
@@ -354,7 +354,7 @@ public enum GEDCOMCodec {
             diagnostics.append(ImportDiagnostic(
                 id: "gedcom.unresolved-pointer",
                 severity: .warning,
-                message: "Не найдена запись @\(pointer)@.",
+                message: L10n.tr("Не найдена запись @\(pointer)@."),
                 recordXref: pointer
             ))
         }
@@ -378,7 +378,7 @@ public enum GEDCOMCodec {
             diagnostics.append(ImportDiagnostic(
                 id: "gedcom.missing-media",
                 severity: .warning,
-                message: "Связанный файл не найден: \(file)."
+                message: L10n.tr("Связанный файл не найден: \(file).")
             ))
         }
 

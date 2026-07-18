@@ -11,7 +11,7 @@ final class FamilyTreeStudioUITests: XCTestCase {
             .appendingPathComponent("fts-ui-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: storageURL, withIntermediateDirectories: true)
         app = XCUIApplication()
-        app.launchArguments = ["--storage-folder", storageURL.path]
+        app.launchArguments = ["-appLanguage", "ru", "--storage-folder", storageURL.path]
         app.launch()
     }
 
