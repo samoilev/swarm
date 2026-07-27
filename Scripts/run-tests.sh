@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run the FamilyTreeCore test suite.
+# Run the SwarmCore test suite.
 #
 # Swift Testing (`import Testing`) ships with both full Xcode and the Command Line
 # Tools, but under CLT-only machines SwiftPM doesn't add the framework search paths

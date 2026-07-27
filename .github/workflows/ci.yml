@@ -22,10 +22,10 @@ jobs:
       - name: Swift version
         run: swift --version
 
-      # FamilyTreeCore is the pure logic library; building it first surfaces
+      # SwarmCore is the pure logic library; building it first surfaces
       # API/access-control breaks before the slower SwiftUI app target.
-      - name: Build FamilyTreeCore
-        run: swift build --target FamilyTreeCore
+      - name: Build SwarmCore
+        run: swift build --target SwarmCore
 
       - name: Build (all targets)
         run: swift build
