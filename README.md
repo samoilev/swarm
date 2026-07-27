@@ -1,4 +1,9 @@
-# Родословная Студия (FamilyTreeStudio)
+<div align="center">
+  <img src="docs/swarm-icon-readme-320.png" width="84" height="84" alt="Swarm" />
+  <h1>Swarm</h1>
+</div>
+
+---
 
 A native macOS app for building, visualizing, and exporting family trees, aimed at
 Russian-speaking genealogy. Trees are stored locally as GEDCOM files. Editing, search
@@ -30,26 +35,26 @@ The code is split into two SPM targets so the domain logic can be tested indepen
 of the UI:
 
 ```
-FamilyTreeStudio/
-  Core/        → FamilyTreeCore library (pure logic, no SwiftUI)
+Swarm/
+  Core/        → SwarmCore library (pure logic, no SwiftUI)
     Models/    → Person, Union, FamilyTree, FamilyIndex, FamilyDate, calculators
     Services/  → GEDCOMParser, GEDCOMSerializer, TreeStore, TreeLayoutEngine
     Resources/ → bundled GeoNames / places TSVs
-  App/         → FamilyTreeStudio executable (SwiftUI views, theme, app entry)
+  App/         → Swarm executable (SwiftUI views, theme, app entry)
 Tests/
-  FamilyTreeCoreTests/  → Swift Testing suites and GEDCOM fixtures for the Core library
-UITests/                → native XCUITest bundle only; no production sources
-FamilyTreeStudioUI.xcworkspace/ → package + test-only Xcode host
+  SwarmCoreTests/   → Swift Testing suites and GEDCOM fixtures for the Core library
+UITests/             → native XCUITest bundle only; no production sources
+SwarmUI.xcworkspace/ → package + test-only Xcode host
 ```
 
 **SwiftPM is the canonical production build.** Open the package directly in Xcode
 (`File ▸ Open…` the folder) or build from the command line. The small project under
 `UITests/` contains only an XCUITest bundle; it is combined with the Swift package by
-`FamilyTreeStudioUI.xcworkspace` and does not duplicate production sources or dependencies.
+`SwarmUI.xcworkspace` and does not duplicate production sources or dependencies.
 
 ### Storage model — GEDCOM is the source of truth
 
-Trees live in `~/Library/Application Support/FamilyTreeStudio/`, one folder per tree:
+Trees live in `~/Library/Application Support/Swarm/`, one folder per tree:
 
 ```
 <Tree Name>/
@@ -57,7 +62,7 @@ Trees live in `~/Library/Application Support/FamilyTreeStudio/`, one folder per 
   ├── original-import.ged  — verbatim copy of an imported file (if the tree was imported)
   ├── Media/               — person portrait photos (GEDCOM OBJE)
   └── Attachments/         — arbitrary files attached to people (GEDCOM _ATTC)
-  └── .FamilyTreeStudio/
+  └── .Swarm/
       ├── History/         — latest 50 previous GEDCOM revisions
       └── Trash/           — replaced/deleted files, retained for 30 days
 Archived/                  — trees removed from the library but kept on disk
@@ -67,16 +72,21 @@ Recovery/<tree-id>/        — permanent pre-v2 and pre-merge full-bundle backup
 Because identity lives inside the GEDCOM (`_TREEID`), the folder/file can be renamed
 freely when the tree is renamed.
 
-**Custom tags** (beyond standard GEDCOM 5.5.1): `_FTSVER`, `_FTSID`, `_TREEID`, `_NAME`, `_SUBTITLE`, `_HOME`,
-`_ROOT` (HEAD metadata); `_PATR` (patronymic), `_MARNM` (married name), `_ATTC`
-(attachment). Coordinates are written as the **standard** `PLAC › MAP › LATI/LONG`
-triple so they interoperate with other tools; legacy `_COORD lat lon` is still read, and
-used as a private fallback when coordinates have no place to host a `MAP`.
+On first launch, Swarm moves the previous app storage into this location when the Swarm
+folder does not already exist. If both folders exist, neither is merged or overwritten;
+Swarm uses its own folder and shows the previous one in Finder for manual review.
+
+**Custom tags** (beyond standard GEDCOM 5.5.1): `_FTSVER` and `_FTSID` remain stable
+compatibility identifiers; tree metadata uses `_TREEID`, `_NAME`, `_SUBTITLE`, `_HOME`
+and `_ROOT`; person data uses `_PATR`, `_MARNM` and `_ATTC`. Coordinates are written as
+the **standard** `PLAC › MAP › LATI/LONG` triple so they interoperate with other tools;
+legacy `_COORD lat lon` is still read, and used as a private fallback when coordinates
+have no place to host a `MAP`.
 
 ### Privacy and maps
 
 The default `appleMaps` provider renders through MapKit: Apple supplies its map tiles and
-may receive the viewed region. FamilyTreeStudio does not intentionally submit names,
+may receive the viewed region. Swarm does not intentionally submit names,
 genealogy records, pins, or annotations. The `offlineVector` provider is a one-click
 alternative in Settings that uses bundled Natural Earth vectors and the local place
 index — it creates no MapKit view and requests no network tiles. Everything outside the
@@ -91,8 +101,8 @@ present.
 ## Build & run
 
 ```sh
-swift build              # build everything
-swift run FamilyTreeStudio   # launch the app
+swift build       # build everything
+swift run Swarm   # launch the app
 ```
 
 Or use the VS Code launch configurations in `.vscode/launch.json`.
@@ -114,8 +124,8 @@ Coverage can be generated with:
 swift test --enable-code-coverage
 ```
 
-Native smoke tests require full Xcode: open `FamilyTreeStudioUI.xcworkspace` and run
-the shared `FamilyTreeStudio-UI` scheme. Every launch receives an isolated
+Native smoke tests require full Xcode: open `SwarmUI.xcworkspace` and run
+the shared `Swarm-UI` scheme. Every launch receives an isolated
 `--storage-folder`; the test host cannot touch a real library.
 
 ## Linting

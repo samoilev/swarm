@@ -1,21 +1,21 @@
 #!/bin/bash
 set -e
 
-# Build DMG for FamilyTreeStudio
+# Build DMG for Swarm
 # Usage: ./build_dmg.sh
 
 PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
-APP_NAME="Родословная Студия"
-BUNDLE_ID="com.familytreestudio.app"
+APP_NAME="Swarm"
+BUNDLE_ID="com.samoilev.swarm"
 VERSION="$(cat "$(cd "$(dirname "$0")" && pwd)/VERSION" 2>/dev/null || echo "1.5.0")"
 BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
-BINARY="$BUILD_DIR/FamilyTreeStudio"
-# Two SwiftPM resource bundles after the FamilyTreeCore split:
+BINARY="$BUILD_DIR/Swarm"
+# Two SwiftPM resource bundles after the SwarmCore split:
 #   - App bundle: AppIcon.icns (loaded via Bundle.module in the app target)
 #   - Core bundle: local place indexes and offline map vectors
-APP_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeStudio.bundle"
-CORE_RESOURCE_BUNDLE="$BUILD_DIR/FamilyTreeStudio_FamilyTreeCore.bundle"
-ICON_SRC="$PROJECT_DIR/FamilyTreeStudio/App/Resources/AppIcon.icns"
+APP_RESOURCE_BUNDLE="$BUILD_DIR/Swarm_Swarm.bundle"
+CORE_RESOURCE_BUNDLE="$BUILD_DIR/Swarm_SwarmCore.bundle"
+ICON_SRC="$PROJECT_DIR/Swarm/App/Resources/AppIcon.icns"
 DMG_DIR="$PROJECT_DIR/dist"
 APP_BUNDLE="$DMG_DIR/$APP_NAME.app"
 
@@ -30,7 +30,7 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 # Copy binary
-cp "$BINARY" "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio"
+cp "$BINARY" "$APP_BUNDLE/Contents/MacOS/Swarm"
 
 # Copy resource bundles (app icon + core data tables)
 cp -R "$APP_RESOURCE_BUNDLE" "$APP_BUNDLE/Contents/Resources/"
@@ -46,7 +46,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
 <plist version="1.0">
 <dict>
     <key>CFBundleExecutable</key>
-    <string>FamilyTreeStudio</string>
+    <string>Swarm</string>
     <key>CFBundleIdentifier</key>
     <string>${BUNDLE_ID}</string>
     <key>CFBundleName</key>
@@ -110,15 +110,15 @@ else
 fi
 
 echo "=== Verifying app bundle ==="
-test -x "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio"
+test -x "$APP_BUNDLE/Contents/MacOS/Swarm"
 plutil -lint "$APP_BUNDLE/Contents/Info.plist"
 codesign --verify --deep --strict "$APP_BUNDLE"
-echo "Architecture: $(lipo -archs "$APP_BUNDLE/Contents/MacOS/FamilyTreeStudio")"
+echo "Architecture: $(lipo -archs "$APP_BUNDLE/Contents/MacOS/Swarm")"
 echo "Signing: $(codesign -dv --verbose=2 "$APP_BUNDLE" 2>&1 | grep -E 'Signature|Authority|TeamIdentifier' | tr '\n' ' ')"
 
 # Create DMG
 echo "=== Creating DMG ==="
-DMG_NAME="Родословная-Студия-${VERSION}.dmg"
+DMG_NAME="Swarm-${VERSION}.dmg"
 DMG_PATH="$DMG_DIR/$DMG_NAME"
 DMG_TEMP="$DMG_DIR/dmg_temp"
 

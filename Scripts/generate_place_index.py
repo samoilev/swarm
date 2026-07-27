@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate FamilyTreeStudio's deterministic offline GeoNames index."""
+"""Generate Swarm's deterministic offline GeoNames index."""
 
 import argparse
 import csv

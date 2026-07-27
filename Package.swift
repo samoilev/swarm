@@ -2,16 +2,16 @@
 import PackageDescription
 
 let package = Package(
-    name: "FamilyTreeStudio",
+    name: "Swarm",
     defaultLocalization: "ru",
     platforms: [.macOS(.v14)],
     targets: [
         // Pure domain logic (Models + Services): no SwiftUI dependency, so it can be
         // unit-tested independently of the app's views.
         .target(
-            name: "FamilyTreeCore",
-            path: "FamilyTreeStudio/Core",
-            exclude: ["Resources/AppIcon_preview.png", "Resources/PLACE_DATA.md", "Resources/MAP_DATA.md"],
+            name: "SwarmCore",
+            path: "Swarm/Core",
+            exclude: ["Resources/PLACE_DATA.md", "Resources/MAP_DATA.md"],
             resources: [
                 .process("Resources/Localization"),
                 .copy("Resources/places.tsv"),
@@ -21,18 +21,18 @@ let package = Package(
                 .copy("Resources/ne_110m_admin_0_boundary_lines_land.geojson"),
             ]
         ),
-        // The SwiftUI app shell. Depends on FamilyTreeCore for all domain types.
+        // The SwiftUI app shell. Depends on SwarmCore for all domain types.
         .executableTarget(
-            name: "FamilyTreeStudio",
-            dependencies: ["FamilyTreeCore"],
-            path: "FamilyTreeStudio/App",
+            name: "Swarm",
+            dependencies: ["SwarmCore"],
+            path: "Swarm/App",
             exclude: ["Assets.xcassets"],
             resources: [.copy("Resources/AppIcon.icns")]
         ),
         .testTarget(
-            name: "FamilyTreeCoreTests",
-            dependencies: ["FamilyTreeCore"],
-            path: "Tests/FamilyTreeCoreTests",
+            name: "SwarmCoreTests",
+            dependencies: ["SwarmCore"],
+            path: "Tests/SwarmCoreTests",
             resources: [.copy("Fixtures")]
         ),
     ]

@@ -1,0 +1,32 @@
+{
+  "configurations" : [
+    {
+      "id" : "4FECBF1C-37C1-4A23-AF45-2E9161816B04",
+      "name" : "Internal UI",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SWARM_UI_TESTING",
+            "value" : "1"
+          }
+        ]
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : false,
+      "skippedTests" : [
+      ],
+      "target" : {
+        "containerPath" : "container:SwarmUITests.xcodeproj",
+        "identifier" : "A10000000000000000000003",
+        "name" : "SwarmUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

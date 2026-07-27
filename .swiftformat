@@ -1,4 +1,4 @@
-# SwiftFormat configuration for FamilyTreeStudio.
+# SwiftFormat configuration for Swarm.
 # Conservative on purpose: enforce whitespace/indentation consistency without
 # structural or opinionated rewrites, so the format gate stays low-risk.
 
