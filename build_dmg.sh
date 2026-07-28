@@ -139,7 +139,9 @@ rm -rf "$DMG_TEMP"
 
 echo "=== Verifying DMG ==="
 hdiutil verify "$DMG_PATH"
-shasum -a 256 "$DMG_PATH" | tee "$DMG_PATH.sha256"
+# Record the bare filename, not the build path, so `shasum -a 256 -c` works
+# where the file is downloaded rather than only where it was built.
+(cd "$DMG_DIR" && shasum -a 256 "$DMG_NAME" | tee "$DMG_NAME.sha256")
 
 # Notarize + staple when credentials are available (requires Developer ID signing).
 # Provide either a stored notarytool keychain profile via NOTARY_PROFILE, or

@@ -1,0 +1,69 @@
+name: Release
+
+# Tag a version to publish it: `git tag v2.2.0 && git push origin v2.2.0`.
+# The DMG is built here rather than on a laptop so every published build comes
+# from a clean checkout with a recorded log.
+on:
+  push:
+    tags: ["v*"]
+
+# Needed to create the release and upload the DMG. Nothing else writes.
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build DMG and publish release
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Select latest stable Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      # A tag that disagrees with VERSION would produce a DMG whose filename
+      # contradicts the release it is attached to. Fail early instead.
+      - name: Check the tag matches VERSION
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(cat VERSION)"
+          if [ "$tag" != "$version" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match VERSION ($version)" >&2
+            exit 1
+          fi
+
+      # build_dmg.sh runs the test suite before building, so a failing test
+      # blocks the release rather than shipping.
+      - name: Build DMG
+        run: ./build_dmg.sh
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(cat VERSION)"
+          {
+            echo "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md) for what changed."
+            echo
+            echo "## Install"
+            echo
+            echo "Open the DMG and drag Swarm to Applications."
+            echo
+            echo "This build is **not signed with an Apple Developer ID and is not notarized**, so the"
+            echo "first launch is blocked. Right-click the app in Applications and choose **Open**, then"
+            echo "confirm. You only need to do this once."
+            echo
+            echo "Apple silicon only, macOS 14 or later. Prefer to build it yourself? See the"
+            echo "[README](https://github.com/${GITHUB_REPOSITORY}#build-and-run)."
+            echo
+            echo "## Verify the download"
+            echo
+            echo '```sh'
+            echo "shasum -a 256 -c Swarm-${version}.dmg.sha256"
+            echo '```'
+          } > release-notes.md
+          gh release create "$GITHUB_REF_NAME" \
+            --title "Swarm ${version}" \
+            --notes-file release-notes.md \
+            "dist/Swarm-${version}.dmg" \
+            "dist/Swarm-${version}.dmg.sha256"

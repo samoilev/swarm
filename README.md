@@ -12,7 +12,7 @@
     <img src="https://img.shields.io/badge/GEDCOM-5.5.1-6B5D4B?style=flat" alt="GEDCOM 5.5.1" />
     <img src="https://img.shields.io/badge/dependencies-none-6B5D4B?style=flat" alt="No third-party dependencies" />
     <img src="https://img.shields.io/badge/telemetry-none-6B5D4B?style=flat" alt="No telemetry" />
-    <a href="#status"><img src="https://img.shields.io/badge/binaries-build%20from%20source-8A7C68?style=flat" alt="No published binaries; build from source" /></a>
+    <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/download-DMG%20(unsigned)-8A7C68?style=flat" alt="Download the DMG; unsigned build" /></a>
   </p>
 </div>
 
@@ -36,14 +36,31 @@ and place lookup all run offline.
 Swarm works and is used daily, but treat it as a personal project rather than a finished
 product:
 
-- **There is no download.** No signed installer, no notarized build, no auto-update. You
-  build it from source. See [Build and run](#build-and-run).
+- **Downloads are unsigned.** Every release ships a DMG built by GitHub Actions, but it
+  carries no Apple Developer ID and is not notarized, so macOS blocks the first launch.
+  See [Install](#install) for the one-time workaround.
 - **Apple silicon only.** No Intel or universal build.
+- **No auto-update.** Check the releases page.
 - **Bug reports are welcome; pull requests are not being accepted yet.** See
   [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The DMG files attached to older releases are ad-hoc-signed artifacts kept for historical
-reference. They are not supported downloads.
+## Install
+
+Download the DMG from the [latest release](https://github.com/samoilev/swarm/releases/latest),
+open it, and drag Swarm to Applications.
+
+The first launch is blocked, because the build is not signed with an Apple Developer ID.
+**Right-click the app in Applications and choose Open**, then confirm. Once only —
+afterwards it launches normally.
+
+Verify the download against its published checksum if you want to:
+
+```sh
+shasum -a 256 -c Swarm-2.2.0.dmg.sha256
+```
+
+Requires macOS 14 or later on Apple silicon. Building it yourself avoids the Gatekeeper
+prompt entirely — see [Build and run](#build-and-run).
 
 ## Features
 
@@ -200,6 +217,11 @@ mint run nicklockwood/SwiftFormat@0.61.1 .          # apply
 every pull request: it builds all targets, runs the tests, and checks formatting. Any
 build error, test failure or formatting violation fails the job.
 
+[`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag. It
+checks the tag against `VERSION`, builds the DMG, and publishes the release with the
+DMG and its checksum attached. Because `build_dmg.sh` runs the test suite first, a
+failing test blocks the release rather than shipping.
+
 ## Packaging a local build
 
 `build_dmg.sh` builds a release binary, assembles the `.app` with both resource bundles,
@@ -217,8 +239,11 @@ NOTARY_PROFILE="<notarytool keychain profile>" \
 # or APPLE_ID / APPLE_TEAM_ID / APPLE_APP_PASSWORD instead of NOTARY_PROFILE
 ```
 
-Nothing produced this way is published. Distributing a signed, notarized build is a
-separate decision that hasn't been taken.
+Published releases are built the same way, but by
+[`.github/workflows/release.yml`](.github/workflows/release.yml) on a clean GitHub
+Actions checkout rather than on a laptop. Pushing a `v*` tag runs the tests, builds the
+DMG and attaches it with its checksum. Adopting a Developer ID — and with it signing and
+notarization — remains a separate decision that hasn't been taken.
 
 ## Contributing and support
 

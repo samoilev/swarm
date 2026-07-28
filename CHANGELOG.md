@@ -11,9 +11,16 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
-### Fixed
+## [2.2.0] — 2026-07-28
 
-- Corrected the Russian feminine labels for adoptive and uncertain daughters.
+### Added
+
+- **Downloadable builds.** Each release now carries a DMG built by GitHub Actions from a
+  clean checkout, together with a SHA-256 checksum. The build is **not** signed with an
+  Apple Developer ID and is not notarized, so the first launch needs a right-click →
+  Open. Apple silicon only.
+- A test asserting that every translatable string has an English entry, so an
+  untranslated string fails the build instead of quietly falling back to Russian.
 
 ### Changed
 
@@ -21,9 +28,12 @@ single English record of what changed and when.
   launch: the old application-support folder is moved, per-tree metadata folders are
   renamed, and the saved interface-language preference carries over. GEDCOM files
   exported by earlier versions still import unchanged.
-- Opened the source under the MIT license. Added third-party data attribution, a
-  security policy, contribution guidelines, and a code of conduct. No binaries are
-  published — Swarm is built from source.
+- Opened the source under the MIT license, with third-party data attribution, a security
+  policy, contribution guidelines and a code of conduct.
+
+### Fixed
+
+- Corrected the Russian feminine labels for adoptive and uncertain daughters.
 
 ## [2.1.0] — 2026-07-18
 
@@ -351,7 +361,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v2.1.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/samoilev/swarm/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/samoilev/swarm/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/samoilev/swarm/compare/v1.10.0...v2.0.0
 [1.10.0]: https://github.com/samoilev/swarm/compare/v1.9.0...v1.10.0
