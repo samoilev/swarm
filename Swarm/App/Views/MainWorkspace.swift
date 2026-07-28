@@ -68,39 +68,56 @@ struct MainWorkspace: View {
                     ZStack {
                         SepiaTheme.paper
 
-                        if viewMode == .tree {
-                            TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
-                        } else if viewMode == .fan {
-                            FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
-                        } else if viewMode == .map {
-                            MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
-                        } else if viewMode == .people {
-                            PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
-                        } else if viewMode == .timeline {
-                            TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
-                        } else if viewMode == .places {
-                            PlacesWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
-                        } else {
-                            ReviewWorkspaceView(
-                                tree: tree,
-                                index: workspaceIndex,
-                                selectedPerson: $selectedPerson,
-                                onEdit: { editingPerson = $0 },
-                                onDeleteDuplicate: { person in
-                                    personToDelete = person
-                                    showDeleteConfirm = true
-                                }
-                            )
+                        Group {
+                            if viewMode == .tree {
+                                TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
+                            } else if viewMode == .fan {
+                                FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
+                            } else if viewMode == .map {
+                                MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                            } else if viewMode == .people {
+                                PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
+                            } else if viewMode == .timeline {
+                                TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                            } else if viewMode == .places {
+                                PlacesWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                            } else {
+                                ReviewWorkspaceView(
+                                    tree: tree,
+                                    index: workspaceIndex,
+                                    selectedPerson: $selectedPerson,
+                                    onEdit: { editingPerson = $0 },
+                                    onDeleteDuplicate: { person in
+                                        personToDelete = person
+                                        showDeleteConfirm = true
+                                    }
+                                )
+                            }
                         }
+                        .transition(.opacity)
 
                         if tree.people.isEmpty, [.tree, .fan, .map].contains(viewMode) {
                             emptyTreeState
+                                .transition(.opacity.combined(with: .scale(scale: 0.97)))
                         }
                     }
-                    .overlay(alignment: .top) { dualSelectHint }
-                    .overlay(alignment: .top) { relationshipBanner }
-                    .overlay(alignment: .top) { searchBar }
-                    .overlay(alignment: .bottom) { firstRelativePrompt }
+                    // One crossfade for the whole canvas stack: swapping tree → fan → map
+                    // used to be a hard cut, which read as the window being replaced rather
+                    // than the same tree being drawn a different way.
+                    .sepiaMotion(SepiaMotion.crossfade, value: viewMode)
+                    .sepiaMotion(SepiaMotion.state, value: tree.people.isEmpty)
+                    .overlay(alignment: .top) {
+                        dualSelectHint.sepiaMotion(SepiaMotion.state, value: dualSelectHintSeen)
+                    }
+                    .overlay(alignment: .top) {
+                        relationshipBanner.sepiaMotion(SepiaMotion.state, value: relationshipName)
+                    }
+                    .overlay(alignment: .top) {
+                        searchBar.sepiaMotion(SepiaMotion.state, value: searchActive)
+                    }
+                    .overlay(alignment: .bottom) {
+                        firstRelativePrompt.sepiaMotion(SepiaMotion.state, value: tree.people.count)
+                    }
                     // Six shortcuts are noise on a tree nobody can navigate yet: ↑↓←→
                     // walks kin, ⌘-click names a relationship, ⌘F searches. All of it
                     // needs a second person.
@@ -117,9 +134,13 @@ struct MainWorkspace: View {
                         }, onMakeHome: { person in
                             makeHome(person)
                         })
-                        .transition(.move(edge: .trailing))
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
                 }
+                // Keyed on *whether* a person is selected, not on which one: the panel
+                // slides in when it opens and out when it closes, but stays put while the
+                // user walks from relative to relative inside it.
+                .sepiaMotion(SepiaMotion.panel, value: selectedPerson == nil)
             }
 
             if let msg = toastMessage {
@@ -137,8 +158,10 @@ struct MainWorkspace: View {
                         .accessibilityElement()
                         .accessibilityLabel(msg)
                 }
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
+        .sepiaMotion(SepiaMotion.state, value: toastMessage != nil)
         .sheet(isPresented: $showExportModal) {
             ExportView(tree: tree, store: store, selectedIds: highlightedBranch, showPhotos: showPhotos)
         }
@@ -146,13 +169,13 @@ struct MainWorkspace: View {
             AddPersonView(tree: tree, store: store) { newPerson in
                 selectedPerson = newPerson
                 workspaceIndex.update(person: newPerson, in: tree)
-                showToast(L10n.tr("Добавлен: \(newPerson.listName)"))
+                showToast(L10n.tr("Добавлен: \(newPerson.displayName(language: .current))"))
             }
         }
         .sheet(item: $editingPerson) { person in
             EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
                 workspaceIndex.update(person: saved, in: tree)
-                showToast(L10n.tr("Сохранено: \(saved.listName)"))
+                showToast(L10n.tr("Сохранено: \(saved.displayName(language: .current))"))
             })
         }
         .sheet(isPresented: $showMerge) {
@@ -166,7 +189,7 @@ struct MainWorkspace: View {
             Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
         } message: {
             if let p = personToDelete {
-                Text(L10n.tr("«\(p.listName)» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)."))
+                Text(L10n.tr("«\(p.displayName(language: .current))» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)."))
             }
         }
         .alert(L10n.tr("Не удалось сохранить"), isPresented: $showSaveError) {
@@ -183,7 +206,7 @@ struct MainWorkspace: View {
         .onChange(of: selectedPerson?.id) { _, newValue in
             recomputeHighlight()
             // Auto-collapse the hints to an icon when a card opens; restore when browsing.
-            withAnimation(.easeOut(duration: 0.22)) { hintsExpanded = (newValue == nil) }
+            withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
         }
         .onChange(of: secondaryPerson?.id) { _, newValue in
             recomputeHighlight()
@@ -264,7 +287,8 @@ struct MainWorkspace: View {
             // Both this and the toast live at the bottom centre; the prompt steps up
             // for the 2.5s a toast is on screen instead of being covered by it.
             .padding(.bottom, toastMessage == nil ? 28 : 96)
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.22), value: toastMessage == nil)
+            .sepiaMotion(SepiaMotion.state, value: toastMessage == nil)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
             .accessibilityElement(children: .contain)
         }
     }
@@ -298,6 +322,7 @@ struct MainWorkspace: View {
             .overlay(Capsule().strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
             .shadow(color: .black.opacity(0.08), radius: 6, y: 2)
             .padding(.top, 14)
+            .transition(.move(edge: .top).combined(with: .opacity))
         }
     }
 
@@ -314,7 +339,7 @@ struct MainWorkspace: View {
                     Text(name)
                         .font(SepiaTheme.body(size: 14))
                         .foregroundColor(SepiaTheme.ink)
-                    Text("\(p.listName) → \(s.listName)")
+                    Text("\(p.displayName(language: .current)) → \(s.displayName(language: .current))")
                         .font(SepiaTheme.ui(size: 10.5))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
@@ -335,6 +360,7 @@ struct MainWorkspace: View {
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
             .shadow(color: .black.opacity(0.1), radius: 8, y: 3)
             .padding(.top, 12)
+            .transition(.move(edge: .top).combined(with: .opacity))
             .accessibilityElement(children: .combine)
         }
     }
@@ -368,7 +394,7 @@ struct MainWorkspace: View {
                         ForEach(Array(results.enumerated()), id: \.element.id) { idx, p in
                             Button { selectSearchResult(p) } label: {
                                 HStack(spacing: 8) {
-                                    Text(p.listName).font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink).lineLimit(1)
+                                    Text(p.displayName(language: .current)).font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink).lineLimit(1)
                                     Spacer(minLength: 8)
                                     if !p.lifespan.isEmpty {
                                         Text(p.lifespan).font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
@@ -394,6 +420,7 @@ struct MainWorkspace: View {
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
             .shadow(color: .black.opacity(0.15), radius: 14, y: 6)
             .padding(.top, 12)
+            .transition(.move(edge: .top).combined(with: .opacity))
             .onExitCommand { closeSearch() }
             .onMoveCommand { moveSearchHighlight($0) }
             .onChange(of: searchQuery) { _, _ in searchHighlight = 0 }
@@ -405,8 +432,12 @@ struct MainWorkspace: View {
         let q = searchQuery.trimmingCharacters(in: .whitespaces)
         guard !q.isEmpty else { return [] }
         return tree.people
-            .filter { $0.listName.localizedStandardContains(q) || $0.fullName.localizedStandardContains(q) }
-            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+            .filter {
+                $0.displayName(language: .current)
+                    .localizedCaseInsensitiveContains(q)
+                    || $0.fullName.localizedCaseInsensitiveContains(q)
+            }
+            .sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
             .prefix(8)
             .map { $0 }
     }
@@ -450,7 +481,7 @@ struct MainWorkspace: View {
     private var commandHints: some View {
         HStack(spacing: 9) {
             Button {
-                withAnimation(.easeOut(duration: 0.22)) { hintsExpanded.toggle() }
+                withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded.toggle() }
             } label: {
                 Image(systemName: hintsExpanded ? "chevron.left" : "keyboard")
                     .font(.system(size: 11, weight: .medium))
@@ -611,21 +642,21 @@ struct MainWorkspace: View {
 
     private var viewModeControls: some View {
         HStack(spacing: 4) {
-            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .tree } } label: {
+            Button { viewMode = .tree } label: {
                 Image(systemName: "rectangle.connected.to.line.below")
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .tree))
             .help(L10n.tr("Древовидная схема"))
             .accessibilityLabel(L10n.tr("Древовидная схема"))
 
-            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .fan } } label: {
+            Button { viewMode = .fan } label: {
                 Image(systemName: "chart.pie")
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
             .help(L10n.tr("Круговая диаграмма предков"))
             .accessibilityLabel(L10n.tr("Круговая диаграмма предков"))
 
-            Button { withAnimation(.easeInOut(duration: 0.2)) { viewMode = .map } } label: {
+            Button { viewMode = .map } label: {
                 Image(systemName: "map")
             }
             .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
@@ -648,13 +679,13 @@ struct MainWorkspace: View {
 
     private var directionControls: some View {
         HStack(spacing: 4) {
-            Button { withAnimation { direction = .topDown } } label: {
+            Button { direction = .topDown } label: {
                 Image(systemName: "arrow.down")
             }
             .buttonStyle(SepiaButtonStyle(isActive: direction == .topDown))
             .help(L10n.tr("Сверху вниз"))
             .accessibilityLabel(L10n.tr("Направление: сверху вниз"))
-            Button { withAnimation { direction = .leftRight } } label: {
+            Button { direction = .leftRight } label: {
                 Image(systemName: "arrow.right")
             }
             .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
@@ -664,7 +695,7 @@ struct MainWorkspace: View {
     }
 
     private var photosControl: some View {
-        Button { showPhotos.toggle() } label: {
+        Button { withAnimation(reduceMotion ? nil : SepiaMotion.state) { showPhotos.toggle() } } label: {
             Image(systemName: showPhotos ? "person.crop.square.fill" : "person.crop.square")
         }
         .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
@@ -689,17 +720,34 @@ struct MainWorkspace: View {
         .help(L10n.tr("Количество поколений"))
     }
 
+    /// Step the zoom. On the tree canvas this goes through the same notification the ⌘±
+    /// menu items use, so the step is anchored to the viewport centre and springs — the
+    /// buttons used to set `zoom` directly, which left `panOffset` untouched and lurched
+    /// the whole tree toward the top-left corner. Fan and map don't observe those
+    /// notifications, so they keep the direct step.
+    private func stepZoom(_ delta: CGFloat) {
+        if viewMode == .tree {
+            NotificationCenter.default.post(name: delta > 0 ? .zoomInRequested : .zoomOutRequested, object: nil)
+        } else {
+            withAnimation(reduceMotion ? nil : SepiaMotion.state) {
+                zoom = min(1.6, max(0.25, zoom + delta))
+            }
+        }
+    }
+
     private var zoomControls: some View {
         HStack(spacing: 3) {
-            RepeatButton(action: { zoom = max(0.25, zoom - 0.1) }) { Image(systemName: "minus") }
+            RepeatButton(action: { stepZoom(-0.1) }) { Image(systemName: "minus") }
                 .help(L10n.tr("Уменьшить масштаб"))
                 .accessibilityLabel(L10n.tr("Уменьшить масштаб"))
             Text("\(Int(zoom * 100))%")
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 34)
+                .contentTransition(.numericText())
+                .sepiaMotion(SepiaMotion.state, value: Int(zoom * 100))
                 .accessibilityLabel(L10n.tr("Масштаб \(Int(zoom * 100)) процентов"))
-            RepeatButton(action: { zoom = min(1.6, zoom + 0.1) }) { Image(systemName: "plus") }
+            RepeatButton(action: { stepZoom(0.1) }) { Image(systemName: "plus") }
                 .help(L10n.tr("Увеличить масштаб"))
                 .accessibilityLabel(L10n.tr("Увеличить масштаб"))
             Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
@@ -732,7 +780,11 @@ struct MainWorkspace: View {
                 Toggle(L10n.tr("Фотографии"), isOn: $showPhotos)
             }
             if viewMode == .fan {
-                Stepper(L10n.tr("Поколений: \(fanLevels)"), value: $fanLevels, in: 2 ... 8)
+                Stepper(
+                    L10n.tr("Веер: \(L10n.count(fanLevels, .generation))"),
+                    value: $fanLevels,
+                    in: 2 ... 8
+                )
             }
         } label: {
             Image(systemName: "ellipsis")
@@ -752,15 +804,22 @@ struct MainWorkspace: View {
     /// Quiet, always-visible reassurance that the vault is safe — edits persist
     /// immediately, so show that plainly rather than only warning when a save fails.
     private var savedStatus: some View {
-        HStack(spacing: 4) {
+        let savedTime = AppLanguage.current.formatted(
+            tree.updatedAt,
+            dateStyle: .none,
+            timeStyle: .short
+        )
+        return HStack(spacing: 4) {
             Image(systemName: "checkmark.circle")
                 .font(.system(size: 10))
-            Text(L10n.tr("Сохранено в \(tree.updatedAt.formatted(date: .omitted, time: .shortened))"))
+            Text(L10n.tr("Сохранено в \(savedTime)"))
                 .font(SepiaTheme.ui(size: 10))
+                .contentTransition(.numericText())
+                .sepiaMotion(SepiaMotion.state, value: tree.updatedAt)
         }
         .foregroundColor(SepiaTheme.inkSoft)
         .help(L10n.tr("Дерево сохраняется автоматически после каждого изменения"))
-        .accessibilityLabel(L10n.tr("Сохранено в \(tree.updatedAt.formatted(date: .omitted, time: .shortened))"))
+        .accessibilityLabel(L10n.tr("Сохранено в \(savedTime)"))
     }
 
     private var actionButtons: some View {
@@ -782,7 +841,7 @@ struct MainWorkspace: View {
 
     private func deletePerson() {
         guard let person = personToDelete else { return }
-        let name = person.listName
+        let name = person.displayName(language: .current)
         undo.begin(tree)
 
         // Remove the person's attached files from the tree folder.
@@ -882,9 +941,11 @@ struct MainWorkspace: View {
     }
 
     private func showToast(_ message: String) {
-        toastMessage = message
+        withAnimation(reduceMotion ? nil : SepiaMotion.state) { toastMessage = message }
         announce(message)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { toastMessage = nil }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            withAnimation(reduceMotion ? nil : SepiaMotion.state) { toastMessage = nil }
+        }
     }
 
     private func makeHome(_ person: Person) {
@@ -894,7 +955,7 @@ struct MainWorkspace: View {
             do {
                 _ = try await store.saveTree(tree)
                 fitRequest += 1
-                showToast(L10n.tr("Домашняя персона: \(person.listName)"))
+                showToast(L10n.tr("Домашняя персона: \(person.displayName(language: .current))"))
             } catch {
                 tree.homePersonId = previous
                 showSaveError = true

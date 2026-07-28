@@ -26,6 +26,11 @@ struct SepiaTheme {
     static let cardLineStrong = Color(hex: "7a6238")
     static let cardLineMale = Color(hex: "8fb0a8")
     static let cardLineFemale = Color(hex: "c49a82")
+    /// Hover weights of the sex card lines. A hovered card must not lose its own hue —
+    /// borrowing the neutral `cardLineStrong` made the tint flicker between cool and warm
+    /// as the pointer crossed the tree. Darker than the resting line, so contrast only rises.
+    static let cardLineMaleStrong = Color(hex: "6e948b")
+    static let cardLineFemaleStrong = Color(hex: "a8765a")
     static let cardRule = Color(hex: "d9c9a4")
     static let accent = Color(hex: "9c4a2f")
     /// Pressed/hover weight of `accent`; white on it is 8.39:1.
@@ -43,6 +48,11 @@ struct SepiaTheme {
     /// sink them into the page instead of lifting them off it.
     static let btnBgHover = Color(hex: "fdf8ea")
     static let cardBgHover = Color(hex: "fdf9ee")
+    /// Hover fills for the sex-tinted cards — each is its own resting tint lifted toward
+    /// white, not a swap to the neutral hover cream. Same reasoning as the *Strong lines:
+    /// hover should raise a card off the paper, never restate what sex it is.
+    static let cardBgMaleHover = Color(hex: "f4faf9")
+    static let cardBgFemaleHover = Color(hex: "fdf7f1")
     static let fieldLine = Color(hex: "d2c09a")
     /// Fill of a text input. Was applied as `.colorMultiply` over a system field, which
     /// also dimmed the system placeholder to 3.85:1; it is a real fill now so the
@@ -78,6 +88,49 @@ struct SepiaTheme {
 
     static func ui(size: CGFloat) -> Font {
         .system(size: size, weight: .medium, design: .serif)
+    }
+}
+
+/// The app's motion vocabulary. Kept here beside the colour and control tokens so
+/// durations and curves are chosen once rather than re-invented per view.
+///
+/// Springs are all damped ≥0.86: they settle, they never wobble. An archival record
+/// should feel steady under the hand, so nothing here bounces.
+enum SepiaMotion {
+    /// Press acknowledgement. Under the ~80ms perception threshold, so it reads as instant.
+    static let press = Animation.easeOut(duration: 0.10)
+    /// Hover lift on a card or control.
+    static let hover = Animation.easeOut(duration: 0.14)
+    /// Everyday state change: dimming, a badge appearing, a toast, a numeric readout.
+    static let state = Animation.easeOut(duration: 0.22)
+    /// Selection: the ring settling onto a card.
+    static let select = Animation.spring(response: 0.28, dampingFraction: 0.86)
+    /// A panel entering or leaving the edge of the window.
+    static let panel = Animation.spring(response: 0.34, dampingFraction: 0.90)
+    /// The one long beat: every card gliding to a new seat when the tree is re-laid out.
+    static let layout = Animation.spring(response: 0.55, dampingFraction: 0.88)
+    /// Swapping one full-canvas view for another.
+    static let crossfade = Animation.easeInOut(duration: 0.18)
+    /// Longest stagger the entrance cascade may span, however tall the tree is.
+    static let entranceStagger: Double = 0.30
+}
+
+/// Applies an animation unless the user has asked for less motion. Reads the environment
+/// itself so callers don't each have to hold `accessibilityReduceMotion` and branch on it.
+private struct SepiaMotionModifier<V: Equatable>: ViewModifier {
+    let animation: Animation
+    let value: V
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content.animation(reduceMotion ? nil : animation, value: value)
+    }
+}
+
+extension View {
+    /// `.animation(_:value:)` that collapses to an instant change under Reduce Motion.
+    func sepiaMotion(_ animation: Animation, value: some Equatable) -> some View {
+        modifier(SepiaMotionModifier(animation: animation, value: value))
     }
 }
 
@@ -138,12 +191,14 @@ private struct SepiaControlSurface<Label: View>: View {
             // button the user simply failed to hit.
             .opacity(isEnabled ? (isPressed ? 0.82 : 1.0) : 0.4)
             .saturation(isEnabled ? 1 : 0.35)
+            .scaleEffect(isPressed && isEnabled ? 0.96 : 1.0)
+            .sepiaMotion(SepiaMotion.press, value: isPressed)
             .onHover { hovering in
                 guard isEnabled else { return }
                 if reduceMotion {
                     isHovering = hovering
                 } else {
-                    withAnimation(.easeOut(duration: 0.15)) { isHovering = hovering }
+                    withAnimation(SepiaMotion.hover) { isHovering = hovering }
                 }
             }
             .onChange(of: isEnabled) { _, enabled in if !enabled { isHovering = false } }

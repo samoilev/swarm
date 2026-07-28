@@ -104,7 +104,7 @@ struct InspectorPanel: View {
                     .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
                     .padding(.bottom, 2)
                 }
-                Text(person.listName)
+                Text(person.displayName(language: .current))
                     .font(SepiaTheme.display(size: 19))
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
@@ -168,7 +168,7 @@ struct InspectorPanel: View {
                 .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(stroke, lineWidth: 1))
                 .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
+        .buttonStyle(InspectorActionButtonStyle())
     }
 
     // Each section renders only when it has at least one filled field, and within
@@ -305,19 +305,69 @@ struct InspectorPanel: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
-            Button(p.listName) {
+            Button(p.displayName(language: .current)) {
                 if let current = self.person { history.append(current) }
                 internalNav = true
                 self.person = p
             }
-            .buttonStyle(.plain)
+            .buttonStyle(RelativeLinkButtonStyle())
             .font(SepiaTheme.body(size: 14))
-            .foregroundColor(SepiaTheme.ink)
             .multilineTextAlignment(.leading)
             .underline(color: SepiaTheme.accent2.opacity(0.5))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, 12)
+    }
+}
+
+/// The inspector's small square actions (home, delete, edit, close) were `.plain`, which on
+/// macOS means no hover and no press state at all — four unlit targets in the busiest corner
+/// of the panel. This gives them the same hover-lifts / press-dips language as the toolbar.
+private struct InspectorActionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        InspectorActionSurface(label: configuration.label, isPressed: configuration.isPressed)
+    }
+
+    private struct InspectorActionSurface<Label: View>: View {
+        let label: Label
+        let isPressed: Bool
+        @State private var isHovering = false
+
+        var body: some View {
+            label
+                .brightness(isHovering && !isPressed ? 0.04 : 0)
+                .opacity(isPressed ? 0.7 : 1)
+                .scaleEffect(isPressed ? 0.92 : (isHovering ? 1.06 : 1.0))
+                .sepiaMotion(SepiaMotion.press, value: isPressed)
+                .sepiaMotion(SepiaMotion.hover, value: isHovering)
+                .onHover { isHovering = $0 }
+        }
+    }
+}
+
+/// A relative's name in the panel is a navigation link but rendered as bare text; without a
+/// hover cue there is nothing to say it can be clicked.
+private struct RelativeLinkButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        RelativeLinkSurface(label: configuration.label, isPressed: configuration.isPressed)
+    }
+
+    private struct RelativeLinkSurface<Label: View>: View {
+        let label: Label
+        let isPressed: Bool
+        @State private var isHovering = false
+
+        var body: some View {
+            label
+                .foregroundColor(isHovering || isPressed ? SepiaTheme.accent : SepiaTheme.ink)
+                .opacity(isPressed ? 0.7 : 1)
+                .sepiaMotion(SepiaMotion.hover, value: isHovering)
+                .sepiaMotion(SepiaMotion.press, value: isPressed)
+                .onHover { hovering in
+                    isHovering = hovering
+                    if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+                }
+        }
     }
 }
 

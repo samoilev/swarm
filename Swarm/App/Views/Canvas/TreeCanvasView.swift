@@ -26,15 +26,17 @@ struct TreeCanvasView: View {
     @State private var magnifyStart: CGFloat = 1.0
     @State private var panAtMagnifyStart: CGSize = .zero
     @State private var isMagnifying = false
-    // Inertia / momentum scrolling
-    @State private var velocity: CGSize = .zero
-    @State private var lastDragValue: CGSize = .zero
-    @State private var inertiaTimer: Timer?
+    /// Momentum scrolling: points per second, decayed on the display's own clock while
+    /// non-zero (see `InertiaDriver`). Zero means the canvas is at rest and nothing ticks.
+    @State private var coastVelocity: CGSize = .zero
     /// Layout only depends on tree structure + direction, so cache it and recompute
     /// only when those change — body re-runs on every pan/zoom frame otherwise.
     @State private var cachedLayout: TreeLayout?
     /// Equality key for cached content and minimap layers. Bumped with each layout.
     @State private var layoutGeneration = 0
+    /// Connector paths can't interpolate between two layouts, so they fade out for the
+    /// duration of a morph and fade back in against the new geometry.
+    @State private var connectorOpacity: Double = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Lets the canvas receive arrow keys for relationship traversal.
     @FocusState private var canvasFocused: Bool
@@ -86,6 +88,7 @@ struct TreeCanvasView: View {
                 // `zoom/superSample`) so the two layers stay pixel-aligned at every frame.
                 TreeConnectorsLayer(layout: layout, generation: layoutGeneration, highlightedIds: highlightedIds)
                     .equatable()
+                    .opacity(connectorOpacity)
                     .scaleEffect(zoom, anchor: .topLeading)
                     .offset(x: panOffset.width, y: panOffset.height)
 
@@ -105,6 +108,7 @@ struct TreeCanvasView: View {
                     superSample: superSample,
                     cardW: cardW,
                     cardH: cardH,
+                    isLeftRight: direction == .leftRight,
                     onSelect: { person, commandClick in
                         if commandClick {
                             // CMD+click: set as secondary (max 2)
@@ -142,7 +146,7 @@ struct TreeCanvasView: View {
                     .transition(.opacity)
                 }
             }
-            .animation(.easeInOut(duration: 0.2), value: layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height)
+            .sepiaMotion(SepiaMotion.crossfade, value: layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height)
             .background(
                 // Mouse-wheel / scroll zoom, soft and anchored to the cursor.
                 ScrollWheelZoom { deltaY, location in
@@ -155,7 +159,8 @@ struct TreeCanvasView: View {
                         width: location.x - (location.x - panOffset.width) * ratio,
                         height: location.y - (location.y - panOffset.height) * ratio
                     )
-                    withAnimation(.interactiveSpring(response: 0.22, dampingFraction: 0.82)) {
+                    coastVelocity = .zero
+                    withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.22, dampingFraction: 0.82)) {
                         zoom = newZoom
                         panOffset = newPan
                     }
@@ -165,23 +170,26 @@ struct TreeCanvasView: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        inertiaTimer?.invalidate()
-                        let newOffset = CGSize(
+                        coastVelocity = .zero // grabbing the canvas stops the coast dead
+                        panOffset = CGSize(
                             width: dragStart.width + value.translation.width,
                             height: dragStart.height + value.translation.height
                         )
-                        velocity = CGSize(
-                            width: newOffset.width - panOffset.width,
-                            height: newOffset.height - panOffset.height
-                        )
-                        panOffset = newOffset
-                        lastDragValue = value.translation
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
                         dragStart = panOffset
-                        startInertia()
+                        // `value.velocity` is points per second, measured by the system —
+                        // more accurate than differencing our own frames, and it lets the
+                        // decay below be expressed in real time rather than in frames.
+                        coastVelocity = reduceMotion ? .zero : value.velocity
                     }
             )
+            // Only present while the canvas is actually coasting, so nothing ticks at rest.
+            .overlay {
+                if coastVelocity != .zero {
+                    InertiaDriver { dt in coast(dt) }
+                }
+            }
             .gesture(
                 MagnifyGesture()
                     .onChanged { value in
@@ -193,6 +201,7 @@ struct TreeCanvasView: View {
                             isMagnifying = true
                             magnifyStart = zoom
                             panAtMagnifyStart = panOffset
+                            coastVelocity = .zero
                         }
                         // Soften the response for a gentle, map-like feel.
                         let damped = 1 + (value.magnification - 1) * zoomSensitivity
@@ -221,16 +230,12 @@ struct TreeCanvasView: View {
                 canvasFocused = true
             }
             .onChange(of: tree.layoutVersion) { _, _ in
-                let l = makeLayout()
-                cachedLayout = l
-                layoutGeneration += 1
-                fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
+                // An edit shouldn't yank the viewport: re-fit only when the new layout no
+                // longer fits at the current zoom. Direction changes and ⌘0 always re-fit.
+                applyLayout(makeLayout(), viewSize: geo.size, refit: .ifOverflowing)
             }
             .onChange(of: direction) { _, _ in
-                let l = makeLayout()
-                cachedLayout = l
-                layoutGeneration += 1
-                fitToScreen(viewSize: geo.size, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
+                applyLayout(makeLayout(), viewSize: geo.size, refit: .always)
             }
             .onChange(of: fitRequest) { _, _ in
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
@@ -287,9 +292,47 @@ struct TreeCanvasView: View {
         }
     }
 
+    // MARK: - Layout changes
+
+    private enum RefitPolicy { case always, ifOverflowing }
+
+    /// Swap in a freshly computed layout. Cards keep their identity across the swap (the
+    /// `ForEach` is keyed by `person.id`) and are placed with `.position`, which SwiftUI
+    /// interpolates — so doing this inside one transaction makes every card glide to its
+    /// new seat instead of teleporting. The connectors are `Path` strokes and cannot
+    /// interpolate between two geometries, so they duck out and back around the move.
+    private func applyLayout(_ l: TreeLayout, viewSize: CGSize, refit: RefitPolicy) {
+        let overflows = l.totalWidth * zoom > viewSize.width || l.totalHeight * zoom > viewSize.height
+        let shouldRefit = refit == .always || overflows
+
+        // Above this many cards the morph is N animated position changes per frame, which
+        // is no longer free — a large tree gets the old instant swap.
+        guard !reduceMotion, l.nodes.count <= 400 else {
+            cachedLayout = l
+            layoutGeneration += 1
+            connectorOpacity = 1
+            if shouldRefit {
+                fitToScreen(viewSize: viewSize, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
+            }
+            return
+        }
+
+        withAnimation(.easeOut(duration: 0.12)) { connectorOpacity = 0 }
+        withAnimation(SepiaMotion.layout) {
+            cachedLayout = l
+            layoutGeneration += 1
+        }
+        if shouldRefit {
+            // Same curve as the cards: the viewport and the tree move as one system rather
+            // than as two timelines racing each other.
+            fitToScreen(viewSize: viewSize, treeWidth: l.totalWidth, treeHeight: l.totalHeight, animation: SepiaMotion.layout)
+        }
+        withAnimation(SepiaMotion.layout.delay(0.18)) { connectorOpacity = 1 }
+    }
+
     // MARK: - Fit to Screen
 
-    private func fitToScreen(viewSize: CGSize, treeWidth: CGFloat, treeHeight: CGFloat) {
+    private func fitToScreen(viewSize: CGSize, treeWidth: CGFloat, treeHeight: CGFloat, animation: Animation? = nil) {
         guard treeWidth > 0, treeHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
 
         let margin: CGFloat = 20
@@ -307,7 +350,9 @@ struct TreeCanvasView: View {
         let offsetX = (viewSize.width - scaledW) / 2
         let offsetY = (viewSize.height - scaledH) / 2
 
-        withAnimation(.easeInOut(duration: 0.3)) {
+        coastVelocity = .zero // a fit overrides any momentum still in flight
+
+        withAnimation(reduceMotion ? nil : (animation ?? .easeInOut(duration: 0.3))) {
             zoom = clampedZoom
             panOffset = CGSize(width: offsetX, height: offsetY)
             dragStart = CGSize(width: offsetX, height: offsetY)
@@ -338,6 +383,7 @@ struct TreeCanvasView: View {
     /// `animated` is forced off for Reduce Motion and for live minimap dragging.
     private func recenter(onTreePoint p: CGPoint, viewSize: CGSize, animated: Bool = true) {
         let newPan = CGSize(width: viewSize.width / 2 - p.x * zoom, height: viewSize.height / 2 - p.y * zoom)
+        coastVelocity = .zero
         if animated, !reduceMotion {
             withAnimation(.easeInOut(duration: 0.25)) {
                 panOffset = newPan
@@ -362,29 +408,64 @@ struct TreeCanvasView: View {
             width: cx - (cx - panOffset.width) * ratio,
             height: cy - (cy - panOffset.height) * ratio
         )
-        withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
+        coastVelocity = .zero
+        withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
             zoom = newZoom
             panOffset = newPan
         }
         dragStart = newPan
     }
 
-    private func startInertia() {
-        inertiaTimer?.invalidate()
-        let decay: CGFloat = 0.88 // fraction of velocity kept per frame (higher = slower decay)
-        let cutoff: CGFloat = 0.5 // stop when velocity drops below this px/frame
-        var v = velocity
-        inertiaTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { t in
-            v = CGSize(width: v.width * decay, height: v.height * decay)
-            if abs(v.width) < cutoff && abs(v.height) < cutoff { t.invalidate(); return }
-            panOffset = CGSize(width: panOffset.width + v.width, height: panOffset.height + v.height)
-            dragStart = panOffset
-        }
+    /// Advance the momentum coast by one display frame. Decay is expressed per *second*
+    /// and raised to the elapsed time, so the glide is identical on a 60 Hz and a 120 Hz
+    /// panel — the old fixed 1/60 timer beat against a ProMotion display and read as stutter.
+    private func coast(_ dt: TimeInterval) {
+        let decayPerSecond = 0.0005 // ≈ the previous 0.88-per-frame feel, expressed in time
+        let cutoff: CGFloat = 30 // points per second, below which the glide is over
+        let k = CGFloat(pow(decayPerSecond, dt))
+        var v = CGSize(width: coastVelocity.width * k, height: coastVelocity.height * k)
+
+        if abs(v.width) < cutoff, abs(v.height) < cutoff { v = .zero }
+        panOffset = CGSize(
+            width: panOffset.width + v.width * CGFloat(dt),
+            height: panOffset.height + v.height * CGFloat(dt)
+        )
+        dragStart = panOffset
+        coastVelocity = v
     }
 
     /// Build the tidy-tree layout via the pure engine in SwarmCore.
     private func makeLayout() -> TreeLayout {
         TreeLayoutEngine().layout(tree: tree, direction: direction == .leftRight ? .leftRight : .topDown)
+    }
+}
+
+/// Ticks once per display refresh and reports the elapsed time, so momentum scrolling runs
+/// on the panel's own clock (120 Hz on ProMotion) rather than a fixed 60 Hz timer. Invisible
+/// and non-interactive; the canvas only keeps one alive while it is actually coasting.
+///
+/// Panning stays outside any animation transaction, so `panOffset` is always the value the
+/// user can see — grabbing the canvas mid-glide picks up exactly where it looks like it is.
+private struct InertiaDriver: View {
+    let onTick: (TimeInterval) -> Void
+    @State private var lastTick: Date?
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            Color.clear
+                .frame(width: 0, height: 0)
+                .onChange(of: timeline.date) { _, now in
+                    defer { lastTick = now }
+                    guard let last = lastTick else { return }
+                    let dt = now.timeIntervalSince(last)
+                    // Skip an implausible gap (window occluded, app suspended) rather than
+                    // flinging the canvas across the tree on the first frame back.
+                    guard dt > 0, dt < 0.25 else { return }
+                    onTick(dt)
+                }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -445,7 +526,14 @@ private struct TreeContentLayer: View, Equatable {
     let superSample: CGFloat
     let cardW: CGFloat
     let cardH: CGFloat
+    let isLeftRight: Bool
     let onSelect: (Person, Bool) -> Void
+
+    /// Flipped on the first frame so the tree cascades in rather than appearing all at once.
+    /// The cards' resting opacity is 1 — this only pulls them back for the frame before
+    /// `.onAppear` runs, so a cascade that somehow never fires still leaves a visible tree.
+    @State private var didAppear = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     static func == (l: TreeContentLayer, r: TreeContentLayer) -> Bool {
         // generation stands in for the (expensive to compare) layout; it bumps whenever
@@ -456,8 +544,19 @@ private struct TreeContentLayer: View, Equatable {
             l.homeId == r.homeId &&
             l.showPhotos == r.showPhotos &&
             l.superSample == r.superSample &&
+            l.isLeftRight == r.isLeftRight &&
             l.highlightedIds == r.highlightedIds &&
             l.lineageLabels == r.lineageLabels
+    }
+
+    /// Entrance delay for a card, proportional to how far along the tree's growth axis it
+    /// sits — so the cascade reads as the tree unfolding from its root. Capped, so a deep
+    /// tree doesn't make the user wait.
+    private func entranceDelay(_ node: TreeNode) -> Double {
+        let t = isLeftRight
+            ? node.x / max(layout.totalWidth, 1)
+            : node.y / max(layout.totalHeight, 1)
+        return min(SepiaMotion.entranceStagger, Double(t) * SepiaMotion.entranceStagger)
     }
 
     var body: some View {
@@ -467,6 +566,7 @@ private struct TreeContentLayer: View, Equatable {
                 let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
                 let isPrimary = selectedId == node.person.id
                 let isSecondary = secondaryId == node.person.id
+                let shown = didAppear || reduceMotion
                 PersonCardView(
                     person: node.person,
                     isSelected: isPrimary,
@@ -479,7 +579,15 @@ private struct TreeContentLayer: View, Equatable {
                 )
                 .equatable()
                 .opacity(dimmed ? 0.3 : 1.0)
+                .sepiaMotion(SepiaMotion.state, value: dimmed)
+                .opacity(shown ? 1 : 0)
+                .scaleEffect(shown ? 1 : 0.94)
+                .sepiaMotion(SepiaMotion.select.delay(entranceDelay(node)), value: shown)
                 .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
+                // A person added or deleted rides the layout morph's transaction: the new
+                // card scales in while its new neighbours glide aside, and a removed one
+                // collapses as the tree closes the gap.
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
                 .onTapGesture {
                     onSelect(node.person, NSEvent.modifierFlags.contains(.command))
                 }
@@ -491,6 +599,7 @@ private struct TreeContentLayer: View, Equatable {
             }
         }
         .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample, alignment: .topLeading)
+        .onAppear { didAppear = true }
     }
 }
 
@@ -640,6 +749,7 @@ struct ScrollWheelZoom: NSViewRepresentable {
 
 struct PersonCardView: View, Equatable {
     let person: Person
+    var language: AppLanguage = .current
     var isSelected: Bool = false
     var isSecondarySelected: Bool = false
     var isHome: Bool = false
@@ -650,6 +760,17 @@ struct PersonCardView: View, Equatable {
     /// text stays crisp at any zoom, instead of being a 1× bitmap stretched by the canvas.
     var scale: CGFloat = 1
 
+    /// Pointer feedback. Deliberately *local* state: it invalidates this one card only,
+    /// so the `.equatable()` isolation that keeps pan/zoom from re-running the whole card
+    /// `ForEach` (see `TreeContentLayer`) still holds.
+    ///
+    /// There is no press state here on purpose. Any gesture on the card that recognises on
+    /// mouse-down — even a `simultaneousGesture` — swallows the tap that selects a person,
+    /// and a `.gesture` would additionally stop the canvas being panned from a card. The
+    /// hover lift is the affordance and the selection ring is the acknowledgement; both
+    /// land well inside the 80 ms that reads as instant.
+    @State private var isHovering = false
+
     static func == (lhs: PersonCardView, rhs: PersonCardView) -> Bool {
         lhs.person.id == rhs.person.id &&
             lhs.person.givenNames == rhs.person.givenNames &&
@@ -657,6 +778,7 @@ struct PersonCardView: View, Equatable {
             lhs.person.maidenName == rhs.person.maidenName &&
             lhs.person.lifespan == rhs.person.lifespan &&
             lhs.person.sex == rhs.person.sex &&
+            lhs.language == rhs.language &&
             lhs.isSelected == rhs.isSelected &&
             lhs.isSecondarySelected == rhs.isSecondarySelected &&
             lhs.isHome == rhs.isHome &&
@@ -671,20 +793,31 @@ struct PersonCardView: View, Equatable {
         v * scale
     }
 
+    private var isChosen: Bool { isSelected || isSecondarySelected }
+
+    /// Hover lifts a card toward white along *its own* hue (see the `*Hover` tokens): the
+    /// pointer should raise the card off the paper, not restate the person's sex.
     private var cardBackground: Color {
+        if isHighlighted { return SepiaTheme.accent.opacity(0.08) }
         switch person.sex {
-        case .male: SepiaTheme.cardBgMale
-        case .female: SepiaTheme.cardBgFemale
-        case .unknown: SepiaTheme.cardBg
+        case .male: return isHovering ? SepiaTheme.cardBgMaleHover : SepiaTheme.cardBgMale
+        case .female: return isHovering ? SepiaTheme.cardBgFemaleHover : SepiaTheme.cardBgFemale
+        case .unknown: return isHovering ? SepiaTheme.cardBgHover : SepiaTheme.cardBg
         }
     }
 
     private var cardBorder: Color {
+        if isHighlighted { return SepiaTheme.accent2 }
         switch person.sex {
-        case .male: SepiaTheme.cardLineMale
-        case .female: SepiaTheme.cardLineFemale
-        case .unknown: SepiaTheme.cardLine
+        case .male: return isHovering ? SepiaTheme.cardLineMaleStrong : SepiaTheme.cardLineMale
+        case .female: return isHovering ? SepiaTheme.cardLineFemaleStrong : SepiaTheme.cardLineFemale
+        case .unknown: return isHovering ? SepiaTheme.cardLineStrong : SepiaTheme.cardLine
         }
+    }
+
+    private var shadowRadius: CGFloat {
+        if isChosen { return s(5) }
+        return isHovering ? s(5) : s(2)
     }
 
     /// Non-color sex cue so sex reads independent of the card tint (color-blind / low contrast).
@@ -699,21 +832,24 @@ struct PersonCardView: View, Equatable {
     var body: some View {
         HStack(spacing: 0) {
             if showPhoto {
-                if let data = person.photoData, let nsImage = NSImage(data: data) {
-                    Image(nsImage: nsImage)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: s(66), height: s(88)) // 3:4 portrait, matches the inspector
-                        .clipped()
-                } else {
-                    ZStack {
-                        Rectangle().fill(SepiaTheme.cardLine.opacity(0.2))
-                        Image(systemName: "person.fill")
-                            .font(.system(size: s(20)))
-                            .foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
+                Group {
+                    if let data = person.photoData, let nsImage = NSImage(data: data) {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: s(66), height: s(88)) // 3:4 portrait, matches the inspector
+                            .clipped()
+                    } else {
+                        ZStack {
+                            Rectangle().fill(SepiaTheme.cardLine.opacity(0.2))
+                            Image(systemName: "person.fill")
+                                .font(.system(size: s(20)))
+                                .foregroundColor(SepiaTheme.inkSoft.opacity(0.4))
+                        }
+                        .frame(width: s(66), height: s(88))
                     }
-                    .frame(width: s(66), height: s(88))
                 }
+                .transition(.opacity)
             }
 
             VStack(alignment: .leading, spacing: 0) {
@@ -721,12 +857,14 @@ struct PersonCardView: View, Equatable {
                     VStack(alignment: .leading, spacing: 0) {
                         // Surname — allow up to 2 lines so long names are never truncated.
                         // The maiden name sits on its own line below (1-line, clipped if needed).
-                        Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: s(8)))
-                            .tracking(s(1.0))
-                            .foregroundColor(SepiaTheme.inkSoft)
-                            .lineLimit(2)
-                            .minimumScaleFactor(0.8)
+                        if language == .russian {
+                            Text(person.displaySurname.uppercased())
+                                .font(SepiaTheme.ui(size: s(8)))
+                                .tracking(s(1.0))
+                                .foregroundColor(SepiaTheme.inkSoft)
+                                .lineLimit(2)
+                                .minimumScaleFactor(0.8)
+                        }
                         if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
                             Text("(\(maiden.uppercased()))")
                                 .font(SepiaTheme.ui(size: s(7)))
@@ -754,9 +892,13 @@ struct PersonCardView: View, Equatable {
                 Rectangle().fill(SepiaTheme.cardRule).frame(height: max(0.5, s(1)))
 
                 VStack(alignment: .leading, spacing: s(1)) {
-                    let nameDisplay = [person.givenNames, person.patronymic ?? ""]
-                        .filter { !$0.isEmpty }
-                        .joined(separator: " ")
+                    let nameDisplay = if language == .english {
+                        person.displayName(language: .english)
+                    } else {
+                        [person.givenNames, person.patronymic ?? ""]
+                            .filter { !$0.isEmpty }
+                            .joined(separator: " ")
+                    }
                     Text(nameDisplay.isEmpty ? L10n.tr("Неизвестно") : nameDisplay)
                         .font(SepiaTheme.display(size: s(13.5)))
                         .fontWeight(.semibold)
@@ -775,18 +917,26 @@ struct PersonCardView: View, Equatable {
             }
         }
         .frame(width: s(210), height: s(90))
-        .background(isHighlighted ? SepiaTheme.accent.opacity(0.08) : cardBackground)
+        .background(cardBackground)
         .overlay(
             RoundedRectangle(cornerRadius: s(4))
-                .strokeBorder(
-                    isSelected ? SepiaTheme.accent :
-                        isSecondarySelected ? SepiaTheme.accent :
-                        (isHighlighted ? SepiaTheme.accent2 : cardBorder),
-                    lineWidth: (isSelected || isSecondarySelected) ? s(3) : (isHighlighted ? s(1.5) : s(1))
-                )
+                .strokeBorder(cardBorder, lineWidth: isHighlighted ? s(1.5) : s(1))
+        )
+        // The selection ring is its own layer rather than a thicker border: SwiftUI does
+        // not interpolate `strokeBorder` line width, but it does interpolate opacity and
+        // scale — so the ring settles onto the card instead of snapping to 3pt.
+        .overlay(
+            RoundedRectangle(cornerRadius: s(4))
+                .strokeBorder(SepiaTheme.accent, lineWidth: s(3))
+                .opacity(isChosen ? 1 : 0)
+                .scaleEffect(isChosen ? 1 : 1.06)
         )
         .clipShape(RoundedRectangle(cornerRadius: s(4)))
-        .shadow(color: (isSelected || isSecondarySelected) ? SepiaTheme.accent.opacity(0.3) : .black.opacity(0.06), radius: (isSelected || isSecondarySelected) ? s(4) : s(2), y: s(1))
+        .shadow(
+            color: isChosen ? SepiaTheme.accent.opacity(0.3) : .black.opacity(isHovering ? 0.14 : 0.06),
+            radius: shadowRadius,
+            y: isHovering || isChosen ? s(2.5) : s(1)
+        )
         .overlay(alignment: .topTrailing) {
             if let label = lineageLabel {
                 Text(label)
@@ -801,7 +951,20 @@ struct PersonCardView: View, Equatable {
                     // Float just above the card's top-right edge so it never collides with
                     // the sex glyph / home dot inside the header.
                     .offset(x: 0, y: -s(15))
+                    .transition(.scale(scale: 0.8).combined(with: .opacity))
             }
         }
+        .scaleEffect(isHovering ? 1.012 : 1.0)
+        .onHover { hovering in
+            isHovering = hovering
+            // The cards are the canvas's primary affordance and had no cursor cue at all.
+            // `.set()` rather than push/pop for the same reason as the inspector's resize
+            // handle: a card can be removed mid-hover (a delete, a layout morph), and a
+            // missed hover-exit would then leak a cursor onto the stack forever.
+            if hovering { NSCursor.pointingHand.set() } else { NSCursor.arrow.set() }
+        }
+        .sepiaMotion(SepiaMotion.hover, value: isHovering)
+        .sepiaMotion(SepiaMotion.select, value: [isSelected, isSecondarySelected, isHighlighted])
+        .sepiaMotion(SepiaMotion.state, value: lineageLabel)
     }
 }

@@ -36,6 +36,8 @@ private struct RepeatIconButtonStyle: ButtonStyle {
                 .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
                 .clipShape(RoundedRectangle(cornerRadius: 7))
                 .opacity(configuration.isPressed ? 0.8 : 1.0)
+                .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+                .sepiaMotion(SepiaMotion.press, value: configuration.isPressed)
                 .onChange(of: configuration.isPressed) { _, pressed in
                     if pressed { start() } else { stop() }
                 }
