@@ -11,8 +11,18 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-07-29
+
 ### Added
 
+- Motion across the tree screen. Cards lift under the pointer, the selection ring settles
+  onto the chosen card, the lineage badge scales in, and the rest of the tree fades back
+  so the selected person's line reads at a glance.
+- Rearrangement in place of redrawing. Switching between top-down and left-right, adding
+  a relative, deleting one, or refreshing the layout now glides every card to its new
+  position; the connector lines fade for the move and return once the cards have settled.
+- Hover states on the inspector's actions and on its links to relatives, which gave no
+  response to the pointer before.
 - A mandatory bilingual Russian/English chooser on pristine installations, with the
   same immediate language switch in the library, onboarding, Settings, and Help.
 - Bilingual contextual Help for first steps, genealogy dates, kinship, workspaces,
@@ -25,6 +35,14 @@ single English record of what changed and when.
 
 ### Changed
 
+- Momentum panning runs at the display's own refresh rate, with decay measured in time
+  rather than frames, so the glide is the same on a 60 Hz screen and on ProMotion.
+- Adding or editing a person no longer refits the viewport unless the tree has outgrown
+  it. A single addition used to shift the whole canvas.
+- The inspector, toasts, the search field, the kinship banner, and switching between the
+  tree, fan, and map views now animate in and out instead of appearing and vanishing.
+- Motion is defined in one place, and every animation honours the system Reduce Motion
+  setting.
 - English now uses given-name-first presentation, surname-first sorting, optional
   patronymics, native examples, unambiguous `5 Mar 1978` dates, and locale-aware counted
   nouns throughout the interface and PDFs.
@@ -33,6 +51,12 @@ single English record of what changed and when.
   one, two, or three generations removed in either direction.
 - Place search, labels, ID lookup, and coordinate resolution now share one bilingual
   index. Ambiguous bare names no longer receive an arbitrary pin.
+
+### Fixed
+
+- The toolbar zoom buttons no longer pull the tree toward the top-left corner. They hold
+  the viewport centre, matching ⌘+ and ⌘−.
+- The inspector panel slides in. Its animation was declared but never ran.
 
 ### Removed
 
@@ -405,6 +429,7 @@ First release. A macOS app for building a family tree.
 Requires macOS 14+ on Apple silicon.
 
 [Unreleased]: https://github.com/samoilev/swarm/compare/v2.2.1...HEAD
+[2.3.0]: https://github.com/samoilev/swarm/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/samoilev/swarm/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/samoilev/swarm/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/samoilev/swarm/compare/v2.0.0...v2.1.0
