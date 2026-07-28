@@ -3,20 +3,20 @@
   <br />
   <br />
   <br />
-  <p>
-    <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3B2F21?style=flat" alt="MIT license" /></a>
-    <img src="https://img.shields.io/badge/macOS-14%2B-4F4132?style=flat" alt="macOS 14 or later" />
-    <img src="https://img.shields.io/badge/Swift-6.0%2B-4F4132?style=flat" alt="Swift 6.0 or later" />
-    <br />
-    <img src="https://img.shields.io/badge/GEDCOM-5.5.1-6B5D4B?style=flat" alt="GEDCOM 5.5.1" />
-    <img src="https://img.shields.io/badge/dependencies-none-6B5D4B?style=flat" alt="No third-party dependencies" />
-    <img src="https://img.shields.io/badge/telemetry-none-6B5D4B?style=flat" alt="No telemetry" />
-    <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/download-DMG%20(unsigned)-8A7C68?style=flat" alt="Download the DMG; unsigned build" /></a>
-  </p>
+  <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.2.0-3B2F21?style=flat" alt="Latest release 2.2.0" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/download-DMG%20(unsigned)-4F4132?style=flat" alt="Download the DMG; unsigned build" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4F4132?style=flat" alt="MIT license" /></a>
+  <br />
+  <img src="https://img.shields.io/badge/macOS-14%2B-6B5D4B?style=flat" alt="macOS 14 or later" />
+  <img src="https://img.shields.io/badge/Swift-6.0%2B-6B5D4B?style=flat" alt="Swift 6.0 or later" />
+  <img src="https://img.shields.io/badge/GEDCOM-5.5.1-8A7C68?style=flat" alt="GEDCOM 5.5.1" />
+  <img src="https://img.shields.io/badge/dependencies-none-8A7C68?style=flat" alt="No third-party dependencies" />
+  <img src="https://img.shields.io/badge/telemetry-none-8A7C68?style=flat" alt="No telemetry" />
+  <br />
+  <br />
+  <br />
 </div>
-
----
 
 Swarm builds, visualizes and exports family trees, with particular attention to
 Russian-language genealogy — full kinship terminology, patronymics, Cyrillic place data,

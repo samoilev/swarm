@@ -22,8 +22,9 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode.app
 
       # A tag that disagrees with VERSION would produce a DMG whose filename
-      # contradicts the release it is attached to. Fail early instead.
-      - name: Check the tag matches VERSION
+      # contradicts the release it is attached to. The README carries the version
+      # in two places that are easy to forget. Fail early on any mismatch.
+      - name: Check the tag, VERSION and README agree
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(cat VERSION)"
@@ -31,6 +32,10 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match VERSION ($version)" >&2
             exit 1
           fi
+          grep -q "badge/release-${version}-" README.md \
+            || { echo "README release badge is not $version" >&2; exit 1; }
+          grep -q "Swarm-${version}.dmg.sha256" README.md \
+            || { echo "README checksum example is not $version" >&2; exit 1; }
 
       # build_dmg.sh runs the test suite before building, so a failing test
       # blocks the release rather than shipping.
