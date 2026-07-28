@@ -1,11 +1,7 @@
 <div align="center">
-  <img src="docs/swarm-icon-readme-320.png" width="84" height="84" alt="Swarm" />
-  <h1>Swarm</h1>
-  <p><strong>A native macOS family tree editor that keeps your genealogy on your own disk.</strong></p>
+  <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 14+, GEDCOM 5.5.1, MIT." />
   <p>
     <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license" /></a>
-    <img src="https://img.shields.io/badge/macOS-14%2B-lightgrey" alt="macOS 14+" />
   </p>
 </div>
 
