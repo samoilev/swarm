@@ -49,6 +49,20 @@ struct SwarmApp: App {
                     NotificationCenter.default.post(name: .newTreeRequested, object: nil)
                 }
                 .keyboardShortcut("n")
+                // Someone who opens the same tree every morning shouldn't have to walk
+                // the library grid to get to it.
+                Menu(L10n.tr("Открыть недавнее")) {
+                    let recent = store.trees.sorted { $0.updatedAt > $1.updatedAt }.prefix(5)
+                    if recent.isEmpty {
+                        Button(L10n.tr("Пока пусто")) {}.disabled(true)
+                    } else {
+                        ForEach(Array(recent), id: \.id) { tree in
+                            Button(tree.name) {
+                                NotificationCenter.default.post(name: .openTreeRequested, object: tree.id)
+                            }
+                        }
+                    }
+                }
             }
             CommandGroup(replacing: .undoRedo) {
                 Button(L10n.tr("Отменить")) {
@@ -96,6 +110,8 @@ struct SwarmApp: App {
 
 extension Notification.Name {
     static let newTreeRequested = Notification.Name("newTreeRequested")
+    /// Object is the `FamilyTree.id` to open.
+    static let openTreeRequested = Notification.Name("openTreeRequested")
     static let zoomInRequested = Notification.Name("zoomInRequested")
     static let zoomOutRequested = Notification.Name("zoomOutRequested")
     static let zoomFitRequested = Notification.Name("zoomFitRequested")

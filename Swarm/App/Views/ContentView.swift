@@ -45,13 +45,16 @@ struct ContentView: View {
                 }
             }
         }
-        .onAppear {
-            if store.trees.isEmpty {
-                showOnboarding = true
-            }
-        }
+        // No auto-presented sheet on an empty library. The empty state itself offers
+        // both ways in (create and import), which a modal that appears before the user
+        // has seen the app cannot do.
         .onReceive(NotificationCenter.default.publisher(for: .newTreeRequested)) { _ in
             showOnboarding = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .openTreeRequested)) { note in
+            guard let id = note.object as? UUID,
+                  let tree = store.trees.first(where: { $0.id == id }) else { return }
+            selectedTree = tree
         }
         .fileImporter(isPresented: $showGEDCOMImporter, allowedContentTypes: [gedcomType]) { result in
             switch result {

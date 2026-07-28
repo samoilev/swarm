@@ -16,11 +16,19 @@ struct SepiaTheme {
     static let cardBg = Color(hex: "f8f1df")
     static let cardBgMale = Color(hex: "eaf2f0")
     static let cardBgFemale = Color(hex: "f5ece4")
-    static let cardLine = Color(hex: "c7b389")
+    /// Boundary of an interactive control (card, button, field). WCAG 1.4.11 wants ≥3:1
+    /// against every surface the control sits on; this clears paper (3.22), cardBg (3.71)
+    /// and btnBg (3.58). Don't lighten it back toward the old c7b389 — that read as 1.58
+    /// against paper, which left the cards and buttons effectively edgeless.
+    static let cardLine = Color(hex: "927850")
+    /// Hover/emphasis weight of `cardLine` (4.46:1 on paper).
+    static let cardLineStrong = Color(hex: "7a6238")
     static let cardLineMale = Color(hex: "8fb0a8")
     static let cardLineFemale = Color(hex: "c49a82")
     static let cardRule = Color(hex: "d9c9a4")
     static let accent = Color(hex: "9c4a2f")
+    /// Pressed/hover weight of `accent`; white on it is 8.39:1.
+    static let accentDeep = Color(hex: "7d3a24")
     // Secondary gold accent, also used for small tracked labels — kept ≥4.5:1 (AA).
     static let accent2 = Color(hex: "775d26")
     static let photoA = Color(hex: "e7dcc2")
@@ -29,6 +37,11 @@ struct SepiaTheme {
     static let toolbarLine = Color(hex: "cdb98f")
     static let panelBg = Color(hex: "f1e8d4")
     static let btnBg = Color(hex: "f4edda")
+    /// Hover fill for paper-coloured surfaces. Deliberately *lighter* than the resting
+    /// fill: btnBg and cardBg already sit above `paper`, so darkening on hover would
+    /// sink them into the page instead of lifting them off it.
+    static let btnBgHover = Color(hex: "fdf8ea")
+    static let cardBgHover = Color(hex: "fdf9ee")
     static let fieldLine = Color(hex: "d2c09a")
     static let fanA = Color(hex: "f4edd9")
     static let fanB = Color(hex: "ebdfc2")
@@ -84,37 +97,86 @@ extension Color {
     }
 }
 
+/// Shared hover/press/disabled behaviour for the sepia controls. `ButtonStyle` cannot
+/// hold `@State`, so the styles below wrap their label in this view.
+private struct SepiaControlSurface<Label: View>: View {
+    let label: Label
+    let isPressed: Bool
+    let isActive: Bool
+
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isHovering = false
+
+    private var fill: Color {
+        if isActive { return isPressed || isHovering ? SepiaTheme.accentDeep : SepiaTheme.accent }
+        return isHovering ? SepiaTheme.btnBgHover : SepiaTheme.btnBg
+    }
+
+    private var stroke: Color {
+        if isActive { return isPressed || isHovering ? SepiaTheme.accentDeep : SepiaTheme.accent }
+        return isHovering ? SepiaTheme.cardLineStrong : SepiaTheme.cardLine
+    }
+
+    var body: some View {
+        label
+            .foregroundColor(isActive ? .white : SepiaTheme.ink)
+            .background(fill)
+            .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(stroke, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 7))
+            .contentShape(RoundedRectangle(cornerRadius: 7))
+            // Disabled is a real state, not just a dimmer: the fill flattens toward the
+            // page so a disabled control reads as part of the paper rather than as a
+            // button the user simply failed to hit.
+            .opacity(isEnabled ? (isPressed ? 0.82 : 1.0) : 0.4)
+            .saturation(isEnabled ? 1 : 0.35)
+            .onHover { hovering in
+                guard isEnabled else { return }
+                if reduceMotion {
+                    isHovering = hovering
+                } else {
+                    withAnimation(.easeOut(duration: 0.15)) { isHovering = hovering }
+                }
+            }
+            .onChange(of: isEnabled) { _, enabled in if !enabled { isHovering = false } }
+    }
+}
+
+extension View {
+    /// The resting chrome of a sepia control. `SepiaButtonStyle` covers Buttons; menus
+    /// and text fields can't use a ButtonStyle, and without this they fall back to the
+    /// stock macOS look and read as a different design system on the same row.
+    func sepiaControlChrome(height: CGFloat = 30) -> some View {
+        frame(height: height)
+            .background(SepiaTheme.btnBg)
+            .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 7))
+            .contentShape(RoundedRectangle(cornerRadius: 7))
+    }
+}
+
 struct SepiaButtonStyle: ButtonStyle {
     var isActive: Bool = false
 
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(SepiaTheme.ui(size: 12))
-            .fontWeight(.semibold)
-            .padding(.horizontal, 10)
-            .frame(height: 30)
-            .foregroundColor(isActive ? .white : SepiaTheme.ink)
-            .background(isActive ? SepiaTheme.accent : SepiaTheme.btnBg)
-            .overlay(
-                RoundedRectangle(cornerRadius: 7)
-                    .strokeBorder(isActive ? SepiaTheme.accent : SepiaTheme.cardLine, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 7))
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
+        SepiaControlSurface(
+            label: configuration.label
+                .font(SepiaTheme.ui(size: 12))
+                .fontWeight(.semibold)
+                .padding(.horizontal, 10)
+                .frame(height: 30),
+            isPressed: configuration.isPressed,
+            isActive: isActive
+        )
     }
 }
 
 struct SepiaIconButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .frame(width: 30, height: 30)
-            .foregroundColor(SepiaTheme.ink)
-            .background(SepiaTheme.btnBg)
-            .overlay(
-                RoundedRectangle(cornerRadius: 7)
-                    .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 7))
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
+        SepiaControlSurface(
+            label: configuration.label.frame(width: 30, height: 30),
+            isPressed: configuration.isPressed,
+            isActive: false
+        )
     }
 }

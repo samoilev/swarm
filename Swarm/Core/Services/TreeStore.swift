@@ -322,6 +322,12 @@ public final class TreeStore {
                 + L10n.tr("Они лежат в папке архивов и не изменены. ")
                 + L10n.tr("Откройте «Показать в Finder», чтобы посмотреть или скопировать их.")
         }
+
+        // `contentsOfDirectory` returns whatever order the filesystem hands back, which
+        // is neither alphabetical nor stable between launches. The library relies on
+        // spatial memory, so ordering has to be a property of the data, not of APFS.
+        // Recency first; the library offers name order as the alternative.
+        trees.sort { $0.updatedAt > $1.updatedAt }
     }
 
     /// Run every discovered migration explicitly. Each existing tree is protected by

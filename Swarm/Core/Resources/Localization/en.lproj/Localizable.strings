@@ -660,3 +660,29 @@
 "Свояченица" = "Sister-in-law";
 "Золовка" = "Sister-in-law";
 "Я" = "Me";
+
+/* Tree library */
+"Сначала недавние" = "Recent first";
+"По названию" = "By name";
+"1 чел." = "1 person";
+"Порядок" = "Order";
+"Порядок деревьев" = "Tree order";
+"Обслуживание архива" = "Archive maintenance";
+"Восстановить из резервной копии…" = "Restore from a backup…";
+"Показать папку хранилища" = "Show the storage folder";
+"Название или фамилия" = "Name or surname";
+"Очистить фильтр" = "Clear filter";
+"Показано %@ из %@" = "Showing %@ of %@";
+"1 дерево в архиве" = "1 tree in the archive";
+"Деревьев в архиве: %@" = "Trees in the archive: %@";
+"Здесь будут ваши деревья" = "Your trees will live here";
+"Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac." = "Each tree is its own GEDCOM file with its photographs, and it stays on this Mac.";
+"Понимает файлы из Ancestry, Gramps и MyHeritage." = "Reads files from Ancestry, Gramps, and MyHeritage.";
+"Ничего не найдено" = "Nothing found";
+"Ни одно дерево не совпадает с «%@» по названию или фамилии." = "No tree matches “%@” by name or surname.";
+"Открыть дерево" = "Open this tree";
+"изменено %@" = "edited %@";
+"Открыть недавнее" = "Open Recent";
+"Пока пусто" = "Nothing yet";
+"изменено только что" = "edited just now";
+"Архив пока пуст" = "The archive is empty";
