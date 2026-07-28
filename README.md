@@ -2,7 +2,6 @@
   <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 14+, GEDCOM 5.5.1, MIT." />
   <br />
   <br />
-  <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.2.1-3B2F21?style=flat" alt="Latest release 2.2.1" /></a>
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/download-DMG%20(unsigned)-4F4132?style=flat" alt="Download the DMG; unsigned build" /></a>
@@ -13,7 +12,6 @@
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-8A7C68?style=flat" alt="GEDCOM 5.5.1" />
   <img src="https://img.shields.io/badge/dependencies-none-8A7C68?style=flat" alt="No third-party dependencies" />
   <img src="https://img.shields.io/badge/telemetry-none-8A7C68?style=flat" alt="No telemetry" />
-  <br />
   <br />
   <br />
 </div>
@@ -31,36 +29,18 @@ and place lookup all run offline.
 - **Dependencies:** none — no third-party Swift packages
 - **License:** [MIT](LICENSE)
 
-## Status
-
-Swarm works and is used daily, but treat it as a personal project rather than a finished
-product:
-
-- **Downloads are unsigned.** Every release ships a DMG built by GitHub Actions, but it
-  carries no Apple Developer ID and is not notarized, so macOS blocks the first launch.
-  See [Install](#install) for the one-time workaround.
-- **Apple silicon only.** No Intel or universal build.
-- **No auto-update.** Check the releases page.
-- **Bug reports are welcome; pull requests are not being accepted yet.** See
-  [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Install
 
-Download the DMG from the [latest release](https://github.com/samoilev/swarm/releases/latest),
-open it, and drag Swarm to Applications.
+Download the DMG from the [latest release](https://github.com/samoilev/swarm/releases/latest).
 
-The first launch is blocked, because the build is not signed with an Apple Developer ID.
-**Right-click the app in Applications and choose Open**, then confirm. Once only —
-afterwards it launches normally.
-
+[Temporary] Build is not signed with an Apple Developer ID. 
 Verify the download against its published checksum if you want to:
 
 ```sh
 shasum -a 256 -c Swarm-2.2.1.dmg.sha256
 ```
 
-Requires macOS 14 or later on Apple silicon. Building it yourself avoids the Gatekeeper
-prompt entirely — see [Build and run](#build-and-run).
+Requires macOS 14 or later on Apple silicon. See [Build and run](#build-and-run).
 
 ## Features
 
@@ -99,9 +79,6 @@ alive. Swarm is built accordingly:
   no MapKit view, no network tiles at all.
 - Selected place text, dataset ID and coordinates are stored in the tree, so a later
   place-data update can never silently move a historical place.
-
-Swarm is not run in the macOS App Sandbox, so it can read GEDCOM files and photos you
-select anywhere on disk.
 
 ## Storage model — GEDCOM is the source of truth
 
@@ -155,95 +132,6 @@ You can also open the package folder directly in Xcode (`File ▸ Open…`).
 
 For isolated development, launch with
 `--storage-folder /absolute/path/to/temporary-library` to keep a real library untouched.
-
-## Architecture
-
-The code splits into two SPM targets so the domain logic can be tested without the UI:
-
-```
-Swarm/
-  Core/        → SwarmCore library (pure logic, no SwiftUI)
-    Models/    → Person, Union, FamilyTree, FamilyIndex, FamilyDate, calculators
-    Services/  → GEDCOMParser, GEDCOMSerializer, TreeStore, TreeLayoutEngine
-    Resources/ → bundled GeoNames / places TSVs and Natural Earth vectors
-  App/         → Swarm executable (SwiftUI views, theme, app entry)
-Tests/
-  SwarmCoreTests/   → Swift Testing suites and synthetic GEDCOM fixtures
-UITests/             → native XCUITest bundle only; no production sources
-SwarmUI.xcworkspace/ → package + test-only Xcode host
-```
-
-**SwiftPM is the canonical build.** The small Xcode project under `UITests/` contains
-only an XCUITest bundle; `SwarmUI.xcworkspace` combines it with the Swift package, and it
-duplicates no production sources or dependencies.
-
-## Tests
-
-```sh
-./Scripts/run-tests.sh   # runs `swift test`
-```
-
-The suite uses [Swift Testing](https://developer.apple.com/documentation/testing)
-(`import Testing`), which requires a Swift 6 toolchain. On machines with only the
-Command Line Tools installed, SwiftPM may omit the test framework search paths, so the
-wrapper adds them. Filesystem integration tests run serially for deterministic bundle
-swaps.
-
-Coverage:
-
-```sh
-swift test --enable-code-coverage
-```
-
-Native smoke tests require full Xcode: open `SwarmUI.xcworkspace` and run the shared
-`Swarm-UI` scheme. Every launch gets an isolated `--storage-folder`, so the test host
-cannot touch a real library.
-
-## Formatting
-
-Formatting is enforced with [SwiftFormat](https://github.com/nicklockwood/SwiftFormat)
-using the conservative `.swiftformat` config. CI runs a pinned version:
-
-```sh
-mint run nicklockwood/SwiftFormat@0.61.1 --lint .   # check, as CI does
-mint run nicklockwood/SwiftFormat@0.61.1 .          # apply
-```
-
-`brew install swiftformat` works too, but the pinned version is what CI enforces.
-
-## Continuous integration
-
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and
-every pull request: it builds all targets, runs the tests, and checks formatting. Any
-build error, test failure or formatting violation fails the job.
-
-[`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a `v*` tag. It
-checks the tag against `VERSION`, builds the DMG, and publishes the release with the
-DMG and its checksum attached. Because `build_dmg.sh` runs the test suite first, a
-failing test blocks the release rather than shipping.
-
-## Packaging a local build
-
-`build_dmg.sh` builds a release binary, assembles the `.app` with both resource bundles,
-runs the tests, verifies the app and the DMG, reports architecture and signing status,
-and writes a `.sha256` checksum. The version comes from `VERSION`.
-
-Without `CODESIGN_IDENTITY` the script ad-hoc-signs and skips notarization, which is fine
-for your own machine — Gatekeeper will warn on first launch. The script keeps an explicit
-path for a properly signed build if a Developer ID is ever available:
-
-```sh
-CODESIGN_IDENTITY="Developer ID Application: …" \
-NOTARY_PROFILE="<notarytool keychain profile>" \
-./build_dmg.sh
-# or APPLE_ID / APPLE_TEAM_ID / APPLE_APP_PASSWORD instead of NOTARY_PROFILE
-```
-
-Published releases are built the same way, but by
-[`.github/workflows/release.yml`](.github/workflows/release.yml) on a clean GitHub
-Actions checkout rather than on a laptop. Pushing a `v*` tag runs the tests, builds the
-DMG and attaches it with its checksum. Adopting a Developer ID — and with it signing and
-notarization — remains a separate decision that hasn't been taken.
 
 ## Contributing and support
 
