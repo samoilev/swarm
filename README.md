@@ -1,7 +1,18 @@
 <div align="center">
   <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 14+, GEDCOM 5.5.1, MIT." />
+  <br />
+  <br />
+  <br />
   <p>
-    <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/samoilev/swarm/ci.yml?branch=main&style=flat-square&label=CI" alt="CI status" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3B2F21?style=flat-square" alt="MIT license" /></a>
+    <img src="https://img.shields.io/badge/macOS-14%2B-4F4132?style=flat-square" alt="macOS 14 or later" />
+    <img src="https://img.shields.io/badge/Swift-5.9%2B-4F4132?style=flat-square" alt="Swift 5.9 or later" />
+    <br />
+    <img src="https://img.shields.io/badge/GEDCOM-5.5.1-6B5D4B?style=flat-square" alt="GEDCOM 5.5.1" />
+    <img src="https://img.shields.io/badge/dependencies-none-6B5D4B?style=flat-square" alt="No third-party dependencies" />
+    <img src="https://img.shields.io/badge/telemetry-none-6B5D4B?style=flat-square" alt="No telemetry" />
+    <a href="#status"><img src="https://img.shields.io/badge/binaries-build%20from%20source-8A7C68?style=flat-square" alt="No published binaries; build from source" /></a>
   </p>
 </div>
 
