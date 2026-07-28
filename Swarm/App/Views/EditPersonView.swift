@@ -131,10 +131,21 @@ struct EditPersonView: View {
                         HStack(spacing: 12) {
                             SepiaTextField(label: L10n.tr("ДЕВИЧЬЯ ФАМИЛИЯ"), text: $maidenName, placeholder: "—")
                             VStack(alignment: .leading, spacing: 6) {
-                                Text(L10n.tr("ПОЛ")).font(SepiaTheme.ui(size: 9.5)).tracking(1.5).foregroundColor(SepiaTheme.inkSoft)
+                                SepiaFieldLabel(L10n.tr("ПОЛ"), isDecorative: false)
+                                // Two toggles, not three choices: an unanswered field
+                                // used to render "Не указан" in the same filled style as
+                                // a deliberate answer, so nobody could tell the two apart.
                                 HStack(spacing: 6) {
-                                    ForEach(Person.Sex.allCases, id: \.rawValue) { s in
-                                        Button(s.russianName) { sex = s }.buttonStyle(SepiaButtonStyle(isActive: sex == s))
+                                    ForEach([Person.Sex.male, .female], id: \.rawValue) { option in
+                                        Button(option.displayName) { sex = (sex == option) ? .unknown : option }
+                                            .buttonStyle(SepiaButtonStyle(isActive: sex == option))
+                                            .accessibilityAddTraits(sex == option ? [.isSelected] : [])
+                                    }
+                                    if sex == .unknown {
+                                        Text(Person.Sex.unknown.displayName)
+                                            .font(SepiaTheme.ui(size: 11.5))
+                                            .foregroundColor(SepiaTheme.inkSoft)
+                                            .padding(.leading, 2)
                                     }
                                 }
                             }
@@ -973,8 +984,7 @@ private struct UnionDraftEditor: View {
             UnionEventDraftEditor(kind: .separation, union: union, attachments: subject.attachments)
             UnionEventDraftEditor(kind: .divorce, union: union, attachments: subject.attachments)
 
-            Text(L10n.tr("ДЕТИ И ТИП РОДИТЕЛЬСТВА"))
-                .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundStyle(SepiaTheme.inkSoft)
+            SepiaFieldLabel(L10n.tr("ДЕТИ И ТИП РОДИТЕЛЬСТВА"), isDecorative: false)
             ForEach(union.childrenIds, id: \.self) { childID in
                 HStack {
                     Text(tree.person(byId: childID)?.listName ?? L10n.tr("Неизвестная персона"))

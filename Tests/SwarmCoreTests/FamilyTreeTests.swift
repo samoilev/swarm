@@ -137,4 +137,38 @@ struct FamilyTreeTests {
         #expect(idx.sharedParentCount(a.id, full.id) == 2)
         #expect(idx.sharedParentCount(a.id, half.id) == 1)
     }
+
+    /// Onboarding's last step names the *relative's* role, but `addRelation` reads the
+    /// kind from the new person's perspective. Get the inversion wrong and the father a
+    /// user just typed becomes their child — silently, in the file that is the record.
+    @Test func firstRelativeRolesLinkInTheRightDirection() {
+        for role in FirstRelative.allCases {
+            let me = Person(givenNames: "Я", surname: "Иванов", sex: .male)
+            let t = tree(me)
+            let relative = Person(givenNames: "Родня", surname: "Иванов", sex: role.sex)
+            t.people.append(relative)
+            t.addRelation(role.relation, person: relative, target: me.id)
+
+            let index = FamilyIndex(tree: t)
+            switch role {
+            case .father:
+                #expect(index.mergedParentIds(me.id).father == relative.id)
+                #expect(relative.sex == .male)
+            case .mother:
+                #expect(index.mergedParentIds(me.id).mother == relative.id)
+                #expect(relative.sex == .female)
+            case .spouse:
+                #expect(t.unions.contains { $0.partnerIds.contains(me.id) && $0.partnerIds.contains(relative.id) })
+                #expect(index.mergedParentIds(me.id).father == nil)
+            case .child:
+                #expect(index.mergedParentIds(relative.id).father == me.id)
+            }
+        }
+    }
+
+    /// A spouse arrives under their own surname; everyone else usually shares one.
+    @Test func onlySpouseSkipsTheInheritedSurname() {
+        #expect(FirstRelative.spouse.inheritsSurname == false)
+        #expect(FirstRelative.allCases.filter(\.inheritsSurname).count == 3)
+    }
 }

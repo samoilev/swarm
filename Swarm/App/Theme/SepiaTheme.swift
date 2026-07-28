@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SepiaTheme {
@@ -43,6 +44,13 @@ struct SepiaTheme {
     static let btnBgHover = Color(hex: "fdf8ea")
     static let cardBgHover = Color(hex: "fdf9ee")
     static let fieldLine = Color(hex: "d2c09a")
+    /// Fill of a text input. Was applied as `.colorMultiply` over a system field, which
+    /// also dimmed the system placeholder to 3.85:1; it is a real fill now so the
+    /// placeholder can be drawn at `inkSoft` (5.64:1 here) instead.
+    static let fieldBg = Color(hex: "f5eed8")
+    /// Validation and failure text. Reads 6.23:1 on `paper` and 7.18:1 on `cardBg`,
+    /// where a raw `.red` sits near 3.4:1 and fights the sepia palette.
+    static let danger = Color(hex: "8f2f22")
     static let fanA = Color(hex: "f4edd9")
     static let fanB = Color(hex: "ebdfc2")
     static let fanEmpty = Color(hex: "e4d8bf")
@@ -142,7 +150,53 @@ private struct SepiaControlSurface<Label: View>: View {
     }
 }
 
+/// Speaks a message to VoiceOver. Used for state the user can't be expected to notice
+/// visually — a step change inside a sheet, a record written to disk.
+func sepiaAnnounce(_ message: String) {
+    guard let window = NSApp.keyWindow else { return }
+    NSAccessibility.post(
+        element: window,
+        notification: .announcementRequested,
+        userInfo: [
+            .announcement: message,
+            .priority: NSAccessibilityPriorityLevel.high.rawValue,
+        ]
+    )
+}
+
 extension View {
+    /// The resting chrome of a sepia text input. Replaces `.textFieldStyle(.roundedBorder)`
+    /// plus a `.colorMultiply` tint, which multiplied the *whole* rendered field — including
+    /// the system placeholder (3.85:1, below AA) and the system focus ring. Here the fill,
+    /// the placeholder (`inkSoft`, 5.64:1) and the focus ring (`accent`, 5.27:1 against the
+    /// fill) are all drawn deliberately.
+    func sepiaFieldChrome(isFocused: Bool, placeholder: String = "", isEmpty: Bool = false) -> some View {
+        padding(.horizontal, 9)
+            .frame(height: 30)
+            .background {
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 6).fill(SepiaTheme.fieldBg)
+                    if isEmpty, !placeholder.isEmpty {
+                        Text(placeholder)
+                            .font(SepiaTheme.body(size: 15))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                            .lineLimit(1)
+                            .padding(.horizontal, 9)
+                            .allowsHitTesting(false)
+                            .accessibilityHidden(true)
+                    }
+                }
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        isFocused ? SepiaTheme.accent : SepiaTheme.cardLine,
+                        lineWidth: isFocused ? 2 : 1
+                    )
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
     /// The resting chrome of a sepia control. `SepiaButtonStyle` covers Buttons; menus
     /// and text fields can't use a ButtonStyle, and without this they fall back to the
     /// stock macOS look and read as a different design system on the same row.

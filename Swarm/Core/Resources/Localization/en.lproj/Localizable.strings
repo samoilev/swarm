@@ -686,3 +686,33 @@
 "Пока пусто" = "Nothing yet";
 "изменено только что" = "edited just now";
 "Архив пока пуст" = "The archive is empty";
+
+/* Onboarding: the record, the first person, the first relationship */
+"Кто ещё?" = "Who else?";
+"Назовите семейную запись и впишите первого человека" = "Name the family record and enter the first person";
+"Дерево начинается со связи между двумя людьми" = "A family tree begins with a link between two people";
+"Шаг" = "Step";
+"%@ из 2" = "%@ of 2";
+"Шаг %@ из 2" = "Step %@ of 2";
+"Первый человек" = "First person";
+"Даты, места и фотографии добавите в карточке человека — там для них есть всё." = "Dates, places and photographs go in the person card, which has room for all of them.";
+"Свяжем с: %@" = "Linking to: %@";
+"первый человек" = "the first person";
+"Можно пропустить: нажмите «Создать дерево», родственников добавите позже." = "You can skip this — press “Create tree” and add relatives later.";
+"Мы запишем родство и откроем дерево — дальше можно достраивать в любую сторону." = "We will record the relationship and open the tree; from there it grows in any direction.";
+"Создать дерево" = "Create tree";
+"Создаём…" = "Creating…";
+"Назовите дерево — под этим именем оно появится в архиве." = "Name the tree — this is how it appears in your archive.";
+"Впишите имя или фамилию первого человека." = "Enter a given name or a surname for the first person.";
+"Впишите имя родственника или снимите выбор роли." = "Enter the relative’s name, or deselect the role.";
+"Не удалось создать дерево" = "Could not create the tree";
+"Введённое сохранено — можно попробовать ещё раз." = "Everything you entered is still here — try again.";
+"напр. Пётр" = "e.g. Pyotr";
+"напр. Мария" = "e.g. Maria";
+"Уточнение даты" = "Date qualifier";
+"%@ — конец диапазона" = "%@ — end of range";
+"Дерево «%@» создано" = "Tree “%@” created";
+
+/* Workspace: a tree of one person is not yet a tree */
+"В дереве пока один человек" = "One person in this tree so far";
+"Добавьте родственника — тогда появятся связи, родство и круговая диаграмма." = "Add a relative and the links, kinship names and fan chart come to life.";

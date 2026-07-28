@@ -4,8 +4,12 @@ import SwiftUI
 
 struct MainWorkspace: View {
     @Environment(\.locale) private var locale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Bindable var tree: FamilyTree
     var store: TreeStore
+    /// Shown once when the workspace opens: the confirmation for a write that happened
+    /// on the previous screen (a tree just created, an archive just imported).
+    var initialToast: String?
     let onBack: () -> Void
 
     @State private var viewMode: ViewMode = .tree
@@ -40,13 +44,15 @@ struct MainWorkspace: View {
     /// when a card is open (re-openable by clicking the icon).
     @State private var hintsExpanded = true
     @State private var workspaceIndex: TreeWorkspaceIndexes
+    @State private var didShowInitialToast = false
 
     enum ViewMode: String, CaseIterable { case tree, fan, map, people, timeline, places, review }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
 
-    init(tree: FamilyTree, store: TreeStore, onBack: @escaping () -> Void) {
+    init(tree: FamilyTree, store: TreeStore, initialToast: String? = nil, onBack: @escaping () -> Void) {
         self.tree = tree
         self.store = store
+        self.initialToast = initialToast
         self.onBack = onBack
         _workspaceIndex = State(initialValue: TreeWorkspaceIndexes(tree: tree))
     }
@@ -94,8 +100,12 @@ struct MainWorkspace: View {
                     .overlay(alignment: .top) { dualSelectHint }
                     .overlay(alignment: .top) { relationshipBanner }
                     .overlay(alignment: .top) { searchBar }
+                    .overlay(alignment: .bottom) { firstRelativePrompt }
+                    // Six shortcuts are noise on a tree nobody can navigate yet: ↑↓←→
+                    // walks kin, ⌘-click names a relationship, ⌘F searches. All of it
+                    // needs a second person.
                     .overlay(alignment: .bottomLeading) {
-                        if viewMode == .tree, !tree.people.isEmpty { commandHints }
+                        if viewMode == .tree, tree.people.count >= 2 { commandHints }
                     }
 
                     if selectedPerson != nil {
@@ -165,6 +175,11 @@ struct MainWorkspace: View {
             Text(store.lastSaveError ?? "")
         }
         .frame(minWidth: 900, minHeight: 600)
+        .onAppear {
+            guard let initialToast, !didShowInitialToast else { return }
+            didShowInitialToast = true
+            showToast(initialToast)
+        }
         .onChange(of: selectedPerson?.id) { _, newValue in
             recomputeHighlight()
             // Auto-collapse the hints to an icon when a card opens; restore when browsing.
@@ -217,11 +232,49 @@ struct MainWorkspace: View {
         .padding(32)
     }
 
+    /// A tree with exactly one person is not yet a tree, and onboarding's relationship
+    /// step is skippable — so the invitation carries forward here rather than leaving
+    /// the user with one card, no labelled action, and a hint about a second person who
+    /// doesn't exist.
+    @ViewBuilder
+    private var firstRelativePrompt: some View {
+        if [.tree, .fan].contains(viewMode), tree.people.count == 1, !searchActive, selectedPerson == nil {
+            VStack(spacing: 8) {
+                Text(L10n.tr("В дереве пока один человек"))
+                    .font(SepiaTheme.body(size: 14.5))
+                    .foregroundColor(SepiaTheme.ink)
+                Text(L10n.tr("Добавьте родственника — тогда появятся связи, родство и круговая диаграмма."))
+                    .font(SepiaTheme.ui(size: 11.5))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button { showAddSheet = true } label: {
+                    Label(L10n.tr("Добавить родственника"), systemImage: "person.badge.plus")
+                }
+                .buttonStyle(SepiaButtonStyle(isActive: true))
+                .padding(.top, 4)
+            }
+            .frame(maxWidth: 380)
+            .padding(.horizontal, 20)
+            .padding(.vertical, 16)
+            .background(SepiaTheme.panelBg)
+            .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .shadow(color: .black.opacity(0.1), radius: 10, y: 4)
+            // Both this and the toast live at the bottom centre; the prompt steps up
+            // for the 2.5s a toast is on screen instead of being covered by it.
+            .padding(.bottom, toastMessage == nil ? 28 : 96)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.22), value: toastMessage == nil)
+            .accessibilityElement(children: .contain)
+        }
+    }
+
     /// One-time hint that teaches the ⌘-click dual-select kinship feature. Appears
     /// once a single person is selected, dismissible, and never returns once seen.
+    /// It needs two people to be true, so it waits for the second one.
     @ViewBuilder
     private var dualSelectHint: some View {
-        if viewMode == .tree, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen, !searchActive {
+        if viewMode == .tree, tree.people.count >= 2, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen, !searchActive {
             HStack(spacing: 10) {
                 Image(systemName: "hand.point.up.left")
                     .font(.system(size: 12))
@@ -852,14 +905,6 @@ struct MainWorkspace: View {
     /// Speak a transient status message to VoiceOver — the toast is visual-only,
     /// so assistive tech needs an explicit announcement to learn a save happened.
     private func announce(_ message: String) {
-        guard let window = NSApp.keyWindow else { return }
-        NSAccessibility.post(
-            element: window,
-            notification: .announcementRequested,
-            userInfo: [
-                .announcement: message,
-                .priority: NSAccessibilityPriorityLevel.high.rawValue,
-            ]
-        )
+        sepiaAnnounce(message)
     }
 }

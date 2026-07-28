@@ -10,6 +10,9 @@ struct ContentView: View {
     @State private var importError: String?
     @State private var pendingImportURL: URL?
     @State private var importPreview: ImportResult?
+    /// Confirmation the workspace shows once, on arrival, for a tree that was just
+    /// written. Creating a whole family record used to be the app's only silent write.
+    @State private var pendingToast: String?
 
     private var gedcomType: UTType {
         UTType(filenameExtension: "ged") ?? .plainText
@@ -18,7 +21,15 @@ struct ContentView: View {
     var body: some View {
         Group {
             if let tree = selectedTree {
-                MainWorkspace(tree: tree, store: store, onBack: { selectedTree = nil })
+                MainWorkspace(
+                    tree: tree,
+                    store: store,
+                    initialToast: pendingToast,
+                    onBack: {
+                        selectedTree = nil
+                        pendingToast = nil
+                    }
+                )
             } else {
                 TreeLibraryView(
                     trees: store.trees,
@@ -32,17 +43,13 @@ struct ContentView: View {
                 )
             }
         }
+        // The sheet reports its own failures inline and dismisses itself on success, so
+        // a write that fails no longer surfaces as an *import* error over a live form.
         .sheet(isPresented: $showOnboarding) {
             OnboardingView { newTree in
-                Task { @MainActor in
-                    do {
-                        _ = try await store.addTreeVerified(newTree)
-                        selectedTree = newTree
-                        showOnboarding = false
-                    } catch {
-                        importError = error.localizedDescription
-                    }
-                }
+                _ = try await store.addTreeVerified(newTree)
+                pendingToast = L10n.tr("Дерево «\(newTree.name)» создано")
+                selectedTree = newTree
             }
         }
         // No auto-presented sheet on an empty library. The empty state itself offers

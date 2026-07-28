@@ -17,19 +17,17 @@ struct PlacePickerField: View {
     private let db = PlacesDatabase.shared
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(SepiaTheme.ui(size: 9.5))
-                .tracking(1.5)
-                .foregroundColor(SepiaTheme.inkSoft)
+        VStack(alignment: .leading, spacing: 5) {
+            SepiaFieldLabel(label)
 
             ZStack(alignment: .topLeading) {
-                TextField(placeholder, text: $text)
-                    .textFieldStyle(.roundedBorder)
+                TextField("", text: $text)
+                    .textFieldStyle(.plain)
                     .font(SepiaTheme.body(size: 15))
                     .foregroundColor(SepiaTheme.ink)
-                    .colorMultiply(Color(hex: "f5eed8"))
                     .focused($isFocused)
+                    .accessibilityLabel(label)
+                    .sepiaFieldChrome(isFocused: isFocused, placeholder: placeholder, isEmpty: text.isEmpty)
                     .onChange(of: text) { old, newValue in
                         // Only show suggestions when the user is actively typing
                         // (i.e. the field is focused). This prevents the list from

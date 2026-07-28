@@ -1,142 +1,453 @@
+import AppKit
 import SwarmCore
 import SwiftUI
 
+/// First run. One screen collects the record and the first person; the second earns its
+/// place by creating a *relationship*, because a tree of one person is not yet a tree —
+/// kinship, the fan chart and the ⌘-click hint all need two people to mean anything.
+///
+/// Dates, places, sex and photographs are deliberately absent: they live in the person
+/// card, which does them properly. Onboarding asks for the least that produces a tree.
 struct OnboardingView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var treeName: String = ""
-    @State private var subtitle: String = ""
-    @State private var step: Int = 0
-    @State private var givenNames: String = ""
-    @State private var patronymic: String = ""
-    @State private var surname: String = ""
-    @State private var sex: Person.Sex = .unknown
-    @State private var birthPlace: String = ""
-    @State private var deathPlace: String = ""
-    @State private var selectedBirthPlace: PlaceEntry?
-    @State private var selectedDeathPlace: PlaceEntry?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    // The record
+    @State private var treeName = ""
+    @State private var subtitle = ""
+    // The first person
+    @State private var surname = ""
+    @State private var givenNames = ""
+    @State private var patronymic = ""
+    // The first relationship
+    @State private var role: FirstRelative?
+    @State private var relativeSurname = ""
+    @State private var relativeGivenNames = ""
+
+    @State private var step: Step = .record
+    @State private var invalidField: Field?
+    @State private var invalidMessage: String?
+    /// Set when the verified write fails. Creation keeps its own error identity instead
+    /// of borrowing the library's import alert.
+    @State private var createError: String?
+    @State private var isSaving = false
     @FocusState private var focusedField: Field?
 
-    enum Field: Hashable { case treeName, subtitle, givenNames, patronymic, surname }
-
-    let onComplete: (FamilyTree) -> Void
-
-    var body: some View {
-        ZStack {
-            SepiaTheme.paper.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                VStack(spacing: 6) {
-                    Text(L10n.tr("Создать родословное дерево"))
-                        .font(SepiaTheme.display(size: 26))
-                        .foregroundColor(SepiaTheme.ink)
-                    Text(step == 0 ? L10n.tr("Назовите вашу семейную запись") : L10n.tr("Добавьте первого человека"))
-                        .font(SepiaTheme.body(size: 14))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                }
-                .padding(.top, 32)
-                .padding(.bottom, 24)
-
-                HStack(spacing: 8) {
-                    Circle().fill(step >= 0 ? SepiaTheme.accent : SepiaTheme.cardLine).frame(width: 8, height: 8)
-                    Circle().fill(step >= 1 ? SepiaTheme.accent : SepiaTheme.cardLine).frame(width: 8, height: 8)
-                }
-                .padding(.bottom, 24)
-
-                Divider().overlay(SepiaTheme.fieldLine)
-
-                VStack(spacing: 20) {
-                    if step == 0 {
-                        treeNameStep
-                    } else {
-                        firstPersonStep
-                    }
-                }
-                .padding(32)
-                .frame(maxWidth: 400)
-
-                Spacer()
-
-                HStack(spacing: 12) {
-                    Button(L10n.tr("Отмена")) { dismiss() }
-                        .buttonStyle(SepiaButtonStyle())
-                    if step > 0 {
-                        Button(L10n.tr("Назад")) { withAnimation { step -= 1 } }
-                            .buttonStyle(SepiaButtonStyle())
-                    }
-                    Spacer()
-                    if step == 0 {
-                        Button(L10n.tr("Далее")) { withAnimation { step = 1 }; focusedField = .givenNames }
-                            .buttonStyle(SepiaButtonStyle(isActive: true))
-                            .disabled(treeName.isEmpty)
-                    } else {
-                        Button(L10n.tr("Создать")) { createTree() }
-                            .buttonStyle(SepiaButtonStyle(isActive: true))
-                            .disabled(givenNames.isEmpty && surname.isEmpty)
-                    }
-                }
-                .padding(24)
-            }
-        }
-        .frame(width: 500, height: 460)
+    enum Step: Int { case record = 0, relative = 1 }
+    enum Field: Hashable {
+        case treeName, subtitle, surname, givenNames, patronymic
+        case relativeSurname, relativeGivenNames
     }
 
-    private var treeNameStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
+    /// Writes the finished tree. It throws so the sheet can report the failure itself,
+    /// with everything the user typed still on screen and the button still live.
+    let onComplete: (FamilyTree) async throws -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            header
+            Divider().overlay(SepiaTheme.fieldLine)
+
+            Group {
+                switch step {
+                case .record: recordStep
+                case .relative: relativeStep
+                }
+            }
+            .padding(.horizontal, 28)
+            .padding(.top, 22)
+
+            if let createError {
+                failureBanner(createError)
+            }
+
+            buttonRow
+        }
+        // Width is fixed, height is not: the two steps hold different amounts and a
+        // pinned height either crams one or leaves the other mostly empty.
+        .frame(width: 480)
+        .background(SepiaTheme.paper)
+        .onChange(of: step) { _, newValue in
+            sepiaAnnounce("\(stepTitle(newValue)). \(L10n.tr("Шаг \(newValue.rawValue + 1) из 2"))")
+        }
+    }
+
+    // MARK: - Chrome
+
+    private var header: some View {
+        VStack(spacing: 7) {
+            Text(stepTitle(step))
+                .font(SepiaTheme.display(size: 24))
+                .foregroundColor(SepiaTheme.ink)
+                .accessibilityAddTraits(.isHeader)
+            Text(stepSubtitle)
+                .font(SepiaTheme.body(size: 13.5))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            stepIndicator
+                .padding(.top, 9)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 28)
+        .padding(.top, 26)
+        .padding(.bottom, 18)
+    }
+
+    private func stepTitle(_ step: Step) -> String {
+        switch step {
+        case .record: L10n.tr("Создать родословное дерево")
+        case .relative: L10n.tr("Кто ещё?")
+        }
+    }
+
+    private var stepSubtitle: String {
+        switch step {
+        case .record: L10n.tr("Назовите семейную запись и впишите первого человека")
+        case .relative: L10n.tr("Дерево начинается со связи между двумя людьми")
+        }
+    }
+
+    /// Two capsules, but they carry a label and a value: a step indicator nobody can
+    /// hear is not an indicator.
+    private var stepIndicator: some View {
+        HStack(spacing: 7) {
+            ForEach(0 ..< 2, id: \.self) { index in
+                Capsule()
+                    .fill(index == step.rawValue ? SepiaTheme.accent : SepiaTheme.cardLine)
+                    .frame(width: index == step.rawValue ? 20 : 8, height: 5)
+            }
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: step)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.tr("Шаг"))
+        .accessibilityValue(L10n.tr("\(step.rawValue + 1) из 2"))
+    }
+
+    private var buttonRow: some View {
+        HStack(spacing: 10) {
+            if step == .relative {
+                Button(L10n.tr("Назад")) { goBack() }
+                    .buttonStyle(SepiaButtonStyle())
+                    .disabled(isSaving)
+            }
+            Spacer(minLength: 12)
+            Button(L10n.tr("Отмена")) { dismiss() }
+                .buttonStyle(SepiaButtonStyle())
+                .keyboardShortcut(.cancelAction)
+                .disabled(isSaving)
+            Button(primaryLabel) { primaryAction() }
+                .buttonStyle(SepiaButtonStyle(isActive: true))
+                .keyboardShortcut(.defaultAction)
+                .disabled(isSaving)
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 20)
+        .padding(.bottom, 20)
+    }
+
+    private var primaryLabel: String {
+        switch step {
+        case .record: L10n.tr("Далее")
+        case .relative: isSaving ? L10n.tr("Создаём…") : L10n.tr("Создать дерево")
+        }
+    }
+
+    // MARK: - Step 1: the record and the first person
+
+    private var recordStep: some View {
+        VStack(alignment: .leading, spacing: 15) {
             SepiaTextField(label: L10n.tr("НАЗВАНИЕ СЕМЬИ"), text: $treeName, placeholder: L10n.tr("напр. Семья Ивановых"))
                 .focused($focusedField, equals: .treeName)
+                .onSubmit { primaryAction() }
+            validationMessage(for: .treeName)
+
             SepiaTextField(label: L10n.tr("ПОДЗАГОЛОВОК (необяз.)"), text: $subtitle, placeholder: L10n.tr("напр. Потомки Ивана и Марии"))
                 .focused($focusedField, equals: .subtitle)
+                .onSubmit { primaryAction() }
+
+            titledRule(L10n.tr("Первый человек"))
+
+            HStack(alignment: .top, spacing: 12) {
+                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                    .focused($focusedField, equals: .surname)
+                    .onSubmit { primaryAction() }
+                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                    .focused($focusedField, equals: .givenNames)
+                    .onSubmit { primaryAction() }
+            }
+            // Half width, so the name block reads as one two-column group instead of a
+            // full-width field that looks more important than the given name.
+            HStack(alignment: .top, spacing: 12) {
+                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                    .focused($focusedField, equals: .patronymic)
+                    .onSubmit { primaryAction() }
+                Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
+            }
+            validationMessage(for: .surname)
+
+            Text(L10n.tr("Даты, места и фотографии добавите в карточке человека — там для них есть всё."))
+                .font(SepiaTheme.ui(size: 11.5))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
         }
         .onAppear { focusedField = .treeName }
     }
 
-    private var firstPersonStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                    .focused($focusedField, equals: .givenNames)
-                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
-                    .focused($focusedField, equals: .patronymic)
-                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                    .focused($focusedField, equals: .surname)
-            }
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.tr("ПОЛ"))
-                    .font(SepiaTheme.ui(size: 9.5))
-                    .tracking(1.5)
-                    .foregroundColor(SepiaTheme.inkSoft)
-                HStack(spacing: 8) {
-                    ForEach(Person.Sex.allCases, id: \.rawValue) { s in
-                        Button(s.displayName) { sex = s }
-                            .buttonStyle(SepiaButtonStyle(isActive: sex == s))
-                    }
+    // MARK: - Step 2: the first relationship
+
+    private var relativeStep: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(L10n.tr("Свяжем с: \(firstPersonName)"))
+                .font(SepiaTheme.ui(size: 11.5))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .lineLimit(1)
+
+            HStack(spacing: 8) {
+                ForEach(FirstRelative.allCases) { candidate in
+                    Button(candidate.label) { select(candidate) }
+                        .buttonStyle(SepiaButtonStyle(isActive: role == candidate))
+                        .accessibilityAddTraits(role == candidate ? [.isSelected] : [])
                 }
             }
-            Text(L10n.tr("Это будет первый человек в вашем дереве. Добавить родственников можно позже."))
-                .font(SepiaTheme.body(size: 13))
-                .foregroundColor(SepiaTheme.inkSoft)
-                .padding(.top, 8)
-            PlacePickerField(label: L10n.tr("МЕСТО РОЖДЕНИЯ"), text: $birthPlace, placeholder: L10n.tr("напр. Москва, Россия")) {
-                selectedBirthPlace = $0
+
+            if let role {
+                HStack(alignment: .top, spacing: 12) {
+                    SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $relativeSurname, placeholder: L10n.tr("напр. Иванов"))
+                        .focused($focusedField, equals: .relativeSurname)
+                        .onSubmit { primaryAction() }
+                    SepiaTextField(label: L10n.tr("ИМЯ"), text: $relativeGivenNames, placeholder: role.givenNameExample)
+                        .focused($focusedField, equals: .relativeGivenNames)
+                        .onSubmit { primaryAction() }
+                }
+                validationMessage(for: .relativeGivenNames)
             }
-            PlacePickerField(label: L10n.tr("МЕСТО СМЕРТИ"), text: $deathPlace, placeholder: "—") {
-                selectedDeathPlace = $0
+
+            Text(role == nil
+                ? L10n.tr("Можно пропустить: нажмите «Создать дерево», родственников добавите позже.")
+                : L10n.tr("Мы запишем родство и откроем дерево — дальше можно достраивать в любую сторону."))
+                .font(SepiaTheme.ui(size: 11.5))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
+        }
+        .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: role)
+    }
+
+    private var firstPersonName: String {
+        let parts = [surname, givenNames, patronymic]
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        return parts.isEmpty ? L10n.tr("первый человек") : parts.joined(separator: " ")
+    }
+
+    /// Selecting a role is a toggle, and it carries a smart default: relatives who
+    /// usually share the surname get it filled in, so the common case is one word typed.
+    private func select(_ candidate: FirstRelative) {
+        guard role != candidate else {
+            role = nil
+            return
+        }
+        role = candidate
+        if candidate.inheritsSurname, relativeSurname.isEmpty {
+            relativeSurname = surname.trimmingCharacters(in: .whitespaces)
+        }
+        // The fields appear in this same frame; focus has to wait for them to exist.
+        DispatchQueue.main.async {
+            focusedField = relativeSurname.isEmpty ? .relativeSurname : .relativeGivenNames
+        }
+    }
+
+    // MARK: - Shared pieces
+
+    /// A section break that names what follows. Not a card, not an eyebrow.
+    private func titledRule(_ title: String) -> some View {
+        HStack(spacing: 10) {
+            Text(title)
+                .font(SepiaTheme.body(size: 13))
+                .foregroundColor(SepiaTheme.ink)
+            Rectangle()
+                .fill(SepiaTheme.fieldLine)
+                .frame(height: 1)
+        }
+        .padding(.top, 5)
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    @ViewBuilder
+    private func validationMessage(for field: Field) -> some View {
+        if invalidField == field, let invalidMessage {
+            Text(invalidMessage)
+                .font(SepiaTheme.ui(size: 11.5))
+                .foregroundColor(SepiaTheme.danger)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityAddTraits(.isStaticText)
+        }
+    }
+
+    private func failureBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 14))
+                .foregroundColor(SepiaTheme.danger)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(L10n.tr("Не удалось создать дерево"))
+                    .font(SepiaTheme.body(size: 13.5))
+                    .foregroundColor(SepiaTheme.ink)
+                Text(message)
+                    .font(SepiaTheme.ui(size: 11))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .textSelection(.enabled)
+                Text(L10n.tr("Введённое сохранено — можно попробовать ещё раз."))
+                    .font(SepiaTheme.ui(size: 11))
+                    .foregroundColor(SepiaTheme.inkSoft)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(SepiaTheme.cardBg)
+        .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Flow
+
+    private func primaryAction() {
+        switch step {
+        case .record:
+            guard validateRecord() else { return }
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { step = .relative }
+        case .relative:
+            createTree()
+        }
+    }
+
+    private func goBack() {
+        invalidField = nil
+        invalidMessage = nil
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { step = .record }
+    }
+
+    /// Validation happens on submit rather than by disabling the button: a disabled
+    /// primary that never says why is the state a first-time user hits first.
+    private func validateRecord() -> Bool {
+        invalidField = nil
+        invalidMessage = nil
+        if trimmed(treeName).isEmpty {
+            return fail(.treeName, L10n.tr("Назовите дерево — под этим именем оно появится в архиве."))
+        }
+        if trimmed(surname).isEmpty, trimmed(givenNames).isEmpty {
+            return fail(.surname, L10n.tr("Впишите имя или фамилию первого человека."))
+        }
+        return true
+    }
+
+    private func fail(_ field: Field, _ message: String) -> Bool {
+        invalidField = field
+        invalidMessage = message
+        focusedField = field
+        sepiaAnnounce(message)
+        return false
+    }
+
+    private func createTree() {
+        guard validateRecord() else {
+            withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { step = .record }
+            return
+        }
+        if role != nil, trimmed(relativeSurname).isEmpty, trimmed(relativeGivenNames).isEmpty {
+            _ = fail(.relativeGivenNames, L10n.tr("Впишите имя родственника или снимите выбор роли."))
+            return
+        }
+
+        let tree = FamilyTree(
+            name: trimmed(treeName),
+            subtitle: trimmed(subtitle).isEmpty ? nil : trimmed(subtitle)
+        )
+        let first = Person(
+            givenNames: trimmed(givenNames),
+            patronymic: trimmed(patronymic).isEmpty ? nil : trimmed(patronymic),
+            surname: trimmed(surname)
+        )
+        tree.people.append(first)
+        tree.homePersonId = first.id
+
+        if let role {
+            let relative = Person(
+                givenNames: trimmed(relativeGivenNames),
+                surname: trimmed(relativeSurname),
+                sex: role.sex
+            )
+            tree.people.append(relative)
+            tree.addRelation(role.relation, person: relative, target: first.id)
+        }
+        tree.optimizeRoot()
+
+        createError = nil
+        isSaving = true
+        Task { @MainActor in
+            defer { isSaving = false }
+            do {
+                try await onComplete(tree)
+                dismiss()
+            } catch {
+                createError = error.localizedDescription
+                sepiaAnnounce(L10n.tr("Не удалось создать дерево"))
             }
         }
     }
 
-    private func createTree() {
-        let tree = FamilyTree(name: treeName, subtitle: subtitle.isEmpty ? nil : subtitle)
-        let person = Person(givenNames: givenNames, patronymic: patronymic.isEmpty ? nil : patronymic, surname: surname, sex: sex, birthPlace: birthPlace.isEmpty ? nil : birthPlace, deathPlace: deathPlace.isEmpty ? nil : deathPlace)
-        if let selectedBirthPlace, selectedBirthPlace.displayName == birthPlace {
-            person.setStructuredPlace(selectedBirthPlace.placeReference, for: .birth)
-        }
-        if let selectedDeathPlace, selectedDeathPlace.displayName == deathPlace {
-            person.setStructuredPlace(selectedDeathPlace.placeReference, for: .death)
-        }
-        tree.people.append(person)
-        tree.homePersonId = person.id
-        onComplete(tree)
+    private func trimmed(_ value: String) -> String {
+        value.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+/// Field caption. 11pt with light tracking: the old 9.5pt tracked caps were below a
+/// comfortable floor for an audience reading handwriting through this app.
+struct SepiaFieldLabel: View {
+    let text: String
+    /// Hidden from VoiceOver when the control it captions carries the same name itself
+    /// (a text field). A caption over a group of buttons is real content: pass `false`.
+    let isDecorative: Bool
+
+    init(_ text: String, isDecorative: Bool = true) {
+        self.text = text
+        self.isDecorative = isDecorative
+    }
+
+    var body: some View {
+        Text(text)
+            .font(SepiaTheme.ui(size: 11))
+            .tracking(0.6)
+            .foregroundColor(SepiaTheme.inkSoft)
+            .accessibilityHidden(isDecorative)
+    }
+}
+
+/// A sepia text input: our own fill, placeholder and focus ring. See `sepiaFieldChrome`
+/// for why the system field plus a colour multiply was not good enough.
+struct SepiaFieldInput: View {
+    @Binding var text: String
+    var placeholder: String = ""
+    /// What VoiceOver should call this field. Without it the field announces its
+    /// placeholder ("напр. Иванов") as its name.
+    var label: String
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        TextField("", text: $text)
+            .textFieldStyle(.plain)
+            .font(SepiaTheme.body(size: 15))
+            .foregroundColor(SepiaTheme.ink)
+            .focused($isFocused)
+            .accessibilityLabel(label)
+            .sepiaFieldChrome(isFocused: isFocused, placeholder: placeholder, isEmpty: text.isEmpty)
     }
 }
 
@@ -146,16 +457,9 @@ struct SepiaTextField: View {
     var placeholder: String = ""
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(SepiaTheme.ui(size: 9.5))
-                .tracking(1.5)
-                .foregroundColor(SepiaTheme.inkSoft)
-            TextField(placeholder, text: $text)
-                .textFieldStyle(.roundedBorder)
-                .font(SepiaTheme.body(size: 15))
-                .foregroundColor(SepiaTheme.ink)
-                .colorMultiply(Color(hex: "f5eed8"))
+        VStack(alignment: .leading, spacing: 5) {
+            SepiaFieldLabel(label)
+            SepiaFieldInput(text: $text, placeholder: placeholder, label: label)
         }
     }
 }
@@ -167,32 +471,39 @@ struct SepiaNotesField: View {
     var placeholder: String = ""
     @State private var height: CGFloat = 90
     @State private var heightAtDragStart: CGFloat = 90
+    @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(SepiaTheme.ui(size: 9.5))
-                .tracking(1.5)
-                .foregroundColor(SepiaTheme.inkSoft)
+        VStack(alignment: .leading, spacing: 5) {
+            SepiaFieldLabel(label)
 
             ZStack(alignment: .topLeading) {
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(hex: "f5eed8"))
-                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(SepiaTheme.fieldLine, lineWidth: 1))
+                    .fill(SepiaTheme.fieldBg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .strokeBorder(
+                                isFocused ? SepiaTheme.accent : SepiaTheme.cardLine,
+                                lineWidth: isFocused ? 2 : 1
+                            )
+                    )
 
-                if text.isEmpty && !placeholder.isEmpty {
+                if text.isEmpty, !placeholder.isEmpty {
                     Text(placeholder)
                         .font(SepiaTheme.body(size: 15))
-                        .foregroundColor(SepiaTheme.inkSoft.opacity(0.45))
+                        .foregroundColor(SepiaTheme.inkSoft)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 9)
                         .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
 
                 TextEditor(text: $text)
                     .font(SepiaTheme.body(size: 15))
                     .foregroundColor(SepiaTheme.ink)
                     .scrollContentBackground(.hidden)
+                    .focused($isFocused)
+                    .accessibilityLabel(label)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 3)
             }
@@ -246,11 +557,8 @@ struct SepiaDateField: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(label)
-                .font(SepiaTheme.ui(size: 9.5))
-                .tracking(1.5)
-                .foregroundColor(SepiaTheme.inkSoft)
+        VStack(alignment: .leading, spacing: 5) {
+            SepiaFieldLabel(label)
             HStack(spacing: 8) {
                 Picker("", selection: $qualifier) {
                     ForEach(GenealogyDate.Qualifier.allCases, id: \.rawValue) { value in
@@ -260,19 +568,25 @@ struct SepiaDateField: View {
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .frame(width: 145)
+                .accessibilityLabel(L10n.tr("Уточнение даты"))
 
-                dateTextField(text: $text, placeholder: placeholder)
+                SepiaFieldInput(text: $text, placeholder: placeholder, label: label)
                 if isRange {
                     Text(qualifier == .between ? L10n.tr("и") : L10n.tr("по"))
                         .font(SepiaTheme.body(size: 12))
                         .foregroundColor(SepiaTheme.inkSoft)
-                    dateTextField(text: $endText, placeholder: placeholder)
+                    SepiaFieldInput(
+                        text: $endText,
+                        placeholder: placeholder,
+                        label: L10n.tr("\(label) — конец диапазона")
+                    )
                 }
             }
-            if !text.isEmpty && !isValidDate {
+            if !text.isEmpty, !isValidDate {
                 Text(L10n.tr("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ"))
-                    .font(SepiaTheme.ui(size: 9))
-                    .foregroundColor(.red.opacity(0.8))
+                    .font(SepiaTheme.ui(size: 11))
+                    .foregroundColor(SepiaTheme.danger)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -287,13 +601,5 @@ struct SepiaDateField: View {
             qualifier: qualifier,
             endValue: isRange ? endText : nil
         ).isValid
-    }
-
-    private func dateTextField(text: Binding<String>, placeholder: String) -> some View {
-        TextField(placeholder, text: text)
-            .textFieldStyle(.roundedBorder)
-            .font(SepiaTheme.body(size: 15))
-            .foregroundColor(SepiaTheme.ink)
-            .colorMultiply(Color(hex: "f5eed8"))
     }
 }

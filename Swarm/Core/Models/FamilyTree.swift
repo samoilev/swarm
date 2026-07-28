@@ -29,6 +29,52 @@ public enum RelationKind: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+/// The four openings that actually start a tree, offered at the end of first-run setup.
+/// Each carries the link *and* a sensible sex, which is part of why onboarding no longer
+/// asks for sex separately.
+public enum FirstRelative: String, CaseIterable, Identifiable, Sendable {
+    case father, mother, spouse, child
+
+    public var id: String { rawValue }
+
+    public var label: String {
+        switch self {
+        case .father: L10n.tr("Отец")
+        case .mother: L10n.tr("Мать")
+        case .spouse: L10n.tr("Супруг(а)")
+        case .child: L10n.tr("Ребёнок")
+        }
+    }
+
+    public var sex: Person.Sex {
+        switch self {
+        case .father: .male
+        case .mother: .female
+        case .spouse, .child: .unknown
+        }
+    }
+
+    /// `addRelation` reads the kind from the *new* person's perspective, so the roles
+    /// invert here: a father is someone whose child is the person already in the tree.
+    public var relation: RelationKind {
+        switch self {
+        case .father, .mother: .child
+        case .spouse: .spouse
+        case .child: .parent
+        }
+    }
+
+    /// Spouses usually arrive with a different surname; everyone else usually doesn't.
+    public var inheritsSurname: Bool { self != .spouse }
+
+    public var givenNameExample: String {
+        switch self {
+        case .father, .child: L10n.tr("напр. Пётр")
+        case .mother, .spouse: L10n.tr("напр. Мария")
+        }
+    }
+}
+
 @Observable
 public final class FamilyTree: Identifiable, Codable {
     public var id: UUID
