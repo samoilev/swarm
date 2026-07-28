@@ -1,0 +1,5 @@
+# Collapse the two author names used for the same person.
+Lev Samoilov <samoilev@users.noreply.github.com> <samoilov.lev@gmail.com>
+Lev Samoilov <samoilev@users.noreply.github.com> samoilev <samoilov.lev@gmail.com>
+Lev Samoilov <samoilev@users.noreply.github.com> Lev <samoilov.lev@gmail.com>
+Lev Samoilov <samoilev@users.noreply.github.com> <samoilev@users.noreply.github.com>

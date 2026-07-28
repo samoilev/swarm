@@ -2,8 +2,8 @@
 
 Swarm searches a bundled, versioned place snapshot. No query is sent to a
 network service. `places.tsv` contains Russian display names, administrative regions
-and countries; `geonames_ussr.tsv` contains the coordinate/alias snapshot used by the
-current internal build. `place_index_v2.tsv` seeds original GeoNames IDs for the most
+and countries; `geonames_ussr.tsv` contains the coordinate/alias snapshot.
+`place_index_v2.tsv` seeds original GeoNames IDs for the most
 common locations and is loaded first. The two legacy snapshots remain one searchable
 fallback index and use a deterministic `local-` identifier when their original ID is
 unavailable.
@@ -37,8 +37,10 @@ display-name snapshot and coordinates.
 
 GeoNames data is licensed under Creative Commons Attribution 4.0. Attribution:
 “Contains GeoNames data, available from https://www.geonames.org/.” Record the dump
-date in the `--version` column and in internal release notes.
+date in the `--version` column and in the release notes. See
+[THIRD_PARTY_NOTICES.md](../../../THIRD_PARTY_NOTICES.md) for the full attribution of
+every bundled dataset.
 
 The bundled seed snapshot version is `2026-07-15-seed`. It is deliberately small;
-internal production packaging should regenerate the full `place_index_v2.tsv` using
-the command above before declaring complete global GeoNames-ID coverage.
+regenerate the full `place_index_v2.tsv` using the command above before claiming
+complete global GeoNames-ID coverage.

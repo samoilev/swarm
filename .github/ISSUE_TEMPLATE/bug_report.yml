@@ -1,0 +1,77 @@
+name: Bug report
+description: Something in Swarm is broken or behaves unexpectedly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never attach a real family GEDCOM.** These files contain living people's
+        names, dates and places. Use a synthetic or fully anonymized file — see
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#never-attach-a-real-family-gedcom).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what Swarm did, and what you expected instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a tree with …
+        2. Click …
+        3. …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Swarm version
+      description: The contents of the `VERSION` file, or the commit you built from.
+      placeholder: "2.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "15.2 (Apple silicon)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: Interface language
+      description: Russian and English take different code paths, so this matters.
+      options:
+        - Russian
+        - English
+        - Both / not language-specific
+    validations:
+      required: true
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Synthetic reproduction file
+      description: >
+        The smallest synthetic GEDCOM that still triggers the bug, if one is needed.
+        Paste it here or attach it. Invented names and dates only.
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Console output, screenshots, or context that might help.
+    validations:
+      required: false
