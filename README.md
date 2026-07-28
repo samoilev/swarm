@@ -4,7 +4,7 @@
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.2.0-3B2F21?style=flat" alt="Latest release 2.2.0" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.2.1-3B2F21?style=flat" alt="Latest release 2.2.1" /></a>
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/download-DMG%20(unsigned)-4F4132?style=flat" alt="Download the DMG; unsigned build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4F4132?style=flat" alt="MIT license" /></a>
   <br />
@@ -56,7 +56,7 @@ afterwards it launches normally.
 Verify the download against its published checksum if you want to:
 
 ```sh
-shasum -a 256 -c Swarm-2.2.0.dmg.sha256
+shasum -a 256 -c Swarm-2.2.1.dmg.sha256
 ```
 
 Requires macOS 14 or later on Apple silicon. Building it yourself avoids the Gatekeeper

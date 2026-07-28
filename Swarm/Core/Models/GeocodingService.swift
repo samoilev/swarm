@@ -40,7 +40,7 @@ public final class GeocodingService {
     }
 
     private static func loadGeoNames() -> [String: CLLocationCoordinate2D] {
-        guard let url = Bundle.module.url(forResource: "geonames_ussr", withExtension: "tsv") else {
+        guard let url = ResourceBundle.core.url(forResource: "geonames_ussr", withExtension: "tsv") else {
             log.error("geonames_ussr.tsv not found in bundle")
             return [:]
         }

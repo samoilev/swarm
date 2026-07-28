@@ -42,6 +42,26 @@ jobs:
       - name: Build DMG
         run: ./build_dmg.sh
 
+      # 2.2.0 shipped a DMG that crashed on every machine except the one that built
+      # it: SwiftPM's Bundle.module falls back to an absolute .build path, which only
+      # the build machine has. Hiding .build reproduces a user's machine exactly, so
+      # a resource that is missing from the .app is fatal here instead of on download.
+      - name: Smoke-test the packaged app without the build directory
+        run: |
+          cp -R dist/Swarm.app "$RUNNER_TEMP/Swarm.app"
+          mv .build .build-hidden
+          "$RUNNER_TEMP/Swarm.app/Contents/MacOS/Swarm" > "$RUNNER_TEMP/app.log" 2>&1 &
+          pid=$!
+          sleep 15
+          kill "$pid" 2>/dev/null || true
+          mv .build-hidden .build
+          echo "--- app output ---"
+          cat "$RUNNER_TEMP/app.log" || true
+          if grep -qiE "could not load resource bundle|Fatal error" "$RUNNER_TEMP/app.log"; then
+            echo "::error::The packaged app cannot load its resources without the build directory." >&2
+            exit 1
+          fi
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}

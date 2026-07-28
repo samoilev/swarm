@@ -11,6 +11,21 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [2.2.1] — 2026-07-28
+
+### Fixed
+
+- **The downloadable app crashed on launch for everyone except the person who built
+  it.** SwiftPM's generated `Bundle.module` searches only next to the executable and an
+  absolute path inside the build machine's `.build` directory — never
+  `Contents/Resources`, where a packaged `.app` keeps its resources. On the build
+  machine the leftover `.build` directory satisfied it and hid the fault. Resource
+  lookups now resolve through the app bundle first and fall back to `Bundle.module` for
+  `swift run` and tests. Every DMG published before this one was affected.
+- Releases are now smoke-tested with the build directory hidden, which reproduces a
+  user's machine, so a packaging fault of this kind fails the release instead of
+  shipping.
+
 ## [2.2.0] — 2026-07-28
 
 ### Added
@@ -361,7 +376,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/samoilev/swarm/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/samoilev/swarm/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/samoilev/swarm/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/samoilev/swarm/compare/v1.10.0...v2.0.0

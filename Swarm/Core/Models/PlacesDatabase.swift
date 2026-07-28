@@ -157,7 +157,7 @@ public final class PlacesDatabase {
     }
 
     private static func loadPlaces() -> [Entry] {
-        guard let url = Bundle.module.url(forResource: "places", withExtension: "tsv") else {
+        guard let url = ResourceBundle.core.url(forResource: "places", withExtension: "tsv") else {
             log.error("places.tsv not found in bundle")
             return []
         }
@@ -212,7 +212,7 @@ public final class PlacesDatabase {
     /// files remain a compatibility fallback until a complete generated v2 snapshot
     /// replaces them; both are exposed through one in-memory index.
     private static func loadV2Places() -> [Entry] {
-        guard let url = Bundle.module.url(forResource: "place_index_v2", withExtension: "tsv"),
+        guard let url = ResourceBundle.core.url(forResource: "place_index_v2", withExtension: "tsv"),
               let data = try? String(contentsOf: url, encoding: .utf8) else { return [] }
         var result: [Entry] = []
         for line in data.split(separator: "\n").dropFirst() {
@@ -242,7 +242,7 @@ public final class PlacesDatabase {
     }
 
     private static func loadCoordinates() -> [String: [(Double, Double)]] {
-        guard let url = Bundle.module.url(forResource: "geonames_ussr", withExtension: "tsv"),
+        guard let url = ResourceBundle.core.url(forResource: "geonames_ussr", withExtension: "tsv"),
               let data = try? String(contentsOf: url, encoding: .utf8) else { return [:] }
         var result: [String: [(Double, Double)]] = [:]
         for line in data.split(separator: "\n") {

@@ -16,8 +16,12 @@ struct SwarmApp: App {
         }
         _store = State(initialValue: TreeStore(storageFolder: storageFolder))
         NSApplication.shared.setActivationPolicy(.regular)
-        if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
-           let icon = NSImage(contentsOf: iconURL) {
+        // A packaged .app carries the icon in Contents/Resources, which is not where
+        // SwiftPM's Bundle.module looks; reading Bundle.module there is fatal, so it
+        // stays the fallback for `swift run`. See SwarmCore's ResourceBundle.
+        let iconURL = Bundle.main.url(forResource: "AppIcon", withExtension: "icns")
+            ?? Bundle.module.url(forResource: "AppIcon", withExtension: "icns")
+        if let iconURL, let icon = NSImage(contentsOf: iconURL) {
             NSApplication.shared.applicationIconImage = icon
         }
     }

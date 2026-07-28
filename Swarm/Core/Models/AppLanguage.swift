@@ -90,7 +90,7 @@ public enum L10n {
 
     private static func translated(_ russian: String, arguments: [CVarArg], language: AppLanguage) -> String {
         guard language == .english,
-              let path = Bundle.module.path(forResource: "en", ofType: "lproj"),
+              let path = ResourceBundle.core.path(forResource: "en", ofType: "lproj"),
               let bundle = Bundle(path: path) else {
             return arguments.isEmpty ? russian.replacingOccurrences(of: "%%", with: "%") : String(format: russian, arguments: arguments)
         }
