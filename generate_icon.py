@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
-"""Build Swarm's macOS .icns from the committed supplied artwork."""
+"""Build Swarm's macOS .icns from the committed supplied artwork.
+
+Requires Pillow (`python3 -m pip install Pillow`). Run after changing the source
+artwork:
+
+    python3 generate_icon.py
+
+Assets.xcassets is the artwork source only — Package.swift excludes it from the
+build, so the generated AppIcon.icns is what actually ships. Editing the PNG
+without re-running this script changes nothing in the app.
+"""
 
 from pathlib import Path
 

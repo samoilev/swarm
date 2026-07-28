@@ -1,58 +1,89 @@
 <div align="center">
   <img src="docs/swarm-icon-readme-320.png" width="84" height="84" alt="Swarm" />
   <h1>Swarm</h1>
+  <p><strong>A native macOS family tree editor that keeps your genealogy on your own disk.</strong></p>
+  <p>
+    <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license" /></a>
+    <img src="https://img.shields.io/badge/macOS-14%2B-lightgrey" alt="macOS 14+" />
+  </p>
 </div>
 
 ---
 
-A native macOS app for building, visualizing, and exporting family trees, aimed at
-Russian-speaking genealogy. Trees are stored locally as GEDCOM files. Editing, search
-and validation run offline; the map uses Apple Maps by default, with a fully offline
-vector map available in Settings.
+Swarm builds, visualizes and exports family trees, with particular attention to
+Russian-language genealogy — full kinship terminology, patronymics, Cyrillic place data,
+and the encodings that Soviet-era records arrive in.
 
-- **Platform:** macOS 14+, SwiftUI + AppKit
+Your trees are plain GEDCOM files in a folder you can open in Finder. There are no
+accounts, no cloud sync, no analytics, and no AI services. Editing, search, validation
+and place lookup all run offline.
+
+- **Platform:** macOS 14+, SwiftUI + AppKit, Apple silicon
 - **Toolchain:** Swift 5.9+ (developed against Swift 6.x), Swift Package Manager
-- **Dependencies:** none (no third-party packages)
+- **Dependencies:** none — no third-party Swift packages
+- **License:** [MIT](LICENSE)
+
+## Status
+
+Swarm works and is used daily, but treat it as a personal project rather than a finished
+product:
+
+- **There is no download.** No signed installer, no notarized build, no auto-update. You
+  build it from source. See [Build and run](#build-and-run).
+- **Apple silicon only.** No Intel or universal build.
+- **Bug reports are welcome; pull requests are not being accepted yet.** See
+  [CONTRIBUTING.md](CONTRIBUTING.md).
+
+The DMG files attached to older releases are ad-hoc-signed artifacts kept for historical
+reference. They are not supported downloads.
+
+## Screenshots
+
+<!-- TODO: add tree view, fan chart, map and person card screenshots -->
 
 ## Features
 
-- Tidy tree diagram (Buchheim–Jünger–Leipert layout), ancestor fan chart, and a map of
-  birth/death/burial places.
-- Russian kinship naming — direct lineage, full/half siblings, cousins (incl. removed),
-  and in-laws (свёкор/тесть, деверь/шурин, золовка/свояченица, …).
-- Russian and English interface languages, selectable in Settings; Russian is the default.
-- Photos and arbitrary file attachments per person.
-- People, timeline, places, review, recovery, source/citation and structured-union
-  workspaces designed for large local trees.
-- GEDCOM 5.5.1 import/export that interoperates with Ancestry, Gramps, and MyHeritage,
-  including standard map coordinates. Structures the app doesn't model (event-level
-  notes, source records, custom tags) are **preserved through import → edit → export**,
-  and the original imported file is kept verbatim as `original-import.ged`.
+- **Tree diagram** using the Buchheim–Jünger–Leipert layout, an **ancestor fan chart**,
+  and a **map** of birth, death and burial places.
+- **Russian kinship naming** — direct lineage, full and half siblings, cousins including
+  removed cousins, and in-laws (свёкор/тесть, деверь/шурин, золовка/свояченица, …).
+  Ask "how are these two related?" about any pair and get the correct term.
+- **Russian and English interfaces**, switchable in Settings without restarting. Russian
+  is the default.
+- **Photos and arbitrary file attachments** on any person.
+- **Workspaces built for large trees** — people, timeline, places, review, recovery, and
+  sources and citations.
+- **GEDCOM 5.5.1 import and export** that interoperates with Ancestry, Gramps and
+  MyHeritage, standard map coordinates included. Structures Swarm doesn't model —
+  event-level notes, source records, other programs' custom tags — survive
+  import → edit → export unchanged, and the original imported file is kept verbatim as
+  `original-import.ged`.
+- **Merge someone else's tree into yours** — matching people are combined rather than
+  duplicated, exact matches are found automatically, and likely matches are only
+  suggested. A backup is taken first and any failure rolls back completely.
 
-## Architecture
+## Privacy
 
-The code is split into two SPM targets so the domain logic can be tested independently
-of the UI:
+Genealogy data is other people's personal data, much of it about people who are still
+alive. Swarm is built accordingly:
 
-```
-Swarm/
-  Core/        → SwarmCore library (pure logic, no SwiftUI)
-    Models/    → Person, Union, FamilyTree, FamilyIndex, FamilyDate, calculators
-    Services/  → GEDCOMParser, GEDCOMSerializer, TreeStore, TreeLayoutEngine
-    Resources/ → bundled GeoNames / places TSVs
-  App/         → Swarm executable (SwiftUI views, theme, app entry)
-Tests/
-  SwarmCoreTests/   → Swift Testing suites and GEDCOM fixtures for the Core library
-UITests/             → native XCUITest bundle only; no production sources
-SwarmUI.xcworkspace/ → package + test-only Xcode host
-```
+- **Nothing is uploaded.** No accounts, no sync, no telemetry, no crash reporting, no AI
+  services.
+- **Place lookup is entirely local.** Names are matched against a bundled snapshot of
+  GeoNames data, so searching for a village sends nothing anywhere.
+- **The map is the only optional network path.** The default `appleMaps` provider renders
+  through MapKit, so Apple supplies the tiles and may receive the region being viewed.
+  Swarm does not submit names, records, pins or annotations. The `offlineVector` provider
+  in Settings replaces it with bundled Natural Earth vectors and the local place index —
+  no MapKit view, no network tiles at all.
+- Selected place text, dataset ID and coordinates are stored in the tree, so a later
+  place-data update can never silently move a historical place.
 
-**SwiftPM is the canonical production build.** Open the package directly in Xcode
-(`File ▸ Open…` the folder) or build from the command line. The small project under
-`UITests/` contains only an XCUITest bundle; it is combined with the Swift package by
-`SwarmUI.xcworkspace` and does not duplicate production sources or dependencies.
+Swarm is not run in the macOS App Sandbox, so it can read GEDCOM files and photos you
+select anywhere on disk.
 
-### Storage model — GEDCOM is the source of truth
+## Storage model — GEDCOM is the source of truth
 
 Trees live in `~/Library/Application Support/Swarm/`, one folder per tree:
 
@@ -61,7 +92,7 @@ Trees live in `~/Library/Application Support/Swarm/`, one folder per tree:
   ├── <Tree Name>.ged      — the tree itself (stable identity stored as the _TREEID tag)
   ├── original-import.ged  — verbatim copy of an imported file (if the tree was imported)
   ├── Media/               — person portrait photos (GEDCOM OBJE)
-  └── Attachments/         — arbitrary files attached to people (GEDCOM _ATTC)
+  ├── Attachments/         — arbitrary files attached to people (GEDCOM _ATTC)
   └── .Swarm/
       ├── History/         — latest 50 previous GEDCOM revisions
       └── Trash/           — replaced/deleted files, retained for 30 days
@@ -69,12 +100,17 @@ Archived/                  — trees removed from the library but kept on disk
 Recovery/<tree-id>/        — permanent pre-v2 and pre-merge full-bundle backups
 ```
 
-Because identity lives inside the GEDCOM (`_TREEID`), the folder/file can be renamed
+Because identity lives inside the GEDCOM (`_TREEID`), the folder and file can be renamed
 freely when the tree is renamed.
 
-On first launch, Swarm moves the previous app storage into this location when the Swarm
-folder does not already exist. If both folders exist, neither is merged or overwritten;
-Swarm uses its own folder and shows the previous one in Finder for manual review.
+Every save is written to a temporary folder, checksummed file by file, and swapped into
+place only after it verifies — a crash or power cut mid-save cannot leave a half-written
+archive.
+
+On first launch, Swarm moves storage from the app's previous name into this location, as
+long as the `Swarm` folder does not already exist. If both exist, neither is merged or
+overwritten: Swarm uses its own folder and reveals the older one in Finder for manual
+review.
 
 **Custom tags** (beyond standard GEDCOM 5.5.1): `_FTSVER` and `_FTSID` remain stable
 compatibility identifiers; tree metadata uses `_TREEID`, `_NAME`, `_SUBTITLE`, `_HOME`
@@ -83,29 +119,43 @@ the **standard** `PLAC › MAP › LATI/LONG` triple so they interoperate with o
 legacy `_COORD lat lon` is still read, and used as a private fallback when coordinates
 have no place to host a `MAP`.
 
-### Privacy and maps
-
-The default `appleMaps` provider renders through MapKit: Apple supplies its map tiles and
-may receive the viewed region. Swarm does not intentionally submit names,
-genealogy records, pins, or annotations. The `offlineVector` provider is a one-click
-alternative in Settings that uses bundled Natural Earth vectors and the local place
-index — it creates no MapKit view and requests no network tiles. Everything outside the
-map (editing, search, place lookup, validation, storage) is offline under both providers.
-The selected display text, dataset ID and coordinates are stored in the tree so a later
-place-data update cannot silently move a historical place.
-
-The internal build is not run in the macOS App Sandbox, so it can read GEDCOM files and
-photos selected anywhere on disk. Accounts, cloud sync, analytics and AI services are not
-present.
-
-## Build & run
+## Build and run
 
 ```sh
-swift build       # build everything
-swift run Swarm   # launch the app
+git clone https://github.com/samoilev/swarm.git
+cd swarm
+swift build -c release
+swift run -c release Swarm
 ```
 
-Or use the VS Code launch configurations in `.vscode/launch.json`.
+`swift build` alone gives you a debug build, which is fine for development but noticeably
+slower on large trees.
+
+You can also open the package folder directly in Xcode (`File ▸ Open…`).
+
+For isolated development, launch with
+`--storage-folder /absolute/path/to/temporary-library` to keep a real library untouched.
+
+## Architecture
+
+The code splits into two SPM targets so the domain logic can be tested without the UI:
+
+```
+Swarm/
+  Core/        → SwarmCore library (pure logic, no SwiftUI)
+    Models/    → Person, Union, FamilyTree, FamilyIndex, FamilyDate, calculators
+    Services/  → GEDCOMParser, GEDCOMSerializer, TreeStore, TreeLayoutEngine
+    Resources/ → bundled GeoNames / places TSVs and Natural Earth vectors
+  App/         → Swarm executable (SwiftUI views, theme, app entry)
+Tests/
+  SwarmCoreTests/   → Swift Testing suites and synthetic GEDCOM fixtures
+UITests/             → native XCUITest bundle only; no production sources
+SwarmUI.xcworkspace/ → package + test-only Xcode host
+```
+
+**SwiftPM is the canonical build.** The small Xcode project under `UITests/` contains
+only an XCUITest bundle; `SwarmUI.xcworkspace` combines it with the Swift package, and it
+duplicates no production sources or dependencies.
 
 ## Tests
 
@@ -118,37 +168,43 @@ The suite uses [Swift Testing](https://developer.apple.com/documentation/testing
 doesn't add the test frameworks to the search path automatically, so the wrapper script
 passes them. Filesystem integration tests run serially for deterministic bundle swaps.
 
-Coverage can be generated with:
+Coverage:
 
 ```sh
 swift test --enable-code-coverage
 ```
 
-Native smoke tests require full Xcode: open `SwarmUI.xcworkspace` and run
-the shared `Swarm-UI` scheme. Every launch receives an isolated
-`--storage-folder`; the test host cannot touch a real library.
+Native smoke tests require full Xcode: open `SwarmUI.xcworkspace` and run the shared
+`Swarm-UI` scheme. Every launch gets an isolated `--storage-folder`, so the test host
+cannot touch a real library.
 
-## Linting
+## Formatting
 
 Formatting is enforced with [SwiftFormat](https://github.com/nicklockwood/SwiftFormat)
-using the conservative `.swiftformat` config:
+using the conservative `.swiftformat` config. CI runs a pinned version:
 
 ```sh
-brew install swiftformat
-swiftformat --lint .     # check (CI runs this)
-swiftformat .            # apply
+mint run nicklockwood/SwiftFormat@0.61.1 --lint .   # check, as CI does
+mint run nicklockwood/SwiftFormat@0.61.1 .          # apply
 ```
 
-## Release
+`brew install swiftformat` works too, but the pinned version is what CI enforces.
 
-`build_dmg.sh` builds a release binary, assembles the `.app` (copying both the app and
-core resource bundles), runs tests, verifies the app and DMG, reports architecture and
-signing status, and writes a `.sha256` checksum. The version is read from `VERSION`.
+## Continuous integration
 
-The current internal artifact is Apple-silicon and ad-hoc signed. Public Developer ID
-signing, notarization, universal binaries and automatic updates require a separate
-distribution decision. The script retains an explicit opt-in path for a future signed
-internal candidate:
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push to `main` and
+every pull request: it builds all targets, runs the tests, and checks formatting. Any
+build error, test failure or formatting violation fails the job.
+
+## Packaging a local build
+
+`build_dmg.sh` builds a release binary, assembles the `.app` with both resource bundles,
+runs the tests, verifies the app and the DMG, reports architecture and signing status,
+and writes a `.sha256` checksum. The version comes from `VERSION`.
+
+Without `CODESIGN_IDENTITY` the script ad-hoc-signs and skips notarization, which is fine
+for your own machine — Gatekeeper will warn on first launch. The script keeps an explicit
+path for a properly signed build if a Developer ID is ever available:
 
 ```sh
 CODESIGN_IDENTITY="Developer ID Application: …" \
@@ -157,14 +213,24 @@ NOTARY_PROFILE="<notarytool keychain profile>" \
 # or APPLE_ID / APPLE_TEAM_ID / APPLE_APP_PASSWORD instead of NOTARY_PROFILE
 ```
 
-Without `CODESIGN_IDENTITY` the script ad-hoc-signs and skips notarization (local use
-only; Gatekeeper will warn).
+Nothing produced this way is published. Distributing a signed, notarized build is a
+separate decision that hasn't been taken.
 
-For isolated development and UI tests, launch with
-`--storage-folder /absolute/path/to/temporary-library`.
+## Contributing and support
 
-## Continuous integration
+- Bug reports and feature requests: [open an issue](https://github.com/samoilev/swarm/issues).
+  **Never attach a real family GEDCOM** — see
+  [CONTRIBUTING.md](CONTRIBUTING.md#never-attach-a-real-family-gedcom).
+- Pull requests: not accepted yet. [CONTRIBUTING.md](CONTRIBUTING.md) explains why.
+- Security issues: [SECURITY.md](SECURITY.md) — report privately, not as an issue.
+- Getting help: [SUPPORT.md](SUPPORT.md).
+- Changes by version: [CHANGELOG.md](CHANGELOG.md).
 
-`.github/workflows/ci.yml` runs on every push to `main` and every PR: it builds all
-targets, runs the tests, and checks formatting. The job fails on any build error, test
-failure, or formatting violation.
+## License and attribution
+
+Swarm's source code is [MIT licensed](LICENSE).
+
+Bundled place and map data is third-party and carries its own terms — GeoNames under
+CC BY 4.0, Natural Earth in the public domain. Full attribution is in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The Swarm name and icon are not covered
+by the MIT license; please rename and re-icon any fork you redistribute.

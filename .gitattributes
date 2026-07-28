@@ -1,0 +1,8 @@
+# Bundled third-party datasets. Marked generated so GitHub collapses their diffs and
+# excludes them from language statistics — places.tsv alone is 455k lines.
+Swarm/Core/Resources/*.tsv       linguist-generated=true -diff
+Swarm/Core/Resources/*.geojson   linguist-generated=true -diff
+
+# Binary assets, so Git never tries to diff or merge them as text.
+*.icns   binary
+*.png    binary

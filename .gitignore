@@ -12,4 +12,9 @@ DerivedData/
 geonames_tmp/
 
 # Impeccable critique snapshots / notes — local only
-.impeccable/**/*.md
+.impeccable/
+
+# Local agent tooling and instructions — not part of the published project
+.claude/
+AGENTS.md
+CLAUDE.md
