@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest something Swarm should do
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do
+      description: >
+        Describe the genealogy task that is currently awkward or impossible, not just
+        the feature. The underlying problem is more useful than a proposed solution.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+      description: How you imagine it working, if you have a specific idea.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How you work around it today
+      description: What you do instead — in Swarm, in another tool, or by hand.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: languages
+    attributes:
+      label: Language
+      description: Swarm ships in Russian and English; new UI text needs both.
+      options:
+        - label: This request involves new or changed user-facing text
+          required: false

@@ -9,12 +9,18 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Read-only by default; no job here writes to the repository or publishes anything.
+permissions:
+  contents: read
+
 jobs:
   build-test:
     name: Build & Test
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v7
+      # Pinned to a full commit SHA: a tag can be moved, a SHA cannot. Dependabot
+      # bumps this and updates the trailing version comment.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Select latest stable Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
@@ -44,7 +50,7 @@ jobs:
       # exact tag from source, so no reliance on release-asset packaging.
       SWIFTFORMAT_VERSION: "0.61.1"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Install Mint
         run: brew install mint
       - name: Check formatting (pinned SwiftFormat)
