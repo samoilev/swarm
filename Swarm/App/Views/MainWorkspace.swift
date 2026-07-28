@@ -180,7 +180,7 @@ struct MainWorkspace: View {
             recomputeHighlight()
         }
         // Snapshot the tree when an editing session opens and record an undo entry
-        // when it closes (only if something actually changed).
+        // when it closes (only if something changed).
         .onChange(of: showAddSheet) { _, isShown in
             if isShown { undo.begin(tree) } else { undo.commit(tree) }
         }
@@ -462,7 +462,7 @@ struct MainWorkspace: View {
                 highlightedBranch = result.ids
                 lineageLabels = result.labels
             } else {
-                // No path found — just highlight both
+                // No path found — highlight both.
                 highlightedBranch = [primary.id, secondary.id]
                 lineageLabels = [primary.id: "①", secondary.id: "②"]
             }

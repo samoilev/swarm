@@ -42,9 +42,8 @@ struct PlacePickerField: View {
                                 showSuggestions = false
                             }
                         }
-                        // Intentionally NOT calling updateSuggestions on focus gain —
-                        // that was what caused the dropdown to appear when opening the
-                        // edit form with an already-filled-in place name.
+                        // Do not refresh on focus gain: that opens the dropdown when an
+                        // edit form starts with an existing place.
                     }
                     .onSubmit {
                         // Enter confirms the manually-typed text and closes the list.
@@ -118,7 +117,7 @@ struct PlacePickerField: View {
             return
         }
         // Debounce, then run the ~455k-row scan on a background queue so typing never
-        // blocks the main thread. Each work item checks its OWN cancellation flag, so a
+        // blocks the main thread. Each work item checks its cancellation flag, so a
         // result whose query the user has already typed past is discarded (a later
         // keystroke cancels this item before starting its own).
         var work: DispatchWorkItem!

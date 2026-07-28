@@ -15,11 +15,8 @@ struct TreeCanvasView: View {
 
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
-    /// The tree is laid out and rasterized at this fixed multiple of its base size,
-    /// then shown via a single `.scaleEffect(zoom / superSample)` transform. Zooming
-    /// is therefore one cheap GPU transform (smooth, everything moves in lockstep —
-    /// no per-frame relayout, no jitter), while the 2× bitmap keeps text crisp: the
-    /// max zoom (2.0) lands at exactly 1:1, and every lower zoom is downsampled.
+    /// Rasterize once at 2×, then zoom with one GPU transform. At maximum zoom the
+    /// bitmap is 1:1; lower zoom levels downsample it.
     private let superSample: CGFloat = 2
     private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
     private let wheelZoomSensitivity: CGFloat = 0.05 // mouse-wheel zoom step per scroll unit (soft)
@@ -36,9 +33,7 @@ struct TreeCanvasView: View {
     /// Layout only depends on tree structure + direction, so cache it and recompute
     /// only when those change — body re-runs on every pan/zoom frame otherwise.
     @State private var cachedLayout: TreeLayout?
-    /// Bumped whenever `cachedLayout` is reassigned. Used as the cheap equality key for
-    /// the isolated content/minimap layers, so they refresh exactly when the layout
-    /// actually changes (not on every pan frame), and never miss a structural update.
+    /// Equality key for cached content and minimap layers. Bumped with each layout.
     @State private var layoutGeneration = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Lets the canvas receive arrow keys for relationship traversal.
@@ -85,7 +80,7 @@ struct TreeCanvasView: View {
                 }
                 .accessibilityHidden(true)
 
-                // Connectors — vector Path strokes at base resolution (NOT a giant
+                // Connectors — vector Path strokes at base resolution, not a giant
                 // supersampled Canvas bitmap, which lagged a frame behind the cards and
                 // made the lines "jump" during movement). Scaled by `zoom` (vs the cards'
                 // `zoom/superSample`) so the two layers stay pixel-aligned at every frame.
@@ -97,8 +92,7 @@ struct TreeCanvasView: View {
                 // Tree content — isolated in an Equatable layer so that pan/zoom (which
                 // change panOffset/zoom every frame) only re-apply the .scaleEffect/.offset
                 // transform on a cached layer tree, instead of re-running the whole card
-                // ForEach each frame. The content re-renders only when selection/layout
-                // actually change. This is what keeps panning and zooming smooth.
+                // ForEach each frame. It re-renders only when selection or layout changes.
                 TreeContentLayer(
                     layout: layout,
                     generation: layoutGeneration,
@@ -136,7 +130,7 @@ struct TreeCanvasView: View {
             .clipped()
             .overlay(alignment: .bottomTrailing) {
                 // Minimap — only once the tree is zoomed in past the viewport, so there's
-                // actually off-screen content worth an overview.
+                // enough off-screen content to need an overview.
                 if !layout.nodes.isEmpty,
                    layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height {
                     TreeMinimap(
@@ -193,7 +187,7 @@ struct TreeCanvasView: View {
                     .onChanged { value in
                         // Capture the zoom/pan baseline once at the start of the
                         // gesture. (value.magnification is cumulative from the
-                        // gesture's start, so the baseline must NOT move mid-pinch
+                        // gesture's start, so the baseline must not move mid-pinch
                         // — otherwise the zoom compounds and feels hypersensitive.)
                         if !isMagnifying {
                             isMagnifying = true
@@ -395,7 +389,7 @@ struct TreeCanvasView: View {
 }
 
 /// Connector lines as vector `Path` strokes at base resolution. Kept as its own
-/// Equatable layer (separate from the cards) so it is NOT a giant supersampled bitmap;
+/// Equatable layer (separate from the cards), not a giant supersampled bitmap;
 /// vector strokes transform in lockstep with the card layers, fixing the "lines jump"
 /// lag during movement. Refreshes only when the layout or highlight changes.
 private struct TreeConnectorsLayer: View, Equatable {

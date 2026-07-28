@@ -7,8 +7,8 @@ artwork:
     python3 generate_icon.py
 
 Assets.xcassets is the artwork source only — Package.swift excludes it from the
-build, so the generated AppIcon.icns is what actually ships. Editing the PNG
-without re-running this script changes nothing in the app.
+build, so the generated AppIcon.icns ships with the app. Editing the PNG without
+re-running this script does not change the app.
 """
 
 from pathlib import Path

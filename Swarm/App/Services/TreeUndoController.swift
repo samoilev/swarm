@@ -29,7 +29,7 @@ final class TreeUndoController {
         sessionBase = try? Self.encoder.encode(tree)
     }
 
-    /// Close a session: record an undo entry only if the tree actually changed.
+    /// Close a session: record an undo entry only if the tree changed.
     func commit(_ tree: FamilyTree) {
         guard let base = sessionBase else { return }
         sessionBase = nil

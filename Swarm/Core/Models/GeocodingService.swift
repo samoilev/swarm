@@ -6,7 +6,7 @@ private let log = Logger(subsystem: "com.samoilev.swarm", category: "Geocoding")
 
 /// Fully offline geocoding, backed solely by the bundled GeoNames database
 /// (252K+ settlements of the former USSR). Place names never leave the device —
-/// a place absent from the database simply resolves to nil (no map pin).
+/// a place absent from the database resolves to nil (no map pin).
 public final class GeocodingService {
     public static let shared = GeocodingService()
 

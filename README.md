@@ -7,7 +7,7 @@
     <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3B2F21?style=flat" alt="MIT license" /></a>
     <img src="https://img.shields.io/badge/macOS-14%2B-4F4132?style=flat" alt="macOS 14 or later" />
-    <img src="https://img.shields.io/badge/Swift-5.9%2B-4F4132?style=flat" alt="Swift 5.9 or later" />
+    <img src="https://img.shields.io/badge/Swift-6.0%2B-4F4132?style=flat" alt="Swift 6.0 or later" />
     <br />
     <img src="https://img.shields.io/badge/GEDCOM-5.5.1-6B5D4B?style=flat" alt="GEDCOM 5.5.1" />
     <img src="https://img.shields.io/badge/dependencies-none-6B5D4B?style=flat" alt="No third-party dependencies" />
@@ -27,7 +27,7 @@ accounts, no cloud sync, no analytics, and no AI services. Editing, search, vali
 and place lookup all run offline.
 
 - **Platform:** macOS 14+, SwiftUI + AppKit, Apple silicon
-- **Toolchain:** Swift 5.9+ (developed against Swift 6.x), Swift Package Manager
+- **Toolchain:** Swift 6.0+, Swift Package Manager
 - **Dependencies:** none — no third-party Swift packages
 - **License:** [MIT](LICENSE)
 
@@ -44,10 +44,6 @@ product:
 
 The DMG files attached to older releases are ad-hoc-signed artifacts kept for historical
 reference. They are not supported downloads.
-
-## Screenshots
-
-<!-- TODO: add tree view, fan chart, map and person card screenshots -->
 
 ## Features
 
@@ -171,9 +167,10 @@ duplicates no production sources or dependencies.
 ```
 
 The suite uses [Swift Testing](https://developer.apple.com/documentation/testing)
-(`import Testing`). On machines with only the Command Line Tools installed, SwiftPM
-doesn't add the test frameworks to the search path automatically, so the wrapper script
-passes them. Filesystem integration tests run serially for deterministic bundle swaps.
+(`import Testing`), which requires a Swift 6 toolchain. On machines with only the
+Command Line Tools installed, SwiftPM may omit the test framework search paths, so the
+wrapper adds them. Filesystem integration tests run serially for deterministic bundle
+swaps.
 
 Coverage:
 

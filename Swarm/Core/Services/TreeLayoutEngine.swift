@@ -64,8 +64,7 @@ public struct LayoutConfig {
     public init() {}
 }
 
-/// Tidy family-tree layout using the Buchheim–Jünger–Leipert algorithm (the O(n)
-/// state-of-the-art for tidy tree drawings):
+/// Tidy family-tree layout using the O(n) Buchheim–Jünger–Leipert algorithm:
 ///   - parents are centered over their children
 ///   - subtrees don't overlap (contour checks via "threads")
 ///   - "mod" accumulators avoid O(n²) subtree shifts

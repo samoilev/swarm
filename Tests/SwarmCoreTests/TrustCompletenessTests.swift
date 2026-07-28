@@ -208,6 +208,11 @@ struct TrustCompletenessTests {
         let result = RelationshipCalculator(tree: tree).relationship(from: child, to: parent)
         #expect(result?.name == "Приёмный родитель")
         #expect(result?.description == ParentageKind.adoptive.displayName)
+
+        child.sex = .female
+        #expect(RelationshipCalculator(tree: tree).relationship(from: parent, to: child)?.name == "Приёмная дочь")
+        tree.parentLinks[0].kind = .uncertain
+        #expect(RelationshipCalculator(tree: tree).relationship(from: parent, to: child)?.name == "Предполагаемая дочь")
     }
 
     @Test func selectedPlaceReferenceKeepsStableIdentityAndExactCoordinates() {

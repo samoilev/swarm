@@ -119,7 +119,7 @@ public enum FamilyDate {
             }
         }
 
-        // Try just YYYY
+        // Try YYYY.
         let yearOnly = #"^\d{4}$"#
         if str.range(of: yearOnly, options: .regularExpression) != nil, let y = Int(str) {
             if y >= 1 && y <= 9999 {

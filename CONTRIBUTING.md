@@ -39,6 +39,8 @@ privately.
 
 ## Building and testing
 
+Use a Swift 6 toolchain (Xcode 16 or later, or matching Command Line Tools).
+
 ```sh
 swift build              # build everything
 swift run Swarm          # launch the app

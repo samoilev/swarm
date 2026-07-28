@@ -5,7 +5,7 @@
 "Провайдер карты" = "Map provider";
 "Карта, подписи и координаты обрабатываются на этом Mac без сетевых тайлов." = "The map, labels, and coordinates are processed on this Mac without network tiles.";
 "Apple Maps загружает сетевые тайлы. Apple может получить область просмотра карты." = "Apple Maps loads network tiles. Apple may receive the visible map region.";
-"Swarm не передаёт Apple имена людей, события, заметки или подписи маркеров. Для Apple Maps передаётся только необходимая самому системному картографическому сервису область просмотра. Переключитесь на офлайн-карту, если не хотите и этого." = "Swarm does not send Apple people's names, events, notes, or marker labels. Apple Maps receives only the visible region required by the system map service itself. Switch to the offline map if you do not want even that.";
+"Swarm не передаёт Apple имена людей, события, заметки или подписи маркеров. Для Apple Maps передаётся только необходимая самому системному картографическому сервису область просмотра. Переключитесь на офлайн-карту, если не хотите и этого." = "Swarm does not send people's names, events, notes, or marker labels to Apple. Apple Maps receives only the visible region required by the system map service itself. Switch to the offline map if you do not want even that.";
 "Локальные данные" = "Local data";
 "Поиск мест использует встроенный локальный индекс. Выбранный идентификатор, подпись и координаты сохраняются в GEDCOM, поэтому обновление справочника не перемещает историческое место." = "Place search uses the built-in local index. The selected identifier, label, and coordinates are saved in GEDCOM, so an index update cannot move a historical place.";
 "Справочник мест основан на GeoNames; в приложении хранится локальная производная выборка. Офлайн-карта использует встроенные упрощённые векторы Natural Earth 1:110m (public domain)." = "The place index is based on GeoNames; the app stores a local derived subset. The offline map uses bundled simplified Natural Earth 1:110m vectors (public domain).";
@@ -367,7 +367,7 @@
 "Обновить формат…" = "Upgrade Format…";
 "Обновить всё (%@)" = "Upgrade All (%@)";
 "Перед обновлением создаётся полная резервная копия. Исходные файлы не удаляются — они переезжают в раздел копий ниже." = "A full backup is created before upgrading. Original files are not deleted; they move to the copies section below.";
-"Сначала выберите, в чью карточку вернуть файл" = "First choose the profile to restore the file to";
+"Сначала выберите, в чью карточку вернуть файл" = "Choose a person before restoring this file";
 "Вернуть в карточку" = "Restore to Profile";
 "Выберите персону…" = "Choose a person…";
 "Вернуть файл в карточку персоны" = "Restore file to a person's profile";
@@ -404,7 +404,7 @@
 "ур." = "née";
 "%@ событий в одном месте" = "%@ events at one place";
 "Показать %@ персон" = "Show %@ people";
-"Обзор дерева — нажмите, чтобы перейти" = "Tree overview—click to navigate";
+"Обзор дерева — нажмите, чтобы перейти" = "Tree overview — click to navigate";
 "Кадрировать фото" = "Crop Photo";
 "Перетащите рамку, потяните угол для размера" = "Drag the frame; pull a corner to resize";
 "Не найдены медиа" = "No Media Found";
@@ -527,7 +527,7 @@
 "Идентификатор уже существовал в библиотеке; импортированной копии назначен новый." = "The identifier already existed in the library; the imported copy was assigned a new one.";
 "Сначала выполните безопасную миграцию этого дерева в разделе восстановления." = "First migrate this tree safely in the Recovery section.";
 "Они лежат в папке архивов и не изменены. " = "They remain unchanged in the archive folder. ";
-"Откройте «Показать в Finder», чтобы посмотреть или скопировать их." = "Use ‘Show in Finder’ to view or copy them.";
+"Откройте «Показать в Finder», чтобы посмотреть или скопировать их." = "Use “Show in Finder” to view or copy them.";
 
 /* Generated domain messages */
 "Некорректная строка GEDCOM: %@." = "Invalid GEDCOM line: %@.";
@@ -636,14 +636,14 @@
 "Предполагаемая мать" = "Uncertain Mother";
 "Предполагаемый родитель" = "Uncertain Parent";
 "Приёмный сын" = "Adoptive Son";
-"Приёмный дочь" = "Adoptive Daughter";
+"Приёмная дочь" = "Adoptive Daughter";
 "Приёмный ребёнок" = "Adoptive Child";
 "Ребёнок под опекой" = "Foster Child";
 "Пасынок" = "Stepson";
 "Падчерица" = "Stepdaughter";
 "Неродной ребёнок" = "Stepchild";
 "Предполагаемый сын" = "Uncertain Son";
-"Предполагаемый дочь" = "Uncertain Daughter";
+"Предполагаемая дочь" = "Uncertain Daughter";
 "Предполагаемый ребёнок" = "Uncertain Child";
 "Невестка" = "Daughter-in-law";
 "Зять" = "Son-in-law";

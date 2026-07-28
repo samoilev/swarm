@@ -171,9 +171,9 @@ public struct GEDCOMSerializer {
             }
 
             // Photo — referenced by filename here. The bytes are returned in
-            // `Result.photos` (for the caller to persist) ONLY when they actually
-            // changed this session, so an unchanged portrait is never force-loaded from
-            // disk just to rewrite an identical file.
+            // `Result.photos` (for the caller to persist) only when they changed this
+            // session, so an unchanged portrait is never force-loaded from
+            // disk solely to rewrite an identical file.
             if p.hasPhoto {
                 let filename = p.photoFilename ?? "\(xref).jpg"
                 lines.append("1 OBJE")

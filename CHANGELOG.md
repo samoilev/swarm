@@ -11,6 +11,10 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Fixed
+
+- Corrected the Russian feminine labels for adoptive and uncertain daughters.
+
 ### Changed
 
 - Renamed the project to **Swarm**. Existing data is migrated automatically on first

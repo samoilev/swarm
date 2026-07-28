@@ -170,7 +170,7 @@ public final class Person: Identifiable, Codable, Hashable {
             education: education
         )
         self.citations = []
-        // Only touch photo state when bytes are actually supplied, so a plain new
+        // Only touch photo state when bytes are supplied, so a plain new
         // person isn't flagged dirty (which would force an unnecessary photo rewrite).
         if let photoData { loadedPhoto = .some(photoData); photoIsDirty = true }
         self.createdAt = Date()

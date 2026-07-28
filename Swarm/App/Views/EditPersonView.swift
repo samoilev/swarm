@@ -502,7 +502,7 @@ struct EditPersonView: View {
         editingTree.unions.removeAll { union in
             union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) && union.childrenIds.isEmpty
         }
-        // If union has children, just remove the partner link
+        // If the union has children, remove only the partner link.
         for union in editingTree.unions {
             if union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) {
                 if union.partner1Id == spouse.id { union.partner1Id = nil }

@@ -283,10 +283,10 @@ public struct RelationshipCalculator {
         let base = gendered(person, male: "сын", female: "дочь", neutral: "ребёнок")
         switch kind {
         case .biological: return base.prefix(1).uppercased() + String(base.dropFirst())
-        case .adoptive: return "Приёмный \(base)"
+        case .adoptive: return gendered(person, male: "Приёмный сын", female: "Приёмная дочь", neutral: "Приёмный ребёнок")
         case .foster: return "Ребёнок под опекой"
         case .step: return gendered(person, male: "Пасынок", female: "Падчерица", neutral: "Неродной ребёнок")
-        case .uncertain: return "Предполагаемый \(base)"
+        case .uncertain: return gendered(person, male: "Предполагаемый сын", female: "Предполагаемая дочь", neutral: "Предполагаемый ребёнок")
         }
     }
 

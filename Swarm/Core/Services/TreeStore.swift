@@ -1086,7 +1086,7 @@ public final class TreeStore {
     }
 
     /// Export a faithful copy of a tree (.ged + photos + attachments) into a `<name>/`
-    /// bundle inside the chosen directory, so it can be re-imported later. Does NOT
+    /// bundle inside the chosen directory, so it can be re-imported later. Does not
     /// remove the tree — the caller decides whether to follow with `deleteTree`.
     /// Returns the bundle URL.
     @discardableResult

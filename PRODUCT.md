@@ -1,9 +1,5 @@
 # Product
 
-## Register
-
-product
-
 ## Users
 
 Russian-speaking people building and preserving their family history — from one
@@ -22,11 +18,11 @@ tree in and out of other genealogy tools without losing anything via GEDCOM.
 A native macOS app to build, validate, recover, visualize, merge, and export family
 trees, with GEDCOM 5.5.1 as the source of truth and offline-first local storage.
 
-Success looks like a trustworthy, lasting home for family history: Russian kinship
-naming that's actually correct (direct lineage, full/half siblings, cousins incl.
-removed, in-laws), clean tree / fan-chart / map visualizations, lossless GEDCOM
-interop with Ancestry, Gramps, and MyHeritage, and durable local storage where
-identity lives inside the file (`_TREEID`) so trees survive being renamed or moved.
+Success means a trustworthy, lasting home for family history: correct Russian kinship
+naming (direct lineage, full and half siblings, removed cousins, and in-laws), clear
+tree, fan-chart, and map views, lossless GEDCOM interop with Ancestry, Gramps, and
+MyHeritage, and durable local storage. Identity lives inside the file (`_TREEID`), so
+trees survive being renamed or moved.
 
 ## Brand Personality
 
@@ -71,7 +67,5 @@ decorative nostalgia or period kitsch. Three words: **warm, archival, trustworth
 - **Bilingual UI (Russian and English).** Russian remains the default and source
   language. Both interfaces must stay idiomatic, including kinship terminology,
   generated labels, accessibility text, error states, and exported presentation copy.
-- **Known consideration (not yet a commitment):** the male/female card tints
-  (`cardBgMale` / `cardBgFemale`, `cardLineMale` / `cardLineFemale`) currently
-  signal sex through color alone, which color-blind users may not perceive. Worth a
-  non-color cue (label, icon, or shape) if/when this becomes a priority.
+- **Sex is not shown through color alone.** Tree cards pair their tint with a text
+  glyph, and VoiceOver descriptions include sex when known.
