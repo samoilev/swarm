@@ -98,7 +98,9 @@ struct TimelineWorkspaceView: View {
 
     private var entries: [TimelineEntry] {
         index.timelineEntries.filter { entry in
-            (query.isEmpty || entry.personName.localizedStandardContains(query) || entry.place?.displayName.localizedStandardContains(query) == true) &&
+            (query.isEmpty
+                || entry.personName.localizedStandardContains(query)
+                || presentedPlace(entry.place)?.localizedStandardContains(query) == true) &&
                 (kind == nil || entry.kind == kind) &&
                 (Int(fromYear).map { (entry.sortYear ?? Int.min) >= $0 } ?? true) &&
                 (Int(toYear).map { (entry.sortYear ?? Int.max) <= $0 } ?? true)
@@ -121,10 +123,13 @@ struct TimelineWorkspaceView: View {
                 ForEach(entries) { entry in
                     Button { selectedPerson = entry.personID.flatMap { tree.person(byId: $0) } } label: {
                         HStack(spacing: 14) {
-                            Text(entry.date?.displayValue ?? "—").font(SepiaTheme.ui(size: 12)).foregroundStyle(SepiaTheme.accent2).frame(width: 130, alignment: .leading)
+                            Text(entry.date?.displayValue(language: .current) ?? "—")
+                                .font(SepiaTheme.ui(size: 12))
+                                .foregroundStyle(SepiaTheme.accent2)
+                                .frame(width: 130, alignment: .leading)
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(entry.personName).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                                Text([eventName(entry.kind), entry.place?.displayName].compactMap { $0 }.joined(separator: " · "))
+                                Text([eventName(entry.kind), presentedPlace(entry.place)].compactMap { $0 }.joined(separator: " · "))
                                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                             }
                             Spacer()
@@ -134,6 +139,11 @@ struct TimelineWorkspaceView: View {
                 }
             }
         }
+    }
+
+    private func presentedPlace(_ place: PlaceReference?) -> String? {
+        guard let place else { return nil }
+        return PlacesDatabase.shared.presentationName(for: place, language: .current)
     }
 }
 
@@ -146,7 +156,7 @@ struct PlacesWorkspaceView: View {
 
     private var entries: [PlaceWorkspaceEntry] {
         index.placeEntries.filter {
-            (query.isEmpty || $0.place.displayName.localizedStandardContains(query)) &&
+            (query.isEmpty || placeName($0.place).localizedCaseInsensitiveContains(query)) &&
                 (!unpinnedOnly || !$0.place.hasValidCoordinates)
         }
     }
@@ -164,14 +174,20 @@ struct PlacesWorkspaceView: View {
                         Image(systemName: entry.place.hasValidCoordinates ? "mappin.circle.fill" : "mappin.slash")
                             .foregroundStyle(entry.place.hasValidCoordinates ? SepiaTheme.pinBirth : SepiaTheme.accent)
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(entry.place.displayName).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                            Text(L10n.tr("\(entry.eventCount) событ. · \(entry.personIDs.count) чел.\(entry.place.isCustom ? L10n.tr(" · пользовательское") : "")"))
+                            Text(placeName(entry.place))
+                                .font(SepiaTheme.body(size: 15))
+                                .foregroundStyle(SepiaTheme.ink)
+                            Text(
+                                "\(L10n.count(entry.eventCount, .event)) · "
+                                    + "\(L10n.count(entry.personIDs.count, .person))"
+                                    + (entry.place.isCustom ? L10n.tr(" · пользовательское") : "")
+                            )
                                 .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                         }
                         Spacer()
                         ForEach(entry.personIDs.prefix(3), id: \.self) { id in
                             if let person = tree.person(byId: id) {
-                                Button(person.surname.isEmpty ? person.givenNames : person.surname) { selectedPerson = person }
+                                Button(person.displayName(language: .current)) { selectedPerson = person }
                                     .buttonStyle(.borderless).font(SepiaTheme.ui(size: 11))
                             }
                         }
@@ -180,6 +196,10 @@ struct PlacesWorkspaceView: View {
                 }
             }
         }
+    }
+
+    private func placeName(_ place: PlaceReference) -> String {
+        PlacesDatabase.shared.presentationName(for: place, language: .current)
     }
 }
 
@@ -197,10 +217,19 @@ struct ReviewWorkspaceView: View {
             "\(issue.severity.rawValue):\(issue.personID?.uuidString ?? "general")"
         }
         return grouped.map { key, values in
-            let personName = values.first?.personID.flatMap { tree.person(byId: $0)?.listName } ?? L10n.tr("Общие")
+            let personName = values.first?.personID.flatMap {
+                tree.person(byId: $0)?.displayName(language: .current)
+            } ?? L10n.tr("Общие")
             let severity = values.first?.severity == .error ? L10n.tr("Ошибки") : L10n.tr("Предупреждения")
             return ReviewIssueGroup(id: key, title: "\(severity) · \(personName)", issues: values)
-        }.sorted { $0.title.localizedStandardCompare($1.title) == .orderedAscending }
+        }.sorted {
+            $0.title.compare(
+                $1.title,
+                options: [.caseInsensitive, .diacriticInsensitive],
+                range: nil,
+                locale: AppLanguage.current.locale
+            ) == .orderedAscending
+        }
     }
 
     var body: some View {
@@ -259,7 +288,10 @@ struct ReviewWorkspaceView: View {
             Image(systemName: "person.2.badge.questionmark").foregroundStyle(SepiaTheme.accent2)
             VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.tr("Возможный дубликат")).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                Text("\(first?.listName ?? "?") · \(second?.listName ?? "?")")
+                Text(
+                    "\(first?.displayName(language: .current) ?? "?") · "
+                        + "\(second?.displayName(language: .current) ?? "?")"
+                )
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                 Text(suggestion.reasons.joined(separator: ", ")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
             }

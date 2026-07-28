@@ -73,7 +73,7 @@ struct RelationshipView: View {
         .onAppear {
             if let p = preselectedPerson {
                 personA = p
-                searchA = p.listName
+                searchA = p.displayName(language: .current)
             }
         }
     }
@@ -87,7 +87,7 @@ struct RelationshipView: View {
 
             if let person = selected.wrappedValue {
                 HStack {
-                    Text(person.listName)
+                    Text(person.displayName(language: .current))
                         .font(SepiaTheme.body(size: 14))
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
@@ -120,11 +120,11 @@ struct RelationshipView: View {
                                 ForEach(filtered.prefix(8), id: \.id) { person in
                                     Button {
                                         selected.wrappedValue = person
-                                        search.wrappedValue = person.listName
+                                        search.wrappedValue = person.displayName(language: .current)
                                         result = nil
                                     } label: {
                                         HStack {
-                                            Text(person.listName)
+                                            Text(person.displayName(language: .current))
                                                 .font(SepiaTheme.body(size: 13))
                                                 .foregroundColor(SepiaTheme.ink)
                                             Spacer()
@@ -162,7 +162,7 @@ struct RelationshipView: View {
             person.fullName.lowercased().contains(q) ||
                 person.surname.lowercased().contains(q) ||
                 person.givenNames.lowercased().contains(q)
-        }.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
+        }.sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
     }
 
     private func resultView(_ result: RelationshipCalculator.RelationshipResult) -> some View {
@@ -183,7 +183,7 @@ struct RelationshipView: View {
             }
 
             if result.path.count > 1 {
-                Text(L10n.tr("Шагов в дереве: \(result.path.count - 1)"))
+                Text(L10n.tr("В дереве: \(L10n.count(result.path.count - 1, .step))"))
                     .font(SepiaTheme.ui(size: 11))
                     .foregroundColor(SepiaTheme.inkSoft)
             }

@@ -8,6 +8,7 @@ struct OfflineVectorMapView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
 
     @State private var annotations: [OfflineMapAnnotation] = []
     @State private var routes: [OfflineMapRoute] = []
@@ -15,6 +16,7 @@ struct OfflineVectorMapView: View {
     @State private var mapScale: CGFloat = 2.4
     @State private var scaleAtGestureStart: CGFloat = 2.4
     @State private var expandedClusterID: String?
+    @State private var placeIndexRevision = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -23,6 +25,7 @@ struct OfflineVectorMapView: View {
                     drawBackground(context: &context, size: size)
                     drawRoutes(context: &context, size: size)
                 }
+                .id("\(languageRaw)-\(placeIndexRevision)")
                 .contentShape(Rectangle())
                 .gesture(dragGesture(size: proxy.size))
                 .simultaneousGesture(magnificationGesture)
@@ -60,11 +63,17 @@ struct OfflineVectorMapView: View {
             .onAppear {
                 resolveAnnotations()
                 fit(size: proxy.size)
+                PlacesDatabase.shared.whenReady {
+                    placeIndexRevision += 1
+                    resolveAnnotations()
+                    fit(size: proxy.size)
+                }
             }
             .onChange(of: tree.layoutVersion) { _, _ in
                 resolveAnnotations()
                 fit(size: proxy.size)
             }
+            .onChange(of: languageRaw) { _, _ in resolveAnnotations() }
             .onChange(of: fitRequest) { _, _ in fit(size: proxy.size) }
             .onChange(of: zoom) { oldValue, newValue in
                 guard oldValue > 0 else { return }
@@ -175,13 +184,85 @@ struct OfflineVectorMapView: View {
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.28)), lineWidth: 0.45)
         }
 
-        for label in OfflineWorldOutline.labels {
-            let point = project(label.coordinate, size: size)
+        drawPlaceLabels(context: &context, size: size)
+    }
+
+    private func drawPlaceLabels(context: inout GraphicsContext, size: CGSize) {
+        guard PlacesDatabase.shared.isReady, size.width > 0, size.height > 0 else { return }
+        let tier: PlaceLabelTier = if mapScale <= 1.4 {
+            .world
+        } else if mapScale <= 4 {
+            .regional
+        } else if mapScale <= 12 {
+            .city
+        } else {
+            .close
+        }
+        let bounds = visibleBounds(size: size)
+        let language = AppLanguage(rawValue: languageRaw) ?? .default
+        let candidates = PlacesDatabase.shared.mapLabels(
+            tier: tier,
+            bounds: bounds,
+            language: language
+        )
+        var occupied: [CGRect] = []
+        occupied.reserveCapacity(tier.maximumLabels)
+
+        for place in candidates {
+            guard let latitude = place.latitude, let longitude = place.longitude else { continue }
+            let point = project(
+                OfflineCoordinate(latitude: latitude, longitude: longitude),
+                size: size
+            )
+            guard point.x >= 0, point.x <= size.width, point.y >= 0, point.y <= size.height else {
+                continue
+            }
+            let name = place.name(language: language)
+            let width = min(170, max(34, CGFloat(name.count) * 6.2 + 10))
+            let rect = CGRect(
+                x: point.x - width / 2,
+                y: point.y - 8,
+                width: width,
+                height: 16
+            )
+            guard !occupied.contains(where: { $0.insetBy(dx: -3, dy: -2).intersects(rect) }) else {
+                continue
+            }
             context.draw(
-                Text(label.name).font(SepiaTheme.ui(size: 9)).foregroundColor(SepiaTheme.inkSoft.opacity(0.8)),
+                Text(name)
+                    .font(SepiaTheme.ui(size: tier == .close ? 10 : 9))
+                    .foregroundColor(SepiaTheme.inkSoft.opacity(0.86)),
                 at: point
             )
+            occupied.append(rect)
+            if occupied.count >= tier.maximumLabels { break }
         }
+    }
+
+    private func visibleBounds(size: CGSize) -> PlaceBounds {
+        let horizontalHalfSpan = 0.5 / Double(mapScale)
+        let verticalHalfSpan = Double(size.height / max(1, size.width))
+            * 0.5 / Double(mapScale)
+        let minimumX = Double(center.x) - horizontalHalfSpan
+        let maximumX = Double(center.x) + horizontalHalfSpan
+        let topY = Double(center.y) - verticalHalfSpan
+        let bottomY = Double(center.y) + verticalHalfSpan
+
+        func longitude(_ normalizedX: Double) -> Double {
+            let wrapped = normalizedX - floor(normalizedX)
+            return wrapped * 360 - 180
+        }
+        func latitude(_ normalizedY: Double) -> Double {
+            let clamped = min(1, max(0, normalizedY))
+            return atan(sinh(.pi * (1 - 2 * clamped))) * 180 / .pi
+        }
+        let showsWholeWorld = horizontalHalfSpan * 2 >= 1
+        return PlaceBounds(
+            minimumLatitude: latitude(bottomY),
+            maximumLatitude: latitude(topY),
+            minimumLongitude: showsWholeWorld ? -180 : longitude(minimumX),
+            maximumLongitude: showsWholeWorld ? 180 : longitude(maximumX)
+        )
     }
 
     private func drawRoutes(context: inout GraphicsContext, size: CGSize) {
@@ -241,8 +322,8 @@ struct OfflineVectorMapView: View {
             if let birth {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
-                    personName: person.listName,
-                    placeName: person.birthPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .birth, fallback: person.birthPlace),
                     kind: .birth,
                     coordinate: birth
                 ))
@@ -250,8 +331,8 @@ struct OfflineVectorMapView: View {
             if let death {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
-                    personName: person.listName,
-                    placeName: person.deathPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .death, fallback: person.deathPlace),
                     kind: .death,
                     coordinate: death
                 ))
@@ -259,8 +340,8 @@ struct OfflineVectorMapView: View {
             if let burial {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
-                    personName: person.listName,
-                    placeName: person.burialPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .burial, fallback: person.burialPlace),
                     kind: .burial,
                     coordinate: burial
                 ))
@@ -270,6 +351,15 @@ struct OfflineVectorMapView: View {
         }
         annotations = result
         routes = newRoutes
+    }
+
+    private func presentationPlace(
+        _ person: Person,
+        kind: GenealogyEvent.Kind,
+        fallback: String?
+    ) -> String {
+        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
+        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func coordinate(latitude: Double?, longitude: Double?, place: String?) -> OfflineCoordinate? {
@@ -388,17 +478,29 @@ struct OfflinePersonMiniMap: View {
         var result: [OfflineMapAnnotation] = []
         if let coordinate = miniCoordinate(person.birthLat, person.birthLon, person.birthPlace) {
             result.append(OfflineMapAnnotation(
-                personID: person.id, personName: person.listName, placeName: person.birthPlace ?? "",
+                personID: person.id,
+                personName: person.displayName(language: .current),
+                placeName: presentationPlace(.birth, fallback: person.birthPlace),
                 kind: .birth, coordinate: coordinate
             ))
         }
         if let coordinate = miniCoordinate(person.deathLat, person.deathLon, person.deathPlace) {
             result.append(OfflineMapAnnotation(
-                personID: person.id, personName: person.listName, placeName: person.deathPlace ?? "",
+                personID: person.id,
+                personName: person.displayName(language: .current),
+                placeName: presentationPlace(.death, fallback: person.deathPlace),
                 kind: .death, coordinate: coordinate
             ))
         }
         return result
+    }
+
+    private func presentationPlace(
+        _ kind: GenealogyEvent.Kind,
+        fallback: String?
+    ) -> String {
+        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
+        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func miniCoordinate(_ latitude: Double?, _ longitude: Double?, _ place: String?) -> OfflineCoordinate? {
@@ -453,7 +555,7 @@ private struct OfflineMapCluster: Identifiable {
     var color: Color { annotations.first?.kind.color ?? SepiaTheme.accent }
     var accessibilityLabel: String {
         if annotations.count == 1 { return "\(annotations[0].personName), \(annotations[0].kind.label)" }
-        return L10n.tr("\(annotations.count) событий в одном месте")
+        return L10n.tr("\(L10n.count(annotations.count, .event)) в одном месте")
     }
 }
 
@@ -477,19 +579,4 @@ private enum OfflineMapPinKind: String {
         case .burial: L10n.tr("Захоронение")
         }
     }
-}
-
-private enum OfflineWorldOutline {
-    struct Label {
-        let name: String
-        let coordinate: OfflineCoordinate
-    }
-
-    static let labels: [Label] = [
-        Label(name: L10n.tr("Москва"), coordinate: OfflineCoordinate(latitude: 55.7558, longitude: 37.6173)),
-        Label(name: L10n.tr("Санкт-Петербург"), coordinate: OfflineCoordinate(latitude: 59.9343, longitude: 30.3351)),
-        Label(name: L10n.tr("Киев"), coordinate: OfflineCoordinate(latitude: 50.4501, longitude: 30.5234)),
-        Label(name: L10n.tr("Минск"), coordinate: OfflineCoordinate(latitude: 53.9006, longitude: 27.5590)),
-        Label(name: L10n.tr("Алматы"), coordinate: OfflineCoordinate(latitude: 43.2389, longitude: 76.8897)),
-    ]
 }

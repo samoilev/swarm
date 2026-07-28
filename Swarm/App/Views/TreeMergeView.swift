@@ -139,8 +139,9 @@ struct TreeMergeView: View {
     }
 
     private func matchRow(_ match: MergePersonMatch, selected: Bool, toggle: (() -> Void)?) -> some View {
-        let local = localTree.person(byId: match.localPersonID)?.listName ?? "?"
-        let incoming = preview?.incomingTree.person(byId: match.incomingPersonID)?.listName ?? "?"
+        let local = localTree.person(byId: match.localPersonID)?.displayName(language: .current) ?? "?"
+        let incoming = preview?.incomingTree.person(byId: match.incomingPersonID)?
+            .displayName(language: .current) ?? "?"
         return HStack(spacing: 10) {
             if let toggle { Toggle("", isOn: Binding(get: { selected }, set: { _ in toggle() })).labelsHidden() }
             else { Image(systemName: "checkmark.seal.fill").foregroundStyle(SepiaTheme.pinBirth) }

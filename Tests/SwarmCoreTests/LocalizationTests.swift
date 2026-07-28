@@ -36,6 +36,48 @@ struct LocalizationTests {
         #expect(current.string(forKey: AppLanguage.storageKey) == AppLanguage.russian.rawValue)
     }
 
+    @Test func pristineInstallsRequireAChoiceWhileExistingLibrariesStayRussian() throws {
+        let suiteName = "swarm-choice-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        AppLanguage.prepareInitialChoice(hasExistingLibrary: false, defaults: defaults)
+        #expect(defaults.bool(forKey: AppLanguage.choiceCompletedKey) == false)
+        #expect(defaults.string(forKey: AppLanguage.storageKey) == nil)
+
+        AppLanguage.prepareInitialChoice(hasExistingLibrary: true, defaults: defaults)
+        #expect(defaults.bool(forKey: AppLanguage.choiceCompletedKey))
+        #expect(defaults.string(forKey: AppLanguage.storageKey) == AppLanguage.russian.rawValue)
+    }
+
+    @Test func countedNounsFollowRussianAndEnglishPluralRules() {
+        #expect(L10n.count(1, .person, language: .english) == "1 person")
+        #expect(L10n.count(2, .person, language: .english) == "2 people")
+        #expect(L10n.count(1, .tree, language: .english) == "1 tree")
+        #expect(L10n.count(1, .event, language: .russian) == "1 событие")
+        #expect(L10n.count(2, .event, language: .russian) == "2 события")
+        #expect(L10n.count(5, .event, language: .russian) == "5 событий")
+        #expect(L10n.count(21, .generation, language: .russian) == "21 поколение")
+    }
+
+    @Test func appDatesUseTheSelectedLanguageInsteadOfTheMacLocale() throws {
+        var components = DateComponents()
+        components.calendar = Calendar(identifier: .gregorian)
+        components.timeZone = TimeZone(secondsFromGMT: 0)
+        components.year = 2026
+        components.month = 7
+        components.day = 28
+        components.hour = 13
+        components.minute = 45
+        let date = try #require(components.date)
+
+        let english = AppLanguage.english.formatted(date, dateStyle: .medium, timeStyle: .short)
+        let russian = AppLanguage.russian.formatted(date, dateStyle: .medium, timeStyle: .short)
+        #expect(english != russian)
+        #expect(english.range(of: #"[А-Яа-яЁё]"#, options: .regularExpression) == nil)
+        #expect(russian.range(of: #"[А-Яа-яЁё]"#, options: .regularExpression) != nil)
+    }
+
     @Test func translatesGeneratedKinshipCopy() {
         #expect(L10n.dynamic("Двоюродная сестра", language: .english) == "First Cousin")
         #expect(L10n.dynamic("5-й предок", language: .english) == "5th-generation ancestor")
@@ -53,6 +95,28 @@ struct LocalizationTests {
 
         let report = "No English translation for \(missing.count) key(s):\n" + missing.joined(separator: "\n")
         #expect(missing.isEmpty, "\(report)")
+    }
+
+    @Test func englishCatalogueHasNoEmptyValuesAndKeepsPlaceholderParity() throws {
+        let catalogue = try LocalizationCatalogue.load()
+        let allowedIdentical = Set(["Swarm"])
+        for (key, value) in catalogue {
+            #expect(!value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            #expect(key != value || allowedIdentical.contains(key), "Untranslated English value: \(key)")
+            #expect(
+                key.components(separatedBy: "%@").count
+                    == value.components(separatedBy: "%@").count,
+                "Placeholder mismatch for \(key)"
+            )
+        }
+    }
+
+    @Test func englishCatalogueDoesNotLeakCyrillic() throws {
+        let catalogue = try LocalizationCatalogue.load()
+        for (key, value) in catalogue {
+            #expect(value.range(of: #"[А-Яа-яЁё]"#, options: .regularExpression) == nil)
+            #expect(!key.isEmpty)
+        }
     }
 }
 

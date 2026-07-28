@@ -1,6 +1,6 @@
 import Foundation
 
-/// Computes direct lineage and Russian kinship labels relative to a selected person
+/// Computes direct lineage and language-neutral kinship descriptors relative to a person.
 public struct LineageCalculator {
     public let index: FamilyIndex
 
@@ -9,145 +9,134 @@ public struct LineageCalculator {
     }
 
     public struct LineageResult {
-        /// All person IDs in the direct lineage
         public var ids: Set<UUID>
-        /// Relationship label for each person relative to the selected one
         public var labels: [UUID: String]
+        public var descriptors: [UUID: KinshipDescriptor]
     }
 
-    /// Compute all direct ancestors and descendants of the given person, with kinship labels
-    public func compute(for person: Person) -> LineageResult {
-        var ids = Set<UUID>()
-        var labels: [UUID: String] = [:]
+    public func compute(
+        for person: Person,
+        language: AppLanguage = .current
+    ) -> LineageResult {
+        var ids: Set<UUID> = [person.id]
+        var descriptors: [UUID: KinshipDescriptor] = [:]
+        var ancestorVisited: Set<UUID> = [person.id]
+        var descendantVisited: Set<UUID> = [person.id]
 
-        ids.insert(person.id)
-        labels[person.id] = "Я"
+        computeAncestors(
+            personID: person.id,
+            generation: 1,
+            parentage: [],
+            visited: &ancestorVisited,
+            ids: &ids,
+            descriptors: &descriptors
+        )
+        computeDescendants(
+            personID: person.id,
+            generation: 1,
+            parentage: [],
+            visited: &descendantVisited,
+            ids: &ids,
+            descriptors: &descriptors
+        )
 
-        // Traverse ancestors
-        computeAncestors(personId: person.id, generation: 1, ids: &ids, labels: &labels)
-
-        // Traverse descendants
-        computeDescendants(personId: person.id, generation: 1, ids: &ids, labels: &labels)
-
-        // Add spouses
         for spouse in index.spousesOf(person) {
             ids.insert(spouse.id)
-            labels[spouse.id] = spouse.sex == .male ? "Муж" : "Жена"
+            descriptors[spouse.id] = .spouse(sex: spouse.sex)
         }
 
-        return LineageResult(ids: ids, labels: labels.mapValues(L10n.dynamic))
+        let formatter = KinshipFormatter(language: language, style: .lineage)
+        var labels = descriptors.mapValues(formatter.label)
+        labels[person.id] = L10n.tr("Я", language: language)
+        return LineageResult(ids: ids, labels: labels, descriptors: descriptors)
     }
 
-    private func computeAncestors(personId: UUID, generation: Int, ids: inout Set<UUID>, labels: inout [UUID: String]) {
-        guard let person = index.byId[personId] else { return }
-        let parents = index.parentsOf(person)
-
-        if let father = parents.father {
-            ids.insert(father.id)
-            labels[father.id] = ancestorLabel(generation: generation, sex: .male)
-            computeAncestors(personId: father.id, generation: generation + 1, ids: &ids, labels: &labels)
-        }
-        if let mother = parents.mother {
-            ids.insert(mother.id)
-            labels[mother.id] = ancestorLabel(generation: generation, sex: .female)
-            computeAncestors(personId: mother.id, generation: generation + 1, ids: &ids, labels: &labels)
+    private func computeAncestors(
+        personID: UUID,
+        generation: Int,
+        parentage: [ParentageKind],
+        visited: inout Set<UUID>,
+        ids: inout Set<UUID>,
+        descriptors: inout [UUID: KinshipDescriptor]
+    ) {
+        for edge in index.parentEdges(of: personID) {
+            guard let parent = index.byId[edge.parentID],
+                  visited.insert(parent.id).inserted else { continue }
+            let pathKinds = uniqueParentage(
+                parentage + (edge.kind == .biological ? [] : [edge.kind])
+            )
+            ids.insert(parent.id)
+            descriptors[parent.id] = generation == 1
+                ? .parent(sex: parent.sex, kind: edge.kind)
+                : qualified(
+                    .ancestor(generation: generation, sex: parent.sex),
+                    by: pathKinds
+                )
+            computeAncestors(
+                personID: parent.id,
+                generation: generation + 1,
+                parentage: pathKinds,
+                visited: &visited,
+                ids: &ids,
+                descriptors: &descriptors
+            )
         }
     }
 
-    private func computeDescendants(personId: UUID, generation: Int, ids: inout Set<UUID>, labels: inout [UUID: String]) {
-        guard let person = index.byId[personId] else { return }
-        let children = index.childrenOf(person)
-
-        for child in children {
+    private func computeDescendants(
+        personID: UUID,
+        generation: Int,
+        parentage: [ParentageKind],
+        visited: inout Set<UUID>,
+        ids: inout Set<UUID>,
+        descriptors: inout [UUID: KinshipDescriptor]
+    ) {
+        for edge in index.childEdges(of: personID) {
+            guard let child = index.byId[edge.childID],
+                  visited.insert(child.id).inserted else { continue }
+            let pathKinds = uniqueParentage(
+                parentage + (edge.kind == .biological ? [] : [edge.kind])
+            )
             ids.insert(child.id)
-            labels[child.id] = descendantLabel(generation: generation, sex: child.sex)
+            descriptors[child.id] = generation == 1
+                ? .child(sex: child.sex, kind: edge.kind)
+                : qualified(
+                    .descendant(generation: generation, sex: child.sex),
+                    by: pathKinds
+                )
 
-            // Add child's spouse
-            let childSpouses = index.spousesOf(child)
-            for spouse in childSpouses {
+            for spouse in index.spousesOf(child) {
                 ids.insert(spouse.id)
-                labels[spouse.id] = childSpouseLabel(generation: generation, spouseSex: spouse.sex, descendantSex: child.sex)
+                descriptors[spouse.id] = qualified(
+                    .spouseOfDescendant(
+                        generation: generation,
+                        spouseSex: spouse.sex,
+                        descendantSex: child.sex
+                    ),
+                    by: pathKinds
+                )
             }
 
-            computeDescendants(personId: child.id, generation: generation + 1, ids: &ids, labels: &labels)
+            computeDescendants(
+                personID: child.id,
+                generation: generation + 1,
+                parentage: pathKinds,
+                visited: &visited,
+                ids: &ids,
+                descriptors: &descriptors
+            )
         }
     }
 
-    private func ancestorLabel(generation: Int, sex: Person.Sex) -> String {
-        if AppLanguage.current == .english {
-            switch generation {
-            case 1: return sex == .female ? "Mother" : "Father"
-            case 2: return sex == .female ? "Grandmother" : "Grandfather"
-            default:
-                return String(repeating: "great-", count: generation - 2) + (sex == .female ? "grandmother" : "grandfather")
-            }
-        }
-        switch generation {
-        case 1:
-            return sex == .female ? "Мать" : "Отец"
-        case 2:
-            return sex == .female ? "Бабушка" : "Дедушка"
-        case 3:
-            return sex == .female ? "Прабабушка" : "Прадедушка"
-        case 4:
-            return sex == .female ? "Прапрабабушка" : "Прапрадедушка"
-        default:
-            let prefix = String(repeating: "пра", count: generation - 1)
-            return sex == .female ? "\(prefix)бабушка" : "\(prefix)дедушка"
-        }
+    private func qualified(
+        _ descriptor: KinshipDescriptor,
+        by kinds: [ParentageKind]
+    ) -> KinshipDescriptor {
+        kinds.reduce(descriptor) { .qualified(base: $0, kind: $1) }
     }
 
-    private func descendantLabel(generation: Int, sex: Person.Sex) -> String {
-        if AppLanguage.current == .english {
-            switch generation {
-            case 1: return sex == .female ? "Daughter" : "Son"
-            case 2: return sex == .female ? "Granddaughter" : "Grandson"
-            default:
-                return String(repeating: "great-", count: generation - 2) + (sex == .female ? "granddaughter" : "grandson")
-            }
-        }
-        switch generation {
-        case 1:
-            return sex == .female ? "Дочь" : "Сын"
-        case 2:
-            return sex == .female ? "Внучка" : "Внук"
-        case 3:
-            return sex == .female ? "Правнучка" : "Правнук"
-        case 4:
-            return sex == .female ? "Праправнучка" : "Праправнук"
-        default:
-            let prefix = String(repeating: "пра", count: generation - 1)
-            return sex == .female ? "\(prefix)внучка" : "\(prefix)внук"
-        }
-    }
-
-    /// Label for the spouse of a descendant. Generation 1 keeps the traditional
-    /// Зять/Невестка; deeper generations are qualified by whom they married,
-    /// e.g. the husband of a granddaughter → «Муж внучки».
-    private func childSpouseLabel(generation: Int, spouseSex: Person.Sex, descendantSex: Person.Sex) -> String {
-        if AppLanguage.current == .english {
-            if generation == 1 { return spouseSex == .female ? "Daughter-in-law" : "Son-in-law" }
-            let descendant = descendantLabel(generation: generation, sex: descendantSex).lowercased()
-            return (spouseSex == .female ? "Wife of " : "Husband of ") + descendant
-        }
-        if generation == 1 {
-            return spouseSex == .female ? "Невестка" : "Зять"
-        }
-        let prefix = spouseSex == .female ? "Жена" : "Муж"
-        return "\(prefix) \(descendantGenitive(generation: generation, sex: descendantSex))"
-    }
-
-    /// Genitive form of a descendant term, for building spouse labels.
-    private func descendantGenitive(generation: Int, sex: Person.Sex) -> String {
-        let isF = sex == .female
-        switch generation {
-        case 1: return isF ? "дочери" : "сына"
-        case 2: return isF ? "внучки" : "внука"
-        case 3: return isF ? "правнучки" : "правнука"
-        case 4: return isF ? "праправнучки" : "праправнука"
-        default:
-            let prefix = String(repeating: "пра", count: generation - 1)
-            return isF ? "\(prefix)внучки" : "\(prefix)внука"
-        }
+    private func uniqueParentage(_ kinds: [ParentageKind]) -> [ParentageKind] {
+        var seen = Set<ParentageKind>()
+        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
     }
 }

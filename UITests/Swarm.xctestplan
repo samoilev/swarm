@@ -2,7 +2,19 @@
   "configurations" : [
     {
       "id" : "4FECBF1C-37C1-4A23-AF45-2E9161816B04",
-      "name" : "Internal UI",
+      "name" : "Russian UI",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "SWARM_UI_TESTING",
+            "value" : "1"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "D2A27F45-9AF2-4F02-A858-1A4CC76B7234",
+      "name" : "English UI",
       "options" : {
         "environmentVariableEntries" : [
           {

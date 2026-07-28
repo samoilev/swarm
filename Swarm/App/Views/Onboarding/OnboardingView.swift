@@ -11,6 +11,7 @@ import SwiftUI
 struct OnboardingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
 
     // The record
     @State private var treeName = ""
@@ -92,6 +93,11 @@ struct OnboardingView: View {
         .padding(.horizontal, 28)
         .padding(.top, 26)
         .padding(.bottom, 18)
+        .overlay(alignment: .topTrailing) {
+            LanguageSwitchControl()
+                .padding(.top, 14)
+                .padding(.trailing, 16)
+        }
     }
 
     private func stepTitle(_ step: Step) -> String {
@@ -168,18 +174,21 @@ struct OnboardingView: View {
 
             titledRule(L10n.tr("Первый человек"))
 
-            HStack(alignment: .top, spacing: 12) {
-                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                    .focused($focusedField, equals: .surname)
-                    .onSubmit { primaryAction() }
-                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                    .focused($focusedField, equals: .givenNames)
-                    .onSubmit { primaryAction() }
-            }
+            nameFields(
+                surname: $surname,
+                givenNames: $givenNames,
+                surnameFocus: .surname,
+                givenFocus: .givenNames,
+                givenPlaceholder: L10n.tr("напр. Иван")
+            )
             // Half width, so the name block reads as one two-column group instead of a
             // full-width field that looks more important than the given name.
             HStack(alignment: .top, spacing: 12) {
-                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                SepiaTextField(
+                    label: language == .english ? L10n.tr("ОТЧЕСТВО (необяз.)") : L10n.tr("ОТЧЕСТВО"),
+                    text: $patronymic,
+                    placeholder: L10n.tr("напр. Петрович")
+                )
                     .focused($focusedField, equals: .patronymic)
                     .onSubmit { primaryAction() }
                 Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
@@ -213,14 +222,13 @@ struct OnboardingView: View {
             }
 
             if let role {
-                HStack(alignment: .top, spacing: 12) {
-                    SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $relativeSurname, placeholder: L10n.tr("напр. Иванов"))
-                        .focused($focusedField, equals: .relativeSurname)
-                        .onSubmit { primaryAction() }
-                    SepiaTextField(label: L10n.tr("ИМЯ"), text: $relativeGivenNames, placeholder: role.givenNameExample)
-                        .focused($focusedField, equals: .relativeGivenNames)
-                        .onSubmit { primaryAction() }
-                }
+                nameFields(
+                    surname: $relativeSurname,
+                    givenNames: $relativeGivenNames,
+                    surnameFocus: .relativeSurname,
+                    givenFocus: .relativeGivenNames,
+                    givenPlaceholder: role.givenNameExample
+                )
                 validationMessage(for: .relativeGivenNames)
             }
 
@@ -236,10 +244,44 @@ struct OnboardingView: View {
     }
 
     private var firstPersonName: String {
-        let parts = [surname, givenNames, patronymic]
+        let components = language == .english
+            ? [givenNames, patronymic, surname]
+            : [surname, givenNames, patronymic]
+        let parts = components
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
         return parts.isEmpty ? L10n.tr("первый человек") : parts.joined(separator: " ")
+    }
+
+    @ViewBuilder
+    private func nameFields(
+        surname: Binding<String>,
+        givenNames: Binding<String>,
+        surnameFocus: Field,
+        givenFocus: Field,
+        givenPlaceholder: String
+    ) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            if language == .english {
+                SepiaTextField(label: L10n.tr("ИМЯ"), text: givenNames, placeholder: givenPlaceholder)
+                    .focused($focusedField, equals: givenFocus)
+                    .onSubmit { primaryAction() }
+                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: surname, placeholder: L10n.tr("напр. Иванов"))
+                    .focused($focusedField, equals: surnameFocus)
+                    .onSubmit { primaryAction() }
+            } else {
+                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: surname, placeholder: L10n.tr("напр. Иванов"))
+                    .focused($focusedField, equals: surnameFocus)
+                    .onSubmit { primaryAction() }
+                SepiaTextField(label: L10n.tr("ИМЯ"), text: givenNames, placeholder: givenPlaceholder)
+                    .focused($focusedField, equals: givenFocus)
+                    .onSubmit { primaryAction() }
+            }
+        }
+    }
+
+    private var language: AppLanguage {
+        AppLanguage(rawValue: languageRaw) ?? .default
     }
 
     /// Selecting a role is a toggle, and it carries a smart default: relatives who

@@ -4,15 +4,18 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Environment(TreeStore.self) private var store
+    @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
     @State private var selectedTree: FamilyTree?
     @State private var showOnboarding = false
     @State private var showGEDCOMImporter = false
     @State private var importError: String?
     @State private var pendingImportURL: URL?
     @State private var importPreview: ImportResult?
+    @State private var queuedOpenURL: URL?
     /// Confirmation the workspace shows once, on arrival, for a tree that was just
     /// written. Creating a whole family record used to be the app's only silent write.
     @State private var pendingToast: String?
+    @State private var showHelp = false
 
     private var gedcomType: UTType {
         UTType(filenameExtension: "ged") ?? .plainText
@@ -20,7 +23,9 @@ struct ContentView: View {
 
     var body: some View {
         Group {
-            if let tree = selectedTree {
+            if !languageChoiceCompleted {
+                LanguageChooserView()
+            } else if let tree = selectedTree {
                 MainWorkspace(
                     tree: tree,
                     store: store,
@@ -52,16 +57,27 @@ struct ContentView: View {
                 selectedTree = newTree
             }
         }
+        .sheet(isPresented: $showHelp) {
+            HelpView()
+        }
         // No auto-presented sheet on an empty library. The empty state itself offers
         // both ways in (create and import), which a modal that appears before the user
         // has seen the app cannot do.
         .onReceive(NotificationCenter.default.publisher(for: .newTreeRequested)) { _ in
-            showOnboarding = true
+            if languageChoiceCompleted { showOnboarding = true }
         }
         .onReceive(NotificationCenter.default.publisher(for: .openTreeRequested)) { note in
             guard let id = note.object as? UUID,
                   let tree = store.trees.first(where: { $0.id == id }) else { return }
             selectedTree = tree
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .helpRequested)) { _ in
+            showHelp = true
+        }
+        .onChange(of: languageChoiceCompleted) { _, completed in
+            guard completed, let url = queuedOpenURL else { return }
+            queuedOpenURL = nil
+            previewGEDCOM(from: url)
         }
         .fileImporter(isPresented: $showGEDCOMImporter, allowedContentTypes: [gedcomType]) { result in
             switch result {
@@ -77,7 +93,13 @@ struct ContentView: View {
                 ImportPreviewView(result: importPreview, onCancel: cancelImportPreview, onImport: commitImportPreview)
             }
         }
-        .onOpenURL { url in previewGEDCOM(from: url) }
+        .onOpenURL { url in
+            if languageChoiceCompleted {
+                previewGEDCOM(from: url)
+            } else {
+                queuedOpenURL = url
+            }
+        }
         .alert(L10n.tr("Не удалось импортировать файл"), isPresented: Binding(
             get: { importError != nil },
             set: { if !$0 { importError = nil } }

@@ -55,6 +55,12 @@ struct RelationshipTests {
         RelationshipCalculator(tree: f.tree).relationship(from: f.people[a]!, to: f.people[b]!)?.name
     }
 
+    private func name(from a: String, to b: String, in f: Fixture, language: AppLanguage) -> String? {
+        RelationshipCalculator(tree: f.tree)
+            .relationship(from: f.people[a]!, to: f.people[b]!, language: language)?
+            .name
+    }
+
     @Test func directAncestorsAndDescendants() {
         let f = Fixture()
         #expect(name(from: "me", to: "father", in: f) == "Отец")
@@ -125,5 +131,143 @@ struct RelationshipTests {
         f.tree.people.append(stranger)
         let result = try RelationshipCalculator(tree: f.tree).relationship(from: #require(f.people["me"]), to: stranger)
         #expect(result?.name == "Связь не найдена")
+    }
+
+    @Test func englishRelationshipsAreFormattedFromDescriptors() {
+        let f = Fixture()
+        #expect(name(from: "me", to: "father", in: f, language: .english) == "Father")
+        #expect(name(from: "me", to: "sister", in: f, language: .english) == "Sister")
+        #expect(name(from: "me", to: "halfBro", in: f, language: .english) == "Paternal Half-brother")
+        #expect(name(from: "me", to: "cousin", in: f, language: .english) == "First Cousin")
+        #expect(name(from: "me", to: "wifeFather", in: f, language: .english) == "Father-in-law")
+        #expect(name(from: "father", to: "wife", in: f, language: .english) == "Daughter-in-law")
+        #expect(KinshipFormatter(language: .english).label(
+            for: .parent(sex: .unknown, kind: .biological)
+        ) == "Parent")
+        #expect(KinshipFormatter(language: .english).label(
+            for: .descendant(generation: 2, sex: .unknown)
+        ) == "Grandchild")
+    }
+
+    @Test func firstCousinTwiceRemovedWorksInBothDirections() {
+        let tree = FamilyTree(name: "Removed cousins")
+        let root = Person(givenNames: "Root", sex: .unknown)
+        let a1 = Person(givenNames: "A1", sex: .unknown)
+        let b1 = Person(givenNames: "B1", sex: .unknown)
+        let subject = Person(givenNames: "Subject", sex: .unknown)
+        let b2 = Person(givenNames: "B2", sex: .unknown)
+        let b3 = Person(givenNames: "B3", sex: .unknown)
+        let cousin = Person(givenNames: "Cousin", sex: .unknown)
+        tree.people = [root, a1, b1, subject, b2, b3, cousin]
+        tree.parentLinks = [
+            ParentLink(parentID: root.id, childID: a1.id),
+            ParentLink(parentID: root.id, childID: b1.id),
+            ParentLink(parentID: a1.id, childID: subject.id),
+            ParentLink(parentID: b1.id, childID: b2.id),
+            ParentLink(parentID: b2.id, childID: b3.id),
+            ParentLink(parentID: b3.id, childID: cousin.id),
+        ]
+
+        let calculator = RelationshipCalculator(tree: tree)
+        let younger = calculator.relationship(from: subject, to: cousin, language: .english)
+        let older = calculator.relationship(from: cousin, to: subject, language: .english)
+        #expect(younger?.name == "First Cousin Twice Removed")
+        #expect(older?.name == "First Cousin Twice Removed")
+        #expect(younger?.descriptor == .cousin(
+            degree: 1,
+            removed: 2,
+            direction: .younger,
+            sex: .unknown
+        ))
+        #expect(older?.descriptor == .cousin(
+            degree: 1,
+            removed: 2,
+            direction: .older,
+            sex: .unknown
+        ))
+    }
+
+    @Test func bilingualFormatterCoversGenerationsParentageNeutralSexAndRemovedCousins() {
+        let english = KinshipFormatter(language: .english)
+        let russian = KinshipFormatter(language: .russian)
+
+        for generation in 1 ... 6 {
+            #expect(!english.label(for: .ancestor(generation: generation, sex: .unknown)).isEmpty)
+            #expect(!english.label(for: .descendant(generation: generation, sex: .unknown)).isEmpty)
+            #expect(!russian.label(for: .ancestor(generation: generation, sex: .unknown)).isEmpty)
+            #expect(!russian.label(for: .descendant(generation: generation, sex: .unknown)).isEmpty)
+        }
+        for kind in ParentageKind.allCases {
+            #expect(!english.label(for: .parent(sex: .unknown, kind: kind)).isEmpty)
+            #expect(!english.label(for: .child(sex: .unknown, kind: kind)).isEmpty)
+            #expect(!russian.label(for: .parent(sex: .unknown, kind: kind)).isEmpty)
+            #expect(!russian.label(for: .child(sex: .unknown, kind: kind)).isEmpty)
+        }
+
+        let ordinals = ["First", "Second", "Third", "Fourth"]
+        let removals = ["Once", "Twice", "Three Times"]
+        for degree in 1 ... 4 {
+            for removed in 1 ... 3 {
+                for direction in [
+                    KinshipDescriptor.CousinDirection.younger,
+                    .older,
+                ] {
+                    let descriptor = KinshipDescriptor.cousin(
+                        degree: degree,
+                        removed: removed,
+                        direction: direction,
+                        sex: .unknown
+                    )
+                    #expect(
+                        english.label(for: descriptor)
+                            == "\(ordinals[degree - 1]) Cousin \(removals[removed - 1]) Removed"
+                    )
+                    #expect(!russian.label(for: descriptor).isEmpty)
+                }
+            }
+        }
+    }
+
+    @Test func calculatedLineageKeepsEveryParentAndParentageKind() throws {
+        let expected: [(ParentageKind, String)] = [
+            (.biological, "Grandmother"),
+            (.adoptive, "Grandmother through adoption"),
+            (.foster, "Grandmother through foster care"),
+            (.step, "Grandmother through a step-family connection"),
+            (.uncertain, "Grandmother through uncertain parentage"),
+        ]
+
+        for (kind, label) in expected {
+            let tree = FamilyTree(name: kind.rawValue)
+            let subject = Person(givenNames: "Subject", sex: .unknown)
+            let parent = Person(givenNames: "Parent", sex: .male)
+            let otherFather = Person(givenNames: "Other", sex: .male)
+            let grandmother = Person(givenNames: "Grandmother", sex: .female)
+            tree.people = [subject, parent, otherFather, grandmother]
+            tree.parentLinks = [
+                ParentLink(parentID: parent.id, childID: subject.id, kind: kind),
+                ParentLink(parentID: otherFather.id, childID: subject.id, kind: .biological),
+                ParentLink(parentID: grandmother.id, childID: parent.id, kind: .biological),
+            ]
+
+            let index = FamilyIndex(tree: tree)
+            #expect(index.parentEdges(of: subject.id).count == 2)
+            #expect(
+                RelationshipCalculator(tree: tree)
+                    .relationship(from: subject, to: parent, language: .english)?
+                    .descriptor == .parent(sex: .male, kind: kind)
+            )
+            let relationship = try #require(
+                RelationshipCalculator(tree: tree)
+                    .relationship(from: subject, to: grandmother, language: .english)
+            )
+            #expect(relationship.name == label)
+
+            let lineage = LineageCalculator(index: index).compute(for: subject, language: .english)
+            #expect(lineage.ids.contains(parent.id))
+            #expect(lineage.ids.contains(otherFather.id))
+            #expect(lineage.descriptors[parent.id] == .parent(sex: .male, kind: kind))
+            #expect(lineage.labels[grandmother.id] == label)
+        }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct MapPrivacySettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
 
     var body: some View {
@@ -44,7 +45,7 @@ struct MapPrivacySettingsView: View {
 
             Section(L10n.tr("Локальные данные")) {
                 Text(L10n.tr("Поиск мест использует встроенный локальный индекс. Выбранный идентификатор, подпись и координаты сохраняются в GEDCOM, поэтому обновление справочника не перемещает историческое место."))
-                Text(L10n.tr("Справочник мест основан на GeoNames; в приложении хранится локальная производная выборка. Офлайн-карта использует встроенные упрощённые векторы Natural Earth 1:110m (public domain)."))
+                Text(L10n.tr("Справочник мест основан на GeoNames и охватывает бывший СССР, Европу и всю Северную Америку. Офлайн-карта использует встроенные упрощённые векторы Natural Earth 1:110m (public domain)."))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -69,7 +70,10 @@ struct MapPrivacySettingsView: View {
     private var languageBinding: Binding<AppLanguage> {
         Binding(
             get: { AppLanguage(rawValue: languageRaw) ?? .default },
-            set: { languageRaw = $0.rawValue }
+            set: {
+                languageRaw = $0.rawValue
+                languageChoiceCompleted = true
+            }
         )
     }
 }

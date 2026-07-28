@@ -157,15 +157,17 @@ final class SwarmUITests: XCTestCase {
     }
 
     private func createInitialTree() {
+        let newTree = app.buttons["Новое дерево"]
+        if newTree.waitForExistence(timeout: 2) { newTree.click() }
         let title = app.textFields["напр. Семья Ивановых"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click(); title.typeText("UI Test")
-        app.buttons["Далее"].click()
         let name = app.textFields["напр. Иван"]
         name.click(); name.typeText("Иван")
         let surname = app.textFields["напр. Иванов"]
         surname.click(); surname.typeText("Иванов")
-        app.buttons["Создать"].click()
+        app.buttons["Далее"].click()
+        app.buttons["Создать дерево"].click()
         let person = app.staticTexts["Иванов Иван"]
         XCTAssertTrue(person.waitForExistence(timeout: 5))
         person.click()
@@ -182,5 +184,88 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Предпросмотр импорта"].waitForExistence(timeout: 5))
         app.buttons["Импортировать проверенную копию"].click()
         XCTAssertTrue(app.staticTexts["Evidence UI"].waitForExistence(timeout: 5))
+    }
+}
+
+final class SwarmEnglishUITests: XCTestCase {
+    private var app: XCUIApplication!
+    private var storageURL: URL!
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        storageURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("swarm-ui-en-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: storageURL, withIntermediateDirectories: true)
+        app = XCUIApplication()
+        app.launchArguments = [
+            "-appLanguage", "en",
+            "-appLanguageChoiceCompleted", "YES",
+            "--storage-folder", storageURL.path,
+        ]
+        app.launch()
+    }
+
+    override func tearDownWithError() throws {
+        app.terminate()
+        try? FileManager.default.removeItem(at: storageURL)
+    }
+
+    func testEnglishCoreJourneyAndWorkspaceParity() {
+        app.buttons["New Tree"].click()
+        let title = app.textFields["e.g. The Smith Family"]
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        title.click(); title.typeText("Smith Archive")
+        let given = app.textFields["e.g. John"]
+        given.click(); given.typeText("John")
+        let surname = app.textFields["e.g. Smith"]
+        surname.click(); surname.typeText("Smith")
+        app.buttons["Next"].click()
+        app.buttons["Create tree"].click()
+
+        let person = app.staticTexts["John Smith"]
+        XCTAssertTrue(person.waitForExistence(timeout: 5))
+        person.click()
+        XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 3))
+
+        for workspace in ["People", "Timeline", "Places", "Review", "Ancestor Fan", "Map"] {
+            let button = app.buttons[workspace]
+            XCTAssertTrue(button.waitForExistence(timeout: 3), "Missing English workspace: \(workspace)")
+            button.click()
+        }
+
+        app.typeKey("?", modifierFlags: .command)
+        XCTAssertTrue(app.staticTexts["Swarm Help"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Dates and Terminology"].exists)
+        app.buttons["Close"].click()
+
+        app.typeKey(",", modifierFlags: .command)
+        XCTAssertTrue(app.staticTexts["Maps and privacy"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Interface language"].exists)
+        let russian = app.radioButtons["Русский"]
+        XCTAssertTrue(russian.waitForExistence(timeout: 3))
+        russian.click()
+        XCTAssertTrue(app.staticTexts["Карта и конфиденциальность"].waitForExistence(timeout: 3))
+        let english = app.radioButtons["English"]
+        XCTAssertTrue(english.waitForExistence(timeout: 3))
+        english.click()
+        XCTAssertTrue(app.staticTexts["Maps and privacy"].waitForExistence(timeout: 3))
+    }
+
+    func testPristineLaunchRequiresAccessibleBilingualChoice() {
+        app.terminate()
+        app.launchArguments = [
+            "-appLanguageChoiceCompleted", "NO",
+            "--storage-folder", storageURL.path,
+        ]
+        app.launch()
+        XCTAssertTrue(
+            app.staticTexts["Выберите язык / Choose your language"]
+                .waitForExistence(timeout: 3)
+        )
+        app.typeKey("n", modifierFlags: .command)
+        XCTAssertTrue(app.staticTexts["Выберите язык / Choose your language"].exists)
+        XCTAssertFalse(app.textFields["e.g. The Smith Family"].exists)
+        app.buttons["English"].click()
+        XCTAssertTrue(app.buttons["New Tree"].waitForExistence(timeout: 3))
     }
 }

@@ -2,6 +2,7 @@ import Foundation
 @testable import SwarmCore
 import Testing
 
+@Suite(.serialized)
 struct TrustCompletenessTests {
     private final class Temp {
         let url = FileManager.default.temporaryDirectory
@@ -239,8 +240,8 @@ struct TrustCompletenessTests {
         }
         let minsk = try #require(PlacesDatabase.shared.search("Менск").first { $0.id == "625144" })
         #expect(minsk.name == "Минск")
-        #expect(minsk.latitude == 53.9)
-        #expect(minsk.longitude == 27.56667)
+        #expect(minsk.latitude == 53.90019)
+        #expect(minsk.longitude == 27.56653)
     }
 
     @Test func mergePreviewNeverAutomaticallyAcceptsHeuristics() {

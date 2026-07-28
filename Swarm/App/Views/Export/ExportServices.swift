@@ -20,7 +20,7 @@ struct PersonCardsPDFExporter {
         let scopeIds = (selectedIds?.isEmpty == false) ? selectedIds : nil
         let scoped = scopeIds.map { ids in tree.people.filter { ids.contains($0.id) } } ?? tree.people
         let people = scoped.sorted {
-            $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending
+            $0.sortName(language: .current) < $1.sortName(language: .current)
         }
         guard !people.isEmpty else { return nil }
 
@@ -193,7 +193,7 @@ struct PersonCardsPDFExporter {
             .font: NSFont.systemFont(ofSize: 8.5),
             .foregroundColor: NSColor(SepiaTheme.inkSoft)
         ]
-        NSAttributedString(string: person.listName, attributes: attr)
+        NSAttributedString(string: person.displayName(language: .current), attributes: attr)
             .draw(at: NSPoint(x: margin, y: footerBaseline))
         let brand = NSAttributedString(string: L10n.tr("Swarm"), attributes: attr)
         brand.draw(at: NSPoint(x: pageW - margin - brand.size().width, y: footerBaseline))
@@ -222,7 +222,7 @@ struct PersonCardsPDFExporter {
         let textW = pageW - margin - textX
         var cursorY = topEdge
 
-        let nameStr = NSAttributedString(string: person.listName, attributes: [
+        let nameStr = NSAttributedString(string: person.displayName(language: .current), attributes: [
             .font: NSFont.systemFont(ofSize: 20, weight: .semibold),
             .foregroundColor: NSColor(SepiaTheme.ink)
         ])
@@ -261,10 +261,13 @@ struct PersonCardsPDFExporter {
 
     private static func drawContinuationHeader(_ person: Person, suffix: String = L10n.tr("продолжение"), textWidth: CGFloat) -> CGFloat {
         let topEdge = pageH - margin
-        let s = NSAttributedString(string: "\(person.listName) — \(suffix)", attributes: [
+        let s = NSAttributedString(
+            string: "\(person.displayName(language: .current)) — \(suffix)",
+            attributes: [
             .font: NSFont.systemFont(ofSize: 11).withItalic(),
             .foregroundColor: NSColor(SepiaTheme.inkSoft)
-        ])
+            ]
+        )
         let h = textHeight(s, width: textWidth)
         s.draw(in: NSRect(x: margin, y: topEdge - h, width: textWidth, height: h))
         let ruleY = topEdge - h - 8
@@ -308,6 +311,19 @@ struct PersonCardsPDFExporter {
                 .font: NSFont.systemFont(ofSize: 12), .foregroundColor: ink, .paragraphStyle: valuePara
             ]))
         }
+        func date(_ kind: GenealogyEvent.Kind, fallback: String?) -> String? {
+            if let value = p.event(ofKind: kind)?.date {
+                return value.displayValue(language: .current)
+            }
+            guard let fallback, !fallback.isEmpty else { return nil }
+            return FamilyDate.parse(fallback).displayString(language: .current)
+        }
+        func place(_ kind: GenealogyEvent.Kind, fallback: String?) -> String? {
+            if let reference = p.event(ofKind: kind)?.place {
+                return PlacesDatabase.shared.presentationName(for: reference, language: .current)
+            }
+            return fallback
+        }
 
         section(L10n.tr("Личность"))
         field(L10n.tr("Имя"), p.givenNames)
@@ -318,18 +334,18 @@ struct PersonCardsPDFExporter {
 
         if p.birthDate?.isEmpty == false || p.birthPlace?.isEmpty == false {
             section(L10n.tr("Рождение"))
-            field(L10n.tr("Дата"), p.birthDate)
-            field(L10n.tr("Место"), p.birthPlace)
+            field(L10n.tr("Дата"), date(.birth, fallback: p.birthDate))
+            field(L10n.tr("Место"), place(.birth, fallback: p.birthPlace))
         }
 
         let hasBurial = (p.burialPlace?.isEmpty == false) || (p.burialLat != nil && p.burialLon != nil)
         if !p.isLiving || hasBurial {
             section(L10n.tr("Смерть и погребение"))
             if !p.isLiving {
-                field(L10n.tr("Дата смерти"), p.deathDate)
-                field(L10n.tr("Место смерти"), p.deathPlace)
+                field(L10n.tr("Дата смерти"), date(.death, fallback: p.deathDate))
+                field(L10n.tr("Место смерти"), place(.death, fallback: p.deathPlace))
             }
-            field(L10n.tr("Место захоронения"), p.burialPlace)
+            field(L10n.tr("Место захоронения"), place(.burial, fallback: p.burialPlace))
             if let lat = p.burialLat, let lon = p.burialLon {
                 field(L10n.tr("Координаты могилы"), String(format: "%.5f, %.5f", lat, lon))
             }
@@ -356,11 +372,26 @@ struct PersonCardsPDFExporter {
         let siblings = idx.siblingsOf(p)
         if parents.father != nil || parents.mother != nil || !spouses.isEmpty || !children.isEmpty || !siblings.isEmpty {
             section(L10n.tr("Родственные связи"))
-            field(L10n.tr("Отец"), parents.father?.listName)
-            field(L10n.tr("Мать"), parents.mother?.listName)
-            if !spouses.isEmpty { field(L10n.tr("Супруг(и)"), spouses.map(\.listName).joined(separator: ", ")) }
-            if !children.isEmpty { field(L10n.tr("Дети"), children.map(\.listName).joined(separator: ", ")) }
-            if !siblings.isEmpty { field(L10n.tr("Братья/сёстры"), siblings.map(\.listName).joined(separator: ", ")) }
+            field(L10n.tr("Отец"), parents.father?.displayName(language: .current))
+            field(L10n.tr("Мать"), parents.mother?.displayName(language: .current))
+            if !spouses.isEmpty {
+                field(
+                    L10n.tr("Супруг(и)"),
+                    spouses.map { $0.displayName(language: .current) }.joined(separator: ", ")
+                )
+            }
+            if !children.isEmpty {
+                field(
+                    L10n.tr("Дети"),
+                    children.map { $0.displayName(language: .current) }.joined(separator: ", ")
+                )
+            }
+            if !siblings.isEmpty {
+                field(
+                    L10n.tr("Братья/сёстры"),
+                    siblings.map { $0.displayName(language: .current) }.joined(separator: ", ")
+                )
+            }
         }
 
         return result

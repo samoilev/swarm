@@ -196,7 +196,7 @@ struct RecoveryView: View {
             Image(systemName: icon(item.kind)).foregroundStyle(SepiaTheme.accent2).frame(width: 24)
             VStack(alignment: .leading, spacing: 3) {
                 Text(item.displayTitle).font(SepiaTheme.body(size: 14)).foregroundStyle(SepiaTheme.ink).lineLimit(1)
-                Text(item.createdAt.formatted(date: .abbreviated, time: .shortened))
+                Text(formattedTimestamp(item.createdAt))
                     .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
             }
             Spacer()
@@ -224,8 +224,8 @@ struct RecoveryView: View {
                 set: { restoreTargets[item.id] = $0 }
             )) {
                 Text(L10n.tr("Выберите персону…")).tag(nil as UUID?)
-                ForEach(tree.people.sorted(by: { $0.listName < $1.listName }), id: \.id) {
-                    Text($0.listName).tag($0.id as UUID?)
+                ForEach(tree.people.sorted(by: { $0.sortName(language: .current) < $1.sortName(language: .current) }), id: \.id) {
+                    Text($0.displayName(language: .current)).tag($0.id as UUID?)
                 }
             }
             .labelsHidden()
@@ -252,13 +252,13 @@ struct RecoveryView: View {
                 case .revision:
                     guard let tree = selectedTree else { return }
                     _ = try await store.restoreRevision(item, to: tree)
-                    statusMessage = L10n.tr("Версия от \(item.createdAt.formatted(date: .abbreviated, time: .shortened)) восстановлена.")
+                    statusMessage = L10n.tr("Версия от \(formattedTimestamp(item.createdAt)) восстановлена.")
                 case .deletedFile:
                     guard let tree = selectedTree,
                           let id = restoreTargets[item.id],
                           let person = tree.person(byId: id) else { return }
                     _ = try await store.restoreDeletedFile(item, to: person, in: tree, asPortrait: item.isPortrait)
-                    statusMessage = L10n.tr("«\(item.displayTitle)» возвращён в карточку: \(person.listName).")
+                    statusMessage = L10n.tr("«\(item.displayTitle)» возвращён в карточку: \(person.displayName(language: .current)).")
                 case .migrationBackup:
                     guard let tree = selectedTree else { return }
                     _ = try await store.restoreFullBackup(item, to: tree)
@@ -284,6 +284,10 @@ struct RecoveryView: View {
             } catch { errorMessage = error.localizedDescription }
             isWorking = false
         }
+    }
+
+    private func formattedTimestamp(_ date: Date) -> String {
+        AppLanguage.current.formatted(date, dateStyle: .medium, timeStyle: .short)
     }
 
     private func actionLabel(_ kind: RecoveryItem.Kind) -> String {

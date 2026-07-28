@@ -276,7 +276,12 @@ public enum TreeValidator {
         }.sorted {
             if $0.isBlocking != $1.isBlocking { return $0.isBlocking && !$1.isBlocking }
             if $0.severity != $1.severity { return $0.severity == .error }
-            return $0.title.localizedStandardCompare($1.title) == .orderedAscending
+            return $0.title.compare(
+                $1.title,
+                options: [.caseInsensitive, .diacriticInsensitive],
+                range: nil,
+                locale: AppLanguage.current.locale
+            ) == .orderedAscending
         }
     }
 
@@ -303,7 +308,10 @@ public enum TreeValidator {
         var groups: [String: [SourceRecord]] = [:]
         for source in sources {
             let key = source.title.lowercased()
-                .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "ru_RU"))
+                .folding(
+                    options: [.diacriticInsensitive, .caseInsensitive],
+                    locale: AppLanguage.current.locale
+                )
                 .replacingOccurrences(of: "ё", with: "е")
                 .split(whereSeparator: \.isWhitespace).joined(separator: " ")
             if !key.isEmpty { groups[key, default: []].append(source) }
@@ -420,7 +428,10 @@ public enum TreeValidator {
         var groups: [String: [Person]] = [:]
         for person in tree.people {
             let name = person.fullName.lowercased()
-                .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "ru_RU"))
+                .folding(
+                    options: [.diacriticInsensitive, .caseInsensitive],
+                    locale: AppLanguage.current.locale
+                )
                 .replacingOccurrences(of: "ё", with: "е")
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard !name.isEmpty else { continue }
@@ -432,7 +443,7 @@ public enum TreeValidator {
                 id: "duplicate-person.\(key)",
                 code: "person.possible-duplicate",
                 title: L10n.tr("Возможные дубликаты"),
-                message: people.map(\.listName).joined(separator: ", "),
+                message: people.map { $0.displayName(language: .current) }.joined(separator: ", "),
                 personID: people.first?.id,
                 field: "identity"
             ))

@@ -1,15 +1,44 @@
 # Local place data
 
-Swarm searches a bundled, versioned place snapshot. No query is sent to a
-network service. `places.tsv` contains Russian display names, administrative regions
-and countries; `geonames_ussr.tsv` contains the coordinate/alias snapshot.
-`place_index_v2.tsv` seeds original GeoNames IDs for the most
-common locations and is loaded first. The two legacy snapshots remain one searchable
-fallback index and use a deterministic `local-` identifier when their original ID is
-unavailable.
+Swarm searches one bundled, versioned bilingual GeoNames snapshot. Place search,
+free-text coordinate resolution, selected-place presentation, and offline map labels
+all read `place_index_v2.tsv`; no place query is sent to a network service.
 
-For the production v2 dataset, generate `place_index_v2.tsv` from an official
-GeoNames dump with:
+The bundled snapshot is pinned to the official GeoNames daily exports downloaded on
+**2026-07-28** and carries dataset version `geonames-2026-07-28`. It contains 476,958
+populated places:
+
+- every populated-place record in Armenia, Azerbaijan, Belarus, Estonia, Georgia,
+  Kazakhstan, Kyrgyzstan, Latvia, Lithuania, Moldova, Russia, Tajikistan,
+  Turkmenistan, Ukraine, and Uzbekistan;
+- populated places with population at least 500 in the GeoNames `EU` and `NA`
+  continents;
+- all populated-place national and administrative seats (`PPLC`, `PPLA*`) in those
+  two continents. GeoNames `NA` includes Central America and the Caribbean.
+
+The exact columns are:
+
+```text
+geoname_id, feature_code, population, name_ru, name_en, name_local, aliases,
+region_ru, region_en, country_ru, country_en, country_code, continent_code,
+latitude, longitude, dataset_version
+```
+
+The file is UTF-8, tab-delimited, and uses LF line endings. Aliases are pipe-delimited.
+Russian and English display names prefer non-historic preferred alternatives;
+canonical/local, ASCII, historic, colloquial, and useful transliterated variants stay
+searchable. Search folds case, width, diacritics, and Russian `ё/е`.
+
+## Rebuilding the snapshot
+
+Download these files from the [official GeoNames daily export](https://download.geonames.org/export/dump/):
+
+- `allCountries.zip`
+- `alternateNamesV2.zip`
+- `countryInfo.txt`
+- `admin1CodesASCII.txt`
+
+After extracting the two archives:
 
 ```sh
 python3 Scripts/generate_place_index.py \
@@ -18,29 +47,18 @@ python3 Scripts/generate_place_index.py \
   --country-info countryInfo.txt \
   --admin1-codes admin1CodesASCII.txt \
   --output Swarm/Core/Resources/place_index_v2.tsv \
-  --version 2026-07-15
+  --version geonames-2026-07-28
 ```
 
-The generated columns are:
+The generator filters before retaining alternate names, sorts by numeric GeoNames ID,
+and emits byte-identical output for identical inputs. Update the version date here,
+in `THIRD_PARTY_NOTICES.md`, and in the changelog whenever the snapshot changes.
 
-```text
-geoname_id<TAB>display_name<TAB>aliases<TAB>region<TAB>country<TAB>latitude<TAB>longitude<TAB>dataset_version
-```
+`PlaceReference` remains the archival snapshot: saved display text, GeoNames ID, and
+coordinates are never rewritten on a language switch or dataset update. Views and PDFs
+may resolve a current localized label by ID; custom/imported text without a known ID is
+family-record data and is never translated. A free-text coordinate is accepted only
+for an exact localized full address or a globally unique bare name/alias.
 
-`aliases` is a pipe-separated, deduplicated list containing Russian, canonical and
-local names. Russian names are used as display names where available; country and
-first-order region codes are resolved through the companion GeoNames files. The
-generator keeps populated places and administrative features, sorts by the numeric
-GeoNames ID, and emits UTF-8 with LF line endings. Dataset updates must not
-rewrite places already stored in a tree: a `PlaceReference` retains its selected ID,
-display-name snapshot and coordinates.
-
-GeoNames data is licensed under Creative Commons Attribution 4.0. Attribution:
-“Contains GeoNames data, available from https://www.geonames.org/.” Record the dump
-date in the `--version` column and in the release notes. See
-[THIRD_PARTY_NOTICES.md](../../../THIRD_PARTY_NOTICES.md) for the full attribution of
-every bundled dataset.
-
-The bundled seed snapshot version is `2026-07-15-seed`. It is deliberately small;
-regenerate the full `place_index_v2.tsv` using the command above before claiming
-complete global GeoNames-ID coverage.
+GeoNames data is licensed under Creative Commons Attribution 4.0:
+“Contains GeoNames data, available from https://www.geonames.org/.”

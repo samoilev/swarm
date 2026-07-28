@@ -12,6 +12,7 @@ struct FamilyDateTests {
     @Test func parsesAlternateSeparators() {
         #expect(FamilyDate.parse("05/03/1978").month == 3)
         #expect(FamilyDate.parse("05-03-1978").day == 5)
+        #expect(FamilyDate.parse("1978-03-05").day == 5)
     }
 
     @Test func parsesMonthYearAndYearOnly() {
@@ -48,6 +49,7 @@ struct FamilyDateTests {
 
     @Test func normalizeProducesStandardForm() {
         #expect(FamilyDate.normalize("5 MAR 1978") == "05.03.1978")
+        #expect(FamilyDate.normalize("1978-03-05") == "05.03.1978")
         #expect(FamilyDate.normalize("1978") == "1978")
         // Unparseable input is returned unchanged rather than dropped.
         #expect(FamilyDate.normalize("неизвестно") == "неизвестно")
@@ -57,6 +59,29 @@ struct FamilyDateTests {
         #expect(FamilyDate.toGEDCOM("05.03.1978") == "5 MAR 1978")
         #expect(FamilyDate.toGEDCOM("03.1978") == "MAR 1978")
         #expect(FamilyDate.toGEDCOM("1978") == "1978")
+    }
+
+    @Test func presentsEnglishDatesWithoutRegionalAmbiguity() {
+        let full = FamilyDate.parse("05.03.1978")
+        #expect(full.displayString(language: .english) == "5 Mar 1978")
+        #expect(full.displayString(language: .russian) == "5 мар 1978")
+        #expect(FamilyDate.parse("Mar 1978").displayString(language: .english) == "Mar 1978")
+    }
+
+    @Test func structuredDatesAcceptBothLanguagesAndPreserveGEDCOMWireFormat() {
+        let english = GenealogyDate(userInput: "5 Mar 1978", language: .english)
+        let russian = GenealogyDate(userInput: "5 марта 1978", language: .russian)
+        let iso = GenealogyDate(userInput: "1978-03-05", language: .english)
+
+        #expect(english.isValid)
+        #expect(russian.isValid)
+        #expect(iso.isValid)
+        #expect(english.displayValue(language: .english) == "5 Mar 1978")
+        #expect(english.displayValue(language: .russian) == "5 мар 1978")
+        #expect(english.canonicalGEDCOMValue == "5 MAR 1978")
+        #expect(russian.canonicalGEDCOMValue == english.canonicalGEDCOMValue)
+        #expect(iso.canonicalGEDCOMValue == english.canonicalGEDCOMValue)
+        #expect(GenealogyDate(userInput: "31 Feb 1978", language: .english).isValid == false)
     }
 
     @Test func calculatesPreciseAge() {

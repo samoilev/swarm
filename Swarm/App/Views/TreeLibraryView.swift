@@ -79,9 +79,7 @@ struct TreeSummary {
     }
 
     var peopleLabel: String {
-        // Russian "чел." is invariant across counts; English is not, so the singular
-        // gets its own key rather than rendering "1 people".
-        peopleCount == 1 ? L10n.tr("1 чел.") : L10n.tr("\(peopleCount) чел.")
+        L10n.count(peopleCount, .person)
     }
 }
 
@@ -127,7 +125,15 @@ struct TreeLibraryView: View {
     private var visibleTrees: [FamilyTree] {
         let sorted: [FamilyTree] = switch sortOrder {
         case .recentlyUpdated: trees.sorted { $0.updatedAt > $1.updatedAt }
-        case .nameAscending: trees.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+        case .nameAscending:
+            trees.sorted {
+                $0.name.compare(
+                    $1.name,
+                    options: [.caseInsensitive, .diacriticInsensitive],
+                    range: nil,
+                    locale: locale
+                ) == .orderedAscending
+            }
         }
         let query = filterText.trimmingCharacters(in: .whitespaces)
         guard !query.isEmpty else { return sorted }
@@ -294,6 +300,7 @@ struct TreeLibraryView: View {
                 filterField
             }
             Spacer(minLength: 12)
+            LanguageSwitchControl()
             if trees.count > 1 {
                 sortMenu
             }
@@ -431,11 +438,8 @@ struct TreeLibraryView: View {
         if !query.isEmpty {
             return L10n.tr("Показано \(visibleTrees.count) из \(trees.count)")
         }
-        switch trees.count {
-        case 0: return L10n.tr("Архив пока пуст")
-        case 1: return L10n.tr("1 дерево в архиве")
-        default: return L10n.tr("Деревьев в архиве: \(trees.count)")
-        }
+        guard !trees.isEmpty else { return L10n.tr("Архив пока пуст") }
+        return L10n.tr("\(L10n.count(trees.count, .tree)) в архиве")
     }
 
     // MARK: - Content

@@ -58,6 +58,9 @@ struct CoreModelTests {
         )
         #expect(deceased.fullName == "Иван Петрович Сидоров")
         #expect(deceased.listName == "Сидоров Иван Петрович")
+        #expect(deceased.displayName(language: .russian) == "Сидоров Иван Петрович")
+        #expect(deceased.displayName(language: .english) == "Иван Петрович Сидоров")
+        #expect(deceased.sortName(language: .english).hasPrefix("сидоров"))
         #expect(deceased.lifespan.contains("1900"))
         #expect(deceased.lifespan.contains("1970"))
 

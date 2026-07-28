@@ -29,15 +29,19 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
         }
 
         public var displayName: String {
+            displayName(language: .current)
+        }
+
+        public func displayName(language: AppLanguage) -> String {
             switch self {
-            case .exact: L10n.tr("Точная")
-            case .about: L10n.tr("Около")
-            case .before: L10n.tr("До")
-            case .after: L10n.tr("После")
-            case .estimated: L10n.tr("Предположительно")
-            case .calculated: L10n.tr("Вычислено")
-            case .between: L10n.tr("Между")
-            case .fromTo: L10n.tr("С — по")
+            case .exact: L10n.tr("Точная", language: language)
+            case .about: L10n.tr("Около", language: language)
+            case .before: L10n.tr("До", language: language)
+            case .after: L10n.tr("После", language: language)
+            case .estimated: L10n.tr("Предположительно", language: language)
+            case .calculated: L10n.tr("Вычислено", language: language)
+            case .between: L10n.tr("Между", language: language)
+            case .fromTo: L10n.tr("С — по", language: language)
             }
         }
     }
@@ -81,9 +85,12 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
         }
 
         public var displayValue: String {
-            if let month, let day { return String(format: "%02d.%02d.%04d", day, month, year) }
-            if let month { return String(format: "%02d.%04d", month, year) }
-            return String(year)
+            displayValue(language: .current)
+        }
+
+        public func displayValue(language: AppLanguage) -> String {
+            FamilyDate.Components(day: day, month: month, year: year)
+                .displayString(language: language)
         }
     }
 
@@ -143,11 +150,16 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
         }
     }
 
-    public init(userInput value: String, qualifier: Qualifier = .exact, endValue: String? = nil) {
+    public init(
+        userInput value: String,
+        qualifier: Qualifier = .exact,
+        endValue: String? = nil,
+        language: AppLanguage = .current
+    ) {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         self.qualifier = qualifier
-        start = Self.parsePartial(trimmed)
-        end = endValue.flatMap(Self.parsePartial)
+        start = Self.parsePartial(trimmed, language: language)
+        end = endValue.flatMap { Self.parsePartial($0, language: language) }
         phrase = start == nil && !trimmed.isEmpty ? trimmed : nil
         rawValue = ""
         rawValue = canonicalGEDCOMValue
@@ -183,55 +195,44 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
     }
 
     public var displayValue: String {
+        displayValue(language: .current)
+    }
+
+    public func displayValue(language: AppLanguage) -> String {
         guard let start else { return rawValue }
         let prefix = switch qualifier {
         case .exact: ""
-        case .about: L10n.tr("ок. ")
-        case .before: L10n.tr("до ")
-        case .after: L10n.tr("после ")
-        case .estimated: L10n.tr("предп. ")
-        case .calculated: L10n.tr("выч. ")
-        case .between: L10n.tr("между ")
-        case .fromTo: L10n.tr("с ")
+        case .about: L10n.tr("ок. ", language: language)
+        case .before: L10n.tr("до ", language: language)
+        case .after: L10n.tr("после ", language: language)
+        case .estimated: L10n.tr("предп. ", language: language)
+        case .calculated: L10n.tr("выч. ", language: language)
+        case .between: L10n.tr("между ", language: language)
+        case .fromTo: L10n.tr("с ", language: language)
         }
         if let end {
-            let separator = qualifier == .between ? L10n.tr(" и ") : L10n.tr(" по ")
-            return prefix + start.displayValue + separator + end.displayValue
+            let separator = qualifier == .between
+                ? L10n.tr(" и ", language: language)
+                : L10n.tr(" по ", language: language)
+            return prefix
+                + start.displayValue(language: language)
+                + separator
+                + end.displayValue(language: language)
         }
-        return prefix + start.displayValue
+        return prefix + start.displayValue(language: language)
     }
 
     public var year: Int? { start?.year }
 
-    private static func parsePartial(_ input: String) -> PartialDate? {
+    private static func parsePartial(
+        _ input: String,
+        language _: AppLanguage = .current
+    ) -> PartialDate? {
         let trimmed = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-
-        let numeric = trimmed.split(separator: ".").compactMap { Int($0) }
-        if numeric.count == 3, !trimmed.contains(where: { !$0.isNumber && $0 != "." }) {
-            return PartialDate(year: numeric[2], month: numeric[1], day: numeric[0])
-        }
-        if numeric.count == 2, !trimmed.contains(where: { !$0.isNumber && $0 != "." }) {
-            return PartialDate(year: numeric[1], month: numeric[0])
-        }
-        if numeric.count == 1, numeric[0] > 0, trimmed.allSatisfy(\.isNumber) {
-            return PartialDate(year: numeric[0])
-        }
-
-        let parts = trimmed.uppercased().split(separator: " ").map(String.init)
-        let months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-        if parts.count == 3,
-           let day = Int(parts[0]),
-           let monthIndex = months.firstIndex(of: parts[1]),
-           let year = Int(parts[2]) {
-            return PartialDate(year: year, month: monthIndex + 1, day: day)
-        }
-        if parts.count == 2,
-           let monthIndex = months.firstIndex(of: parts[0]),
-           let year = Int(parts[1]) {
-            return PartialDate(year: year, month: monthIndex + 1)
-        }
-        return nil
+        guard let parsed = FamilyDate.parseExact(trimmed),
+              let year = parsed.year else { return nil }
+        let result = PartialDate(year: year, month: parsed.month, day: parsed.day)
+        return result.isValid ? result : nil
     }
 
     private static func splitRange(_ value: String, separator: String) -> (String, String)? {
@@ -464,7 +465,7 @@ public struct GenealogyEvent: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
-public enum ParentageKind: String, Codable, CaseIterable, Sendable {
+public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
     case biological
     case adoptive
     case foster

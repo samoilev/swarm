@@ -123,9 +123,15 @@ struct EditPersonView: View {
 
                         SectionHeader(title: L10n.tr("Личность"))
                         HStack(spacing: 12) {
-                            SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                            SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                            SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            if AppLanguage.current == .english {
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО (необяз.)"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            } else {
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            }
                         }.padding(.bottom, 12)
 
                         HStack(spacing: 12) {
@@ -321,7 +327,10 @@ struct EditPersonView: View {
         case .relationship:
             editingTree.parentLinks.filter { $0.parentID == editingPerson.id || $0.childID == editingPerson.id }.map { link in
                 let otherID = link.parentID == editingPerson.id ? link.childID : link.parentID
-                return (link.id, editingTree.person(byId: otherID)?.listName ?? L10n.tr("Связь"))
+                return (
+                    link.id,
+                    editingTree.person(byId: otherID)?.displayName(language: .current) ?? L10n.tr("Связь")
+                )
             }
         case .union:
             editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) || $0.childrenIds.contains(editingPerson.id) }
@@ -395,7 +404,9 @@ struct EditPersonView: View {
     }
 
     private func unionLabel(_ union: Union) -> String {
-        let names = union.partnerIds.compactMap { editingTree.person(byId: $0)?.listName }
+        let names = union.partnerIds.compactMap {
+            editingTree.person(byId: $0)?.displayName(language: .current)
+        }
         return names.isEmpty ? L10n.tr("Семейная запись") : names.joined(separator: " + ")
     }
 
@@ -443,7 +454,7 @@ struct EditPersonView: View {
                     Picker(L10n.tr("Кто:"), selection: $addRelPersonId) {
                         Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
                         ForEach(availablePeople, id: \.id) { p in
-                            Text(p.listName).tag(p.id as UUID?)
+                            Text(p.displayName(language: .current)).tag(p.id as UUID?)
                         }
                     }
                     .pickerStyle(.menu)
@@ -463,7 +474,7 @@ struct EditPersonView: View {
     private var availablePeople: [Person] {
         editingTree.people
             .filter { $0.id != editingPerson.id }
-            .sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
+            .sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
     }
 
     private func relEditRow(_ tag: String, _ p: Person, onRemove: @escaping () -> Void) -> some View {
@@ -471,7 +482,7 @@ struct EditPersonView: View {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 80, alignment: .leading)
-            Text(p.listName)
+            Text(p.displayName(language: .current))
                 .font(SepiaTheme.body(size: 13.5))
                 .foregroundColor(SepiaTheme.ink)
             Spacer()
@@ -975,7 +986,9 @@ private struct UnionDraftEditor: View {
 
             Picker(L10n.tr("Партнёр"), selection: partnerBinding) {
                 Text(L10n.tr("Не указан")).tag(nil as UUID?)
-                ForEach(availablePartners, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
+                ForEach(availablePartners, id: \.id) {
+                    Text($0.displayName(language: .current)).tag($0.id as UUID?)
+                }
             }
             .pickerStyle(.menu)
 
@@ -987,7 +1000,10 @@ private struct UnionDraftEditor: View {
             SepiaFieldLabel(L10n.tr("ДЕТИ И ТИП РОДИТЕЛЬСТВА"), isDecorative: false)
             ForEach(union.childrenIds, id: \.self) { childID in
                 HStack {
-                    Text(tree.person(byId: childID)?.listName ?? L10n.tr("Неизвестная персона"))
+                    Text(
+                        tree.person(byId: childID)?.displayName(language: .current)
+                            ?? L10n.tr("Неизвестная персона")
+                    )
                         .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
                     Spacer()
                     Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
@@ -1002,7 +1018,9 @@ private struct UnionDraftEditor: View {
             HStack {
                 Picker(L10n.tr("Добавить ребёнка"), selection: $childToAdd) {
                     Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
-                    ForEach(availableChildren, id: \.id) { Text($0.listName).tag($0.id as UUID?) }
+                    ForEach(availableChildren, id: \.id) {
+                        Text($0.displayName(language: .current)).tag($0.id as UUID?)
+                    }
                 }.pickerStyle(.menu)
                 Button(L10n.tr("Добавить")) { addChild() }.buttonStyle(SepiaButtonStyle()).disabled(childToAdd == nil)
             }
@@ -1014,17 +1032,19 @@ private struct UnionDraftEditor: View {
     }
 
     private var partnerNames: String {
-        union.partnerIds.compactMap { tree.person(byId: $0)?.listName }.joined(separator: " + ")
+        union.partnerIds.compactMap {
+            tree.person(byId: $0)?.displayName(language: .current)
+        }.joined(separator: " + ")
     }
 
     private var availableChildren: [Person] {
         tree.people.filter { !union.partnerIds.contains($0.id) && !union.childrenIds.contains($0.id) }
-            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+            .sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
     }
 
     private var availablePartners: [Person] {
         tree.people.filter { $0.id != subject.id && !union.childrenIds.contains($0.id) }
-            .sorted { $0.listName.localizedStandardCompare($1.listName) == .orderedAscending }
+            .sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
     }
 
     private var partnerBinding: Binding<UUID?> {

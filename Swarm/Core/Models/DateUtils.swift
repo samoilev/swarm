@@ -11,7 +11,7 @@ public enum FamilyDate {
 
     // MARK: - Parse any date string into components
 
-    public struct Components {
+    public struct Components: Hashable, Sendable {
         public var day: Int?
         public var month: Int?
         public var year: Int?
@@ -40,11 +40,18 @@ public enum FamilyDate {
 
         /// Formatted for user display in the selected app language.
         public var displayString: String {
+            displayString(language: .current)
+        }
+
+        public func displayString(language: AppLanguage) -> String {
+            let months = FamilyDate.displayMonthsShort(language: language)
             if let d = day, let m = month, let y = year {
-                let monthName = FamilyDate.displayMonthsShort[m - 1]
+                guard months.indices.contains(m - 1) else { return formatted }
+                let monthName = months[m - 1]
                 return "\(d) \(monthName) \(y)"
             } else if let m = month, let y = year {
-                let monthName = FamilyDate.displayMonthsShort[m - 1]
+                guard months.indices.contains(m - 1) else { return formatted }
+                let monthName = months[m - 1]
                 return "\(monthName) \(y)"
             } else if let y = year {
                 return "\(y)"
@@ -59,7 +66,7 @@ public enum FamilyDate {
             dc.year = y
             dc.month = month ?? 1
             dc.day = day ?? 1
-            return Calendar.current.date(from: dc)
+            return Calendar(identifier: .gregorian).date(from: dc)
         }
     }
 
@@ -74,12 +81,12 @@ public enum FamilyDate {
     ]
 
     private static let englishMonthsShort = [
-        "jan", "feb", "mar", "apr", "may", "jun",
-        "jul", "aug", "sep", "oct", "nov", "dec"
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ]
 
-    private static var displayMonthsShort: [String] {
-        AppLanguage.current == .english ? englishMonthsShort : russianMonthsShort
+    private static func displayMonthsShort(language: AppLanguage) -> [String] {
+        language == .english ? englishMonthsShort : russianMonthsShort
     }
 
     // MARK: - Parse
@@ -97,6 +104,38 @@ public enum FamilyDate {
             return Components()
         }
 
+        if let exact = parseExact(str) { return exact }
+
+        // Imported free-form dates historically yielded a usable year even when
+        // the rest of the phrase was not understood. Keep that compatibility in
+        // the forgiving parser; editors use parseExact so invalid dates stay invalid.
+        if let range = str.range(of: #"\b\d{4}\b"#, options: .regularExpression),
+           let y = Int(str[range]) {
+            return Components(day: nil, month: nil, year: y)
+        }
+
+        return Components()
+    }
+
+    /// Parses only supported date forms, without extracting a year from otherwise
+    /// invalid text. This is the validator used by editable genealogy fields.
+    public static func parseExact(_ string: String?) -> Components? {
+        guard let str = string?.trimmingCharacters(in: .whitespacesAndNewlines), !str.isEmpty else {
+            return nil
+        }
+
+        // ISO 8601 calendar date. Check this before the day-first hyphen form.
+        let isoPattern = #"^(\d{4})-(\d{1,2})-(\d{1,2})$"#
+        if str.range(of: isoPattern, options: .regularExpression) != nil {
+            let parts = str.split(separator: "-")
+            if parts.count == 3,
+               let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]),
+               isValid(day: d, month: m, year: y) {
+                return Components(day: d, month: m, year: y)
+            }
+            return nil
+        }
+
         // Try DD.MM.YYYY or DD/MM/YYYY or DD-MM-YYYY
         let separatorPattern = #"^(\d{1,2})[./\-](\d{1,2})[./\-](\d{4})$"#
         if let match = str.range(of: separatorPattern, options: .regularExpression) {
@@ -106,6 +145,7 @@ public enum FamilyDate {
                     return Components(day: d, month: m, year: y)
                 }
             }
+            return nil
         }
 
         // Try MM.YYYY or MM/YYYY
@@ -117,6 +157,7 @@ public enum FamilyDate {
                     return Components(day: nil, month: m, year: y)
                 }
             }
+            return nil
         }
 
         // Try YYYY.
@@ -125,6 +166,7 @@ public enum FamilyDate {
             if y >= 1 && y <= 9999 {
                 return Components(day: nil, month: nil, year: y)
             }
+            return nil
         }
 
         // Try "D MMM YYYY" or "DD MMMM YYYY" (with month name in Russian, English or GEDCOM)
@@ -136,6 +178,7 @@ public enum FamilyDate {
                     if isValid(day: d, month: m, year: y) {
                         return Components(day: d, month: m, year: y)
                     }
+                    return nil
                 }
             }
             // "MONTH YYYY"
@@ -145,22 +188,14 @@ public enum FamilyDate {
                 }
             }
         }
-
-        // Last resort: extract year from string
-        if let range = str.range(of: #"\b\d{4}\b"#, options: .regularExpression) {
-            if let y = Int(str[range]) {
-                return Components(day: nil, month: nil, year: y)
-            }
-        }
-
-        return Components()
+        return nil
     }
 
     /// Normalize a date string to the standard format (DD.MM.YYYY)
     /// Returns the original if it cannot be parsed
     public static func normalize(_ string: String?) -> String {
         guard let str = string, !str.isEmpty else { return "" }
-        let components = parse(str)
+        guard let components = parseExact(str) else { return str }
         let result = components.formatted
         return result.isEmpty ? str : result
     }
@@ -179,7 +214,7 @@ public enum FamilyDate {
         } else {
             // Living person — use today
             let now = Date()
-            let cal = Calendar.current
+            let cal = Calendar(identifier: .gregorian)
             endComp = Components(
                 day: cal.component(.day, from: now),
                 month: cal.component(.month, from: now),
@@ -192,7 +227,8 @@ public enum FamilyDate {
         // If we have full dates, use Calendar for precise calculation
         if birthComp.isComplete && endComp.isComplete,
            let birthDate = birthComp.date, let endDate = endComp.date {
-            let ageComponents = Calendar.current.dateComponents([.year], from: birthDate, to: endDate)
+            let ageComponents = Calendar(identifier: .gregorian)
+                .dateComponents([.year], from: birthDate, to: endDate)
             if let years = ageComponents.year, years >= 0 && years < 200 {
                 return (years, false)
             }
@@ -238,7 +274,7 @@ public enum FamilyDate {
             return idx + 1
         }
         // English/GEDCOM
-        if let idx = englishMonthsShort.firstIndex(where: { lower.hasPrefix($0) }) {
+        if let idx = englishMonthsShort.firstIndex(where: { lower.hasPrefix($0.lowercased()) }) {
             return idx + 1
         }
 

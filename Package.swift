@@ -14,8 +14,6 @@ let package = Package(
             exclude: ["Resources/PLACE_DATA.md", "Resources/MAP_DATA.md"],
             resources: [
                 .process("Resources/Localization"),
-                .copy("Resources/places.tsv"),
-                .copy("Resources/geonames_ussr.tsv"),
                 .copy("Resources/place_index_v2.tsv"),
                 .copy("Resources/ne_110m_land.geojson"),
                 .copy("Resources/ne_110m_admin_0_boundary_lines_land.geojson"),

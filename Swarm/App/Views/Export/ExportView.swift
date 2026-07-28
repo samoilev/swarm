@@ -37,7 +37,7 @@ struct ExportView: View {
                     Text(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name)
                         .font(SepiaTheme.display(size: 17)).fontWeight(.semibold).foregroundColor(SepiaTheme.ink)
                         .lineLimit(1)
-                    Text(L10n.tr("\(tree.people.count) чел."))
+                    Text(L10n.count(tree.people.count, .person))
                         .font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
                 }
 

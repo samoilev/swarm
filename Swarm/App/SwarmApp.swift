@@ -6,6 +6,7 @@ import SwiftUI
 struct SwarmApp: App {
     @State private var store: TreeStore
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
 
     init() {
         AppLanguage.migrateLegacyPreferenceIfNeeded()
@@ -14,7 +15,9 @@ struct SwarmApp: App {
             guard arguments.indices.contains(index + 1) else { return nil }
             return URL(fileURLWithPath: arguments[index + 1], isDirectory: true)
         }
-        _store = State(initialValue: TreeStore(storageFolder: storageFolder))
+        let initialStore = TreeStore(storageFolder: storageFolder)
+        AppLanguage.prepareInitialChoice(hasExistingLibrary: !initialStore.trees.isEmpty)
+        _store = State(initialValue: initialStore)
         NSApplication.shared.setActivationPolicy(.regular)
         // A packaged .app carries the icon in Contents/Resources, which is not where
         // SwiftPM's Bundle.module looks; reading Bundle.module there is fatal, so it
@@ -49,6 +52,7 @@ struct SwarmApp: App {
                     NotificationCenter.default.post(name: .newTreeRequested, object: nil)
                 }
                 .keyboardShortcut("n")
+                .disabled(!languageChoiceCompleted)
                 // Someone who opens the same tree every morning shouldn't have to walk
                 // the library grid to get to it.
                 Menu(L10n.tr("Открыть недавнее")) {
@@ -94,6 +98,12 @@ struct SwarmApp: App {
                 }
                 .keyboardShortcut("0")
             }
+            CommandGroup(replacing: .help) {
+                Button(L10n.tr("Справка Swarm")) {
+                    NotificationCenter.default.post(name: .helpRequested, object: nil)
+                }
+                .keyboardShortcut("?", modifiers: [.command])
+            }
         }
 
         Settings {
@@ -118,4 +128,5 @@ extension Notification.Name {
     static let undoRequested = Notification.Name("undoRequested")
     static let redoRequested = Notification.Name("redoRequested")
     static let findPersonRequested = Notification.Name("findPersonRequested")
+    static let helpRequested = Notification.Name("helpRequested")
 }

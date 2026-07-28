@@ -1,16 +1,17 @@
 import Foundation
 
-/// Calculates and names the relationship between two people in the family tree
+/// Calculates relationship semantics independently of presentation language.
 public struct RelationshipCalculator {
     public let tree: FamilyTree
     private let idx: FamilyIndex
 
     public init(tree: FamilyTree) {
         self.tree = tree
-        self.idx = FamilyIndex(tree: tree)
+        idx = FamilyIndex(tree: tree)
     }
 
     public struct RelationshipResult {
+        public let descriptor: KinshipDescriptor
         public let name: String
         public let path: [UUID]
         public let description: String
@@ -18,366 +19,372 @@ public struct RelationshipCalculator {
 
     // MARK: - Public
 
-    public func relationship(from personA: Person, to personB: Person) -> RelationshipResult? {
-        guard let result = russianRelationship(from: personA, to: personB) else { return nil }
-        return RelationshipResult(
-            name: L10n.dynamic(result.name),
-            path: result.path,
-            description: L10n.dynamic(result.description)
-        )
-    }
+    public func relationship(
+        from personA: Person,
+        to personB: Person,
+        language: AppLanguage = .current
+    ) -> RelationshipResult? {
+        let formatter = KinshipFormatter(language: language)
 
-    private func russianRelationship(from personA: Person, to personB: Person) -> RelationshipResult? {
-        guard personA.id != personB.id else {
-            return RelationshipResult(name: "Это тот же человек", path: [personA.id], description: "")
+        if personA.id == personB.id {
+            return make(.samePerson, path: [personA.id], formatter: formatter)
         }
 
-        // Direct spouse — must be checked before anything else.
         if idx.spousesOf(personA).contains(where: { $0.id == personB.id }) {
-            return RelationshipResult(name: gendered(personB, male: "Муж", female: "Жена", neutral: "Супруг/супруга"),
-                                      path: [personA.id, personB.id], description: "")
+            return make(.spouse(sex: personB.sex), path: [personA.id, personB.id], formatter: formatter)
         }
 
-        if let link = tree.parentLinks.first(where: { $0.parentID == personB.id && $0.childID == personA.id }) {
-            return RelationshipResult(
-                name: parentName(personB, kind: link.kind),
+        if let edge = idx.parentEdges(of: personA.id).first(where: { $0.parentID == personB.id }) {
+            return make(
+                .parent(sex: personB.sex, kind: edge.kind),
                 path: [personA.id, personB.id],
-                description: link.kind.displayName
+                description: parentageDescription(edge.kind, language: language),
+                formatter: formatter
             )
         }
-        if let link = tree.parentLinks.first(where: { $0.parentID == personA.id && $0.childID == personB.id }) {
-            return RelationshipResult(
-                name: childName(personB, kind: link.kind),
+        if let edge = idx.parentEdges(of: personB.id).first(where: { $0.parentID == personA.id }) {
+            return make(
+                .child(sex: personB.sex, kind: edge.kind),
                 path: [personA.id, personB.id],
-                description: link.kind.displayName
+                description: parentageDescription(edge.kind, language: language),
+                formatter: formatter
             )
         }
+
         let parents = idx.parentsOf(personA)
         let parentPeople = [parents.father, parents.mother].compactMap { $0 }
         if !parentPeople.contains(where: { $0.id == personB.id }),
-           parentPeople.contains(where: { parent in idx.spousesOf(parent).contains(where: { $0.id == personB.id }) }) {
-            return RelationshipResult(
-                name: gendered(personB, male: "Отчим", female: "Мачеха", neutral: "Неродной родитель"),
+           parentPeople.contains(where: { parent in
+               idx.spousesOf(parent).contains(where: { $0.id == personB.id })
+           }) {
+            return make(
+                .stepParent(sex: personB.sex),
                 path: [personA.id, personB.id],
-                description: "Производная связь через союз с родителем"
+                description: L10n.tr("Производная связь через союз с родителем", language: language),
+                formatter: formatter
             )
         }
 
-        // Find path using BFS in family graph (used for the description / highlight)
         guard let path = findPath(from: personA.id, to: personB.id) else {
-            return RelationshipResult(name: "Связь не найдена", path: [], description: "Эти люди не связаны в дереве")
+            return make(
+                .unconnected,
+                path: [],
+                description: L10n.tr("Эти люди не связаны в дереве", language: language),
+                formatter: formatter
+            )
         }
 
-        // Blood relationship via lowest common ancestor.
-        if let blood = bloodRelationship(from: personA, to: personB) {
-            let desc = buildDescription(from: personA, to: personB, path: path)
-            return RelationshipResult(name: blood.name, path: path, description: desc)
+        if let descriptor = bloodDescriptor(from: personA, to: personB) {
+            return make(
+                descriptor,
+                path: path,
+                description: buildDescription(path: path, language: language),
+                formatter: formatter
+            )
         }
 
-        // Otherwise an in-law / spouse-based relationship.
-        if let result = checkInLawRelationship(from: personA, to: personB, path: path) {
-            return result
+        if let descriptor = inLawDescriptor(from: personA, to: personB) {
+            return make(
+                descriptor,
+                path: path,
+                description: buildDescription(path: path, language: language),
+                formatter: formatter
+            )
         }
 
-        let desc = buildDescription(from: personA, to: personB, path: path)
-        return RelationshipResult(name: "Родственник", path: path, description: desc)
+        return make(
+            .relative,
+            path: path,
+            description: buildDescription(path: path, language: language),
+            formatter: formatter
+        )
     }
 
-    /// Blood relationship only (via lowest common ancestor); nil if no common ancestor.
-    /// Kept separate so in-law detection can use it without re-entering in-law logic.
-    private func bloodRelationship(from personA: Person, to personB: Person) -> RelationshipResult? {
-        if personA.id == personB.id {
-            return RelationshipResult(name: "Это тот же человек", path: [personA.id], description: "")
-        }
-        let (upA, upB) = findCommonAncestorDistances(from: personA.id, to: personB.id)
-        guard let up = upA, let down = upB else { return nil }
-        let name = nameRelationship(stepsUp: up, stepsDown: down, from: personA, to: personB)
-        return RelationshipResult(name: name, path: [], description: "")
+    private func make(
+        _ descriptor: KinshipDescriptor,
+        path: [UUID],
+        description: String = "",
+        formatter: KinshipFormatter
+    ) -> RelationshipResult {
+        RelationshipResult(
+            descriptor: descriptor,
+            name: formatter.label(for: descriptor),
+            path: path,
+            description: description
+        )
     }
 
-    // MARK: - Path Finding (BFS)
+    // MARK: - Path finding
 
-    private func findPath(from startId: UUID, to targetId: UUID) -> [UUID]? {
-        var visited = Set<UUID>()
-        var queue: [(id: UUID, path: [UUID])] = [(startId, [startId])]
-        visited.insert(startId)
+    private func findPath(from startID: UUID, to targetID: UUID) -> [UUID]? {
+        var visited: Set<UUID> = [startID]
+        var queue: [(id: UUID, path: [UUID])] = [(startID, [startID])]
 
         while !queue.isEmpty {
             let (current, path) = queue.removeFirst()
-            if current == targetId { return path }
+            if current == targetID { return path }
 
-            for neighbor in neighbors(of: current) {
-                if !visited.contains(neighbor) {
-                    visited.insert(neighbor)
-                    queue.append((neighbor, path + [neighbor]))
-                }
+            for neighbor in neighbors(of: current) where !visited.contains(neighbor) {
+                visited.insert(neighbor)
+                queue.append((neighbor, path + [neighbor]))
             }
         }
         return nil
     }
 
-    private func neighbors(of personId: UUID) -> [UUID] {
+    private func neighbors(of personID: UUID) -> [UUID] {
         var result: [UUID] = []
+        result.append(contentsOf: idx.parentEdges(of: personID).map(\.parentID))
+        result.append(contentsOf: idx.mergedSiblingIds(personID))
 
-        // Parents + siblings (merged across split-family FAM records)
-        let parents = idx.mergedParentIds(personId)
-        if let f = parents.father { result.append(f) }
-        if let m = parents.mother { result.append(m) }
-        result.append(contentsOf: idx.mergedSiblingIds(personId))
-
-        // Spouses and children
-        for union in idx.unionsOf[personId] ?? [] {
-            result.append(contentsOf: union.partnerIds.filter { $0 != personId })
+        for union in idx.unionsOf[personID] ?? [] {
+            result.append(contentsOf: union.partnerIds.filter { $0 != personID })
             result.append(contentsOf: union.childrenIds)
         }
-
-        return result
+        if let person = idx.byId[personID] {
+            result.append(contentsOf: idx.childrenOf(person).map(\.id))
+        }
+        var seen = Set<UUID>()
+        return result.filter { seen.insert($0).inserted }
     }
 
-    // MARK: - Common Ancestor
+    // MARK: - Blood relationships
 
-    /// Returns (stepsUp from A to ancestor, stepsDown from ancestor to B)
-    private func findCommonAncestorDistances(from aId: UUID, to bId: UUID) -> (Int?, Int?) {
-        let ancestorsA = allAncestorsWithDepth(aId)
-        let ancestorsB = allAncestorsWithDepth(bId)
+    private func bloodDescriptor(from personA: Person, to personB: Person) -> KinshipDescriptor? {
+        if personA.id == personB.id { return .samePerson }
+        guard let match = findCommonAncestor(from: personA.id, to: personB.id) else {
+            return nil
+        }
+        let base = descriptor(
+            stepsUp: match.stepsUp,
+            stepsDown: match.stepsDown,
+            from: personA,
+            to: personB
+        )
+        return match.parentage.reduce(base) {
+            .qualified(base: $0, kind: $1)
+        }
+    }
 
-        var bestSum = Int.max
-        var bestUp = 0
-        var bestDown = 0
+    private struct AncestorPath {
+        let depth: Int
+        let parentage: [ParentageKind]
+    }
 
-        for (ancId, depthA) in ancestorsA {
-            if let depthB = ancestorsB[ancId] {
-                let sum = depthA + depthB
-                if sum < bestSum {
-                    bestSum = sum
-                    bestUp = depthA
-                    bestDown = depthB
-                }
+    private func findCommonAncestor(
+        from firstID: UUID,
+        to secondID: UUID
+    ) -> (stepsUp: Int, stepsDown: Int, parentage: [ParentageKind])? {
+        let firstAncestors = allAncestors(firstID)
+        let secondAncestors = allAncestors(secondID)
+        var best: (
+            stepsUp: Int,
+            stepsDown: Int,
+            parentage: [ParentageKind],
+            ancestorID: UUID
+        )?
+
+        for (ancestorID, firstPath) in firstAncestors {
+            guard let secondPath = secondAncestors[ancestorID] else { continue }
+            let parentage = uniqueParentage(firstPath.parentage + secondPath.parentage)
+            let candidate = (
+                stepsUp: firstPath.depth,
+                stepsDown: secondPath.depth,
+                parentage: parentage,
+                ancestorID: ancestorID
+            )
+            if best == nil || commonAncestorKey(candidate) < commonAncestorKey(best!) {
+                best = candidate
             }
         }
-
-        if bestSum == Int.max { return (nil, nil) }
-        return (bestUp, bestDown)
+        guard let best else { return nil }
+        return (best.stepsUp, best.stepsDown, best.parentage)
     }
 
-    private func allAncestorsWithDepth(_ personId: UUID) -> [UUID: Int] {
-        var result: [UUID: Int] = [personId: 0]
-        var queue: [(UUID, Int)] = [(personId, 0)]
+    private func allAncestors(_ personID: UUID) -> [UUID: AncestorPath] {
+        var result: [UUID: AncestorPath] = [
+            personID: AncestorPath(depth: 0, parentage: []),
+        ]
+        var queue: [(UUID, AncestorPath)] = [(personID, result[personID]!)]
 
         while !queue.isEmpty {
-            let (current, depth) = queue.removeFirst()
-            let parents = idx.mergedParentIds(current)
-            for pid in [parents.father, parents.mother].compactMap({ $0 }) {
-                if result[pid] == nil {
-                    result[pid] = depth + 1
-                    queue.append((pid, depth + 1))
+            let (current, path) = queue.removeFirst()
+            for edge in idx.parentEdges(of: current) {
+                let parentage = uniqueParentage(
+                    path.parentage + (edge.kind == .biological ? [] : [edge.kind])
+                )
+                let candidate = AncestorPath(depth: path.depth + 1, parentage: parentage)
+                if let existing = result[edge.parentID],
+                   ancestorPathKey(existing) <= ancestorPathKey(candidate) {
+                    continue
                 }
+                result[edge.parentID] = candidate
+                queue.append((edge.parentID, candidate))
             }
         }
         return result
     }
 
-    // MARK: - Naming
-
-    /// Names a sibling, distinguishing full (2 shared parents) from half
-    /// (1 shared parent → единокровный via father / единоутробный via mother).
-    private func siblingName(from a: Person, to b: Person) -> String {
-        let full = idx.sharedParentCount(a.id, b.id) >= 2
-        if b.sex == .unknown {
-            return full ? "Брат/сестра" : "Неполнородный брат/сестра"
-        }
-        let isF = b.sex == .female
-        if full { return isF ? "Сестра" : "Брат" }
-        let pa = idx.mergedParentIds(a.id)
-        let pb = idx.mergedParentIds(b.id)
-        let sameFather = pa.father != nil && pa.father == pb.father
-        if sameFather { return isF ? "Единокровная сестра" : "Единокровный брат" }
-        return isF ? "Единоутробная сестра" : "Единоутробный брат"
+    private func uniqueParentage(_ kinds: [ParentageKind]) -> [ParentageKind] {
+        var seen = Set<ParentageKind>()
+        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
     }
 
-    private func nameRelationship(stepsUp: Int, stepsDown: Int, from personA: Person, to personB: Person) -> String {
-        // Direct ancestor/descendant
+    private func ancestorPathKey(_ path: AncestorPath) -> String {
+        [
+            String(format: "%08d", path.depth),
+            String(format: "%08d", path.parentage.count),
+            path.parentage.map(\.rawValue).joined(separator: ","),
+        ].joined(separator: "|")
+    }
+
+    private func commonAncestorKey(
+        _ match: (
+            stepsUp: Int,
+            stepsDown: Int,
+            parentage: [ParentageKind],
+            ancestorID: UUID
+        )
+    ) -> String {
+        let total = match.stepsUp + match.stepsDown
+        return [
+            String(format: "%08d", total),
+            String(format: "%08d", match.parentage.count),
+            String(format: "%08d", match.stepsUp),
+            String(format: "%08d", match.stepsDown),
+            match.parentage.map(\.rawValue).joined(separator: ","),
+            match.ancestorID.uuidString,
+        ].joined(separator: "|")
+    }
+
+    private func descriptor(
+        stepsUp: Int,
+        stepsDown: Int,
+        from personA: Person,
+        to personB: Person
+    ) -> KinshipDescriptor {
         if stepsDown == 0 {
-            switch stepsUp {
-            case 1: return gendered(personB, male: "Отец", female: "Мать", neutral: "Родитель")
-            case 2: return gendered(personB, male: "Дед", female: "Бабушка", neutral: "Родитель родителя")
-            case 3: return gendered(personB, male: "Прадед", female: "Прабабушка", neutral: "Прародитель")
-            case 4: return gendered(personB, male: "Прапрадед", female: "Прапрабабушка", neutral: "Пра-прародитель")
-            default: return "\(stepsUp)-й предок"
-            }
+            return .ancestor(generation: stepsUp, sex: personB.sex)
         }
-
         if stepsUp == 0 {
-            switch stepsDown {
-            case 1: return gendered(personB, male: "Сын", female: "Дочь", neutral: "Ребёнок")
-            case 2: return gendered(personB, male: "Внук", female: "Внучка", neutral: "Внук/внучка")
-            case 3: return gendered(personB, male: "Правнук", female: "Правнучка", neutral: "Правнук/правнучка")
-            case 4: return gendered(personB, male: "Праправнук", female: "Праправнучка", neutral: "Праправнук/праправнучка")
-            default: return "\(stepsDown)-й потомок"
-            }
+            return .descendant(generation: stepsDown, sex: personB.sex)
         }
-
-        // Siblings (distinguish full from half siblings)
-        if stepsUp == 1 && stepsDown == 1 {
-            return siblingName(from: personA, to: personB)
+        if stepsUp == 1, stepsDown == 1 {
+            return .sibling(sex: personB.sex, kind: siblingKind(from: personA, to: personB))
         }
-
-        // Uncle/Aunt - Nephew/Niece
-        if stepsUp == 1 && stepsDown == 2 {
-            return gendered(personB, male: "Племянник", female: "Племянница", neutral: "Племянник/племянница")
+        if stepsUp == 1, stepsDown >= 2 {
+            return .nieceOrNephew(greats: stepsDown - 2, sex: personB.sex)
         }
-        if stepsUp == 2 && stepsDown == 1 {
-            return gendered(personB, male: "Дядя", female: "Тётя", neutral: "Дядя/тётя")
+        if stepsDown == 1, stepsUp >= 2 {
+            return .auntOrUncle(greats: stepsUp - 2, sex: personB.sex)
         }
-
-        // Great uncle/aunt - grand nephew/niece
-        if stepsUp == 1 && stepsDown == 3 {
-            return gendered(personB, male: "Внучатый племянник", female: "Внучатая племянница", neutral: "Внучатый племянник/племянница")
-        }
-        if stepsUp == 3 && stepsDown == 1 {
-            return gendered(personB, male: "Двоюродный дед", female: "Двоюродная бабушка", neutral: "Двоюродный прародитель")
-        }
-
-        // Cousins
-        if stepsUp == stepsDown {
-            let degree = stepsUp - 1
-            switch degree {
-            case 1: return gendered(personB, male: "Двоюродный брат", female: "Двоюродная сестра", neutral: "Двоюродный брат/сестра")
-            case 2: return gendered(personB, male: "Троюродный брат", female: "Троюродная сестра", neutral: "Троюродный брат/сестра")
-            case 3: return gendered(personB, male: "Четвероюродный брат", female: "Четвероюродная сестра", neutral: "Четвероюродный брат/сестра")
-            default: return "\(degree + 1)-юродный родственник"
-            }
-        }
-
-        // Cousins removed
-        if stepsUp >= 2 && stepsDown >= 2 {
-            let degree = min(stepsUp, stepsDown) - 1
-            let cousinName: String = switch degree {
-            case 1: personB.sex == .male ? "Двоюродный" : personB.sex == .female ? "Двоюродная" : "Двоюродный/двоюродная"
-            case 2: personB.sex == .male ? "Троюродный" : personB.sex == .female ? "Троюродная" : "Троюродный/троюродная"
-            default: "\(degree + 1)-юродный"
-            }
-            let relType = gendered(personB, male: "племянник", female: "племянница", neutral: "племянник/племянница")
-            if stepsDown > stepsUp {
-                return "\(cousinName) \(relType)"
+        if stepsUp >= 2, stepsDown >= 2 {
+            let removed = abs(stepsUp - stepsDown)
+            let direction: KinshipDescriptor.CousinDirection = if stepsDown > stepsUp {
+                .younger
+            } else if stepsUp > stepsDown {
+                .older
             } else {
-                let relType2 = gendered(personB, male: "дядя", female: "тётя", neutral: "дядя/тётя")
-                return "\(cousinName) \(relType2)"
+                .sameGeneration
+            }
+            return .cousin(
+                degree: min(stepsUp, stepsDown) - 1,
+                removed: removed,
+                direction: direction,
+                sex: personB.sex
+            )
+        }
+        return .distantRelative
+    }
+
+    private func siblingKind(from first: Person, to second: Person) -> KinshipDescriptor.SiblingKind {
+        if idx.sharedParentCount(first.id, second.id) >= 2 { return .full }
+        let firstParents = Set(idx.parentEdges(of: first.id).map(\.parentID))
+        let secondParents = Set(idx.parentEdges(of: second.id).map(\.parentID))
+        let shared = firstParents.intersection(secondParents)
+        if shared.contains(where: { idx.byId[$0]?.sex == .male }) { return .paternalHalf }
+        if shared.contains(where: { idx.byId[$0]?.sex == .female }) { return .maternalHalf }
+        return .halfUnknown
+    }
+
+    // MARK: - In-laws
+
+    private func inLawDescriptor(from personA: Person, to personB: Person) -> KinshipDescriptor? {
+        for spouseOfB in idx.spousesOf(personB) where spouseOfB.id != personA.id {
+            guard let blood = bloodDescriptor(from: personA, to: spouseOfB) else { continue }
+            if let result = inLawForSpouseOfBloodRelative(blood, spouseSex: personB.sex) {
+                return result
             }
         }
 
-        return "Дальний родственник"
-    }
-
-    private func parentName(_ person: Person, kind: ParentageKind) -> String {
-        switch kind {
-        case .biological: gendered(person, male: "Отец", female: "Мать", neutral: "Родитель")
-        case .adoptive: gendered(person, male: "Приёмный отец", female: "Приёмная мать", neutral: "Приёмный родитель")
-        case .foster: gendered(person, male: "Опекун", female: "Опекун", neutral: "Опекун")
-        case .step: gendered(person, male: "Отчим", female: "Мачеха", neutral: "Неродной родитель")
-        case .uncertain: gendered(person, male: "Предполагаемый отец", female: "Предполагаемая мать", neutral: "Предполагаемый родитель")
-        }
-    }
-
-    private func childName(_ person: Person, kind: ParentageKind) -> String {
-        let base = gendered(person, male: "сын", female: "дочь", neutral: "ребёнок")
-        switch kind {
-        case .biological: return base.prefix(1).uppercased() + String(base.dropFirst())
-        case .adoptive: return gendered(person, male: "Приёмный сын", female: "Приёмная дочь", neutral: "Приёмный ребёнок")
-        case .foster: return "Ребёнок под опекой"
-        case .step: return gendered(person, male: "Пасынок", female: "Падчерица", neutral: "Неродной ребёнок")
-        case .uncertain: return gendered(person, male: "Предполагаемый сын", female: "Предполагаемая дочь", neutral: "Предполагаемый ребёнок")
-        }
-    }
-
-    private func gendered(_ person: Person, male: String, female: String, neutral: String) -> String {
-        switch person.sex {
-        case .male: male
-        case .female: female
-        case .unknown: neutral
-        }
-    }
-
-    // MARK: - In-Law Relationships
-
-    private func checkInLawRelationship(from personA: Person, to personB: Person, path: [UUID]) -> RelationshipResult? {
-        let sexA = personA.sex
-        let sexB = personB.sex
-
-        // Check if B is spouse of a blood relative of A
-        let spousesOfB = idx.spousesOf(personB)
-        for spouseOfB in spousesOfB where spouseOfB.id != personA.id {
-            if let bloodRel = bloodRelationship(from: personA, to: spouseOfB) {
-                if let name = inLawName(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB) {
-                    let desc = buildDescription(from: personA, to: personB, path: path)
-                    return RelationshipResult(name: name, path: path, description: desc)
-                }
+        for spouseOfA in idx.spousesOf(personA) where spouseOfA.id != personB.id {
+            guard let blood = bloodDescriptor(from: spouseOfA, to: personB) else { continue }
+            if let result = inLawViaSpouse(blood, subjectSex: personA.sex, relativeSex: personB.sex) {
+                return result
             }
         }
-
-        // Check if A's spouse is blood relative of B
-        let spousesOfA = idx.spousesOf(personA)
-        for spouseOfA in spousesOfA where spouseOfA.id != personB.id {
-            if let bloodRel = bloodRelationship(from: spouseOfA, to: personB) {
-                if let n = inLawViaMySpouse(bloodRelName: bloodRel.name, sexA: sexA, sexB: sexB) {
-                    let desc = buildDescription(from: personA, to: personB, path: path)
-                    return RelationshipResult(name: n, path: path, description: desc)
-                }
-            }
-        }
-
         return nil
     }
 
-    /// Names in-law when B is the spouse of A's blood relative
-    private func inLawName(bloodRelName: String, sexA: Person.Sex, sexB: Person.Sex) -> String? {
-        switch bloodRelName {
-        case "Брат":
-            // B is spouse of A's brother → B is невестка/сноха for female, N/A for male
-            sexB == .female ? "Невестка (жена брата)" : nil
-        case "Сестра":
-            // B is spouse of A's sister → B is зять for male
-            sexB == .male ? "Зять (муж сестры)" : nil
-        case "Сын":
-            sexB == .female ? "Невестка (сноха)" : nil
-        case "Дочь":
-            sexB == .male ? "Зять (муж дочери)" : nil
+    private func inLawForSpouseOfBloodRelative(
+        _ blood: KinshipDescriptor,
+        spouseSex: Person.Sex
+    ) -> KinshipDescriptor? {
+        switch blood {
+        case let .sibling(relativeSex, _):
+            if relativeSex == .male, spouseSex == .female { return .inLaw(.brothersWife) }
+            if relativeSex == .female, spouseSex == .male { return .inLaw(.sistersHusband) }
+        case let .descendant(generation, relativeSex) where generation == 1:
+            if relativeSex == .male, spouseSex == .female { return .inLaw(.sonsWife) }
+            if relativeSex == .female, spouseSex == .male { return .inLaw(.daughtersHusband) }
         default:
-            nil
+            break
         }
+        return nil
     }
 
-    /// Names when B is blood relative of A's spouse
-    private func inLawViaMySpouse(bloodRelName: String, sexA: Person.Sex, sexB: Person.Sex) -> String? {
-        switch bloodRelName {
-        case "Отец":
-            // B is the spouse's father (always male); the term depends on the
-            // subject's sex: the wife's side says свёкор, the husband's side тесть.
-            sexA == .female ? "Свёкор" : "Тесть"
-        case "Мать":
-            sexB == .female ? (sexA == .female ? "Свекровь" : "Тёща") : nil
-        case "Брат":
-            if sexA == .female {
-                sexB == .male ? "Деверь" : nil
-            } else {
-                sexB == .male ? "Шурин" : nil
+    private func inLawViaSpouse(
+        _ blood: KinshipDescriptor,
+        subjectSex: Person.Sex,
+        relativeSex: Person.Sex
+    ) -> KinshipDescriptor? {
+        let husbandsSide = subjectSex == .female
+        switch blood {
+        case let .ancestor(generation, _) where generation == 1:
+            if relativeSex == .male {
+                return .inLaw(husbandsSide ? .fatherHusbandsSide : .fatherWifesSide)
             }
-        case "Сестра":
-            if sexA == .male {
-                sexB == .female ? "Свояченица" : nil
-            } else {
-                sexB == .female ? "Золовка" : nil
+            if relativeSex == .female {
+                return .inLaw(husbandsSide ? .motherHusbandsSide : .motherWifesSide)
+            }
+        case .sibling:
+            if relativeSex == .male {
+                return .inLaw(husbandsSide ? .brotherHusbandsSide : .brotherWifesSide)
+            }
+            if relativeSex == .female {
+                return .inLaw(husbandsSide ? .sisterHusbandsSide : .sisterWifesSide)
             }
         default:
-            nil
+            break
         }
+        return nil
     }
 
-    // MARK: - Description
+    // MARK: - Descriptions
 
-    private func buildDescription(from personA: Person, to personB: Person, path: [UUID]) -> String {
+    private func buildDescription(path: [UUID], language: AppLanguage) -> String {
         guard path.count > 2 else { return "" }
-        let names = path.compactMap { idx.byId[$0]?.listName }
-        return "Через: " + names.dropFirst().dropLast().joined(separator: " → ")
+        let names = path.compactMap { idx.byId[$0]?.displayName(language: language) }
+        return L10n.tr("Через: \(names.dropFirst().dropLast().joined(separator: " → "))", language: language)
+    }
+
+    private func parentageDescription(_ kind: ParentageKind, language: AppLanguage) -> String {
+        switch kind {
+        case .biological: L10n.tr("Биологическая", language: language)
+        case .adoptive: L10n.tr("Приёмная", language: language)
+        case .foster: L10n.tr("Опекунская", language: language)
+        case .step: L10n.tr("Сводная", language: language)
+        case .uncertain: L10n.tr("Предполагаемая", language: language)
+        }
     }
 }

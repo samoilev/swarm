@@ -102,16 +102,20 @@ public final class Person: Identifiable, Codable, Hashable {
     public var createdAt: Date
     public var updatedAt: Date
 
-    public enum Sex: String, Codable, CaseIterable {
+    public enum Sex: String, Codable, CaseIterable, Sendable {
         case male = "M"
         case female = "F"
         case unknown = "U"
 
         public var displayName: String {
+            displayName(language: .current)
+        }
+
+        public func displayName(language: AppLanguage) -> String {
             switch self {
-            case .male: AppLanguage.current == .english ? "Male" : "Муж"
-            case .female: AppLanguage.current == .english ? "Female" : "Жен"
-            case .unknown: L10n.tr("Не указан")
+            case .male: language == .english ? "Male" : "Муж"
+            case .female: language == .english ? "Female" : "Жен"
+            case .unknown: L10n.tr("Не указан", language: language)
             }
         }
 
@@ -188,6 +192,31 @@ public final class Person: Identifiable, Codable, Hashable {
         [surname.isEmpty ? nil : surname, givenNames.isEmpty ? nil : givenNames, patronymic]
             .compactMap { $0 }
             .joined(separator: " ")
+    }
+
+    /// Locale-appropriate presentation name. The stored name parts remain unchanged;
+    /// only their display order changes.
+    public func displayName(language: AppLanguage = .current) -> String {
+        switch language {
+        case .russian:
+            listName
+        case .english:
+            fullName
+        }
+    }
+
+    /// Stable, locale-aware sort key. English still sorts genealogical lists by
+    /// surname, while showing the natural given-name-first form.
+    public func sortName(language: AppLanguage = .current) -> String {
+        let components = switch language {
+        case .russian:
+            [surname, givenNames, patronymic ?? ""]
+        case .english:
+            [surname, givenNames, patronymic ?? ""]
+        }
+        return components
+            .map { $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: language.locale) }
+            .joined(separator: "\u{001F}")
     }
 
     public var displaySurname: String {

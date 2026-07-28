@@ -58,7 +58,7 @@ public final class TreeWorkspaceIndexes {
 
     public func rebuild(tree: FamilyTree, validationContext: TreeValidationContext = .init()) {
         searchEntries = tree.people.map(Self.searchEntry)
-            .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+            .sorted { Self.localizedLess($0.displayName, $1.displayName) }
         timelineEntries = (tree.people.flatMap(Self.timelineEntries) + Self.unionTimelineEntries(tree))
             .sorted(by: Self.timelineSort)
         placeEntries = Self.buildPlaces(from: timelineEntries)
@@ -72,7 +72,7 @@ public final class TreeWorkspaceIndexes {
     public func update(person: Person, in tree: FamilyTree, validationContext: TreeValidationContext = .init()) {
         searchEntries.removeAll { $0.personID == person.id }
         searchEntries.append(Self.searchEntry(person))
-        searchEntries.sort { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
+        searchEntries.sort { Self.localizedLess($0.displayName, $1.displayName) }
 
         timelineEntries.removeAll { $0.personID == person.id || $0.unionID != nil }
         timelineEntries.append(contentsOf: Self.timelineEntries(person))
@@ -84,11 +84,17 @@ public final class TreeWorkspaceIndexes {
     }
 
     private static func searchEntry(_ person: Person) -> PersonSearchEntry {
-        let places = person.events.compactMap(\.place?.displayName)
-        let combined = ([person.fullName, person.listName] + places).joined(separator: " ")
+        let places = person.events.compactMap(\.place).map {
+            PlacesDatabase.shared.presentationName(for: $0, language: .current)
+        }
+        let combined = (
+            [person.fullName, person.displayName(language: .current)] + places
+        ).joined(separator: " ")
         return PersonSearchEntry(
             personID: person.id,
-            displayName: person.listName.isEmpty ? L10n.tr("Без имени") : person.listName,
+            displayName: person.displayName(language: .current).isEmpty
+                ? L10n.tr("Без имени")
+                : person.displayName(language: .current),
             normalizedText: normalize(combined),
             birthYear: person.event(ofKind: .birth)?.date?.year,
             deathYear: person.event(ofKind: .death)?.date?.year,
@@ -106,7 +112,9 @@ public final class TreeWorkspaceIndexes {
                 unionID: nil,
                 relatedPersonIDs: [person.id],
                 eventID: event.id,
-                personName: person.listName.isEmpty ? L10n.tr("Без имени") : person.listName,
+                personName: person.displayName(language: .current).isEmpty
+                    ? L10n.tr("Без имени")
+                    : person.displayName(language: .current),
                 kind: event.kind,
                 date: event.date,
                 place: event.place,
@@ -118,7 +126,9 @@ public final class TreeWorkspaceIndexes {
     private static func unionTimelineEntries(_ tree: FamilyTree) -> [TimelineEntry] {
         tree.unions.flatMap { union in
             let relatedIDs = Array(Set(union.partnerIds + union.childrenIds))
-            let names = union.partnerIds.compactMap { tree.person(byId: $0)?.listName }
+            let names = union.partnerIds.compactMap {
+                tree.person(byId: $0)?.displayName(language: .current)
+            }
             let title = names.isEmpty ? L10n.tr("Семейная запись") : names.joined(separator: " + ")
             return union.events.map { event in
                 TimelineEntry(
@@ -157,13 +167,34 @@ public final class TreeWorkspaceIndexes {
             group.eventCount += 1
             grouped[key] = group
         }
-        return grouped.values.sorted { $0.place.displayName.localizedStandardCompare($1.place.displayName) == .orderedAscending }
+        return grouped.values.sorted {
+            let lhs = PlacesDatabase.shared.presentationName(for: $0.place, language: .current)
+            let rhs = PlacesDatabase.shared.presentationName(for: $1.place, language: .current)
+            return lhs.compare(
+                rhs,
+                options: [.caseInsensitive, .diacriticInsensitive],
+                range: nil,
+                locale: AppLanguage.current.locale
+            ) == .orderedAscending
+        }
     }
 
     public static func normalize(_ value: String) -> String {
-        value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "ru_RU"))
+        value.folding(
+            options: [.caseInsensitive, .diacriticInsensitive],
+            locale: AppLanguage.current.locale
+        )
             .lowercased()
             .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
             .joined(separator: " ")
+    }
+
+    private static func localizedLess(_ lhs: String, _ rhs: String) -> Bool {
+        lhs.compare(
+            rhs,
+            options: [.caseInsensitive, .diacriticInsensitive],
+            range: nil,
+            locale: AppLanguage.current.locale
+        ) == .orderedAscending
     }
 }

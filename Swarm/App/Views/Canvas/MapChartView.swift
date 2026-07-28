@@ -24,6 +24,7 @@ struct AppleMapChartView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
 
     @State private var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 55, longitude: 40),
@@ -80,6 +81,7 @@ struct AppleMapChartView: View {
         .onChange(of: tree.layoutVersion) { _, _ in
             computeAnnotations()
         }
+        .onChange(of: languageRaw) { _, _ in computeAnnotations() }
         .onChange(of: fitRequest) { _, _ in
             fitToAnnotations()
         }
@@ -151,7 +153,11 @@ struct AppleMapChartView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(group.label)
-        .accessibilityHint(count == 1 ? L10n.tr("Выбрать персону") : L10n.tr("Показать \(count) персон"))
+        .accessibilityHint(
+            count == 1
+                ? L10n.tr("Выбрать персону")
+                : L10n.tr("Показать \(L10n.count(count, .person))")
+        )
         .accessibilityAction {
             if count == 1 {
                 selectedPerson = tree.people.first { $0.id == group.annotations[0].personId }
@@ -297,8 +303,8 @@ struct AppleMapChartView: View {
             if let coord = birthCoord {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
-                    personName: person.listName,
-                    placeName: person.birthPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .birth, fallback: person.birthPlace),
                     eventType: .birth,
                     coordinate: coord
                 ))
@@ -306,8 +312,8 @@ struct AppleMapChartView: View {
             if let coord = deathCoord {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
-                    personName: person.listName,
-                    placeName: person.deathPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .death, fallback: person.deathPlace),
                     eventType: .death,
                     coordinate: coord
                 ))
@@ -315,8 +321,8 @@ struct AppleMapChartView: View {
             if let coord = burialCoord {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
-                    personName: person.listName,
-                    placeName: person.burialPlace ?? "",
+                    personName: person.displayName(language: .current),
+                    placeName: presentationPlace(person, kind: .burial, fallback: person.burialPlace),
                     eventType: .burial,
                     coordinate: coord
                 ))
@@ -337,6 +343,15 @@ struct AppleMapChartView: View {
 
         // Fit map to show all annotations
         fitToAnnotations()
+    }
+
+    private func presentationPlace(
+        _ person: Person,
+        kind: GenealogyEvent.Kind,
+        fallback: String?
+    ) -> String {
+        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
+        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func fitToAnnotations() {

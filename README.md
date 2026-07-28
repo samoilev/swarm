@@ -46,11 +46,13 @@ Requires macOS 14 or later on Apple silicon. See [Build and run](#build-and-run)
 
 - **Tree diagram** using the Buchheim–Jünger–Leipert layout, an **ancestor fan chart**,
   and a **map** of birth, death and burial places.
-- **Russian kinship naming** — direct lineage, full and half siblings, cousins including
-  removed cousins, and in-laws (свёкор/тесть, деверь/шурин, золовка/свояченица, …).
-  Ask "how are these two related?" about any pair and get the correct term.
-- **Russian and English interfaces**, switchable in Settings without restarting. Russian
-  is the default.
+- **Russian and English kinship naming** — direct lineage, full and half siblings,
+  neutral-sex relationships, cousins with exact removed generations, and in-laws
+  (свёкор/тесть, деверь/шурин, золовка/свояченица, …). Ask “how are these two related?”
+  about any pair and get the correct term.
+- **Russian and English interfaces**, selected on first launch and switchable without
+  restarting. Name order, sorting, examples, dates, plural grammar, Help, and PDF
+  presentation follow the selected language.
 - **Photos and arbitrary file attachments** on any person.
 - **Workspaces built for large trees** — people, timeline, places, review, recovery, and
   sources and citations.
@@ -71,7 +73,8 @@ alive. Swarm is built accordingly:
 - **Nothing is uploaded.** No accounts, no sync, no telemetry, no crash reporting, no AI
   services.
 - **Place lookup is entirely local.** Names are matched against a bundled snapshot of
-  GeoNames data, so searching for a village sends nothing anywhere.
+  476,958 bilingual GeoNames places across the former USSR, Europe, and North America,
+  so searching for a village sends nothing anywhere.
 - **The map is the only optional network path.** The default `appleMaps` provider renders
   through MapKit, so Apple supplies the tiles and may receive the region being viewed.
   Swarm does not submit names, records, pins or annotations. The `offlineVector` provider

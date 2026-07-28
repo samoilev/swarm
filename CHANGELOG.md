@@ -11,6 +11,34 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Added
+
+- A mandatory bilingual Russian/English chooser on pristine installations, with the
+  same immediate language switch in the library, onboarding, Settings, and Help.
+- Bilingual contextual Help for first steps, genealogy dates, kinship, workspaces,
+  keyboard navigation, map privacy, and recovery.
+- A pinned 476,958-place bilingual GeoNames snapshot (`geonames-2026-07-28`) covering
+  every populated place in the 15 former-USSR countries and population ≥500 places plus
+  populated-place capital/admin seats across Europe and all North America, including
+  Central America and the Caribbean.
+- Population-ranked, zoom-aware Russian/English labels on the offline map.
+
+### Changed
+
+- English now uses given-name-first presentation, surname-first sorting, optional
+  patronymics, native examples, unambiguous `5 Mar 1978` dates, and locale-aware counted
+  nouns throughout the interface and PDFs.
+- Kinship is computed as language-neutral descriptors and formatted explicitly in
+  Russian or English, including neutral-sex lineage and first through fourth cousins
+  one, two, or three generations removed in either direction.
+- Place search, labels, ID lookup, and coordinate resolution now share one bilingual
+  index. Ambiguous bare names no longer receive an arbitrary pin.
+
+### Removed
+
+- The legacy `places.tsv` and `geonames_ussr.tsv` snapshots, superseded by the single
+  versioned bilingual index.
+
 ## [2.2.1] — 2026-07-28
 
 ### Fixed

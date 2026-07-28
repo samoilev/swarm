@@ -46,7 +46,7 @@ struct AddPersonView: View {
     }
 
     private var sortedPeople: [Person] {
-        tree.people.sorted { $0.listName.localizedCaseInsensitiveCompare($1.listName) == .orderedAscending }
+        tree.people.sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
     }
 
     var body: some View {
@@ -75,9 +75,15 @@ struct AddPersonView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         SectionHeader(title: L10n.tr("Личность"))
                         HStack(spacing: 12) {
-                            SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                            SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                            SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            if AppLanguage.current == .english {
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО (необяз.)"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            } else {
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                            }
                         }.padding(.bottom, 12)
 
                         HStack(spacing: 12) {
@@ -157,7 +163,9 @@ struct AddPersonView: View {
                                     }.labelsHidden().pickerStyle(.menu).frame(width: 130)
                                     Picker("", selection: $rel.personId) {
                                         Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
-                                        ForEach(sortedPeople, id: \.id) { p in Text(p.listName).tag(p.id as UUID?) }
+                                        ForEach(sortedPeople, id: \.id) {
+                                            p in Text(p.displayName(language: .current)).tag(p.id as UUID?)
+                                        }
                                     }.labelsHidden().pickerStyle(.menu)
                                     Button { pendingRels.removeAll { $0.id == rel.id } } label: {
                                         Image(systemName: "minus.circle.fill")

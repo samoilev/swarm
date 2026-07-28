@@ -254,11 +254,13 @@ struct FanWedgeShape: View {
                 .stroke(SepiaTheme.fanLine, lineWidth: 1)
             if let person = wedge.person {
                 VStack(spacing: 2) {
-                    Text(person.displaySurname.uppercased())
-                        .font(SepiaTheme.ui(size: 8.5))
-                        .tracking(1.0)
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
+                    if AppLanguage.current == .russian {
+                        Text(person.displaySurname.uppercased())
+                            .font(SepiaTheme.ui(size: 8.5))
+                            .tracking(1.0)
+                            .foregroundColor(SepiaTheme.inkSoft)
+                            .lineLimit(1)
+                    }
                     if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                         Text("(\(maiden))".uppercased())
                             .font(SepiaTheme.ui(size: 7.5))
@@ -292,11 +294,13 @@ struct FanWedgeShape: View {
                 .stroke(SepiaTheme.fanLine, lineWidth: 1)
             if let person = wedge.person {
                 VStack(spacing: 2) {
-                    Text(person.displaySurname.uppercased())
-                        .font(SepiaTheme.ui(size: 8.5))
-                        .tracking(1.0)
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
+                    if AppLanguage.current == .russian {
+                        Text(person.displaySurname.uppercased())
+                            .font(SepiaTheme.ui(size: 8.5))
+                            .tracking(1.0)
+                            .foregroundColor(SepiaTheme.inkSoft)
+                            .lineLimit(1)
+                    }
                     if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                         Text("(\(maiden))".uppercased())
                             .font(SepiaTheme.ui(size: 7.5))
@@ -404,7 +408,10 @@ struct FanWedgeShape: View {
     }
 
     private func personFullGivenName(_ person: Person) -> String {
-        [person.givenNames, person.patronymic ?? ""]
+        if AppLanguage.current == .english {
+            return person.displayName(language: .english)
+        }
+        return [person.givenNames, person.patronymic ?? ""]
             .filter { !$0.isEmpty }
             .joined(separator: " ")
     }
@@ -413,12 +420,18 @@ struct FanWedgeShape: View {
         let surname = person.displaySurname
         let givenInitial = person.givenNames.first.map { "\($0)." } ?? ""
         let patronInitial = (person.patronymic ?? "").first.map { "\($0)." } ?? ""
+        if AppLanguage.current == .english {
+            return "\(givenInitial) \(surname)".trimmingCharacters(in: .whitespaces)
+        }
         return "\(surname) \(givenInitial)\(patronInitial)".trimmingCharacters(in: .whitespaces)
     }
 
     private func personMinimalName(_ person: Person) -> String {
         let surname = person.displaySurname
         let initial = person.givenNames.first.map { "\($0)." } ?? ""
+        if AppLanguage.current == .english {
+            return "\(initial) \(surname)".trimmingCharacters(in: .whitespaces)
+        }
         return "\(surname) \(initial)".trimmingCharacters(in: .whitespaces)
     }
 
