@@ -3,14 +3,14 @@
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.3.0-3B2F21?style=flat" alt="Latest release 2.3.0" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-4F4132?style=flat" alt="MIT license" /></a>
-  <a href="https://discord.gg/XPEvHZyecD"><img src="https://img.shields.io/badge/Discord-join-4F4132?style=flat" alt="Join the Discord server" /></a>
-  <a href="https://www.reddit.com/r/FragForge/"><img src="https://img.shields.io/badge/Reddit-r%2FFragForge-4F4132?style=flat" alt="Reddit community r/FragForge" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-2.3.0-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 2.3.0" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-3DA639?style=flat&logo=opensourceinitiative&logoColor=white" alt="MIT license" /></a>
+  <a href="https://discord.gg/XPEvHZyecD"><img src="https://img.shields.io/badge/Discord-join-5865F2?style=flat&logo=discord&logoColor=white" alt="Join the Discord server" /></a>
+  <a href="https://www.reddit.com/r/FragForge/"><img src="https://img.shields.io/badge/Reddit-r%2FFragForge-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit community r/FragForge" /></a>
   <br />
-  <img src="https://img.shields.io/badge/macOS-14%2B-6B5D4B?style=flat" alt="macOS 14 or later" />
-  <img src="https://img.shields.io/badge/Swift-6.0%2B-6B5D4B?style=flat" alt="Swift 6.0 or later" />
-  <img src="https://img.shields.io/badge/GEDCOM-5.5.1-8A7C68?style=flat" alt="GEDCOM 5.5.1" />
+  <img src="https://img.shields.io/badge/macOS-14%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 14 or later" />
+  <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
+  <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
   <br />
   <br />
 </div>
