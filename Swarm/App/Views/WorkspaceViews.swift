@@ -182,7 +182,7 @@ struct PlacesWorkspaceView: View {
                                     + "\(L10n.count(entry.personIDs.count, .person))"
                                     + (entry.place.isCustom ? L10n.tr(" · пользовательское") : "")
                             )
-                                .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                            .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                         }
                         Spacer()
                         ForEach(entry.personIDs.prefix(3), id: \.self) { id in
@@ -292,7 +292,7 @@ struct ReviewWorkspaceView: View {
                     "\(first?.displayName(language: .current) ?? "?") · "
                         + "\(second?.displayName(language: .current) ?? "?")"
                 )
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                 Text(suggestion.reasons.joined(separator: ", ")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
             }
             Spacer()

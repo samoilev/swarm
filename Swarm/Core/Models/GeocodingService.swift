@@ -35,11 +35,10 @@ public final class GeocodingService: @unchecked Sendable {
         if let cached = lock.withLock({ cache[key] }) { return cached }
 
         let entry = places.uniqueEntry(matching: placeName, language: language)
-        let coordinate: CLLocationCoordinate2D?
-        if let latitude = entry?.latitude, let longitude = entry?.longitude {
-            coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let coordinate: CLLocationCoordinate2D? = if let latitude = entry?.latitude, let longitude = entry?.longitude {
+            CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
         } else {
-            coordinate = nil
+            nil
         }
         lock.withLock { cache[key] = coordinate }
         return coordinate

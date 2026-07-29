@@ -189,8 +189,8 @@ struct OnboardingView: View {
                     text: $patronymic,
                     placeholder: L10n.tr("напр. Петрович")
                 )
-                    .focused($focusedField, equals: .patronymic)
-                    .onSubmit { primaryAction() }
+                .focused($focusedField, equals: .patronymic)
+                .onSubmit { primaryAction() }
                 Color.clear.frame(maxWidth: .infinity, maxHeight: 1)
             }
             validationMessage(for: .surname)
@@ -253,7 +253,6 @@ struct OnboardingView: View {
         return parts.isEmpty ? L10n.tr("первый человек") : parts.joined(separator: " ")
     }
 
-    @ViewBuilder
     private func nameFields(
         surname: Binding<String>,
         givenNames: Binding<String>,

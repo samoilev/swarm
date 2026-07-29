@@ -119,7 +119,7 @@ public struct FamilyIndex {
         var result: [UUID] = []
         for union in childOfAll[personId] ?? [] {
             for siblingID in union.childrenIds
-            where byId[siblingID] != nil && seen.insert(siblingID).inserted {
+                where byId[siblingID] != nil && seen.insert(siblingID).inserted {
                 result.append(siblingID)
             }
         }

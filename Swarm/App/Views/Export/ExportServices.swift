@@ -264,8 +264,8 @@ struct PersonCardsPDFExporter {
         let s = NSAttributedString(
             string: "\(person.displayName(language: .current)) — \(suffix)",
             attributes: [
-            .font: NSFont.systemFont(ofSize: 11).withItalic(),
-            .foregroundColor: NSColor(SepiaTheme.inkSoft)
+                .font: NSFont.systemFont(ofSize: 11).withItalic(),
+                .foregroundColor: NSColor(SepiaTheme.inkSoft)
             ]
         )
         let h = textHeight(s, width: textWidth)

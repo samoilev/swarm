@@ -184,9 +184,9 @@ public final class TreeWorkspaceIndexes {
             options: [.caseInsensitive, .diacriticInsensitive],
             locale: AppLanguage.current.locale
         )
-            .lowercased()
-            .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
-            .joined(separator: " ")
+        .lowercased()
+        .split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+        .joined(separator: " ")
     }
 
     private static func localizedLess(_ lhs: String, _ rhs: String) -> Bool {

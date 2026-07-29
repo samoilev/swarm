@@ -1004,7 +1004,7 @@ private struct UnionDraftEditor: View {
                         tree.person(byId: childID)?.displayName(language: .current)
                             ?? L10n.tr("Неизвестная персона")
                     )
-                        .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+                    .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
                     Spacer()
                     Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
                         ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }

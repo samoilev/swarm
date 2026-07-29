@@ -236,13 +236,13 @@ public struct KinshipFormatter: Sendable {
     private func russianSibling(sex: Person.Sex, kind: KinshipDescriptor.SiblingKind) -> String {
         switch kind {
         case .full:
-            return gendered(sex, male: "Брат", female: "Сестра", neutral: "Брат/сестра")
+            gendered(sex, male: "Брат", female: "Сестра", neutral: "Брат/сестра")
         case .paternalHalf:
-            return gendered(sex, male: "Единокровный брат", female: "Единокровная сестра", neutral: "Неполнородный брат/сестра")
+            gendered(sex, male: "Единокровный брат", female: "Единокровная сестра", neutral: "Неполнородный брат/сестра")
         case .maternalHalf:
-            return gendered(sex, male: "Единоутробный брат", female: "Единоутробная сестра", neutral: "Неполнородный брат/сестра")
+            gendered(sex, male: "Единоутробный брат", female: "Единоутробная сестра", neutral: "Неполнородный брат/сестра")
         case .halfUnknown:
-            return "Неполнородный брат/сестра"
+            "Неполнородный брат/сестра"
         }
     }
 

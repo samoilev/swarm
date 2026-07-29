@@ -17,7 +17,7 @@ struct PlaceIndexTests {
         )
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
-        let prefix = try handle.read(upToCount: 1_024) ?? Data()
+        let prefix = try handle.read(upToCount: 1024) ?? Data()
         let firstLine = try #require(String(data: prefix, encoding: .utf8)?.split(separator: "\n").first)
         #expect(firstLine == """
         geoname_id\tfeature_code\tpopulation\tname_ru\tname_en\tname_local\taliases\tregion_ru\tregion_en\tcountry_ru\tcountry_en\tcountry_code\tcontinent_code\tlatitude\tlongitude\tdataset_version

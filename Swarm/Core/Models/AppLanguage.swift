@@ -140,11 +140,10 @@ public enum L10n {
             }
             let absolute = abs(value)
             let lastTwo = absolute % 100
-            let noun: String
-            if (11 ... 14).contains(lastTwo) {
-                noun = forms.many
+            let noun: String = if (11 ... 14).contains(lastTwo) {
+                forms.many
             } else {
-                noun = switch absolute % 10 {
+                switch absolute % 10 {
                 case 1: forms.one
                 case 2 ... 4: forms.few
                 default: forms.many

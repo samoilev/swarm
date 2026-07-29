@@ -168,7 +168,7 @@ public struct PlaceBounds: Hashable, Sendable {
 public final class PlacesDatabase: @unchecked Sendable {
     public static let shared = PlacesDatabase()
 
-    private struct IndexedEntry: Sendable {
+    private struct IndexedEntry {
         let place: PlaceEntry
         let ruName: String
         let enName: String
@@ -179,7 +179,7 @@ public final class PlacesDatabase: @unchecked Sendable {
         let fullAddressEn: String
     }
 
-    private struct LoadedIndex: Sendable {
+    private struct LoadedIndex {
         let entries: [IndexedEntry]
         let byID: [String: Int]
         let uniqueBareNames: [String: Int]
@@ -275,30 +275,29 @@ public final class PlacesDatabase: @unchecked Sendable {
             return (entries, searchPrefixes[prefix] ?? Array(entries.indices))
         }
         var scored: [(index: Int, score: Int)] = []
-        scored.reserveCapacity(min(2_000, snapshot.1.count))
+        scored.reserveCapacity(min(2000, snapshot.1.count))
 
         for index in snapshot.1 {
             guard snapshot.0.indices.contains(index) else { continue }
             let entry = snapshot.0[index]
             guard entry.haystack.contains(first) else { continue }
             let localizedName = language == .english ? entry.enName : entry.ruName
-            var score: Int
-            if normalizedQuery == (language == .english ? entry.fullAddressEn : entry.fullAddressRu) {
-                score = 2_000
+            var score = if normalizedQuery == (language == .english ? entry.fullAddressEn : entry.fullAddressRu) {
+                2000
             } else if localizedName == first {
-                score = 1_500
+                1500
             } else if entry.aliasNames.contains(first) || entry.localName == first {
-                score = 1_400
+                1400
             } else if localizedName.hasPrefix(first) {
-                score = 1_200
+                1200
             } else if entry.aliasNames.contains(where: { $0.hasPrefix(first) }) {
-                score = 1_100
+                1100
             } else if localizedName.contains(first) {
-                score = 700
+                700
             } else if entry.aliasNames.contains(where: { $0.contains(first) }) {
-                score = 650
+                650
             } else {
-                score = 200
+                200
             }
             for token in tokens.dropFirst() where entry.haystack.contains(token) {
                 score += 250
@@ -362,20 +361,19 @@ public final class PlacesDatabase: @unchecked Sendable {
             }
             : filtered
         return ranked
-        .prefix(tier.maximumLabels * 5)
-        .map { $0 }
+            .prefix(tier.maximumLabels * 5)
+            .map { $0 }
     }
 
     private func candidateIndexes(in bounds: PlaceBounds) -> [Int] {
         let minimumLatCell = Self.latitudeCell(bounds.minimumLatitude)
         let maximumLatCell = Self.latitudeCell(bounds.maximumLatitude)
-        let longitudeRanges: [ClosedRange<Int>]
-        if bounds.minimumLongitude <= bounds.maximumLongitude {
-            longitudeRanges = [
+        let longitudeRanges: [ClosedRange<Int>] = if bounds.minimumLongitude <= bounds.maximumLongitude {
+            [
                 Self.longitudeCell(bounds.minimumLongitude) ... Self.longitudeCell(bounds.maximumLongitude),
             ]
         } else {
-            longitudeRanges = [
+            [
                 Self.longitudeCell(bounds.minimumLongitude) ... 71,
                 0 ... Self.longitudeCell(bounds.maximumLongitude),
             ]
@@ -438,7 +436,7 @@ public final class PlacesDatabase: @unchecked Sendable {
         }
 
         var result: [IndexedEntry] = []
-        result.reserveCapacity(max(1_000, data.utf8.count / 180))
+        result.reserveCapacity(max(1000, data.utf8.count / 180))
         var byID: [String: Int] = [:]
         var uniqueBare: [String: Int] = [:]
         var ambiguousBare = Set<String>()
