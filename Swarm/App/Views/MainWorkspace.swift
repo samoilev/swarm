@@ -65,65 +65,7 @@ struct MainWorkspace: View {
                 toolbar
 
                 HStack(spacing: 0) {
-                    ZStack {
-                        SepiaTheme.paper
-
-                        Group {
-                            if viewMode == .tree {
-                                TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
-                            } else if viewMode == .fan {
-                                FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
-                            } else if viewMode == .map {
-                                MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
-                            } else if viewMode == .people {
-                                PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
-                            } else if viewMode == .timeline {
-                                TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
-                            } else if viewMode == .places {
-                                PlacesWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
-                            } else {
-                                ReviewWorkspaceView(
-                                    tree: tree,
-                                    index: workspaceIndex,
-                                    selectedPerson: $selectedPerson,
-                                    onEdit: { editingPerson = $0 },
-                                    onDeleteDuplicate: { person in
-                                        personToDelete = person
-                                        showDeleteConfirm = true
-                                    }
-                                )
-                            }
-                        }
-                        .transition(.opacity)
-
-                        if tree.people.isEmpty, [.tree, .fan, .map].contains(viewMode) {
-                            emptyTreeState
-                                .transition(.opacity.combined(with: .scale(scale: 0.97)))
-                        }
-                    }
-                    // One crossfade for the whole canvas stack: swapping tree → fan → map
-                    // used to be a hard cut, which read as the window being replaced rather
-                    // than the same tree being drawn a different way.
-                    .sepiaMotion(SepiaMotion.crossfade, value: viewMode)
-                    .sepiaMotion(SepiaMotion.state, value: tree.people.isEmpty)
-                    .overlay(alignment: .top) {
-                        dualSelectHint.sepiaMotion(SepiaMotion.state, value: dualSelectHintSeen)
-                    }
-                    .overlay(alignment: .top) {
-                        relationshipBanner.sepiaMotion(SepiaMotion.state, value: relationshipName)
-                    }
-                    .overlay(alignment: .top) {
-                        searchBar.sepiaMotion(SepiaMotion.state, value: searchActive)
-                    }
-                    .overlay(alignment: .bottom) {
-                        firstRelativePrompt.sepiaMotion(SepiaMotion.state, value: tree.people.count)
-                    }
-                    // Six shortcuts are noise on a tree nobody can navigate yet: ↑↓←→
-                    // walks kin, ⌘-click names a relationship, ⌘F searches. All of it
-                    // needs a second person.
-                    .overlay(alignment: .bottomLeading) {
-                        if viewMode == .tree, tree.people.count >= 2 { commandHints }
-                    }
+                    canvasArea
 
                     if selectedPerson != nil {
                         InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
@@ -231,6 +173,70 @@ struct MainWorkspace: View {
         // Zoom-in/out notifications are handled inside TreeCanvasView where
         // panOffset and viewport size are available for center-anchored zooming.
         .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
+    }
+
+    /// The workspace canvas and everything layered over it. Kept out of `body` because
+    /// the combined expression pushed the Swift type checker past its budget on CI, which
+    /// fails the build outright rather than merely compiling slowly.
+    private var canvasArea: some View {
+        ZStack {
+            SepiaTheme.paper
+
+            Group {
+                if viewMode == .tree {
+                    TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
+                } else if viewMode == .fan {
+                    FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
+                } else if viewMode == .map {
+                    MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                } else if viewMode == .people {
+                    PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
+                } else if viewMode == .timeline {
+                    TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                } else if viewMode == .places {
+                    PlacesWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
+                } else {
+                    ReviewWorkspaceView(
+                        tree: tree,
+                        index: workspaceIndex,
+                        selectedPerson: $selectedPerson,
+                        onEdit: { editingPerson = $0 },
+                        onDeleteDuplicate: { person in
+                            personToDelete = person
+                            showDeleteConfirm = true
+                        }
+                    )
+                }
+            }
+            .transition(.opacity)
+
+            if tree.people.isEmpty, [.tree, .fan, .map].contains(viewMode) {
+                emptyTreeState
+                    .transition(.opacity.combined(with: .scale(scale: 0.97)))
+            }
+        }
+        // One crossfade for the whole canvas stack: swapping tree → fan → map used to be a
+        // hard cut, which read as the window being replaced rather than the same tree being
+        // drawn a different way.
+        .sepiaMotion(SepiaMotion.crossfade, value: viewMode)
+        .sepiaMotion(SepiaMotion.state, value: tree.people.isEmpty)
+        .overlay(alignment: .top) {
+            dualSelectHint.sepiaMotion(SepiaMotion.state, value: dualSelectHintSeen)
+        }
+        .overlay(alignment: .top) {
+            relationshipBanner.sepiaMotion(SepiaMotion.state, value: relationshipName)
+        }
+        .overlay(alignment: .top) {
+            searchBar.sepiaMotion(SepiaMotion.state, value: searchActive)
+        }
+        .overlay(alignment: .bottom) {
+            firstRelativePrompt.sepiaMotion(SepiaMotion.state, value: tree.people.count)
+        }
+        // Six shortcuts are noise on a tree nobody can navigate yet: ↑↓←→ walks kin,
+        // ⌘-click names a relationship, ⌘F searches. All of it needs a second person.
+        .overlay(alignment: .bottomLeading) {
+            if viewMode == .tree, tree.people.count >= 2 { commandHints }
+        }
     }
 
     /// Shown over an empty canvas (no people yet) — the library has an empty state,
