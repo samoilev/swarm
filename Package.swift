@@ -4,7 +4,9 @@ import PackageDescription
 let package = Package(
     name: "Swarm",
     defaultLocalization: "ru",
-    platforms: [.macOS(.v14)],
+    // String form keeps the manifest compatible with the existing Swift tools 5.9
+    // declaration while targeting the macOS 26 SDK/runtime.
+    platforms: [.macOS("26.0")],
     targets: [
         // Pure domain logic (Models + Services): no SwiftUI dependency, so it can be
         // unit-tested independently of the app's views.

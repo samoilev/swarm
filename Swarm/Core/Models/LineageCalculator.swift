@@ -12,6 +12,7 @@ public struct LineageCalculator {
         public var ids: Set<UUID>
         public var labels: [UUID: String]
         public var descriptors: [UUID: KinshipDescriptor]
+        public var connections: Set<FamilyConnection>
     }
 
     public func compute(
@@ -20,6 +21,7 @@ public struct LineageCalculator {
     ) -> LineageResult {
         var ids: Set<UUID> = [person.id]
         var descriptors: [UUID: KinshipDescriptor] = [:]
+        var connections: Set<FamilyConnection> = []
         var ancestorVisited: Set<UUID> = [person.id]
         var descendantVisited: Set<UUID> = [person.id]
 
@@ -29,7 +31,8 @@ public struct LineageCalculator {
             parentage: [],
             visited: &ancestorVisited,
             ids: &ids,
-            descriptors: &descriptors
+            descriptors: &descriptors,
+            connections: &connections
         )
         computeDescendants(
             personID: person.id,
@@ -37,18 +40,41 @@ public struct LineageCalculator {
             parentage: [],
             visited: &descendantVisited,
             ids: &ids,
-            descriptors: &descriptors
+            descriptors: &descriptors,
+            connections: &connections
         )
 
         for spouse in index.spousesOf(person) {
             ids.insert(spouse.id)
             descriptors[spouse.id] = .spouse(sex: spouse.sex)
+            connections.insert(FamilyConnection(person.id, spouse.id))
+        }
+
+        // A pair of direct ancestors reads as one family unit in the drawing. Include
+        // their marriage connector only when a traversed parent-child relationship
+        // actually passes through that union; unrelated spouse branches stay out.
+        for union in index.tree.unions {
+            let partners = union.partnerIds.filter { ids.contains($0) }
+            guard partners.count == 2 else { continue }
+            let hasTraversedChild = union.childrenIds.contains { childID in
+                partners.contains { parentID in
+                    connections.contains(FamilyConnection(parentID, childID))
+                }
+            }
+            if hasTraversedChild {
+                connections.insert(FamilyConnection(partners[0], partners[1]))
+            }
         }
 
         let formatter = KinshipFormatter(language: language, style: .lineage)
         var labels = descriptors.mapValues(formatter.label)
         labels[person.id] = L10n.tr("Я", language: language)
-        return LineageResult(ids: ids, labels: labels, descriptors: descriptors)
+        return LineageResult(
+            ids: ids,
+            labels: labels,
+            descriptors: descriptors,
+            connections: connections
+        )
     }
 
     private func computeAncestors(
@@ -57,7 +83,8 @@ public struct LineageCalculator {
         parentage: [ParentageKind],
         visited: inout Set<UUID>,
         ids: inout Set<UUID>,
-        descriptors: inout [UUID: KinshipDescriptor]
+        descriptors: inout [UUID: KinshipDescriptor],
+        connections: inout Set<FamilyConnection>
     ) {
         for edge in index.parentEdges(of: personID) {
             guard let parent = index.byId[edge.parentID],
@@ -66,6 +93,7 @@ public struct LineageCalculator {
                 parentage + (edge.kind == .biological ? [] : [edge.kind])
             )
             ids.insert(parent.id)
+            connections.insert(FamilyConnection(parent.id, personID))
             descriptors[parent.id] = generation == 1
                 ? .parent(sex: parent.sex, kind: edge.kind)
                 : qualified(
@@ -78,7 +106,8 @@ public struct LineageCalculator {
                 parentage: pathKinds,
                 visited: &visited,
                 ids: &ids,
-                descriptors: &descriptors
+                descriptors: &descriptors,
+                connections: &connections
             )
         }
     }
@@ -89,7 +118,8 @@ public struct LineageCalculator {
         parentage: [ParentageKind],
         visited: inout Set<UUID>,
         ids: inout Set<UUID>,
-        descriptors: inout [UUID: KinshipDescriptor]
+        descriptors: inout [UUID: KinshipDescriptor],
+        connections: inout Set<FamilyConnection>
     ) {
         for edge in index.childEdges(of: personID) {
             guard let child = index.byId[edge.childID],
@@ -98,6 +128,7 @@ public struct LineageCalculator {
                 parentage + (edge.kind == .biological ? [] : [edge.kind])
             )
             ids.insert(child.id)
+            connections.insert(FamilyConnection(personID, child.id))
             descriptors[child.id] = generation == 1
                 ? .child(sex: child.sex, kind: edge.kind)
                 : qualified(
@@ -107,6 +138,7 @@ public struct LineageCalculator {
 
             for spouse in index.spousesOf(child) {
                 ids.insert(spouse.id)
+                connections.insert(FamilyConnection(child.id, spouse.id))
                 descriptors[spouse.id] = qualified(
                     .spouseOfDescendant(
                         generation: generation,
@@ -123,7 +155,8 @@ public struct LineageCalculator {
                 parentage: pathKinds,
                 visited: &visited,
                 ids: &ids,
-                descriptors: &descriptors
+                descriptors: &descriptors,
+                connections: &connections
             )
         }
     }

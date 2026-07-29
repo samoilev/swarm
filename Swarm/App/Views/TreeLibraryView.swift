@@ -101,6 +101,10 @@ struct TreeLibraryView: View {
     @State private var treeToRename: FamilyTree?
     @State private var renameName = ""
     @State private var renameSubtitle = ""
+    @State private var renameValidationMessage: String?
+    @State private var renameSaving = false
+    @FocusState private var renameNameFocused: Bool
+    @FocusState private var renameSubtitleFocused: Bool
     /// Errors
     @State private var errorMessage: String?
     /// Set from `store.lastLoadError` when trees on disk failed to parse at launch.
@@ -161,8 +165,6 @@ struct TreeLibraryView: View {
                 } else {
                     grid
                 }
-
-                footer
             }
         }
         .frame(minWidth: 600, minHeight: 400)
@@ -197,26 +199,17 @@ struct TreeLibraryView: View {
         } message: {
             Text(L10n.tr("Выберите, что сделать с файлом GEDCOM и фотографиями этого дерева."))
         }
-        .alert(L10n.tr("Переименовать дерево"), isPresented: Binding(get: { treeToRename != nil }, set: { if !$0 { treeToRename = nil } })) {
-            TextField(L10n.tr("Название"), text: $renameName)
-            TextField(L10n.tr("Подзаголовок (необязательно)"), text: $renameSubtitle)
-            Button(L10n.tr("Сохранить")) {
-                guard let tree = treeToRename else { return }
-                Task { @MainActor in
-                    do {
-                        _ = try await store.renameTreeVerified(tree, name: renameName, subtitle: renameSubtitle)
-                    } catch {
-                        errorMessage = error.localizedDescription
-                    }
+        .sheet(isPresented: Binding(
+            get: { treeToRename != nil },
+            set: {
+                if !$0 {
                     treeToRename = nil
+                    renameValidationMessage = nil
+                    renameSaving = false
                 }
             }
-            // A blank name produces a card nobody can identify, so it is prevented
-            // rather than accepted and explained afterwards.
-            .disabled(renameName.trimmingCharacters(in: .whitespaces).isEmpty)
-            Button(L10n.tr("Отмена"), role: .cancel) { treeToRename = nil }
-        } message: {
-            Text(L10n.tr("Измените название и подзаголовок дерева."))
+        )) {
+            renameSheet
         }
         .fileImporter(isPresented: $showExporter, allowedContentTypes: [.folder]) { result in
             guard let tree = treeToExport else { return }
@@ -279,69 +272,95 @@ struct TreeLibraryView: View {
     // MARK: - Chrome
 
     private var header: some View {
-        VStack(spacing: 6) {
-            Text(L10n.tr("Swarm"))
-                .font(SepiaTheme.display(size: 32))
-                .foregroundColor(SepiaTheme.ink)
-            Text(L10n.tr("СЕМЕЙНЫЙ АРХИВ"))
-                .font(SepiaTheme.ui(size: 11.5))
-                .tracking(2)
-                .foregroundColor(SepiaTheme.inkSoft)
-        }
-        .padding(.top, 34)
-        .padding(.bottom, 24)
-        .accessibilityElement(children: .combine)
-        .accessibilityAddTraits(.isHeader)
+        Text(L10n.tr("Swarm"))
+            .font(SepiaTheme.display(size: 32))
+            .foregroundColor(SepiaTheme.ink)
+            .padding(.top, 34)
+            .padding(.bottom, 24)
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
     }
 
     private var toolbar: some View {
-        HStack(spacing: 10) {
-            if showsFilter {
-                filterField
-            }
-            Spacer(minLength: 12)
-            LanguageSwitchControl()
-            if trees.count > 1 {
-                sortMenu
-            }
-            // On an empty library these two live in the empty state itself, 300pt below.
-            // Showing them twice on one screen is noise, not reinforcement.
-            if !trees.isEmpty {
-                Button(action: { onImport?() }) {
-                    Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                if showsFilter {
+                    filterField()
                 }
-                .buttonStyle(SepiaButtonStyle())
-                Button(action: onCreate) {
-                    Label(L10n.tr("Новое дерево"), systemImage: "plus")
-                }
-                .buttonStyle(SepiaButtonStyle(isActive: true))
+                Spacer(minLength: 12)
+                toolbarActions
             }
-            // ⌘N is owned by the File menu command in SwarmApp; binding it here too
-            // would register the shortcut twice.
-            // Recovery is a once-a-year rescue tool. It stays reachable, but it no
-            // longer sits at the front door with the same weight as creating a tree.
-            Menu {
-                Button(L10n.tr("Восстановить из резервной копии…")) { showRecovery = true }
-                Button(L10n.tr("Показать папку хранилища")) {
-                    NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
+
+            VStack(spacing: 8) {
+                HStack(spacing: 10) {
+                    Spacer(minLength: 0)
+                    toolbarActions
                 }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(SepiaTheme.ink)
-                    .frame(width: 30, height: 30)
+                if showsFilter {
+                    filterField(width: nil)
+                }
             }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            // The chrome goes on the Menu, not on its label: `.borderlessButton`
-            // discards backgrounds applied inside the label builder.
-            .sepiaControlChrome()
-            .help(L10n.tr("Обслуживание архива"))
-            .accessibilityLabel(L10n.tr("Обслуживание архива"))
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 12)
+    }
+
+    @ViewBuilder private var toolbarActions: some View {
+        if trees.count > 1 {
+            sortMenu
+        }
+
+        GlassEffectContainer(spacing: 8) {
+            HStack(spacing: 8) {
+                // On an empty library these two live in the empty state itself, 300pt below.
+                // Showing them twice on one screen is noise, not reinforcement.
+                if !trees.isEmpty {
+                    Button(action: { onImport?() }) {
+                        Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                            .lineLimit(1)
+                            .frame(height: 16)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.regular)
+                    .fixedSize(horizontal: true, vertical: false)
+
+                    // ⌘N is owned by the File menu command in SwarmApp; binding it here too
+                    // would register the shortcut twice.
+                    Button(action: onCreate) {
+                        Label(L10n.tr("Новое дерево"), systemImage: "plus")
+                            .lineLimit(1)
+                            .frame(height: 16)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.regular)
+                    .tint(SepiaTheme.accent)
+                    .fixedSize(horizontal: true, vertical: false)
+                }
+
+                // Recovery is a once-a-year rescue tool. It stays reachable, but it no
+                // longer sits at the front door with the same weight as creating a tree.
+                Menu {
+                    Button(L10n.tr("Восстановить из резервной копии…")) { showRecovery = true }
+                    Button(L10n.tr("Показать папку хранилища")) {
+                        NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(SepiaTheme.ink)
+                        .frame(width: 16, height: 16)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .controlSize(.regular)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .help(L10n.tr("Обслуживание архива"))
+                .accessibilityLabel(L10n.tr("Обслуживание архива"))
+            }
+        }
     }
 
     private var sortMenu: some View {
@@ -374,7 +393,7 @@ struct TreeLibraryView: View {
         .accessibilityLabel(L10n.tr("Порядок деревьев"))
     }
 
-    private var filterField: some View {
+    private func filterField(width: CGFloat? = 230) -> some View {
         HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 11))
@@ -399,47 +418,9 @@ struct TreeLibraryView: View {
             }
         }
         .padding(.horizontal, 8)
-        .frame(width: 230)
+        .frame(width: width)
+        .frame(maxWidth: width == nil ? .infinity : nil)
         .sepiaControlChrome()
-    }
-
-    private var footer: some View {
-        HStack(spacing: 8) {
-            Text(libraryCountLabel)
-                .font(SepiaTheme.ui(size: 11))
-                .foregroundColor(SepiaTheme.inkSoft)
-            Text("·")
-                .font(SepiaTheme.ui(size: 11))
-                .foregroundColor(SepiaTheme.line)
-                .accessibilityHidden(true)
-            // The promise is that the record stays on this Mac; saying where it lives
-            // is the cheapest way to make that promise checkable.
-            Button {
-                NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
-            } label: {
-                Text(store.storageFolderURL.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
-                    .font(SepiaTheme.ui(size: 11))
-                    .foregroundColor(SepiaTheme.accent2)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
-            .buttonStyle(.plain)
-            .help(L10n.tr("Показать папку хранилища"))
-            Spacer(minLength: 8)
-        }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 10)
-        .background(SepiaTheme.toolbarBg)
-        .overlay(alignment: .top) { Rectangle().fill(SepiaTheme.line).frame(height: 1) }
-    }
-
-    private var libraryCountLabel: String {
-        let query = filterText.trimmingCharacters(in: .whitespaces)
-        if !query.isEmpty {
-            return L10n.tr("Показано \(visibleTrees.count) из \(trees.count)")
-        }
-        guard !trees.isEmpty else { return L10n.tr("Архив пока пуст") }
-        return L10n.tr("\(L10n.count(trees.count, .tree)) в архиве")
     }
 
     // MARK: - Content
@@ -505,14 +486,21 @@ struct TreeLibraryView: View {
     private func move(_ direction: MoveCommandDirection, from id: UUID) {
         let list = visibleTrees
         guard let index = list.firstIndex(where: { $0.id == id }) else { return }
-        let step = switch direction {
-        case .left: -1
-        case .right: 1
-        case .up: -columnCount
-        case .down: columnCount
-        @unknown default: 0
+        let target: Int
+        switch direction {
+        case .left:
+            guard index % columnCount > 0 else { return }
+            target = index - 1
+        case .right:
+            guard index % columnCount < columnCount - 1 else { return }
+            target = index + 1
+        case .up:
+            target = index - columnCount
+        case .down:
+            target = index + columnCount
+        @unknown default:
+            return
         }
-        let target = index + step
         guard list.indices.contains(target) else { return }
         focusedTreeID = list[target].id
     }
@@ -529,7 +517,7 @@ struct TreeLibraryView: View {
                     .foregroundColor(SepiaTheme.ink)
                 Text(L10n.tr("Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac."))
                     .font(SepiaTheme.body(size: 13.5))
-                    .foregroundColor(SepiaTheme.inkSoft)
+                    .foregroundColor(SepiaTheme.ink)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 420)
@@ -564,7 +552,7 @@ struct TreeLibraryView: View {
                 .foregroundColor(SepiaTheme.ink)
             Text(L10n.tr("Ни одно дерево не совпадает с «\(filterText)» по названию или фамилии."))
                 .font(SepiaTheme.body(size: 13))
-                .foregroundColor(SepiaTheme.inkSoft)
+                .foregroundColor(SepiaTheme.ink)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 380)
@@ -617,10 +605,140 @@ struct TreeLibraryView: View {
         return L10n.tr("\(subject) — в старом формате хранения")
     }
 
+    private var renameSheet: some View {
+        ZStack {
+            LiquidGlassPanelBackground()
+
+            VStack(spacing: 0) {
+                LiquidGlassPanelHeader(
+                    title: L10n.tr("Переименовать дерево"),
+                    subtitle: L10n.tr("Измените название и подзаголовок дерева."),
+                    closeDisabled: renameSaving,
+                    onClose: {
+                        treeToRename = nil
+                        renameValidationMessage = nil
+                    }
+                )
+                .padding(14)
+
+                VStack(alignment: .leading, spacing: 18) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L10n.tr("Название"))
+                            .font(SepiaTheme.ui(size: 11))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                        TextField("", text: $renameName)
+                            .textFieldStyle(.plain)
+                            .font(SepiaTheme.body(size: 14))
+                            .foregroundColor(SepiaTheme.ink)
+                            .focused($renameNameFocused)
+                            .accessibilityLabel(L10n.tr("Название"))
+                            .sepiaFieldChrome(isFocused: renameNameFocused)
+                            .onChange(of: renameName) { _, newValue in
+                                if !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    renameValidationMessage = nil
+                                }
+                            }
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L10n.tr("Подзаголовок (необязательно)"))
+                            .font(SepiaTheme.ui(size: 11))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                        TextField("", text: $renameSubtitle)
+                            .textFieldStyle(.plain)
+                            .font(SepiaTheme.body(size: 14))
+                            .foregroundColor(SepiaTheme.ink)
+                            .focused($renameSubtitleFocused)
+                            .accessibilityLabel(L10n.tr("Подзаголовок (необязательно)"))
+                            .sepiaFieldChrome(isFocused: renameSubtitleFocused)
+                    }
+
+                    if let renameValidationMessage {
+                        Label(renameValidationMessage, systemImage: "exclamationmark.circle.fill")
+                            .font(SepiaTheme.ui(size: 12))
+                            .foregroundColor(SepiaTheme.danger)
+                            .accessibilityElement(children: .combine)
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 22)
+
+                LiquidGlassActionRow {
+                    Spacer()
+
+                    Button(L10n.tr("Отмена")) {
+                        treeToRename = nil
+                        renameValidationMessage = nil
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .keyboardShortcut(.cancelAction)
+                    .disabled(renameSaving)
+
+                    Button(action: saveRenamedTree) {
+                        HStack(spacing: 6) {
+                            if renameSaving {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .tint(.white)
+                                    .accessibilityHidden(true)
+                            }
+                            Text(L10n.tr("Сохранить"))
+                            if !renameSaving {
+                                Image(systemName: "checkmark")
+                            }
+                        }
+                    }
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.capsule)
+                    .tint(SepiaTheme.accent)
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(renameSaving)
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 20)
+            }
+        }
+        .frame(width: 440)
+        .interactiveDismissDisabled(renameSaving)
+        .onAppear {
+            DispatchQueue.main.async { renameNameFocused = true }
+        }
+    }
+
+    private func saveRenamedTree() {
+        guard let tree = treeToRename else { return }
+        guard !renameName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            let message = L10n.tr("Введите название дерева.")
+            renameValidationMessage = message
+            renameNameFocused = true
+            sepiaAnnounce(message)
+            return
+        }
+
+        renameSaving = true
+        Task { @MainActor in
+            do {
+                _ = try await store.renameTreeVerified(tree, name: renameName, subtitle: renameSubtitle)
+                renameSaving = false
+                treeToRename = nil
+                renameValidationMessage = nil
+            } catch {
+                let message = error.localizedDescription
+                renameSaving = false
+                renameValidationMessage = message
+                sepiaAnnounce(message)
+            }
+        }
+    }
+
     private func startRename(_ tree: FamilyTree) {
         renameName = tree.name
         renameSubtitle = tree.subtitle ?? ""
+        renameValidationMessage = nil
+        renameSaving = false
         treeToRename = tree
+        DispatchQueue.main.async { renameNameFocused = true }
     }
 }
 
@@ -663,8 +781,10 @@ struct TreeCardView: View {
                             .foregroundColor(SepiaTheme.ink)
                             .lineLimit(1)
                             .truncationMode(.tail)
-                        Spacer(minLength: 0)
-                        actionsMenu
+                            .help(tree.name)
+                        // The actions menu is an overlay sibling of this Button, not
+                        // part of its label. Reserve its visual footprint here.
+                        Spacer(minLength: 34)
                     }
 
                     // The subtitle row is always rendered, blank or not. Trees without
@@ -674,6 +794,7 @@ struct TreeCardView: View {
                         .font(SepiaTheme.body(size: 12))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
+                        .help(tree.subtitle ?? "")
 
                     Spacer(minLength: 6)
 
@@ -719,6 +840,15 @@ struct TreeCardView: View {
         }
         .buttonStyle(.plain)
         .focusable()
+        .accessibilityLabel(accessibilityDescription)
+        .accessibilityHint(L10n.tr("Открыть дерево"))
+        .overlay(alignment: .topTrailing) {
+            // An overlay keeps this Menu outside the Button label, so macOS exposes
+            // "open tree" and "tree actions" as two honest, focusable controls.
+            actionsMenu
+                .padding(.top, 8)
+                .padding(.trailing, 12)
+        }
         .contextMenu { menuItems }
         .onHover { hovering in
             if reduceMotion {
@@ -727,10 +857,6 @@ struct TreeCardView: View {
                 withAnimation(.easeOut(duration: 0.15)) { isHovering = hovering }
             }
         }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(accessibilityDescription)
-        .accessibilityHint(L10n.tr("Открыть дерево"))
-        .accessibilityAddTraits(.isButton)
     }
 
     private var actionsMenu: some View {
@@ -747,6 +873,7 @@ struct TreeCardView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
+        .sepiaControlChrome(height: 24)
         .help(L10n.tr("Действия с деревом"))
         .accessibilityLabel(L10n.tr("Действия с деревом"))
     }

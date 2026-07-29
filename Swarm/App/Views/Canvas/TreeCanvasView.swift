@@ -9,12 +9,18 @@ struct TreeCanvasView: View {
     @Binding var selectedPerson: Person?
     @Binding var secondaryPerson: Person?
     var highlightedIds: Set<UUID> = []
+    var highlightedConnections: Set<FamilyConnection> = []
     var lineageLabels: [UUID: String] = [:]
     @Binding var fitRequest: Int
+    @Binding var initialFocusCompleted: Bool
     var showPhotos: Bool = false
 
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
+    private let initialFocusZoom: CGFloat = 0.8
+    /// The record can move slightly beyond the viewport edge, but never disappear
+    /// into unbounded empty canvas after an accidental drag or momentum fling.
+    private let canvasOverscroll: CGFloat = 120
     /// Rasterize once at 2×, then zoom with one GPU transform. At maximum zoom the
     /// bitmap is 1:1; lower zoom levels downsample it.
     private let superSample: CGFloat = 2
@@ -37,6 +43,7 @@ struct TreeCanvasView: View {
     /// Connector paths can't interpolate between two layouts, so they fade out for the
     /// duration of a morph and fade back in against the new geometry.
     @State private var connectorOpacity: Double = 1
+    @State private var initialFocusWorkItem: DispatchWorkItem?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Lets the canvas receive arrow keys for relationship traversal.
     @FocusState private var canvasFocused: Bool
@@ -86,11 +93,15 @@ struct TreeCanvasView: View {
                 // supersampled Canvas bitmap, which lagged a frame behind the cards and
                 // made the lines "jump" during movement). Scaled by `zoom` (vs the cards'
                 // `zoom/superSample`) so the two layers stay pixel-aligned at every frame.
-                TreeConnectorsLayer(layout: layout, generation: layoutGeneration, highlightedIds: highlightedIds)
-                    .equatable()
-                    .opacity(connectorOpacity)
-                    .scaleEffect(zoom, anchor: .topLeading)
-                    .offset(x: panOffset.width, y: panOffset.height)
+                TreeConnectorsLayer(
+                    layout: layout,
+                    generation: layoutGeneration,
+                    highlightedConnections: highlightedConnections
+                )
+                .equatable()
+                .opacity(connectorOpacity)
+                .scaleEffect(zoom, anchor: .topLeading)
+                .offset(x: panOffset.width, y: panOffset.height)
 
                 // Tree content — isolated in an Equatable layer so that pan/zoom (which
                 // change panOffset/zoom every frame) only re-apply the .scaleEffect/.offset
@@ -140,7 +151,14 @@ struct TreeCanvasView: View {
                     TreeMinimap(
                         layout: layout, generation: layoutGeneration, zoom: zoom, panOffset: panOffset, viewSize: geo.size,
                         selectedId: selectedPerson?.id, cardW: cardW, cardH: cardH,
-                        onRecenter: { treePoint in recenter(onTreePoint: treePoint, viewSize: geo.size, animated: false) }
+                        onRecenter: { treePoint in
+                            recenter(
+                                onTreePoint: treePoint,
+                                viewSize: geo.size,
+                                layout: layout,
+                                animated: false
+                            )
+                        }
                     )
                     .padding(12)
                     .transition(.opacity)
@@ -150,14 +168,22 @@ struct TreeCanvasView: View {
             .background(
                 // Mouse-wheel / scroll zoom, soft and anchored to the cursor.
                 ScrollWheelZoom { deltaY, location in
+                    cancelInitialFocus()
                     var factor = 1 + deltaY * wheelZoomSensitivity
                     factor = min(1.25, max(0.8, factor))
                     let newZoom = min(2.0, max(0.2, zoom * factor))
                     guard newZoom != zoom else { return }
                     let ratio = newZoom / zoom
-                    let newPan = CGSize(
+                    let proposedPan = CGSize(
                         width: location.x - (location.x - panOffset.width) * ratio,
                         height: location.y - (location.y - panOffset.height) * ratio
+                    )
+                    let newPan = constrainedPan(
+                        proposedPan,
+                        viewSize: geo.size,
+                        treeWidth: layout.totalWidth,
+                        treeHeight: layout.totalHeight,
+                        atZoom: newZoom
                     )
                     coastVelocity = .zero
                     withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.22, dampingFraction: 0.82)) {
@@ -170,10 +196,18 @@ struct TreeCanvasView: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
+                        cancelInitialFocus()
                         coastVelocity = .zero // grabbing the canvas stops the coast dead
-                        panOffset = CGSize(
+                        let proposedPan = CGSize(
                             width: dragStart.width + value.translation.width,
                             height: dragStart.height + value.translation.height
+                        )
+                        panOffset = constrainedPan(
+                            proposedPan,
+                            viewSize: geo.size,
+                            treeWidth: layout.totalWidth,
+                            treeHeight: layout.totalHeight,
+                            atZoom: zoom
                         )
                     }
                     .onEnded { value in
@@ -187,12 +221,20 @@ struct TreeCanvasView: View {
             // Only present while the canvas is actually coasting, so nothing ticks at rest.
             .overlay {
                 if coastVelocity != .zero {
-                    InertiaDriver { dt in coast(dt) }
+                    InertiaDriver { dt in
+                        coast(
+                            dt,
+                            viewSize: geo.size,
+                            treeWidth: layout.totalWidth,
+                            treeHeight: layout.totalHeight
+                        )
+                    }
                 }
             }
             .gesture(
                 MagnifyGesture()
                     .onChanged { value in
+                        cancelInitialFocus()
                         // Capture the zoom/pan baseline once at the start of the
                         // gesture. (value.magnification is cumulative from the
                         // gesture's start, so the baseline must not move mid-pinch
@@ -211,9 +253,16 @@ struct TreeCanvasView: View {
                         let ratio = newZoom / magnifyStart
                         let cx = geo.size.width / 2
                         let cy = geo.size.height / 2
-                        panOffset = CGSize(
+                        let proposedPan = CGSize(
                             width: cx - (cx - panAtMagnifyStart.width) * ratio,
                             height: cy - (cy - panAtMagnifyStart.height) * ratio
+                        )
+                        panOffset = constrainedPan(
+                            proposedPan,
+                            viewSize: geo.size,
+                            treeWidth: layout.totalWidth,
+                            treeHeight: layout.totalHeight,
+                            atZoom: newZoom
                         )
                         zoom = newZoom
                     }
@@ -225,36 +274,78 @@ struct TreeCanvasView: View {
             )
             .onAppear {
                 magnifyStart = zoom
-                if cachedLayout == nil { cachedLayout = makeLayout() }
-                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+                let isNewCanvas = cachedLayout == nil
+                if isNewCanvas { cachedLayout = makeLayout() }
+                if !initialFocusCompleted {
+                    fitToScreen(
+                        viewSize: geo.size,
+                        treeWidth: layout.totalWidth,
+                        treeHeight: layout.totalHeight,
+                        animated: false
+                    )
+                    initialFocusCompleted = true
+                    scheduleInitialHomeFocus(viewSize: geo.size, layout: layout)
+                } else if isNewCanvas {
+                    // Re-entering the tree (for example after opening the inspector or
+                    // visiting another view) keeps the user's zoom instead of replaying
+                    // the opening fit. A fresh pan state is simply anchored on home.
+                    focusHome(
+                        viewSize: geo.size,
+                        layout: layout,
+                        targetZoom: zoom,
+                        animated: false
+                    )
+                }
                 canvasFocused = true
             }
+            .onDisappear {
+                cancelInitialFocus()
+                coastVelocity = .zero
+            }
             .onChange(of: tree.layoutVersion) { _, _ in
+                cancelInitialFocus()
                 // An edit shouldn't yank the viewport: re-fit only when the new layout no
                 // longer fits at the current zoom. Direction changes and ⌘0 always re-fit.
                 applyLayout(makeLayout(), viewSize: geo.size, refit: .ifOverflowing)
             }
             .onChange(of: direction) { _, _ in
+                cancelInitialFocus()
                 applyLayout(makeLayout(), viewSize: geo.size, refit: .always)
             }
             .onChange(of: fitRequest) { _, _ in
+                cancelInitialFocus()
                 fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: selectedPerson?.id) { _, newValue in
                 // Selecting a person (canvas tap, search, inspector link, arrow key) glides
                 // the canvas to center them when they're off-screen, keeping the zoom.
                 if newValue != nil {
+                    cancelInitialFocus()
                     centerOnSelected(viewSize: geo.size, layout: layout)
                     canvasFocused = true
                 }
             }
+            .onChange(of: geo.size) { _, newSize in
+                let bounded = constrainedPan(
+                    panOffset,
+                    viewSize: newSize,
+                    treeWidth: layout.totalWidth,
+                    treeHeight: layout.totalHeight,
+                    atZoom: zoom
+                )
+                panOffset = bounded
+                dragStart = bounded
+            }
             .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
-                applyZoomStep(delta: 0.1, viewSize: geo.size)
+                cancelInitialFocus()
+                applyZoomStep(delta: 0.1, viewSize: geo.size, layout: layout)
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
-                applyZoomStep(delta: -0.1, viewSize: geo.size)
+                cancelInitialFocus()
+                applyZoomStep(delta: -0.1, viewSize: geo.size, layout: layout)
             }
-            // Arrow keys walk the tree by relationship: ↑ parent, ↓ child, ←/→ siblings.
+            // Arrow keys walk the tree by relationship: ↑ parent, ↓ child,
+            // ←/→ spouses and siblings along their visual axis.
             .focusable()
             .focusEffectDisabled()
             .focused($canvasFocused)
@@ -263,22 +354,33 @@ struct TreeCanvasView: View {
     }
 
     /// Move the selection to a connected person along the family graph. ↑ a parent,
-    /// ↓ the leftmost child, ←/→ the previous/next sibling in visual (x) order.
+    /// ↓ the first child, ←/→ the previous/next spouse or sibling in visual order.
     private func moveSelection(_ direction: MoveCommandDirection, layout: TreeLayout) {
         guard let current = selectedPerson else { return }
         let idx = FamilyIndex(tree: tree)
-        let xOf: (Person) -> CGFloat = { p in layout.nodes.first(where: { $0.person.id == p.id })?.x ?? 0 }
+        let nodeOf: (Person) -> TreeNode? = { person in
+            layout.nodes.first(where: { $0.person.id == person.id })
+        }
+        let lateralPosition: (Person) -> CGFloat = { person in
+            guard let node = nodeOf(person) else { return 0 }
+            return self.direction == .leftRight ? node.y : node.x
+        }
         var next: Person?
         switch direction {
         case .up:
             let parents = idx.parentsOf(current)
             next = parents.father ?? parents.mother
         case .down:
-            next = idx.childrenOf(current).min(by: { xOf($0) < xOf($1) })
+            next = idx.childrenOf(current).min(by: { lateralPosition($0) < lateralPosition($1) })
         case .left, .right:
-            var group = idx.siblingsOf(current)
-            group.append(current)
-            group.sort { xOf($0) < xOf($1) }
+            var seen = Set<UUID>()
+            var group = (idx.siblingsOf(current) + idx.spousesOf(current) + [current])
+                .filter { seen.insert($0.id).inserted }
+            group.sort {
+                let lhs = lateralPosition($0)
+                let rhs = lateralPosition($1)
+                return lhs == rhs ? $0.id.uuidString < $1.id.uuidString : lhs < rhs
+            }
             if let i = group.firstIndex(where: { $0.id == current.id }) {
                 let j = direction == .left ? i - 1 : i + 1
                 if group.indices.contains(j) { next = group[j] }
@@ -313,6 +415,16 @@ struct TreeCanvasView: View {
             connectorOpacity = 1
             if shouldRefit {
                 fitToScreen(viewSize: viewSize, treeWidth: l.totalWidth, treeHeight: l.totalHeight)
+            } else {
+                let bounded = constrainedPan(
+                    panOffset,
+                    viewSize: viewSize,
+                    treeWidth: l.totalWidth,
+                    treeHeight: l.totalHeight,
+                    atZoom: zoom
+                )
+                panOffset = bounded
+                dragStart = bounded
             }
             return
         }
@@ -326,13 +438,29 @@ struct TreeCanvasView: View {
             // Same curve as the cards: the viewport and the tree move as one system rather
             // than as two timelines racing each other.
             fitToScreen(viewSize: viewSize, treeWidth: l.totalWidth, treeHeight: l.totalHeight, animation: SepiaMotion.layout)
+        } else {
+            let bounded = constrainedPan(
+                panOffset,
+                viewSize: viewSize,
+                treeWidth: l.totalWidth,
+                treeHeight: l.totalHeight,
+                atZoom: zoom
+            )
+            panOffset = bounded
+            dragStart = bounded
         }
         withAnimation(SepiaMotion.layout.delay(0.18)) { connectorOpacity = 1 }
     }
 
     // MARK: - Fit to Screen
 
-    private func fitToScreen(viewSize: CGSize, treeWidth: CGFloat, treeHeight: CGFloat, animation: Animation? = nil) {
+    private func fitToScreen(
+        viewSize: CGSize,
+        treeWidth: CGFloat,
+        treeHeight: CGFloat,
+        animation: Animation? = nil,
+        animated: Bool = true
+    ) {
         guard treeWidth > 0, treeHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
 
         let margin: CGFloat = 20
@@ -352,12 +480,75 @@ struct TreeCanvasView: View {
 
         coastVelocity = .zero // a fit overrides any momentum still in flight
 
-        withAnimation(reduceMotion ? nil : (animation ?? .easeInOut(duration: 0.3))) {
+        let fitAnimation: Animation? = animated && !reduceMotion
+            ? (animation ?? .easeInOut(duration: 0.3))
+            : nil
+        withAnimation(fitAnimation) {
             zoom = clampedZoom
             panOffset = CGSize(width: offsetX, height: offsetY)
             dragStart = CGSize(width: offsetX, height: offsetY)
             magnifyStart = clampedZoom
         }
+    }
+
+    /// Show the whole record first, then move in on the home person at a stable 80%.
+    /// A short pause lets the fitted overview register before the focused workspace takes
+    /// over. Any direct manipulation cancels the pending move.
+    private func scheduleInitialHomeFocus(viewSize: CGSize, layout: TreeLayout) {
+        let focus = {
+            focusHome(
+                viewSize: viewSize,
+                layout: layout,
+                targetZoom: initialFocusZoom,
+                animated: true
+            )
+            initialFocusWorkItem = nil
+        }
+
+        guard !reduceMotion else {
+            focus()
+            return
+        }
+        let workItem = DispatchWorkItem(block: focus)
+        initialFocusWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55, execute: workItem)
+    }
+
+    private func focusHome(
+        viewSize: CGSize,
+        layout: TreeLayout,
+        targetZoom: CGFloat,
+        animated: Bool
+    ) {
+        guard let homeID = tree.homePersonId,
+              let home = layout.nodes.first(where: { $0.person.id == homeID }) else { return }
+        let center = CGPoint(x: home.x + cardW / 2, y: home.y + cardH / 2)
+        let proposedPan = CGSize(
+            width: viewSize.width / 2 - center.x * targetZoom,
+            height: viewSize.height / 2 - center.y * targetZoom
+        )
+        let targetPan = constrainedPan(
+            proposedPan,
+            viewSize: viewSize,
+            treeWidth: layout.totalWidth,
+            treeHeight: layout.totalHeight,
+            atZoom: targetZoom
+        )
+        coastVelocity = .zero
+        let animation: Animation? = animated && !reduceMotion
+            ? .easeInOut(duration: 1.2)
+            : nil
+        withAnimation(animation) {
+            zoom = targetZoom
+            panOffset = targetPan
+        }
+        dragStart = targetPan
+        magnifyStart = targetZoom
+    }
+
+    private func cancelInitialFocus() {
+        initialFocusWorkItem?.cancel()
+        initialFocusWorkItem = nil
     }
 
     /// Pan (keeping the current zoom) so the selected card is centered — but only when
@@ -375,14 +566,29 @@ struct TreeCanvasView: View {
         let comfortablyVisible = screenX >= marginX && screenX <= viewSize.width - marginX
             && screenY >= marginY && screenY <= viewSize.height - marginY
         guard !comfortablyVisible else { return }
-        recenter(onTreePoint: centerPoint, viewSize: viewSize)
+        recenter(onTreePoint: centerPoint, viewSize: viewSize, layout: layout)
     }
 
     /// Pan so a given point in tree coordinates sits at the viewport center.
     /// (screen = treePoint·zoom + panOffset, so panOffset = center − treePoint·zoom.)
     /// `animated` is forced off for Reduce Motion and for live minimap dragging.
-    private func recenter(onTreePoint p: CGPoint, viewSize: CGSize, animated: Bool = true) {
-        let newPan = CGSize(width: viewSize.width / 2 - p.x * zoom, height: viewSize.height / 2 - p.y * zoom)
+    private func recenter(
+        onTreePoint p: CGPoint,
+        viewSize: CGSize,
+        layout: TreeLayout,
+        animated: Bool = true
+    ) {
+        let proposedPan = CGSize(
+            width: viewSize.width / 2 - p.x * zoom,
+            height: viewSize.height / 2 - p.y * zoom
+        )
+        let newPan = constrainedPan(
+            proposedPan,
+            viewSize: viewSize,
+            treeWidth: layout.totalWidth,
+            treeHeight: layout.totalHeight,
+            atZoom: zoom
+        )
         coastVelocity = .zero
         if animated, !reduceMotion {
             withAnimation(.easeInOut(duration: 0.25)) {
@@ -398,15 +604,22 @@ struct TreeCanvasView: View {
     // MARK: - Inertia (momentum scrolling)
 
     /// Zoom by `delta` anchored to the viewport centre (same math as scroll-wheel zoom).
-    private func applyZoomStep(delta: CGFloat, viewSize: CGSize) {
+    private func applyZoomStep(delta: CGFloat, viewSize: CGSize, layout: TreeLayout) {
         let newZoom = min(2.0, max(0.2, zoom + delta))
         guard newZoom != zoom else { return }
         let ratio = newZoom / zoom
         let cx = viewSize.width / 2
         let cy = viewSize.height / 2
-        let newPan = CGSize(
+        let proposedPan = CGSize(
             width: cx - (cx - panOffset.width) * ratio,
             height: cy - (cy - panOffset.height) * ratio
+        )
+        let newPan = constrainedPan(
+            proposedPan,
+            viewSize: viewSize,
+            treeWidth: layout.totalWidth,
+            treeHeight: layout.totalHeight,
+            atZoom: newZoom
         )
         coastVelocity = .zero
         withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
@@ -419,19 +632,73 @@ struct TreeCanvasView: View {
     /// Advance the momentum coast by one display frame. Decay is expressed per *second*
     /// and raised to the elapsed time, so the glide is identical on a 60 Hz and a 120 Hz
     /// panel — the old fixed 1/60 timer beat against a ProMotion display and read as stutter.
-    private func coast(_ dt: TimeInterval) {
+    private func coast(
+        _ dt: TimeInterval,
+        viewSize: CGSize,
+        treeWidth: CGFloat,
+        treeHeight: CGFloat
+    ) {
         let decayPerSecond = 0.0005 // ≈ the previous 0.88-per-frame feel, expressed in time
         let cutoff: CGFloat = 30 // points per second, below which the glide is over
         let k = CGFloat(pow(decayPerSecond, dt))
         var v = CGSize(width: coastVelocity.width * k, height: coastVelocity.height * k)
 
         if abs(v.width) < cutoff, abs(v.height) < cutoff { v = .zero }
-        panOffset = CGSize(
+        let proposedPan = CGSize(
             width: panOffset.width + v.width * CGFloat(dt),
             height: panOffset.height + v.height * CGFloat(dt)
         )
+        let boundedPan = constrainedPan(
+            proposedPan,
+            viewSize: viewSize,
+            treeWidth: treeWidth,
+            treeHeight: treeHeight,
+            atZoom: zoom
+        )
+        if boundedPan.width != proposedPan.width { v.width = 0 }
+        if boundedPan.height != proposedPan.height { v.height = 0 }
+        panOffset = boundedPan
         dragStart = panOffset
         coastVelocity = v
+    }
+
+    private func constrainedPan(
+        _ proposed: CGSize,
+        viewSize: CGSize,
+        treeWidth: CGFloat,
+        treeHeight: CGFloat,
+        atZoom targetZoom: CGFloat
+    ) -> CGSize {
+        CGSize(
+            width: constrainedAxis(
+                proposed.width,
+                viewportLength: viewSize.width,
+                contentLength: treeWidth * targetZoom
+            ),
+            height: constrainedAxis(
+                proposed.height,
+                viewportLength: viewSize.height,
+                contentLength: treeHeight * targetZoom
+            )
+        )
+    }
+
+    private func constrainedAxis(
+        _ proposed: CGFloat,
+        viewportLength: CGFloat,
+        contentLength: CGFloat
+    ) -> CGFloat {
+        guard viewportLength > 0, contentLength > 0 else { return proposed }
+        if contentLength <= viewportLength {
+            let centered = (viewportLength - contentLength) / 2
+            return min(centered + canvasOverscroll, max(centered - canvasOverscroll, proposed))
+        }
+        // When content overflows, allow enough edge space to bring an outermost
+        // person near the viewport center, but cap it so the tree cannot be lost.
+        let edgeFocusAllowance = min(360, max(canvasOverscroll, viewportLength * 0.45))
+        let minimum = viewportLength - contentLength - edgeFocusAllowance
+        let maximum = edgeFocusAllowance
+        return min(maximum, max(minimum, proposed))
     }
 
     /// Build the tidy-tree layout via the pure engine in SwarmCore.
@@ -476,32 +743,32 @@ private struct InertiaDriver: View {
 private struct TreeConnectorsLayer: View, Equatable {
     let layout: TreeLayout
     let generation: Int
-    let highlightedIds: Set<UUID>
+    let highlightedConnections: Set<FamilyConnection>
 
     static func == (l: TreeConnectorsLayer, r: TreeConnectorsLayer) -> Bool {
-        l.generation == r.generation && l.highlightedIds == r.highlightedIds
+        l.generation == r.generation
+            && l.highlightedConnections == r.highlightedConnections
     }
 
-    private func path(for links: [TreeLink]) -> Path {
+    private func path(for segments: [LinkSegment]) -> Path {
         var p = Path()
-        for link in links {
-            for seg in link.segments {
-                p.move(to: seg.from)
-                p.addLine(to: seg.to)
-            }
+        for segment in segments {
+            p.move(to: segment.from)
+            p.addLine(to: segment.to)
         }
         return p
     }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            if highlightedIds.isEmpty {
-                path(for: layout.links)
-                    .stroke(SepiaTheme.line, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
-            } else {
-                path(for: layout.links.filter { !$0.personIds.allSatisfy { highlightedIds.contains($0) } })
-                    .stroke(SepiaTheme.line.opacity(0.25), style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
-                path(for: layout.links.filter { $0.personIds.allSatisfy { highlightedIds.contains($0) } })
+            path(for: layout.links.flatMap(\.segments))
+                .stroke(SepiaTheme.line, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
+
+            if !highlightedConnections.isEmpty {
+                let activeSegments = layout.highlightRoutes
+                    .filter { !$0.connections.isDisjoint(with: highlightedConnections) }
+                    .flatMap(\.segments)
+                path(for: activeSegments)
                     .stroke(SepiaTheme.accent, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
             }
         }
@@ -563,7 +830,6 @@ private struct TreeContentLayer: View, Equatable {
         ZStack(alignment: .topLeading) {
             // Cards (connectors are a separate sibling layer — see TreeConnectorsLayer).
             ForEach(layout.nodes, id: \.person.id) { node in
-                let dimmed = !highlightedIds.isEmpty && !highlightedIds.contains(node.person.id)
                 let isPrimary = selectedId == node.person.id
                 let isSecondary = secondaryId == node.person.id
                 let shown = didAppear || reduceMotion
@@ -578,8 +844,6 @@ private struct TreeContentLayer: View, Equatable {
                     scale: superSample
                 )
                 .equatable()
-                .opacity(dimmed ? 0.3 : 1.0)
-                .sepiaMotion(SepiaMotion.state, value: dimmed)
                 .opacity(shown ? 1 : 0)
                 .scaleEffect(shown ? 1 : 0.94)
                 .sepiaMotion(SepiaMotion.select.delay(entranceDelay(node)), value: shown)
@@ -625,8 +889,12 @@ private struct TreeMinimap: View {
         let mapH = layout.totalHeight * m
         // Current viewport rectangle (visible tree region): screen = tree·zoom + pan,
         // so the visible tree origin is −pan/zoom and its size is viewSize/zoom.
-        let vx = (-panOffset.width / zoom) * m, vy = (-panOffset.height / zoom) * m
-        let vw = (viewSize.width / zoom) * m, vh = (viewSize.height / zoom) * m
+        let rawX = (-panOffset.width / zoom) * m
+        let rawY = (-panOffset.height / zoom) * m
+        let viewportW = min(mapW, max(1, (viewSize.width / zoom) * m))
+        let viewportH = min(mapH, max(1, (viewSize.height / zoom) * m))
+        let viewportX = min(max(0, rawX), max(0, mapW - viewportW))
+        let viewportY = min(max(0, rawY), max(0, mapH - viewportH))
 
         ZStack(alignment: .topLeading) {
             // Static card map — Equatable, so panning the main canvas doesn't redraw it.
@@ -635,11 +903,14 @@ private struct TreeMinimap: View {
                 .frame(width: mapW, height: mapH)
 
             // Viewport indicator — a cheap moving layer (no per-frame node redraw).
-            Rectangle()
+            RoundedRectangle(cornerRadius: 1)
                 .fill(SepiaTheme.accent.opacity(0.08))
-                .overlay(Rectangle().strokeBorder(SepiaTheme.accent, lineWidth: 1.5))
-                .frame(width: vw, height: vh)
-                .offset(x: vx, y: vy)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 1)
+                        .strokeBorder(SepiaTheme.accent, lineWidth: 1)
+                )
+                .frame(width: viewportW, height: viewportH)
+                .offset(x: viewportX, y: viewportY)
                 .allowsHitTesting(false)
         }
         .frame(width: mapW, height: mapH, alignment: .topLeading)
@@ -651,11 +922,20 @@ private struct TreeMinimap: View {
                     onRecenter(CGPoint(x: value.location.x / m, y: value.location.y / m))
                 }
         )
-        .padding(6)
-        .background(SepiaTheme.paper.opacity(0.92))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardLine, lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
+        .padding(8)
+        .background(
+            SepiaTheme.paper.opacity(0.58),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .glassEffect(
+            .regular.interactive(),
+            in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(SepiaTheme.cardLine.opacity(0.42), lineWidth: 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .help(L10n.tr("Обзор дерева — нажмите, чтобы перейти"))
         .accessibilityHidden(true)
     }
@@ -798,11 +1078,10 @@ struct PersonCardView: View, Equatable {
     /// Hover lifts a card toward white along *its own* hue (see the `*Hover` tokens): the
     /// pointer should raise the card off the paper, not restate the person's sex.
     private var cardBackground: Color {
-        if isHighlighted { return SepiaTheme.accent.opacity(0.08) }
         switch person.sex {
-        case .male: return isHovering ? SepiaTheme.cardBgMaleHover : SepiaTheme.cardBgMale
-        case .female: return isHovering ? SepiaTheme.cardBgFemaleHover : SepiaTheme.cardBgFemale
-        case .unknown: return isHovering ? SepiaTheme.cardBgHover : SepiaTheme.cardBg
+        case .male: isHovering ? SepiaTheme.cardBgMaleHover : SepiaTheme.cardBgMale
+        case .female: isHovering ? SepiaTheme.cardBgFemaleHover : SepiaTheme.cardBgFemale
+        case .unknown: isHovering ? SepiaTheme.cardBgHover : SepiaTheme.cardBg
         }
     }
 
@@ -857,14 +1136,12 @@ struct PersonCardView: View, Equatable {
                     VStack(alignment: .leading, spacing: 0) {
                         // Surname — allow up to 2 lines so long names are never truncated.
                         // The maiden name sits on its own line below (1-line, clipped if needed).
-                        if language == .russian {
-                            Text(person.displaySurname.uppercased())
-                                .font(SepiaTheme.ui(size: s(8)))
-                                .tracking(s(1.0))
-                                .foregroundColor(SepiaTheme.inkSoft)
-                                .lineLimit(2)
-                                .minimumScaleFactor(0.8)
-                        }
+                        Text(person.displaySurname.uppercased())
+                            .font(SepiaTheme.ui(size: s(8)))
+                            .tracking(s(1.0))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
                         if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
                             Text("(\(maiden.uppercased()))")
                                 .font(SepiaTheme.ui(size: s(7)))
@@ -892,13 +1169,9 @@ struct PersonCardView: View, Equatable {
                 Rectangle().fill(SepiaTheme.cardRule).frame(height: max(0.5, s(1)))
 
                 VStack(alignment: .leading, spacing: s(1)) {
-                    let nameDisplay = if language == .english {
-                        person.displayName(language: .english)
-                    } else {
-                        [person.givenNames, person.patronymic ?? ""]
-                            .filter { !$0.isEmpty }
-                            .joined(separator: " ")
-                    }
+                    let nameDisplay = [person.givenNames, person.patronymic ?? ""]
+                        .filter { !$0.isEmpty }
+                        .joined(separator: " ")
                     Text(nameDisplay.isEmpty ? L10n.tr("Неизвестно") : nameDisplay)
                         .font(SepiaTheme.display(size: s(13.5)))
                         .fontWeight(.semibold)

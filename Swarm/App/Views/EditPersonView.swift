@@ -48,6 +48,7 @@ struct EditPersonView: View {
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
     @State private var editSession: EditSession?
+    @State private var isHomePerson = false
     @State private var preparedAttachmentIDs: Set<UUID> = []
     @State private var saveError: String?
     @State private var isSaving = false
@@ -97,25 +98,18 @@ struct EditPersonView: View {
 
     var body: some View {
         ZStack {
-            SepiaTheme.paper.ignoresSafeArea()
-                .onTapGesture { NSApp.keyWindow?.makeFirstResponder(nil) } // tap empty space → close dropdowns
+            ZStack {
+                Rectangle().fill(.regularMaterial)
+                SepiaTheme.paper.opacity(0.9)
+            }
+            .ignoresSafeArea()
+            .onTapGesture { NSApp.keyWindow?.makeFirstResponder(nil) } // tap empty space → close dropdowns
 
             VStack(spacing: 0) {
-                HStack {
-                    Text(L10n.tr("Редактировать"))
-                        .font(SepiaTheme.display(size: 22))
-                        .foregroundColor(SepiaTheme.ink)
-                    Spacer()
-                    Button { cancelEditing() } label: {
-                        Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
-                            .frame(width: 32, height: 32)
-                            .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 24).padding(.top, 20).padding(.bottom, 12)
-
-                Divider().overlay(SepiaTheme.toolbarLine)
+                editorHeader
+                    .padding(.horizontal, 12)
+                    .padding(.top, 12)
+                    .padding(.bottom, 8)
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
@@ -144,7 +138,10 @@ struct EditPersonView: View {
                                 HStack(spacing: 6) {
                                     ForEach([Person.Sex.male, .female], id: \.rawValue) { option in
                                         Button(option.displayName) { sex = (sex == option) ? .unknown : option }
-                                            .buttonStyle(SepiaButtonStyle(isActive: sex == option))
+                                            .buttonStyle(.glass)
+                                            .buttonBorderShape(.capsule)
+                                            .tint(sex == option ? SepiaTheme.accent : nil)
+                                            .foregroundStyle(sex == option ? Color.white : SepiaTheme.ink)
                                             .accessibilityAddTraits(sex == option ? [.isSelected] : [])
                                     }
                                     if sex == .unknown {
@@ -156,6 +153,10 @@ struct EditPersonView: View {
                                 }
                             }
                         }.padding(.bottom, 12)
+
+                        homePersonControl
+                            .help(L10n.tr("Домашняя персона открывается первой и служит центром дерева"))
+                            .padding(.bottom, 12)
 
                         SectionHeader(title: L10n.tr("Рождение"))
                         SepiaDateField(
@@ -210,17 +211,9 @@ struct EditPersonView: View {
                     .padding(.horizontal, 24).padding(.bottom, 20)
                 }
 
-                Divider().overlay(SepiaTheme.toolbarLine)
-
-                HStack {
-                    Button(L10n.tr("Отмена")) { cancelEditing() }.buttonStyle(SepiaButtonStyle())
-                    Spacer()
-                    Button(L10n.tr("Сохранить")) { savePerson() }
-                        .buttonStyle(SepiaButtonStyle(isActive: true))
-                        .disabled(isSaving)
-                        .disabled(givenNames.isEmpty && surname.isEmpty)
-                }
-                .padding(16)
+                editorFooter
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
             }
         }
         .frame(width: 540, height: 720)
@@ -245,7 +238,88 @@ struct EditPersonView: View {
         }
     }
 
+    private var editorHeader: some View {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(L10n.tr("Редактировать"))
+                        .font(SepiaTheme.display(size: 20))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(SepiaTheme.ink)
+                    Text(person.displayName(language: .current))
+                        .font(SepiaTheme.ui(size: 11))
+                        .foregroundStyle(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .frame(height: 52)
+                .glassEffect(
+                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+
+                Button { cancelEditing() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(SepiaTheme.ink)
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .help(L10n.tr("Закрыть без сохранения"))
+                .accessibilityLabel(L10n.tr("Закрыть без сохранения"))
+            }
+        }
+    }
+
+    private var editorFooter: some View {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) {
+                Button(L10n.tr("Отмена")) { cancelEditing() }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+
+                Spacer()
+
+                Button { savePerson() } label: {
+                    Label(L10n.tr("Сохранить"), systemImage: "checkmark")
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
+                .disabled(isSaving)
+                .disabled(givenNames.isEmpty && surname.isEmpty)
+            }
+        }
+    }
+
     // MARK: - Relationships Editor
+
+    @ViewBuilder
+    private var homePersonControl: some View {
+        if isHomePerson {
+            Label(L10n.tr("Домашняя персона"), systemImage: "house.fill")
+                .font(SepiaTheme.ui(size: 12))
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .frame(height: 34)
+                .glassEffect(.regular.tint(SepiaTheme.accent), in: Capsule())
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(L10n.tr("Домашняя персона"))
+        } else {
+            Button {
+                isHomePerson = true
+            } label: {
+                Label(L10n.tr("Сделать домашней персоной"), systemImage: "house")
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.capsule)
+            .tint(SepiaTheme.accent)
+            .accessibilityLabel(L10n.tr("Сделать домашней персоной"))
+        }
+    }
 
     private var evidenceEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -255,9 +329,12 @@ struct EditPersonView: View {
                 SepiaTextField(label: L10n.tr("НОВЫЙ ИСТОЧНИК"), text: $sourceTitle, placeholder: L10n.tr("Название"))
                 SepiaTextField(label: L10n.tr("АВТОР"), text: $sourceAuthor, placeholder: "—")
             }
-            Button(L10n.tr("Добавить в библиотеку")) { addSource() }
-                .buttonStyle(SepiaButtonStyle())
-                .disabled(sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            Button { addSource() } label: {
+                Label(L10n.tr("Добавить в библиотеку"), systemImage: "books.vertical")
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .disabled(sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
 
             if editingTree.sourceRecords.isEmpty {
                 Text(L10n.tr("Сначала добавьте источник.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
@@ -290,9 +367,13 @@ struct EditPersonView: View {
                 }
                 SepiaNotesField(label: L10n.tr("РАСШИФРОВКА"), text: $citationTranscription, placeholder: L10n.tr("Точная запись из источника…"))
                 SepiaNotesField(label: L10n.tr("ЗАМЕТКА К ССЫЛКЕ"), text: $citationNotes, placeholder: "—")
-                Button(L10n.tr("Привязать ссылку")) { addCitation() }
-                    .buttonStyle(SepiaButtonStyle(isActive: true))
-                    .disabled(selectedSourceID == nil || (requiresEvidenceObject && evidenceObjectID == nil))
+                Button { addCitation() } label: {
+                    Label(L10n.tr("Привязать ссылку"), systemImage: "link")
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
+                .disabled(selectedSourceID == nil || (requiresEvidenceObject && evidenceObjectID == nil))
             }
         }.padding(.bottom, 12)
     }
@@ -464,9 +545,13 @@ struct EditPersonView: View {
             .padding(.bottom, 4)
 
             if addRelType != .none && addRelPersonId != nil {
-                Button(L10n.tr("Связать")) { addRelationship() }
-                    .buttonStyle(SepiaButtonStyle(isActive: true))
-                    .padding(.top, 4)
+                Button { addRelationship() } label: {
+                    Label(L10n.tr("Связать"), systemImage: "link.badge.plus")
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
+                .padding(.top, 4)
             }
         }
     }
@@ -487,13 +572,14 @@ struct EditPersonView: View {
                 .foregroundColor(SepiaTheme.ink)
             Spacer()
             Button { onRemove() } label: {
-                Image(systemName: "minus.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(.red.opacity(0.7))
-                    .frame(width: 24, height: 24)
-                    .contentShape(Rectangle())
+                Image(systemName: "minus")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.red.opacity(0.78))
+                    .frame(width: 26, height: 26)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .help(L10n.tr("Удалить связь"))
         }
         .padding(.bottom, 6)
     }
@@ -599,7 +685,8 @@ struct EditPersonView: View {
             Button { showAttachmentImporter = true } label: {
                 Label(L10n.tr("Прикрепить файл"), systemImage: "paperclip")
             }
-            .buttonStyle(SepiaButtonStyle())
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
             .padding(.top, 4)
             .padding(.bottom, 12)
             .fileImporter(isPresented: $showAttachmentImporter, allowedContentTypes: [.item], allowsMultipleSelection: true) { result in
@@ -630,11 +717,13 @@ struct EditPersonView: View {
             Spacer(minLength: 0)
 
             Button { removeDraftAttachment(att) } label: {
-                Image(systemName: "minus.circle.fill")
-                    .font(.system(size: 14)).foregroundColor(.red.opacity(0.7))
-                    .frame(width: 24, height: 24).contentShape(Rectangle())
+                Image(systemName: "minus")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.red.opacity(0.78))
+                    .frame(width: 26, height: 26)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить файл"))
         }
         .padding(.bottom, 8)
@@ -691,7 +780,8 @@ struct EditPersonView: View {
                     } label: {
                         Label(L10n.tr("Выбрать фото"), systemImage: "photo.on.rectangle")
                     }
-                    .buttonStyle(SepiaButtonStyle())
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
                     .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
                         if case .success(let url) = result { beginPhotoSelection(from: url) }
                     }
@@ -703,12 +793,12 @@ struct EditPersonView: View {
                             Label(L10n.tr("Удалить"), systemImage: "trash")
                                 .foregroundColor(.red.opacity(0.8))
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
                     }
                 }
             }
         }
-        .padding(.horizontal, 24)
         .padding(.vertical, 12)
     }
 
@@ -766,6 +856,7 @@ struct EditPersonView: View {
     private func loadPerson() {
         if editSession == nil { editSession = try? EditSession(tree: tree) }
         let source = editingPerson
+        isHomePerson = tree.homePersonId == person.id
         givenNames = source.givenNames
         patronymic = source.patronymic ?? ""
         surname = source.surname
@@ -860,6 +951,7 @@ struct EditPersonView: View {
         person.notes = notes.isEmpty ? nil : notes
         if photoData != person.photoData { person.photoData = photoData }
         person.updatedAt = Date()
+        if isHomePerson { tree.homePersonId = person.id }
         tree.optimizeRoot()
         tree.updatedAt = Date()
         isSaving = true
@@ -1012,7 +1104,15 @@ private struct UnionDraftEditor: View {
                     Button(role: .destructive) {
                         union.childrenIds.removeAll { $0 == childID }
                         tree.parentLinks.removeAll { $0.unionID == union.id && $0.childID == childID }
-                    } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain)
+                    } label: {
+                        Image(systemName: "minus")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundStyle(Color.red.opacity(0.78))
+                            .frame(width: 26, height: 26)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .help(L10n.tr("Удалить ребёнка из союза"))
                 }
             }
             HStack {
@@ -1022,13 +1122,21 @@ private struct UnionDraftEditor: View {
                         Text($0.displayName(language: .current)).tag($0.id as UUID?)
                     }
                 }.pickerStyle(.menu)
-                Button(L10n.tr("Добавить")) { addChild() }.buttonStyle(SepiaButtonStyle()).disabled(childToAdd == nil)
+                Button { addChild() } label: {
+                    Label(L10n.tr("Добавить"), systemImage: "plus")
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
+                .disabled(childToAdd == nil)
             }
         }
-        .padding(12)
-        .background(SepiaTheme.cardBg.opacity(0.65))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-        .overlay(RoundedRectangle(cornerRadius: 8).stroke(SepiaTheme.cardLine, lineWidth: 1))
+        .padding(14)
+        .background(SepiaTheme.cardBg, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
+        }
     }
 
     private var partnerNames: String {
@@ -1122,7 +1230,7 @@ private struct UnionEventDraftEditor: View {
                 PlacePickerField(label: L10n.tr("МЕСТО"), text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }
                 SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: "—")
                 if !attachments.isEmpty {
-                    Menu(L10n.tr("Медиа (\(mediaIDs.count))")) {
+                    Menu {
                         ForEach(attachments) { attachment in
                             Toggle(attachment.originalName, isOn: Binding(
                                 get: { mediaIDs.contains(attachment.id.uuidString) },
@@ -1133,7 +1241,11 @@ private struct UnionEventDraftEditor: View {
                                 }
                             ))
                         }
-                    }.menuStyle(.borderlessButton)
+                    } label: {
+                        Label(L10n.tr("Медиа (\(mediaIDs.count))"), systemImage: "photo.stack")
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
                 }
             }
         }

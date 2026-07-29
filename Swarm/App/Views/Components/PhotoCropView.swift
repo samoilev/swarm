@@ -19,71 +19,96 @@ struct PhotoCropView: View {
     private let minSize: CGFloat = 48
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Text(L10n.tr("Кадрировать фото")).font(SepiaTheme.display(size: 18)).foregroundColor(SepiaTheme.ink)
-                Spacer()
-                Text(L10n.tr("Перетащите рамку, потяните угол для размера"))
-                    .font(SepiaTheme.body(size: 11)).foregroundColor(SepiaTheme.inkSoft)
+        ZStack {
+            ZStack {
+                Rectangle().fill(.regularMaterial)
+                SepiaTheme.paper.opacity(0.9)
             }
-            .padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 12)
+            .ignoresSafeArea()
 
-            Divider().overlay(SepiaTheme.toolbarLine)
-
-            GeometryReader { geo in
-                ZStack {
-                    Image(nsImage: image)
-                        .resizable()
-                        .frame(width: imageFrame.width, height: imageFrame.height)
-                        .position(x: imageFrame.midX, y: imageFrame.midY)
-
-                    // Dim everything outside the selection.
-                    Group {
-                        dimBar(CGRect(x: imageFrame.minX, y: imageFrame.minY, width: imageFrame.width, height: crop.minY - imageFrame.minY))
-                        dimBar(CGRect(x: imageFrame.minX, y: crop.maxY, width: imageFrame.width, height: imageFrame.maxY - crop.maxY))
-                        dimBar(CGRect(x: imageFrame.minX, y: crop.minY, width: crop.minX - imageFrame.minX, height: crop.height))
-                        dimBar(CGRect(x: crop.maxX, y: crop.minY, width: imageFrame.maxX - crop.maxX, height: crop.height))
+            VStack(spacing: 0) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L10n.tr("Кадрировать фото"))
+                            .font(SepiaTheme.display(size: 18))
+                            .fontWeight(.semibold)
+                            .foregroundColor(SepiaTheme.ink)
+                        Text(L10n.tr("Перетащите рамку, потяните угол для размера"))
+                            .font(SepiaTheme.body(size: 11))
+                            .foregroundColor(SepiaTheme.inkSoft)
                     }
-                    .allowsHitTesting(false)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 54)
+                .glassEffect(
+                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+                .padding(12)
 
-                    // Draggable interior.
-                    Color.clear
-                        .frame(width: crop.width, height: crop.height)
-                        .contentShape(Rectangle())
-                        .position(x: crop.midX, y: crop.midY)
-                        .gesture(moveGesture)
+                GeometryReader { geo in
+                    ZStack {
+                        Image(nsImage: image)
+                            .resizable()
+                            .frame(width: imageFrame.width, height: imageFrame.height)
+                            .position(x: imageFrame.midX, y: imageFrame.midY)
 
-                    Rectangle()
-                        .strokeBorder(Color.white, lineWidth: 2)
-                        .frame(width: crop.width, height: crop.height)
-                        .position(x: crop.midX, y: crop.midY)
+                        // Dim everything outside the selection.
+                        Group {
+                            dimBar(CGRect(x: imageFrame.minX, y: imageFrame.minY, width: imageFrame.width, height: crop.minY - imageFrame.minY))
+                            dimBar(CGRect(x: imageFrame.minX, y: crop.maxY, width: imageFrame.width, height: imageFrame.maxY - crop.maxY))
+                            dimBar(CGRect(x: imageFrame.minX, y: crop.minY, width: crop.minX - imageFrame.minX, height: crop.height))
+                            dimBar(CGRect(x: crop.maxX, y: crop.minY, width: imageFrame.maxX - crop.maxX, height: crop.height))
+                        }
                         .allowsHitTesting(false)
 
-                    // Resize handle (bottom-right corner).
-                    Circle()
-                        .fill(Color.white)
-                        .overlay(Circle().strokeBorder(SepiaTheme.ink.opacity(0.3), lineWidth: 1))
-                        .frame(width: 20, height: 20)
-                        .position(x: crop.maxX, y: crop.maxY)
-                        .gesture(resizeGesture)
+                        // Draggable interior.
+                        Color.clear
+                            .frame(width: crop.width, height: crop.height)
+                            .contentShape(Rectangle())
+                            .position(x: crop.midX, y: crop.midY)
+                            .gesture(moveGesture)
+
+                        Rectangle()
+                            .strokeBorder(Color.white, lineWidth: 2)
+                            .frame(width: crop.width, height: crop.height)
+                            .position(x: crop.midX, y: crop.midY)
+                            .allowsHitTesting(false)
+
+                        // Resize handle (bottom-right corner).
+                        Circle()
+                            .fill(Color.white)
+                            .overlay(Circle().strokeBorder(SepiaTheme.ink.opacity(0.3), lineWidth: 1))
+                            .frame(width: 20, height: 20)
+                            .position(x: crop.maxX, y: crop.maxY)
+                            .gesture(resizeGesture)
+                    }
+                    .onAppear { layout(in: geo.size) }
+                    .onChange(of: geo.size) { _, newSize in layout(in: newSize) }
                 }
-                .onAppear { layout(in: geo.size) }
-                .onChange(of: geo.size) { _, newSize in layout(in: newSize) }
-            }
-            .background(Color.black.opacity(0.9))
+                .background(Color.black.opacity(0.9), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .padding(.horizontal, 12)
 
-            Divider().overlay(SepiaTheme.toolbarLine)
-
-            HStack {
-                Button(L10n.tr("Отмена")) { onCancel() }.buttonStyle(SepiaButtonStyle())
-                Spacer()
-                Button(L10n.tr("Готово")) { if let c = cropped() { onConfirm(c) } }
-                    .buttonStyle(SepiaButtonStyle(isActive: true))
+                GlassEffectContainer(spacing: 10) {
+                    HStack {
+                        Button(L10n.tr("Отмена")) { onCancel() }
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.capsule)
+                        Spacer()
+                        Button { if let c = cropped() { onConfirm(c) } } label: {
+                            Label(L10n.tr("Готово"), systemImage: "checkmark")
+                        }
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
+                    }
+                }
+                .padding(12)
             }
-            .padding(16)
         }
         .frame(width: 520, height: 600)
-        .background(SepiaTheme.paper)
     }
 
     private func dimBar(_ r: CGRect) -> some View {

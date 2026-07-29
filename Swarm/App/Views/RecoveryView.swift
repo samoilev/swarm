@@ -22,56 +22,67 @@ struct RecoveryView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider().overlay(SepiaTheme.toolbarLine)
-            treePicker
-            Divider().overlay(SepiaTheme.cardLine)
+        ZStack {
+            LiquidGlassPanelBackground()
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 22) {
-                    migrationSection
+            VStack(spacing: 0) {
+                header
+                    .padding(14)
 
-                    if items.isEmpty {
-                        emptyState
-                    } else {
-                        group(
-                            .revision,
-                            title: L10n.tr("Предыдущие версии"),
-                            explanation: L10n.tr("Состояние дерева после каждого сохранения. Хранятся последние 50.")
-                        )
-                        group(
-                            .deletedFile,
-                            title: L10n.tr("Удалённые файлы"),
-                            explanation: L10n.tr("Фотографии и документы, убранные из карточек. Доступны 30 дней, затем удаляются.")
-                        )
-                        group(
-                            .migrationBackup,
-                            title: L10n.tr("Полные копии архива"),
-                            explanation: L10n.tr("Снимок всего дерева перед крупной операцией — обновлением формата, слиянием. Хранятся бессрочно.")
-                        )
-                        group(
-                            .archivedTree,
-                            title: L10n.tr("Архивированные деревья"),
-                            explanation: L10n.tr("Деревья, убранные из библиотеки вместе с файлами. Можно вернуть обратно.")
-                        )
+                treePicker
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        migrationSection
+
+                        if items.isEmpty {
+                            emptyState
+                        } else {
+                            group(
+                                .revision,
+                                title: L10n.tr("Предыдущие версии"),
+                                explanation: L10n.tr("Состояние дерева после каждого сохранения. Хранятся последние 50.")
+                            )
+                            group(
+                                .deletedFile,
+                                title: L10n.tr("Удалённые файлы"),
+                                explanation: L10n.tr("Фотографии и документы, убранные из карточек. Доступны 30 дней, затем удаляются.")
+                            )
+                            group(
+                                .migrationBackup,
+                                title: L10n.tr("Полные копии архива"),
+                                explanation: L10n.tr("Снимок всего дерева перед крупной операцией — обновлением формата, слиянием. Хранятся бессрочно.")
+                            )
+                            group(
+                                .archivedTree,
+                                title: L10n.tr("Архивированные деревья"),
+                                explanation: L10n.tr("Деревья, убранные из библиотеки вместе с файлами. Можно вернуть обратно.")
+                            )
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
-                .padding(20)
-            }
 
-            if let statusMessage {
-                Divider().overlay(SepiaTheme.cardLine)
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle").font(.system(size: 11))
-                    Text(statusMessage).font(SepiaTheme.ui(size: 11))
+                if let statusMessage {
+                    Label(statusMessage, systemImage: "checkmark.circle.fill")
+                        .font(SepiaTheme.ui(size: 11))
+                        .foregroundStyle(SepiaTheme.accent2)
+                        .padding(.horizontal, 14)
+                        .frame(minHeight: 34)
+                        .glassEffect(
+                            .regular.tint(SepiaTheme.toolbarBg.opacity(0.2)),
+                            in: Capsule()
+                        )
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 14)
+                        .accessibilityElement(children: .combine)
                 }
-                .foregroundStyle(SepiaTheme.accent2)
-                .padding(10)
             }
         }
         .frame(width: 760, height: 560)
-        .background(SepiaTheme.paper)
         .onAppear {
             if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
             refresh()
@@ -85,31 +96,37 @@ struct RecoveryView: View {
     // MARK: - Chrome
 
     private var header: some View {
-        HStack(alignment: .top) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(L10n.tr("Восстановление")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
-                Text(L10n.tr("Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения."))
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 560, alignment: .leading)
-            }
-            Spacer()
-            Button { dismiss() } label: { Image(systemName: "xmark") }
-                .buttonStyle(SepiaIconButtonStyle())
-                .accessibilityLabel(L10n.tr("Закрыть восстановление"))
-        }.padding(20)
+        LiquidGlassPanelHeader(
+            title: L10n.tr("Восстановление"),
+            subtitle: L10n.tr("Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения."),
+            minimumHeight: 68,
+            closeLabel: L10n.tr("Закрыть восстановление"),
+            closeDisabled: isWorking,
+            onClose: { dismiss() }
+        )
     }
 
     private var treePicker: some View {
-        HStack(spacing: 12) {
+        LiquidGlassActionRow {
+            Label(L10n.tr("Архив"), systemImage: "tree")
+                .font(SepiaTheme.ui(size: 12))
+                .foregroundStyle(SepiaTheme.ink)
+
             Picker(L10n.tr("Архив"), selection: $selectedTreeID) {
-                Text(L10n.tr("Все архивы")).tag(nil as UUID?)
-                ForEach(store.trees, id: \.id) { Text($0.name).tag($0.id as UUID?) }
+                Text(L10n.tr("Все архивы"))
+                    .tag(nil as UUID?)
+                ForEach(store.trees, id: \.id) {
+                    Text($0.name)
+                        .tag($0.id as UUID?)
+                }
             }
-            .frame(width: 280)
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .frame(width: 260)
             .help(L10n.tr("Выберите дерево, историю которого нужно посмотреть"))
+
             Spacer()
-        }.padding(16)
+        }
     }
 
     private var emptyState: some View {
@@ -151,16 +168,24 @@ struct RecoveryView: View {
                         }
                         Spacer()
                         Button(L10n.tr("Показать в Finder")) { reveal(migration.url) }
-                            .buttonStyle(SepiaButtonStyle())
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.capsule)
                     }
-                    .padding(10)
+                    .padding(12)
                     .background(SepiaTheme.cardBg)
-                    .clipShape(RoundedRectangle(cornerRadius: 7))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
 
                 HStack(spacing: 10) {
                     Button(L10n.tr("Обновить всё (\(store.pendingMigrations.count))")) { runMigrations() }
-                        .buttonStyle(SepiaButtonStyle(isActive: true)).disabled(isWorking)
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
+                        .disabled(isWorking)
                     Text(L10n.tr("Перед обновлением создаётся полная резервная копия. Исходные файлы не удаляются — они переезжают в раздел копий ниже."))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -187,8 +212,10 @@ struct RecoveryView: View {
     }
 
     private func sectionTitle(_ title: String, count: Int) -> some View {
-        Text("\(title.uppercased()) · \(count)")
-            .font(SepiaTheme.ui(size: 10)).tracking(1).foregroundStyle(SepiaTheme.inkSoft)
+        Text("\(title) · \(count)")
+            .font(SepiaTheme.display(size: 15))
+            .foregroundStyle(SepiaTheme.ink)
+            .accessibilityAddTraits(.isHeader)
     }
 
     private func row(_ item: RecoveryItem) -> some View {
@@ -202,15 +229,21 @@ struct RecoveryView: View {
             Spacer()
             if item.kind == .deletedFile { personPicker(for: item) }
             Button(actionLabel(item.kind)) { restore(item) }
-                .buttonStyle(SepiaButtonStyle())
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
                 .disabled(isWorking || (item.kind == .deletedFile && restoreTargets[item.id] == nil))
                 .help(item.kind == .deletedFile && restoreTargets[item.id] == nil
                     ? L10n.tr("Сначала выберите, в чью карточку вернуть файл")
                     : actionLabel(item.kind))
         }
-        .padding(10)
+        .padding(12)
         .background(SepiaTheme.cardBg)
-        .clipShape(RoundedRectangle(cornerRadius: 7))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     /// A deleted file has no owner once it is in the trash, so the target person is

@@ -90,7 +90,7 @@ struct PlacePickerField: View {
                         .padding(.vertical, 6)
                         .contentShape(Rectangle())
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PlaceSuggestionButtonStyle())
 
                     if place.id != suggestions.last?.id {
                         Divider().overlay(SepiaTheme.fieldLine.opacity(0.5))
@@ -99,10 +99,18 @@ struct PlacePickerField: View {
             }
         }
         .frame(height: CGFloat(visibleRows) * rowHeight)
-        .background(SepiaTheme.cardBg)
-        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+        .background(
+            SepiaTheme.cardBg.opacity(0.88),
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
+        .glassEffect(
+            .regular.interactive(),
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(SepiaTheme.cardLine.opacity(0.7), lineWidth: 1)
+        }
         .zIndex(100)
     }
 
@@ -129,5 +137,37 @@ struct PlacePickerField: View {
         }
         searchWork = work
         DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 0.15, execute: work)
+    }
+}
+
+private struct PlaceSuggestionButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        PlaceSuggestionButtonSurface(
+            label: configuration.label,
+            isPressed: configuration.isPressed
+        )
+    }
+
+    private struct PlaceSuggestionButtonSurface<Label: View>: View {
+        let label: Label
+        let isPressed: Bool
+        @State private var isHovering = false
+
+        var body: some View {
+            label
+                .background {
+                    Rectangle()
+                        .fill(
+                            isHovering
+                                ? SepiaTheme.accent.opacity(0.09)
+                                : Color.clear
+                        )
+                }
+                .opacity(isPressed ? 0.72 : 1)
+                .contentShape(Rectangle())
+                .sepiaMotion(SepiaMotion.hover, value: isHovering)
+                .sepiaMotion(SepiaMotion.press, value: isPressed)
+                .onHover { isHovering = $0 }
+        }
     }
 }

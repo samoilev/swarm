@@ -109,7 +109,19 @@ struct PersonCardsPDFExporter {
         let layout = TreeLayoutEngine().layout(tree: tree, direction: .topDown)
         let nodes = scopeIds.map { ids in layout.nodes.filter { ids.contains($0.person.id) } } ?? layout.nodes
         guard !nodes.isEmpty else { return }
-        let links = scopeIds.map { ids in layout.links.filter { l in l.personIds.allSatisfy { ids.contains($0) } } } ?? layout.links
+        let links: [TreeLink] = if let scopeIds {
+            // A scoped export follows exact relationship routes instead of pulling
+            // an unrelated section of a shared sibling bus into the poster.
+            layout.highlightRoutes
+                .filter { route in
+                    route.connections.contains {
+                        scopeIds.contains($0.firstID) && scopeIds.contains($0.secondID)
+                    }
+                }
+                .map { TreeLink(id: $0.id, segments: $0.segments) }
+        } else {
+            layout.links
+        }
 
         let cardW: CGFloat = 210, cardH: CGFloat = 90
         let minX = nodes.map(\.x).min()!

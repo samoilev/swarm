@@ -16,7 +16,7 @@ permissions:
 jobs:
   build-test:
     name: Build & Test
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       # Pinned to a full commit SHA: a tag can be moved, a SHA cannot. Dependabot
       # bumps this and updates the trailing version comment.
@@ -43,7 +43,7 @@ jobs:
 
   lint:
     name: SwiftFormat
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       # Pin the formatter version so an upstream release with changed default rules
       # can't fail CI without a code change. Bump this deliberately. Mint builds the

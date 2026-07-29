@@ -45,24 +45,27 @@ struct OnboardingView: View {
     let onComplete: (FamilyTree) async throws -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider().overlay(SepiaTheme.fieldLine)
+        ZStack {
+            LiquidGlassPanelBackground()
 
-            Group {
-                switch step {
-                case .record: recordStep
-                case .relative: relativeStep
+            VStack(spacing: 0) {
+                header
+
+                Group {
+                    switch step {
+                    case .record: recordStep
+                    case .relative: relativeStep
+                    }
                 }
-            }
-            .padding(.horizontal, 28)
-            .padding(.top, 22)
+                .padding(.horizontal, 28)
+                .padding(.top, 22)
 
-            if let createError {
-                failureBanner(createError)
-            }
+                if let createError {
+                    failureBanner(createError)
+                }
 
-            buttonRow
+                buttonRow
+            }
         }
         // Width is fixed, height is not: the two steps hold different amounts and a
         // pinned height either crams one or leaves the other mostly empty.
@@ -76,28 +79,19 @@ struct OnboardingView: View {
     // MARK: - Chrome
 
     private var header: some View {
-        VStack(spacing: 7) {
-            Text(stepTitle(step))
-                .font(SepiaTheme.display(size: 24))
-                .foregroundColor(SepiaTheme.ink)
-                .accessibilityAddTraits(.isHeader)
-            Text(stepSubtitle)
-                .font(SepiaTheme.body(size: 13.5))
-                .foregroundColor(SepiaTheme.inkSoft)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+        VStack(spacing: 12) {
+            LiquidGlassPanelHeader(
+                title: stepTitle(step),
+                subtitle: stepSubtitle,
+                minimumHeight: 62,
+                closeLabel: L10n.tr("Закрыть"),
+                onClose: { dismiss() }
+            )
+
             stepIndicator
-                .padding(.top, 9)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 28)
-        .padding(.top, 26)
-        .padding(.bottom, 18)
-        .overlay(alignment: .topTrailing) {
-            LanguageSwitchControl()
-                .padding(.top, 14)
-                .padding(.trailing, 16)
-        }
+        .padding(.horizontal, 14)
+        .padding(.top, 14)
     }
 
     private func stepTitle(_ step: Step) -> String {
@@ -131,21 +125,39 @@ struct OnboardingView: View {
     }
 
     private var buttonRow: some View {
-        HStack(spacing: 10) {
+        LiquidGlassActionRow {
             if step == .relative {
                 Button(L10n.tr("Назад")) { goBack() }
-                    .buttonStyle(SepiaButtonStyle())
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
                     .disabled(isSaving)
             }
             Spacer(minLength: 12)
             Button(L10n.tr("Отмена")) { dismiss() }
-                .buttonStyle(SepiaButtonStyle())
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
                 .keyboardShortcut(.cancelAction)
                 .disabled(isSaving)
-            Button(primaryLabel) { primaryAction() }
-                .buttonStyle(SepiaButtonStyle(isActive: true))
-                .keyboardShortcut(.defaultAction)
-                .disabled(isSaving)
+
+            Button(action: primaryAction) {
+                HStack(spacing: 6) {
+                    if isSaving {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(.white)
+                            .accessibilityHidden(true)
+                    }
+                    Text(primaryLabel)
+                    if !isSaving {
+                        Image(systemName: step == .record ? "arrow.right" : "checkmark")
+                    }
+                }
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.capsule)
+            .tint(SepiaTheme.accent)
+            .keyboardShortcut(.defaultAction)
+            .disabled(isSaving)
         }
         .padding(.horizontal, 24)
         .padding(.top, 20)
@@ -215,9 +227,7 @@ struct OnboardingView: View {
 
             HStack(spacing: 8) {
                 ForEach(FirstRelative.allCases) { candidate in
-                    Button(candidate.label) { select(candidate) }
-                        .buttonStyle(SepiaButtonStyle(isActive: role == candidate))
-                        .accessibilityAddTraits(role == candidate ? [.isSelected] : [])
+                    relativeRoleButton(candidate)
                 }
             }
 
@@ -281,6 +291,21 @@ struct OnboardingView: View {
 
     private var language: AppLanguage {
         AppLanguage(rawValue: languageRaw) ?? .default
+    }
+
+    @ViewBuilder
+    private func relativeRoleButton(_ candidate: FirstRelative) -> some View {
+        if role == candidate {
+            Button(candidate.label) { select(candidate) }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
+                .accessibilityAddTraits(.isSelected)
+        } else {
+            Button(candidate.label) { select(candidate) }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
+        }
     }
 
     /// Selecting a role is a toggle, and it carries a smart default: relatives who

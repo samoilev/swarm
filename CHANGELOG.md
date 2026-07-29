@@ -11,6 +11,24 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Changed
+
+- The opened-tree workspace now uses the native macOS 26 unified toolbar and Liquid
+  Glass controls. Swarm now requires macOS 26 or later.
+- “About Swarm” is now a native singleton window with the app icon, English product
+  and version details, and Liquid Glass Help and Close actions.
+- Tree creation, tree renaming, recovery, and Settings now share native macOS 26
+  Liquid Glass headers, selection controls, and action groups. Language selection has
+  been removed from tree creation and remains available in Settings.
+- Selecting two people now emphasizes only their shortest relationship path.
+
+### Fixed
+
+- Heritage highlighting follows exact relationship branches instead of coloring an
+  unrelated part of a shared sibling connector.
+- Selected and lineage cards retain their opaque archival fills, and the command-hint
+  pill and minimap keep crisp, continuous edges.
+
 ## [2.3.0] — 2026-07-29
 
 ### Added

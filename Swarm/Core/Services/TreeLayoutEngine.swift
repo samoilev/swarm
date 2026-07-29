@@ -32,19 +32,44 @@ public struct LinkSegment: Equatable {
 public struct TreeLink: Identifiable, Equatable {
     public let id: String
     public let segments: [LinkSegment]
-    public var personIds: Set<UUID>
-    public init(id: String, segments: [LinkSegment], personIds: Set<UUID> = []) {
-        self.id = id; self.segments = segments; self.personIds = personIds
+    public init(id: String, segments: [LinkSegment]) {
+        self.id = id; self.segments = segments
+    }
+}
+
+/// Geometry used only for the accent overlay. Unlike the neutral sibling bus, each
+/// route follows one logical relationship branch and can be activated independently.
+public struct TreeHighlightRoute: Identifiable, Equatable {
+    public let id: String
+    public let segments: [LinkSegment]
+    public let connections: Set<FamilyConnection>
+
+    public init(
+        id: String,
+        segments: [LinkSegment],
+        connections: Set<FamilyConnection>
+    ) {
+        self.id = id
+        self.segments = segments
+        self.connections = connections
     }
 }
 
 public struct TreeLayout: Equatable {
     public let nodes: [TreeNode]
     public let links: [TreeLink]
+    public let highlightRoutes: [TreeHighlightRoute]
     public let totalWidth: CGFloat
     public let totalHeight: CGFloat
-    public init(nodes: [TreeNode], links: [TreeLink], totalWidth: CGFloat, totalHeight: CGFloat) {
+    public init(
+        nodes: [TreeNode],
+        links: [TreeLink],
+        highlightRoutes: [TreeHighlightRoute],
+        totalWidth: CGFloat,
+        totalHeight: CGFloat
+    ) {
         self.nodes = nodes; self.links = links
+        self.highlightRoutes = highlightRoutes
         self.totalWidth = totalWidth; self.totalHeight = totalHeight
     }
 }
@@ -501,6 +526,7 @@ public struct TreeLayoutEngine {
         // ─── STEP 6: Build connector lines ───
 
         var links: [TreeLink] = []
+        var highlightRoutes: [TreeHighlightRoute] = []
 
         // ── Marriage lines ──
         for union in tree.unions {
@@ -519,7 +545,12 @@ public struct TreeLayoutEngine {
                 let y2 = max(pl1.bc, pl2.bc) + bShift - cardH / 2
                 segments.append(LinkSegment(from: CGPoint(x: x, y: y1), to: CGPoint(x: x, y: y2)))
             }
-            links.append(TreeLink(id: "marriage-\(union.id)", segments: segments, personIds: Set(validPartners)))
+            links.append(TreeLink(id: "marriage-\(union.id)", segments: segments))
+            highlightRoutes.append(TreeHighlightRoute(
+                id: "marriage-\(union.id)",
+                segments: segments,
+                connections: [FamilyConnection(validPartners[0], validPartners[1])]
+            ))
         }
 
         // ── Child connectors (uniform routing) ──
@@ -531,12 +562,12 @@ public struct TreeLayoutEngine {
             let id: String
             let depth: Int // parent generation index
             let ax: CGFloat // parent-side stem position (cross-axis)
-            let childCoords: [CGFloat] // child stem positions (cross-axis)
+            let children: [(id: UUID, coord: CGFloat)] // child stem positions (cross-axis)
             let lo: CGFloat // trunk span min (cross-axis)
             let hi: CGFloat // trunk span max (cross-axis)
             let parentEdge: CGFloat // main-axis: bottom/right edge of parents
             let childEdge: CGFloat // main-axis: top/left edge of children
-            let personIds: Set<UUID>
+            let partnerIds: Set<UUID>
         }
 
         var buses: [ChildBus] = []
@@ -548,8 +579,11 @@ public struct TreeLayoutEngine {
             let parentBcs = validPartners.compactMap { placements[$0]?.bc }
             let ax = parentBcs.reduce(0, +) / CGFloat(parentBcs.count) + bShift
             let depth = placements[validPartners[0]]!.depth
-            let childCoords = kids.compactMap { placements[$0]?.bc }.map { $0 + bShift }
-            let span = childCoords + [ax]
+            let children = kids.compactMap { childID -> (id: UUID, coord: CGFloat)? in
+                guard let coordinate = placements[childID]?.bc else { return nil }
+                return (childID, coordinate + bShift)
+            }
+            let span = children.map(\.coord) + [ax]
 
             let parentEdge: CGFloat
             let childEdge: CGFloat
@@ -562,9 +596,9 @@ public struct TreeLayoutEngine {
             }
 
             buses.append(ChildBus(
-                id: "children-\(union.id)", depth: depth, ax: ax, childCoords: childCoords,
+                id: "children-\(union.id)", depth: depth, ax: ax, children: children,
                 lo: span.min()!, hi: span.max()!, parentEdge: parentEdge, childEdge: childEdge,
-                personIds: Set(validPartners + kids)
+                partnerIds: Set(validPartners)
             ))
         }
 
@@ -575,29 +609,95 @@ public struct TreeLayoutEngine {
             // overlap — so all connectors share one consistent shape.
             let busPos = bus.parentEdge + (bus.childEdge - bus.parentEdge) * busFraction
 
-            var segments: [LinkSegment] = []
+            var trunkSegments: [LinkSegment] = []
             if direction == .topDown {
                 // Stem from couple centre down to the trunk.
-                segments.append(LinkSegment(from: CGPoint(x: bus.ax, y: bus.parentEdge), to: CGPoint(x: bus.ax, y: busPos)))
+                trunkSegments.append(LinkSegment(from: CGPoint(x: bus.ax, y: bus.parentEdge), to: CGPoint(x: bus.ax, y: busPos)))
                 // Horizontal trunk.
-                segments.append(LinkSegment(from: CGPoint(x: bus.lo, y: busPos), to: CGPoint(x: bus.hi, y: busPos)))
-                // Drops to each child.
-                for cx in bus.childCoords {
-                    segments.append(LinkSegment(from: CGPoint(x: cx, y: busPos), to: CGPoint(x: cx, y: bus.childEdge)))
+                trunkSegments.append(LinkSegment(from: CGPoint(x: bus.lo, y: busPos), to: CGPoint(x: bus.hi, y: busPos)))
+                links.append(TreeLink(
+                    id: "\(bus.id)-trunk",
+                    segments: trunkSegments
+                ))
+                // Each child drop carries only that child's identity. A sibling outside
+                // the selected lineage can no longer suppress the chosen child's branch.
+                for child in bus.children {
+                    let segment = LinkSegment(
+                        from: CGPoint(x: child.coord, y: busPos),
+                        to: CGPoint(x: child.coord, y: bus.childEdge)
+                    )
+                    links.append(TreeLink(
+                        id: "\(bus.id)-child-\(child.id)",
+                        segments: [segment]
+                    ))
+
+                    let routeSegments = [
+                        LinkSegment(
+                            from: CGPoint(x: bus.ax, y: bus.parentEdge),
+                            to: CGPoint(x: bus.ax, y: busPos)
+                        ),
+                        LinkSegment(
+                            from: CGPoint(x: bus.ax, y: busPos),
+                            to: CGPoint(x: child.coord, y: busPos)
+                        ),
+                        segment,
+                    ]
+                    highlightRoutes.append(TreeHighlightRoute(
+                        id: "\(bus.id)-route-\(child.id)",
+                        segments: routeSegments,
+                        connections: Set(bus.partnerIds.map {
+                            FamilyConnection($0, child.id)
+                        })
+                    ))
                 }
             } else {
-                segments.append(LinkSegment(from: CGPoint(x: bus.parentEdge, y: bus.ax), to: CGPoint(x: busPos, y: bus.ax)))
-                segments.append(LinkSegment(from: CGPoint(x: busPos, y: bus.lo), to: CGPoint(x: busPos, y: bus.hi)))
-                for cy in bus.childCoords {
-                    segments.append(LinkSegment(from: CGPoint(x: busPos, y: cy), to: CGPoint(x: bus.childEdge, y: cy)))
+                trunkSegments.append(LinkSegment(from: CGPoint(x: bus.parentEdge, y: bus.ax), to: CGPoint(x: busPos, y: bus.ax)))
+                trunkSegments.append(LinkSegment(from: CGPoint(x: busPos, y: bus.lo), to: CGPoint(x: busPos, y: bus.hi)))
+                links.append(TreeLink(
+                    id: "\(bus.id)-trunk",
+                    segments: trunkSegments
+                ))
+                for child in bus.children {
+                    let segment = LinkSegment(
+                        from: CGPoint(x: busPos, y: child.coord),
+                        to: CGPoint(x: bus.childEdge, y: child.coord)
+                    )
+                    links.append(TreeLink(
+                        id: "\(bus.id)-child-\(child.id)",
+                        segments: [segment]
+                    ))
+
+                    let routeSegments = [
+                        LinkSegment(
+                            from: CGPoint(x: bus.parentEdge, y: bus.ax),
+                            to: CGPoint(x: busPos, y: bus.ax)
+                        ),
+                        LinkSegment(
+                            from: CGPoint(x: busPos, y: bus.ax),
+                            to: CGPoint(x: busPos, y: child.coord)
+                        ),
+                        segment,
+                    ]
+                    highlightRoutes.append(TreeHighlightRoute(
+                        id: "\(bus.id)-route-\(child.id)",
+                        segments: routeSegments,
+                        connections: Set(bus.partnerIds.map {
+                            FamilyConnection($0, child.id)
+                        })
+                    ))
                 }
             }
-            links.append(TreeLink(id: bus.id, segments: segments, personIds: bus.personIds))
         }
 
         let totalWidth = direction == .topDown ? (maxB - minB) + 2 * pad : CGFloat(maxDepth) * genStep + cardW + 2 * pad
         let totalHeight = direction == .topDown ? CGFloat(maxDepth) * genStep + cardH + 2 * pad : (maxB - minB) + 2 * pad
 
-        return TreeLayout(nodes: nodes, links: links, totalWidth: max(totalWidth, 600), totalHeight: max(totalHeight, 400))
+        return TreeLayout(
+            nodes: nodes,
+            links: links,
+            highlightRoutes: highlightRoutes,
+            totalWidth: max(totalWidth, 600),
+            totalHeight: max(totalHeight, 400)
+        )
     }
 }

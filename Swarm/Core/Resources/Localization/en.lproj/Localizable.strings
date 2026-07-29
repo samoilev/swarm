@@ -1,6 +1,7 @@
 /* App and settings */
 "Язык" = "Language";
 "Язык интерфейса" = "Interface language";
+"Настройки Swarm" = "Swarm Settings";
 "Переключить язык интерфейса" = "Switch the interface language";
 "Карта и конфиденциальность" = "Maps and privacy";
 "Провайдер карты" = "Map provider";
@@ -53,7 +54,6 @@
 "Некоторые старые папки истории оставлены без изменений, потому что рядом уже есть папки Swarm." = "Some previous history folders were left unchanged because Swarm folders already exist beside them.";
 "Не удалось перенести папку данных в Swarm. Предыдущая папка используется без изменений: %@" = "The data folder could not be moved to Swarm. The previous folder is being used unchanged: %@";
 "Родословная" = "Family Tree";
-"СЕМЕЙНЫЙ АРХИВ" = "FAMILY ARCHIVE";
 "Все деревья" = "All Trees";
 "Деревьев пока нет" = "No trees yet";
 "Создайте первое родословное дерево" = "Create your first family tree";
@@ -65,6 +65,7 @@
 "Действия с деревом" = "Tree Actions";
 "Переименовать дерево" = "Rename Tree";
 "Измените название и подзаголовок дерева." = "Change the tree name and subtitle.";
+"Введите название дерева." = "Enter a tree name.";
 "Архивировать (оставить файлы)" = "Archive (Keep Files)";
 "Удалить вместе с файлами" = "Delete with Files";
 "Экспортировать копию и удалить…" = "Export a Copy and Delete…";
@@ -120,6 +121,7 @@
 "Круговая диаграмма предков" = "Ancestor Fan Chart";
 "Карта мест жизни" = "Family Places Map";
 "Рабочие пространства" = "Workspaces";
+"Варианты отображения" = "View Options";
 "Люди" = "People";
 "Хронология" = "Timeline";
 "Места" = "Places";
@@ -128,17 +130,22 @@
 "Карта" = "Map";
 "Вид" = "View";
 "Направление" = "Direction";
+"Направление дерева" = "Tree Direction";
 "Сверху вниз" = "Top to Bottom";
 "Слева направо" = "Left to Right";
 "Направление: сверху вниз" = "Direction: top to bottom";
 "Направление: слева направо" = "Direction: left to right";
 "Фотографии" = "Photos";
 "Показать фотографии" = "Show Photos";
+"Показать скрытые элементы панели инструментов" = "Show Hidden Toolbar Items";
 "Скрыть фотографии" = "Hide Photos";
 "Количество поколений" = "Number of Generations";
+"Меньше поколений" = "Fewer Generations";
+"Больше поколений" = "More Generations";
 "Масштаб" = "Zoom";
 "Центрировать и вписать дерево" = "Center and Fit Tree";
 "Обновить расположение дерева" = "Refresh Tree Layout";
+"Дополнительные функции дерева" = "More Tree Actions";
 "Ещё настройки вида" = "More View Settings";
 "Дерево сохраняется автоматически после каждого изменения" = "The tree is saved automatically after every change";
 "Экспорт карточек в PDF или GEDCOM" = "Export cards to PDF or GEDCOM";
@@ -146,6 +153,7 @@
 "Вернуться к списку деревьев" = "Return to the tree list";
 "Найти персону…" = "Find a person…";
 "Закрыть поиск" = "Close Search";
+"Закрыть без сохранения" = "Close Without Saving";
 "Никого не найдено" = "No people found";
 "Скрыть подсказки" = "Hide Hints";
 "Показать горячие клавиши" = "Show Keyboard Shortcuts";
@@ -162,6 +170,8 @@
 "Сохранено: %@" = "Saved: %@";
 "Удалён: %@" = "Deleted: %@";
 "Домашняя персона: %@" = "Home person: %@";
+"Домашняя персона" = "Home Person";
+"Домашняя персона открывается первой и служит центром дерева" = "The home person opens first and serves as the center of the tree";
 "Слияние проверено и сохранено" = "Merge verified and saved";
 "Удалить персону?" = "Delete Person?";
 "«%@» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)." = "“%@” will be removed from the tree and all of their links will be disconnected. You can undo this immediately after deletion (⌘Z).";
@@ -236,6 +246,8 @@
 "Файл" = "File";
 "ФОТО" = "PHOTO";
 "Удалить файл" = "Delete File";
+"Удалить связь" = "Remove Relationship";
+"Удалить ребёнка из союза" = "Remove Child from Union";
 "Открыть «%@»" = "Open “%@”";
 "Родственные" = "Relationships";
 "Родственные связи" = "Relationships";

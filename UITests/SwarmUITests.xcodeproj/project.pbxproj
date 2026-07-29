@@ -14,10 +14,10 @@
 		A10000000000000000000009 = {isa = PBXBuildFile; fileRef = A10000000000000000000006;};
 		A10000000000000000000010 = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000012, A10000000000000000000013,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
 		A10000000000000000000011 = {isa = XCConfigurationList; buildConfigurations = (A10000000000000000000014, A10000000000000000000015,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;};
-		A10000000000000000000012 = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 14.0; SDKROOT = macosx;}; name = Debug;};
-		A10000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 14.0; SDKROOT = macosx;}; name = Release;};
-		A10000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; PRODUCT_BUNDLE_IDENTIFIER = com.samoilev.swarm.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TEST_TARGET_NAME = Swarm;}; name = Debug;};
-		A10000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 14.0; PRODUCT_BUNDLE_IDENTIFIER = com.samoilev.swarm.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TEST_TARGET_NAME = Swarm;}; name = Release;};
+		A10000000000000000000012 = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 26.0; SDKROOT = macosx;}; name = Debug;};
+		A10000000000000000000013 = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 26.0; SDKROOT = macosx;}; name = Release;};
+		A10000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.samoilev.swarm.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TEST_TARGET_NAME = Swarm;}; name = Debug;};
+		A10000000000000000000015 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGNING_ALLOWED = NO; GENERATE_INFOPLIST_FILE = YES; MACOSX_DEPLOYMENT_TARGET = 26.0; PRODUCT_BUNDLE_IDENTIFIER = com.samoilev.swarm.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; SWIFT_VERSION = 5.0; TEST_TARGET_NAME = Swarm;}; name = Release;};
 	};
 	rootObject = A10000000000000000000001;
 }

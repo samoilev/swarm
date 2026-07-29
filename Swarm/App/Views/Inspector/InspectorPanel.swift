@@ -9,7 +9,6 @@ struct InspectorPanel: View {
     @Binding var width: CGFloat
     var onEdit: ((Person) -> Void)?
     var onDelete: ((Person) -> Void)?
-    var onMakeHome: ((Person) -> Void)?
 
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
@@ -45,7 +44,8 @@ struct InspectorPanel: View {
 
                 VStack(spacing: 0) {
                     inspectorHeader(person)
-                    Divider().overlay(SepiaTheme.toolbarLine)
+                    Divider()
+                        .overlay(SepiaTheme.toolbarLine.opacity(0.6))
                     ScrollView {
                         VStack(alignment: .leading, spacing: 0) {
                             identitySection(person)
@@ -63,7 +63,12 @@ struct InspectorPanel: View {
                 }
             }
             .frame(width: width)
-            .background(SepiaTheme.panelBg)
+            .background {
+                ZStack {
+                    Rectangle().fill(.regularMaterial)
+                    SepiaTheme.panelBg.opacity(0.72)
+                }
+            }
             .onChange(of: person.id) { _, _ in
                 // A change we didn't make (a new canvas selection) starts a fresh
                 // context, so drop the relative-navigation trail.
@@ -97,12 +102,14 @@ struct InspectorPanel: View {
                             Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
                             Text(L10n.tr("Назад")).font(SepiaTheme.ui(size: 11))
                         }
-                        .foregroundColor(SepiaTheme.accent2)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .foregroundStyle(SepiaTheme.accent2)
+                    .controlSize(.small)
                     .help(L10n.tr("Вернуться к предыдущей персоне"))
                     .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
-                    .padding(.bottom, 2)
+                    .padding(.bottom, 6)
                 }
                 Text(person.displayName(language: .current))
                     .font(SepiaTheme.display(size: 19))
@@ -125,50 +132,45 @@ struct InspectorPanel: View {
             .padding(.leading, 14)
             .padding(.top, 14)
 
-            actionButtons(person: person, tinted: false)
+            actionButtons(person: person)
                 .padding(.top, 14)
                 .padding(.bottom, 14)
                 .padding(.trailing, 14)
         }
     }
 
-    @ViewBuilder
-    private func actionButtons(person: Person, tinted: Bool) -> some View {
-        let bg = tinted ? Color.black.opacity(0.35) : SepiaTheme.cardBg
-        let fg = tinted ? Color.white : SepiaTheme.inkSoft
-        let stroke = tinted ? Color.white.opacity(0.25) : SepiaTheme.cardLine
-
-        VStack(spacing: 4) {
-            if tree.homePersonId != person.id, let onMakeHome {
-                actionBtn("house", fg: fg, bg: bg, stroke: stroke) { onMakeHome(person) }
-                    .help(L10n.tr("Сделать домашней персоной"))
-                    .accessibilityLabel(L10n.tr("Сделать домашней персоной"))
-            }
-            if let onDelete {
-                actionBtn("trash", fg: tinted ? .red.opacity(0.85) : .red.opacity(0.7), bg: bg, stroke: stroke) { onDelete(person) }
-                    .help(L10n.tr("Удалить"))
-                    .accessibilityLabel(L10n.tr("Удалить персону"))
-            }
-            if let onEdit {
-                actionBtn("pencil", fg: fg, bg: bg, stroke: stroke) { onEdit(person) }
+    private func actionButtons(person: Person) -> some View {
+        GlassEffectContainer(spacing: 8) {
+            VStack(spacing: 8) {
+                if let onEdit {
+                    Button { onEdit(person) } label: {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .frame(width: 22, height: 22)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.circle)
+                    .controlSize(.mini)
+                    .tint(SepiaTheme.accent)
                     .help(L10n.tr("Редактировать"))
                     .accessibilityLabel(L10n.tr("Редактировать"))
-            }
-            actionBtn("xmark", fg: fg, bg: bg, stroke: stroke) { self.person = nil }
-                .help(L10n.tr("Закрыть"))
-                .accessibilityLabel(L10n.tr("Закрыть карточку"))
-        }
-    }
+                }
 
-    private func actionBtn(_ image: String, fg: Color, bg: Color, stroke: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: image).font(.system(size: 12)).foregroundColor(fg)
-                .frame(width: 30, height: 30)
-                .background(bg)
-                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(stroke, lineWidth: 1))
-                .contentShape(Rectangle())
+                if let onDelete {
+                    Button(role: .destructive) { onDelete(person) } label: {
+                        Image(systemName: "trash")
+                            .font(.system(size: 10.5, weight: .semibold))
+                            .foregroundStyle(Color.red.opacity(0.82))
+                            .frame(width: 22, height: 22)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .controlSize(.mini)
+                    .help(L10n.tr("Удалить"))
+                    .accessibilityLabel(L10n.tr("Удалить персону"))
+                }
+            }
         }
-        .buttonStyle(InspectorActionButtonStyle())
     }
 
     // Each section renders only when it has at least one filled field, and within
@@ -305,43 +307,25 @@ struct InspectorPanel: View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
-            Button(p.displayName(language: .current)) {
+            Button {
                 if let current = self.person { history.append(current) }
                 internalNav = true
                 self.person = p
+            } label: {
+                HStack(spacing: 8) {
+                    Text(p.displayName(language: .current))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(SepiaTheme.inkSoft)
+                }
             }
             .buttonStyle(RelativeLinkButtonStyle())
             .font(SepiaTheme.body(size: 14))
             .multilineTextAlignment(.leading)
-            .underline(color: SepiaTheme.accent2.opacity(0.5))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, 12)
-    }
-}
-
-/// The inspector's small square actions (home, delete, edit, close) were `.plain`, which on
-/// macOS means no hover and no press state at all — four unlit targets in the busiest corner
-/// of the panel. This gives them the same hover-lifts / press-dips language as the toolbar.
-private struct InspectorActionButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        InspectorActionSurface(label: configuration.label, isPressed: configuration.isPressed)
-    }
-
-    private struct InspectorActionSurface<Label: View>: View {
-        let label: Label
-        let isPressed: Bool
-        @State private var isHovering = false
-
-        var body: some View {
-            label
-                .brightness(isHovering && !isPressed ? 0.04 : 0)
-                .opacity(isPressed ? 0.7 : 1)
-                .scaleEffect(isPressed ? 0.92 : (isHovering ? 1.06 : 1.0))
-                .sepiaMotion(SepiaMotion.press, value: isPressed)
-                .sepiaMotion(SepiaMotion.hover, value: isHovering)
-                .onHover { isHovering = $0 }
-        }
     }
 }
 
@@ -361,6 +345,13 @@ private struct RelativeLinkButtonStyle: ButtonStyle {
             label
                 .foregroundColor(isHovering || isPressed ? SepiaTheme.accent : SepiaTheme.ink)
                 .opacity(isPressed ? 0.7 : 1)
+                .padding(.horizontal, 10)
+                .frame(minHeight: 36)
+                .background {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(isHovering ? SepiaTheme.fieldBg.opacity(0.9) : Color.clear)
+                }
+                .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                 .sepiaMotion(SepiaMotion.hover, value: isHovering)
                 .sepiaMotion(SepiaMotion.press, value: isPressed)
                 .onHover { hovering in

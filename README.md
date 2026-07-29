@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 14+, GEDCOM 5.5.1, MIT." />
+  <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 26+, GEDCOM 5.5.1, MIT." />
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
@@ -8,7 +8,7 @@
   <a href="https://discord.gg/XPEvHZyecD"><img src="https://img.shields.io/badge/Discord-join-5865F2?style=flat&logo=discord&logoColor=white" alt="Join the Discord server" /></a>
   <a href="https://www.reddit.com/r/FragForge/"><img src="https://img.shields.io/badge/Reddit-r%2FFragForge-FF4500?style=flat&logo=reddit&logoColor=white" alt="Reddit community r/FragForge" /></a>
   <br />
-  <img src="https://img.shields.io/badge/macOS-14%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 14 or later" />
+  <img src="https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 26 or later" />
   <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
   <br />
@@ -23,7 +23,7 @@ Your trees are plain GEDCOM files in a folder you can open in Finder. There are 
 accounts, no cloud sync, no analytics, and no AI services. Editing, search, validation
 and place lookup all run offline.
 
-- **Platform:** macOS 14+, SwiftUI + AppKit, Apple silicon
+- **Platform:** macOS 26+, SwiftUI + AppKit, Apple silicon
 - **Toolchain:** Swift 6.0+, Swift Package Manager
 - **Dependencies:** none — no third-party Swift packages
 - **License:** [MIT](LICENSE)
@@ -39,7 +39,7 @@ Verify the download against its published checksum if you want to:
 shasum -a 256 -c Swarm-2.3.0.dmg.sha256
 ```
 
-Requires macOS 14 or later on Apple silicon. See [Build and run](#build-and-run).
+Requires macOS 26 or later on Apple silicon. See [Build and run](#build-and-run).
 
 ## Features
 

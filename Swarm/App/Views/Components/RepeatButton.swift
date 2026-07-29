@@ -5,24 +5,32 @@ import SwiftUI
 /// while held (press-and-hold auto-repeat), like a native Stepper — but keeping
 /// the custom SepiaIconButtonStyle look. Used for zoom and fan-level +/-.
 struct RepeatButton<Label: View>: View {
+    var chrome: RepeatButtonChrome = .sepia
     let action: () -> Void
     @ViewBuilder var label: () -> Label
 
     var body: some View {
         Button(action: {}) { label() }
-            .buttonStyle(RepeatIconButtonStyle(action: action))
+            .buttonStyle(RepeatIconButtonStyle(chrome: chrome, action: action))
     }
 }
 
+enum RepeatButtonChrome: Equatable {
+    case sepia
+    case toolbar
+}
+
 private struct RepeatIconButtonStyle: ButtonStyle {
+    let chrome: RepeatButtonChrome
     let action: () -> Void
 
     func makeBody(configuration: Configuration) -> some View {
-        RepeatBody(configuration: configuration, action: action)
+        RepeatBody(configuration: configuration, chrome: chrome, action: action)
     }
 
     private struct RepeatBody: View {
         let configuration: ButtonStyleConfiguration
+        let chrome: RepeatButtonChrome
         let action: () -> Void
         @State private var timer: Timer?
         @State private var delay: DispatchWorkItem?
@@ -32,8 +40,14 @@ private struct RepeatIconButtonStyle: ButtonStyle {
             configuration.label
                 .frame(width: 30, height: 30)
                 .foregroundColor(SepiaTheme.ink)
-                .background(SepiaTheme.btnBg)
-                .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+                .background(chrome == .sepia ? SepiaTheme.btnBg : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 7)
+                        .strokeBorder(
+                            chrome == .sepia ? SepiaTheme.cardLine : Color.clear,
+                            lineWidth: 1
+                        )
+                )
                 .clipShape(RoundedRectangle(cornerRadius: 7))
                 .opacity(configuration.isPressed ? 0.8 : 1.0)
                 .scaleEffect(configuration.isPressed ? 0.94 : 1.0)

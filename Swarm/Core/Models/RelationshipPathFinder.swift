@@ -15,12 +15,19 @@ public struct RelationshipPathFinder {
         public var ids: Set<UUID>
         /// Relationship label for each person relative to person1
         public var labels: [UUID: String]
+        /// Exact graph edges traversed by the shortest path.
+        public var connections: Set<FamilyConnection>
     }
 
     /// Find shortest path between two people via BFS on the family graph
     public func findPath(from person1Id: UUID, to person2Id: UUID) -> PathResult? {
         guard person1Id != person2Id else {
-            return PathResult(path: [person1Id], ids: [person1Id], labels: [person1Id: L10n.tr("Я")])
+            return PathResult(
+                path: [person1Id],
+                ids: [person1Id],
+                labels: [person1Id: L10n.tr("Я")],
+                connections: []
+            )
         }
 
         // BFS
@@ -48,7 +55,13 @@ public struct RelationshipPathFinder {
 
                     let ids = Set(path)
                     let labels = computeLabels(path: path, from: person1Id)
-                    return PathResult(path: path, ids: ids, labels: labels)
+                    let connections = Set(zip(path, path.dropFirst()).map(FamilyConnection.init))
+                    return PathResult(
+                        path: path,
+                        ids: ids,
+                        labels: labels,
+                        connections: connections
+                    )
                 }
 
                 queue.append(neighbor)

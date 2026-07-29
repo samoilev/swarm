@@ -4,6 +4,8 @@ import SwiftUI
 
 @main
 struct SwarmApp: App {
+    static let aboutWindowID = "about"
+
     @State private var store: TreeStore
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
@@ -37,14 +39,11 @@ struct SwarmApp: App {
                 .preferredColorScheme(.light)
                 .onAppear {
                     NSApplication.shared.activate(ignoringOtherApps: true)
-                    if let window = NSApplication.shared.windows.first {
-                        window.makeKeyAndOrderFront(nil)
-                        window.backgroundColor = NSColor(red: 0.91, green: 0.88, blue: 0.77, alpha: 1.0) // matches SepiaTheme.toolbarBg
-                        window.titlebarAppearsTransparent = true
-                    }
+                    NSApp.keyWindow?.makeKeyAndOrderFront(nil)
                 }
         }
         .windowStyle(.titleBar)
+        .windowToolbarStyle(.unified(showsTitle: false))
         .defaultSize(width: 1280, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
@@ -68,6 +67,7 @@ struct SwarmApp: App {
                     }
                 }
             }
+            AboutCommands()
             CommandGroup(replacing: .undoRedo) {
                 Button(L10n.tr("Отменить")) {
                     NotificationCenter.default.post(name: .undoRequested, object: nil)
@@ -111,10 +111,32 @@ struct SwarmApp: App {
                 .environment(\.locale, language.locale)
                 .preferredColorScheme(.light)
         }
+
+        Window(Text(verbatim: "About Swarm"), id: Self.aboutWindowID) {
+            AboutView()
+                .preferredColorScheme(.light)
+        }
+        .windowStyle(.titleBar)
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
     }
 
     private var language: AppLanguage {
         AppLanguage(rawValue: languageRaw) ?? .default
+    }
+}
+
+private struct AboutCommands: Commands {
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some Commands {
+        CommandGroup(replacing: .appInfo) {
+            Button {
+                openWindow(id: SwarmApp.aboutWindowID)
+            } label: {
+                Text(verbatim: "About Swarm")
+            }
+        }
     }
 }
 

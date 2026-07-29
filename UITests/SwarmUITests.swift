@@ -82,8 +82,7 @@ final class SwarmUITests: XCTestCase {
 
     func testRecoveryWorkspaceOpens() {
         app.buttons["Отмена"].firstMatch.click()
-        XCTAssertTrue(app.buttons["Восстановление"].waitForExistence(timeout: 3))
-        app.buttons["Восстановление"].click()
+        openRecoveryWorkspace()
         XCTAssertTrue(app.staticTexts["Восстановление и миграция"].waitForExistence(timeout: 3))
     }
 
@@ -95,7 +94,7 @@ final class SwarmUITests: XCTestCase {
         app.buttons["Сохранить"].click()
         XCTAssertTrue(app.staticTexts["Иванов Пётр"].waitForExistence(timeout: 5))
         app.buttons["Вернуться к списку деревьев"].click()
-        app.buttons["Восстановление"].click()
+        openRecoveryWorkspace()
         XCTAssertTrue(app.staticTexts["Версия GEDCOM"].waitForExistence(timeout: 3))
         app.buttons["Восстановить"].firstMatch.click()
         XCTAssertTrue(app.staticTexts["Восстановление проверено и сохранено."].waitForExistence(timeout: 5))
@@ -123,9 +122,38 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Архивировать (оставить файлы)"].waitForExistence(timeout: 3))
         app.buttons["Архивировать (оставить файлы)"].click()
         app.activate()
-        app.buttons["Восстановление"].click()
+        openRecoveryWorkspace()
         XCTAssertTrue(app.staticTexts["Все архивы"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts.matching(NSPredicate(format: "label CONTAINS 'UI Test'")).firstMatch.exists)
+    }
+
+    func testTreeCardAndActionsAreSeparateAccessibleControls() {
+        createInitialTree()
+        app.buttons["Вернуться к списку деревьев"].click()
+
+        let card = app.buttons.matching(NSPredicate(format: "label CONTAINS 'UI Test'")).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 3))
+        XCTAssertEqual(card.elementType, .button)
+
+        let actions = app.menuButtons["Действия с деревом"]
+        XCTAssertTrue(actions.waitForExistence(timeout: 3))
+    }
+
+    func testBlankRenameExplainsHowToRecover() {
+        createInitialTree()
+        app.buttons["Вернуться к списку деревьев"].click()
+        app.menuButtons["Действия с деревом"].click()
+        app.menuItems["Переименовать…"].click()
+
+        let name = app.textFields["Название"]
+        XCTAssertTrue(name.waitForExistence(timeout: 3))
+        name.click()
+        name.typeKey("a", modifierFlags: .command)
+        name.typeKey(.delete, modifierFlags: [])
+        app.buttons["Сохранить"].click()
+
+        XCTAssertTrue(app.staticTexts["Введите название дерева."].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Сохранить"].isEnabled)
     }
 
     func testVerifiedExportAndDeleteLeavesImportableBundle() throws {
@@ -172,6 +200,15 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(person.waitForExistence(timeout: 5))
         person.click()
         XCTAssertTrue(app.buttons["Редактировать"].firstMatch.waitForExistence(timeout: 3))
+    }
+
+    private func openRecoveryWorkspace() {
+        let maintenance = app.menuButtons["Обслуживание архива"]
+        XCTAssertTrue(maintenance.waitForExistence(timeout: 3))
+        maintenance.click()
+        let restore = app.menuItems["Восстановить из резервной копии…"]
+        XCTAssertTrue(restore.waitForExistence(timeout: 3))
+        restore.click()
     }
 
     private func importTree(_ gedcom: String) throws {

@@ -10,11 +10,18 @@ struct PersonMiniMap: View {
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
 
     var body: some View {
-        if providerRaw == MapProviderSetting.appleMaps.rawValue {
-            ApplePersonMiniMap(person: person)
-        } else {
-            OfflinePersonMiniMap(person: person)
+        Group {
+            if providerRaw == MapProviderSetting.appleMaps.rawValue {
+                ApplePersonMiniMap(person: person)
+            } else {
+                OfflinePersonMiniMap(person: person)
+            }
         }
+        // This is a read-only preview inside the inspector's ScrollView. MapKit still
+        // captures wheel events even with `interactionModes: []`, which breaks a scroll
+        // already in progress as soon as the pointer crosses the map. Passing hit testing
+        // through keeps the whole card continuously scrollable.
+        .allowsHitTesting(false)
     }
 }
 

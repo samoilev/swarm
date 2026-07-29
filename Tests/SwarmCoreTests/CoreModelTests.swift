@@ -38,6 +38,22 @@ struct CoreModelTests {
         #expect(try result.labels[#require(p["spouse"]?.id)] == "Жена")
         // A sibling is not part of direct lineage.
         #expect(try result.ids.contains(#require(p["sis"]?.id)) == false)
+        #expect(try result.connections.contains(FamilyConnection(
+            #require(p["me"]?.id),
+            #require(p["dad"]?.id)
+        )))
+        #expect(try result.connections.contains(FamilyConnection(
+            #require(p["me"]?.id),
+            #require(p["son"]?.id)
+        )))
+        #expect(try result.connections.contains(FamilyConnection(
+            #require(p["me"]?.id),
+            #require(p["spouse"]?.id)
+        )))
+        #expect(try result.connections.contains(FamilyConnection(
+            #require(p["me"]?.id),
+            #require(p["sis"]?.id)
+        )) == false)
     }
 
     @Test func pathFinderConnectsMeToGrandfather() throws {
@@ -49,6 +65,11 @@ struct CoreModelTests {
         #expect(result?.path.last == p["gf"]!.id)
         #expect(result?.path.count == 3) // me → dad → gf
         #expect(try result?.ids.contains(#require(p["dad"]?.id)) == true)
+        #expect(result?.connections.count == 2)
+        #expect(try result?.connections == [
+            FamilyConnection(#require(p["me"]?.id), #require(p["dad"]?.id)),
+            FamilyConnection(#require(p["dad"]?.id), #require(p["gf"]?.id)),
+        ])
     }
 
     @Test func personDerivedNamesAndLifespan() {

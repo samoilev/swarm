@@ -74,6 +74,46 @@ struct LayoutEngineTests {
         #expect(layout.totalWidth > 0 && layout.totalHeight > 0)
     }
 
+    @Test(arguments: [LayoutDirection.topDown, .leftRight])
+    func childBranchesCarryIndependentHighlightRoutes(direction: LayoutDirection) throws {
+        let (t, people) = familyTree()
+        let layout = TreeLayoutEngine(config: config).layout(tree: t, direction: direction)
+        let parents = Array(people.prefix(2))
+        let children = Array(people.dropFirst(2))
+        let childRoutes = layout.highlightRoutes.filter { $0.id.contains("-route-") }
+
+        #expect(childRoutes.count == children.count)
+        for child in children {
+            let route = try #require(
+                childRoutes.first { $0.id.hasSuffix(child.id.uuidString) }
+            )
+            #expect(route.connections == Set(parents.map {
+                FamilyConnection($0.id, child.id)
+            }))
+            #expect(route.segments.count == 3)
+
+            let stem = route.segments[0]
+            let branch = route.segments[1]
+            let drop = route.segments[2]
+            #expect(stem.to == branch.from)
+            #expect(branch.to == drop.from)
+            if direction == .topDown {
+                #expect(branch.from.y == branch.to.y)
+                #expect(drop.from.x == drop.to.x)
+            } else {
+                #expect(branch.from.x == branch.to.x)
+                #expect(drop.from.y == drop.to.y)
+            }
+        }
+
+        let marriage = try #require(
+            layout.highlightRoutes.first { $0.id.hasPrefix("marriage-") }
+        )
+        #expect(marriage.connections == [
+            FamilyConnection(parents[0].id, parents[1].id),
+        ])
+    }
+
     @Test func disconnectedPeopleAreStillPlaced() {
         let (t, _) = familyTree()
         let loner = Person(givenNames: "Один", sex: .male)

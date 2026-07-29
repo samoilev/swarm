@@ -14,7 +14,7 @@ permissions:
 jobs:
   release:
     name: Build DMG and publish release
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
@@ -78,7 +78,7 @@ jobs:
             echo "first launch is blocked. Right-click the app in Applications and choose **Open**, then"
             echo "confirm. You only need to do this once."
             echo
-            echo "Apple silicon only, macOS 14 or later. Prefer to build it yourself? See the"
+            echo "Apple silicon only, macOS 26 or later. Prefer to build it yourself? See the"
             echo "[README](https://github.com/${GITHUB_REPOSITORY}#build-and-run)."
             echo
             echo "## Verify the download"

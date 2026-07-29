@@ -19,58 +19,52 @@ struct ExportView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.4).ignoresSafeArea()
+            ZStack {
+                Rectangle().fill(.regularMaterial)
+                SepiaTheme.paper.opacity(0.9)
+            }
+            .ignoresSafeArea()
 
-            VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    Text(L10n.tr("Экспорт")).font(SepiaTheme.display(size: 22)).foregroundColor(SepiaTheme.ink)
-                    Spacer()
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark").foregroundColor(SepiaTheme.inkSoft)
-                            .frame(width: 32, height: 32)
-                            .contentShape(Rectangle())
+            VStack(alignment: .leading, spacing: 20) {
+                exportHeader
+
+                GlassEffectContainer(spacing: 10) {
+                    VStack(spacing: 10) {
+                        Button { exportPDF(selected: false) } label: {
+                            exportButtonLabel(L10n.tr("PDF — всё дерево"), systemImage: "tree")
+                        }
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
+                        .controlSize(.large)
+                        .disabled(tree.people.isEmpty)
+
+                        Button { exportPDF(selected: true) } label: {
+                            exportButtonLabel(L10n.tr("PDF — выделенная часть"), systemImage: "scope")
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
+                        .controlSize(.large)
+                        .disabled(selectedIds.isEmpty)
+
+                        Button { exportVerifiedTree() } label: {
+                            exportButtonLabel(L10n.tr("Проверенный GEDCOM-архив"), systemImage: "archivebox")
+                        }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
+                        .controlSize(.large)
                     }
-                    .buttonStyle(.plain)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name)
-                        .font(SepiaTheme.display(size: 17)).fontWeight(.semibold).foregroundColor(SepiaTheme.ink)
-                        .lineLimit(1)
-                    Text(L10n.count(tree.people.count, .person))
-                        .font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
-                }
-
-                VStack(spacing: 10) {
-                    Button { exportPDF(selected: false) } label: {
-                        Label(L10n.tr("PDF — всё дерево"), systemImage: "tree").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(SepiaButtonStyle(isActive: true)).controlSize(.large)
-                    .disabled(tree.people.isEmpty)
-
-                    Button { exportPDF(selected: true) } label: {
-                        Label(L10n.tr("PDF — выделенная часть"), systemImage: "scope").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
-                    .disabled(selectedIds.isEmpty)
-
-                    Button { exportVerifiedTree() } label: {
-                        Label(L10n.tr("Проверенный GEDCOM-архив"), systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(SepiaButtonStyle()).controlSize(.large)
                 }
 
                 Text(L10n.tr("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди. Архив GEDCOM сохраняет и проверяет файл дерева, портреты и вложения в отдельной папке."))
-                    .font(SepiaTheme.body(size: 11.5)).foregroundColor(SepiaTheme.inkSoft).lineSpacing(2)
+                    .font(SepiaTheme.body(size: 11.5))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(24)
-            .frame(width: 360)
-            .background(SepiaTheme.panelBg)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .shadow(color: .black.opacity(0.35), radius: 22, y: 10)
+            .padding(14)
         }
-        .frame(minWidth: 460, minHeight: 340)
+        .frame(width: 420, height: 390)
         .fileExporter(
             isPresented: $showExporter,
             document: exportDoc,
@@ -87,6 +81,56 @@ struct ExportView: View {
         } message: {
             Text(exportError ?? "")
         }
+    }
+
+    private var exportHeader: some View {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L10n.tr("Экспорт"))
+                        .font(SepiaTheme.display(size: 20))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(SepiaTheme.ink)
+                    Text("\(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name) · \(L10n.count(tree.people.count, .person))")
+                        .font(SepiaTheme.ui(size: 11))
+                        .foregroundStyle(SepiaTheme.inkSoft)
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .frame(height: 54)
+                .glassEffect(
+                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
+                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                )
+
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(SepiaTheme.ink)
+                        .frame(width: 34, height: 34)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .help(L10n.tr("Закрыть"))
+                .accessibilityLabel(L10n.tr("Закрыть"))
+            }
+        }
+    }
+
+    private func exportButtonLabel(_ title: String, systemImage: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.system(size: 13, weight: .semibold))
+                .frame(width: 20)
+            Text(title)
+                .font(SepiaTheme.ui(size: 12.5))
+                .fontWeight(.semibold)
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 8)
+        .frame(height: 36)
     }
 
     private var fileSlug: String {

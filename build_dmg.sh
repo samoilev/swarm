@@ -62,7 +62,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
-    <string>14.0</string>
+    <string>26.0</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.lifestyle</string>
     <key>NSHighResolutionCapable</key>

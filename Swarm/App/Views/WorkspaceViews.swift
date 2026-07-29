@@ -5,7 +5,7 @@ struct PeopleWorkspaceView: View {
     let tree: FamilyTree
     let index: TreeWorkspaceIndexes
     @Binding var selectedPerson: Person?
-    let onMakeHome: (Person) -> Void
+    let onEdit: (Person) -> Void
 
     @State private var query = ""
     @State private var missingOnly = false
@@ -67,7 +67,9 @@ struct PeopleWorkspaceView: View {
                                 Spacer()
                                 if entry.hasMissingData { Label(L10n.tr("Есть пропуски"), systemImage: "exclamationmark.circle").font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent) }
                                 Menu {
-                                    Button(L10n.tr("Сделать домашней персоной")) { onMakeHome(person) }
+                                    Button { onEdit(person) } label: {
+                                        Label(L10n.tr("Редактировать"), systemImage: "pencil")
+                                    }
                                 } label: { Image(systemName: "ellipsis.circle").foregroundStyle(SepiaTheme.inkSoft) }
                                     .menuStyle(.borderlessButton).fixedSize()
                             }

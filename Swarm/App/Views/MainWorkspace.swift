@@ -16,12 +16,13 @@ struct MainWorkspace: View {
     @State private var direction: TreeDirection = .topDown
     @State private var selectedPerson: Person?
     @State private var secondaryPerson: Person?
-    @State private var zoom: CGFloat = 0.85
+    @State private var zoom: CGFloat = 0.8
     @State private var showExportModal = false
     @State private var showAddSheet = false
     @State private var editingPerson: Person?
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
+    @State private var highlightedConnections: Set<FamilyConnection> = []
     @State private var lineageLabels: [UUID: String] = [:]
     /// Kinship name shown when two people are ⌘-selected (replaces the old modal).
     @State private var relationshipName: String?
@@ -45,9 +46,17 @@ struct MainWorkspace: View {
     @State private var hintsExpanded = true
     @State private var workspaceIndex: TreeWorkspaceIndexes
     @State private var didShowInitialToast = false
+    /// Opening a tree gets one authored arrival: fit the whole record, then focus its
+    /// home person at 80%. Switching views later must not replay that entrance.
+    @State private var didPerformInitialTreeFocus = false
+    /// The compact toolbar is driven by the actual window width, not a device or screen
+    /// assumption. At minimum width, secondary controls move into a Notes-style overflow.
+    @State private var workspaceWidth: CGFloat = 1200
 
     enum ViewMode: String, CaseIterable { case tree, fan, map, people, timeline, places, review }
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
+
+    private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
 
     init(tree: FamilyTree, store: TreeStore, initialToast: String? = nil, onBack: @escaping () -> Void) {
         self.tree = tree
@@ -57,13 +66,11 @@ struct MainWorkspace: View {
         _workspaceIndex = State(initialValue: TreeWorkspaceIndexes(tree: tree))
     }
 
-    var body: some View {
+    private var workspaceSurface: some View {
         ZStack {
             SepiaTheme.paper.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                toolbar
-
                 HStack(spacing: 0) {
                     canvasArea
 
@@ -73,8 +80,6 @@ struct MainWorkspace: View {
                         }, onDelete: { person in
                             personToDelete = person
                             showDeleteConfirm = true
-                        }, onMakeHome: { person in
-                            makeHome(person)
                         })
                         .transition(.move(edge: .trailing).combined(with: .opacity))
                     }
@@ -104,75 +109,87 @@ struct MainWorkspace: View {
             }
         }
         .sepiaMotion(SepiaMotion.state, value: toastMessage != nil)
-        .sheet(isPresented: $showExportModal) {
-            ExportView(tree: tree, store: store, selectedIds: highlightedBranch, showPhotos: showPhotos)
-        }
-        .sheet(isPresented: $showAddSheet) {
-            AddPersonView(tree: tree, store: store) { newPerson in
-                selectedPerson = newPerson
-                workspaceIndex.update(person: newPerson, in: tree)
-                showToast(L10n.tr("Добавлен: \(newPerson.displayName(language: .current))"))
+        .toolbar { workspaceToolbar }
+        .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
+        .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
+    }
+
+    var body: some View {
+        workspaceSurface
+            .sheet(isPresented: $showExportModal) {
+                ExportView(tree: tree, store: store, selectedIds: highlightedBranch, showPhotos: showPhotos)
             }
-        }
-        .sheet(item: $editingPerson) { person in
-            EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
-                workspaceIndex.update(person: saved, in: tree)
-                showToast(L10n.tr("Сохранено: \(saved.displayName(language: .current))"))
-            })
-        }
-        .sheet(isPresented: $showMerge) {
-            TreeMergeView(localTree: tree, store: store) {
+            .sheet(isPresented: $showAddSheet) {
+                AddPersonView(tree: tree, store: store) { newPerson in
+                    selectedPerson = newPerson
+                    workspaceIndex.update(person: newPerson, in: tree)
+                    showToast(L10n.tr("Добавлен: \(newPerson.displayName(language: .current))"))
+                }
+            }
+            .sheet(item: $editingPerson) { person in
+                EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
+                    workspaceIndex.update(person: saved, in: tree)
+                    showToast(L10n.tr("Сохранено: \(saved.displayName(language: .current))"))
+                })
+            }
+            .sheet(isPresented: $showMerge) {
+                TreeMergeView(localTree: tree, store: store) {
+                    workspaceIndex.rebuild(tree: tree)
+                    showToast(L10n.tr("Слияние проверено и сохранено"))
+                }
+            }
+            .alert(L10n.tr("Удалить персону?"), isPresented: $showDeleteConfirm) {
+                Button(L10n.tr("Отмена"), role: .cancel) { personToDelete = nil }
+                Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
+            } message: {
+                if let p = personToDelete {
+                    Text(L10n.tr("«\(p.displayName(language: .current))» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)."))
+                }
+            }
+            .alert(L10n.tr("Не удалось сохранить"), isPresented: $showSaveError) {
+                Button("OK", role: .cancel) { store.lastSaveError = nil }
+            } message: {
+                Text(store.lastSaveError ?? "")
+            }
+            .frame(minWidth: 900, minHeight: 600)
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { newWidth in
+                workspaceWidth = newWidth
+            }
+            .onAppear {
+                guard let initialToast, !didShowInitialToast else { return }
+                didShowInitialToast = true
+                showToast(initialToast)
+            }
+            .onChange(of: selectedPerson?.id) { _, newValue in
+                recomputeHighlight()
+                // Auto-collapse the hints to an icon when a card opens; restore when browsing.
+                withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
+            }
+            .onChange(of: secondaryPerson?.id) { _, newValue in
+                recomputeHighlight()
+                if newValue != nil { dualSelectHintSeen = true }
+            }
+            .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
+            .onChange(of: locale.identifier) { _, _ in
                 workspaceIndex.rebuild(tree: tree)
-                showToast(L10n.tr("Слияние проверено и сохранено"))
+                recomputeHighlight()
             }
-        }
-        .alert(L10n.tr("Удалить персону?"), isPresented: $showDeleteConfirm) {
-            Button(L10n.tr("Отмена"), role: .cancel) { personToDelete = nil }
-            Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
-        } message: {
-            if let p = personToDelete {
-                Text(L10n.tr("«\(p.displayName(language: .current))» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)."))
+            // Snapshot the tree when an editing session opens and record an undo entry
+            // when it closes (only if something changed).
+            .onChange(of: showAddSheet) { _, isShown in
+                if isShown { undo.begin(tree) } else { undo.commit(tree) }
             }
-        }
-        .alert(L10n.tr("Не удалось сохранить"), isPresented: $showSaveError) {
-            Button("OK", role: .cancel) { store.lastSaveError = nil }
-        } message: {
-            Text(store.lastSaveError ?? "")
-        }
-        .frame(minWidth: 900, minHeight: 600)
-        .onAppear {
-            guard let initialToast, !didShowInitialToast else { return }
-            didShowInitialToast = true
-            showToast(initialToast)
-        }
-        .onChange(of: selectedPerson?.id) { _, newValue in
-            recomputeHighlight()
-            // Auto-collapse the hints to an icon when a card opens; restore when browsing.
-            withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
-        }
-        .onChange(of: secondaryPerson?.id) { _, newValue in
-            recomputeHighlight()
-            if newValue != nil { dualSelectHintSeen = true }
-        }
-        .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
-        .onChange(of: locale.identifier) { _, _ in
-            workspaceIndex.rebuild(tree: tree)
-            recomputeHighlight()
-        }
-        // Snapshot the tree when an editing session opens and record an undo entry
-        // when it closes (only if something changed).
-        .onChange(of: showAddSheet) { _, isShown in
-            if isShown { undo.begin(tree) } else { undo.commit(tree) }
-        }
-        .onChange(of: editingPerson?.id) { oldValue, newValue in
-            if newValue != nil { undo.begin(tree) } else if oldValue != nil { undo.commit(tree) }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
-        .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
-        .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
-        // Zoom-in/out notifications are handled inside TreeCanvasView where
-        // panOffset and viewport size are available for center-anchored zooming.
-        .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
+            .onChange(of: editingPerson?.id) { oldValue, newValue in
+                if newValue != nil { undo.begin(tree) } else if oldValue != nil { undo.commit(tree) }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
+            .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
+            .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
+            // Zoom-in/out notifications are handled inside TreeCanvasView where
+            // panOffset and viewport size are available for center-anchored zooming.
+            .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
     }
 
     /// The workspace canvas and everything layered over it. Kept out of `body` because
@@ -184,13 +201,30 @@ struct MainWorkspace: View {
 
             Group {
                 if viewMode == .tree {
-                    TreeCanvasView(tree: tree, direction: direction, zoom: $zoom, selectedPerson: $selectedPerson, secondaryPerson: $secondaryPerson, highlightedIds: highlightedBranch, lineageLabels: lineageLabels, fitRequest: $fitRequest, showPhotos: showPhotos)
+                    TreeCanvasView(
+                        tree: tree,
+                        direction: direction,
+                        zoom: $zoom,
+                        selectedPerson: $selectedPerson,
+                        secondaryPerson: $secondaryPerson,
+                        highlightedIds: highlightedBranch,
+                        highlightedConnections: highlightedConnections,
+                        lineageLabels: lineageLabels,
+                        fitRequest: $fitRequest,
+                        initialFocusCompleted: $didPerformInitialTreeFocus,
+                        showPhotos: showPhotos
+                    )
                 } else if viewMode == .fan {
                     FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
                 } else if viewMode == .map {
                     MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                 } else if viewMode == .people {
-                    PeopleWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson, onMakeHome: makeHome)
+                    PeopleWorkspaceView(
+                        tree: tree,
+                        index: workspaceIndex,
+                        selectedPerson: $selectedPerson,
+                        onEdit: { editingPerson = $0 }
+                    )
                 } else if viewMode == .timeline {
                     TimelineWorkspaceView(tree: tree, index: workspaceIndex, selectedPerson: $selectedPerson)
                 } else if viewMode == .places {
@@ -517,10 +551,11 @@ struct MainWorkspace: View {
                 .transition(.move(edge: .leading).combined(with: .opacity))
             }
         }
-        .padding(.horizontal, 10).padding(.vertical, 6)
-        .background(SepiaTheme.paper.opacity(0.9))
-        .clipShape(Capsule())
-        .overlay(Capsule().strokeBorder(SepiaTheme.cardLine.opacity(0.6), lineWidth: 0.5))
+        .padding(.horizontal, 11)
+        .padding(.vertical, 7)
+        .background(SepiaTheme.paper.opacity(0.58), in: Capsule())
+        .glassEffect(.regular.interactive(), in: Capsule())
+        .contentShape(Capsule())
         .padding(12)
     }
 
@@ -530,9 +565,12 @@ struct MainWorkspace: View {
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.ink)
                 .padding(.horizontal, 4).padding(.vertical, 1)
-                .background(SepiaTheme.btnBg)
-                .clipShape(RoundedRectangle(cornerRadius: 3))
-                .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(SepiaTheme.cardLine.opacity(0.5), lineWidth: 0.5))
+                .background(SepiaTheme.btnBg.opacity(0.88))
+                .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .strokeBorder(SepiaTheme.cardLine.opacity(0.62), lineWidth: 1)
+                }
             Text(label).font(SepiaTheme.ui(size: 10.5)).foregroundColor(SepiaTheme.inkSoft)
         }
         .fixedSize()
@@ -546,14 +584,16 @@ struct MainWorkspace: View {
         let idx = FamilyIndex(tree: tree)
 
         if let primary = selectedPerson, let secondary = secondaryPerson {
-            // Dual selection: find path between the two
             let finder = RelationshipPathFinder(index: idx)
             if let result = finder.findPath(from: primary.id, to: secondary.id) {
                 highlightedBranch = result.ids
+                highlightedConnections = result.connections
                 lineageLabels = result.labels
             } else {
-                // No path found — highlight both.
+                // Two disconnected people remain selected, but there is no route
+                // between them to color.
                 highlightedBranch = [primary.id, secondary.id]
+                highlightedConnections = []
                 lineageLabels = [primary.id: "①", secondary.id: "②"]
             }
             // Name the kinship (the ⌘-click feature now carries what the modal showed).
@@ -563,46 +603,175 @@ struct MainWorkspace: View {
             let calc = LineageCalculator(index: idx)
             let result = calc.compute(for: person)
             highlightedBranch = result.ids
+            highlightedConnections = result.connections
             lineageLabels = result.labels
             relationshipName = nil
         } else {
             highlightedBranch = []
+            highlightedConnections = []
             lineageLabels = [:]
             relationshipName = nil
         }
     }
 
-    private var toolbar: some View {
-        HStack(spacing: 8) {
+    @ToolbarContentBuilder
+    private var workspaceToolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
+                Image(systemName: "house.fill")
                     .font(.system(size: 12, weight: .semibold))
             }
-            .buttonStyle(SepiaIconButtonStyle())
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .foregroundStyle(SepiaTheme.ink)
             .help(L10n.tr("Вернуться к списку деревьев"))
             .accessibilityLabel(L10n.tr("Вернуться к списку деревьев"))
+        }
+        .sharedBackgroundVisibility(.hidden)
 
+        ToolbarItem(placement: .navigation) {
             titleBlock
+        }
+        .sharedBackgroundVisibility(.hidden)
 
-            Divider().frame(height: 26).overlay(SepiaTheme.toolbarLine)
+        ToolbarSpacer(.fixed)
 
-            // The view/direction/zoom controls collapse into a native "…" menu
-            // when the window is too narrow to show them all (instead of clipping).
-            ViewThatFits(in: .horizontal) {
-                fullControls
-                compactControls
+        ToolbarItemGroup(placement: .automatic) {
+            viewModeControls
+                .padding(.horizontal, 3)
+        }
+        .sharedBackgroundVisibility(.visible)
+
+        if !usesCompactToolbar, viewMode == .tree {
+            ToolbarSpacer(.fixed)
+            ToolbarItemGroup(placement: .automatic) {
+                HStack(spacing: 4) {
+                    directionControls
+                    photosControl
+                }
+                .padding(.horizontal, 3)
+            }
+            .sharedBackgroundVisibility(.visible)
+        } else if !usesCompactToolbar, viewMode == .fan {
+            ToolbarSpacer(.fixed)
+            ToolbarItemGroup(placement: .automatic) {
+                fanLevelControls
+                    .padding(.horizontal, 3)
+            }
+            .sharedBackgroundVisibility(.visible)
+        }
+
+        if !usesCompactToolbar, [.tree, .fan, .map].contains(viewMode) {
+            ToolbarSpacer(.fixed)
+            ToolbarItemGroup(placement: .automatic) {
+                zoomControls
+                    .padding(.horizontal, 3)
+            }
+            .sharedBackgroundVisibility(.visible)
+        }
+
+        ToolbarSpacer(.flexible)
+
+        if usesCompactToolbar {
+            ToolbarItem(placement: .automatic) {
+                compactToolbarOverflow
+            }
+            .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .automatic) {
+                savedStatus
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+
+        ToolbarSpacer(.fixed)
+
+        ToolbarItemGroup(placement: .primaryAction) {
+            Button { showAddSheet = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus")
+                    if !usesCompactToolbar {
+                        Text(L10n.tr("Добавить родственника"))
+                    }
+                }
+                .fixedSize()
+            }
+            .buttonStyle(.glassProminent)
+            .tint(SepiaTheme.accent)
+            .help(L10n.tr("Добавить новую персону в дерево"))
+            .accessibilityLabel(L10n.tr("Добавить новую персону в дерево"))
+
+            Button { showExportModal = true } label: {
+                Image(systemName: "square.and.arrow.up")
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .tint(SepiaTheme.ink)
+            .help(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
+            .accessibilityLabel(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
+        }
+        .sharedBackgroundVisibility(.hidden)
+    }
+
+    private var compactToolbarOverflow: some View {
+        Menu {
+            if viewMode == .tree {
+                Picker(L10n.tr("Направление дерева"), selection: $direction) {
+                    Label(L10n.tr("Сверху вниз"), systemImage: "arrow.down")
+                        .tag(TreeDirection.topDown)
+                    Label(L10n.tr("Слева направо"), systemImage: "arrow.right")
+                        .tag(TreeDirection.leftRight)
+                }
+                Toggle(isOn: $showPhotos) {
+                    Label(
+                        showPhotos ? L10n.tr("Скрыть фотографии") : L10n.tr("Показать фотографии"),
+                        systemImage: showPhotos ? "person.crop.square.fill" : "person.crop.square"
+                    )
+                }
+            } else if viewMode == .fan {
+                Button {
+                    if fanLevels > 2 { fanLevels -= 1 }
+                } label: {
+                    Label(L10n.tr("Меньше поколений"), systemImage: "minus")
+                }
+                .disabled(fanLevels <= 2)
+                Button {
+                    if fanLevels < 8 { fanLevels += 1 }
+                } label: {
+                    Label(L10n.tr("Больше поколений"), systemImage: "plus")
+                }
+                .disabled(fanLevels >= 8)
             }
 
-            Spacer(minLength: 8)
+            if [.tree, .fan, .map].contains(viewMode) {
+                Divider()
+                Button { stepZoom(-0.1) } label: {
+                    Label(L10n.tr("Уменьшить масштаб"), systemImage: "minus.magnifyingglass")
+                }
+                Button { stepZoom(0.1) } label: {
+                    Label(L10n.tr("Увеличить масштаб"), systemImage: "plus.magnifyingglass")
+                }
+                Button { fitRequest += 1 } label: {
+                    Label(L10n.tr("Центрировать и вписать дерево"), systemImage: "arrow.up.left.and.arrow.down.right")
+                }
+            }
 
-            savedStatus
-
-            actionButtons
+            if viewMode == .tree {
+                Divider()
+                treeFunctionMenuItems
+            }
+        } label: {
+            Image(systemName: "chevron.right.2")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundColor(SepiaTheme.ink)
+                .frame(width: 30, height: 30)
+                .contentShape(Circle())
+                .glassEffect(.regular.interactive(), in: Circle())
         }
-        .padding(.horizontal, 16)
-        .frame(height: 52)
-        .background(SepiaTheme.toolbarBg)
-        .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.toolbarLine).frame(height: 1) }
+        .menuIndicator(.hidden)
+        .fixedSize()
+        .help(L10n.tr("Показать скрытые элементы панели инструментов"))
+        .accessibilityLabel(L10n.tr("Показать скрытые элементы панели инструментов"))
     }
 
     private var titleBlock: some View {
@@ -623,63 +792,39 @@ struct MainWorkspace: View {
         .frame(maxWidth: 160, alignment: .leading)
     }
 
-    /// Wide layout: everything inline.
-    private var fullControls: some View {
-        HStack(spacing: 8) {
-            viewModeControls
-            if viewMode == .tree {
-                directionControls
-                photosControl
-            }
-            if viewMode == .fan {
-                fanLevelControls
-            }
-            if [.tree, .fan, .map].contains(viewMode) { zoomControls }
-        }
-    }
-
-    /// Narrow layout: keep zoom inline, fold the rest into a native menu.
-    private var compactControls: some View {
-        HStack(spacing: 8) {
-            zoomControls
-            overflowMenu
-        }
-    }
-
     private var viewModeControls: some View {
         HStack(spacing: 4) {
             Button { viewMode = .tree } label: {
                 Image(systemName: "rectangle.connected.to.line.below")
             }
-            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .tree))
+            .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: viewMode == .tree))
             .help(L10n.tr("Древовидная схема"))
             .accessibilityLabel(L10n.tr("Древовидная схема"))
-
-            Button { viewMode = .fan } label: {
-                Image(systemName: "chart.pie")
-            }
-            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .fan))
-            .help(L10n.tr("Круговая диаграмма предков"))
-            .accessibilityLabel(L10n.tr("Круговая диаграмма предков"))
 
             Button { viewMode = .map } label: {
                 Image(systemName: "map")
             }
-            .buttonStyle(SepiaButtonStyle(isActive: viewMode == .map))
+            .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: viewMode == .map))
             .help(L10n.tr("Карта мест жизни"))
             .accessibilityLabel(L10n.tr("Карта мест жизни"))
 
             Menu {
+                Button { viewMode = .fan } label: { Label(L10n.tr("Веер предков"), systemImage: "chart.pie") }
+                Divider()
                 Button { viewMode = .people } label: { Label(L10n.tr("Люди"), systemImage: "person.3") }
                 Button { viewMode = .timeline } label: { Label(L10n.tr("Хронология"), systemImage: "calendar") }
                 Button { viewMode = .places } label: { Label(L10n.tr("Места"), systemImage: "mappin.and.ellipse") }
                 Button { viewMode = .review } label: { Label(L10n.tr("Проверка"), systemImage: "checklist") }
             } label: {
-                Image(systemName: [.people, .timeline, .places, .review].contains(viewMode) ? "square.grid.2x2.fill" : "square.grid.2x2")
+                Image(systemName: [.fan, .people, .timeline, .places, .review].contains(viewMode) ? "square.grid.2x2.fill" : "square.grid.2x2")
+                    .frame(width: 30, height: 30)
             }
             .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
             .fixedSize()
-            .help(L10n.tr("Рабочие пространства"))
+            .toolbarIconChrome()
+            .help(L10n.tr("Варианты отображения"))
+            .accessibilityLabel(L10n.tr("Варианты отображения"))
         }
     }
 
@@ -688,13 +833,13 @@ struct MainWorkspace: View {
             Button { direction = .topDown } label: {
                 Image(systemName: "arrow.down")
             }
-            .buttonStyle(SepiaButtonStyle(isActive: direction == .topDown))
+            .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: direction == .topDown))
             .help(L10n.tr("Сверху вниз"))
             .accessibilityLabel(L10n.tr("Направление: сверху вниз"))
             Button { direction = .leftRight } label: {
                 Image(systemName: "arrow.right")
             }
-            .buttonStyle(SepiaButtonStyle(isActive: direction == .leftRight))
+            .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: direction == .leftRight))
             .help(L10n.tr("Слева направо"))
             .accessibilityLabel(L10n.tr("Направление: слева направо"))
         }
@@ -704,20 +849,20 @@ struct MainWorkspace: View {
         Button { withAnimation(reduceMotion ? nil : SepiaMotion.state) { showPhotos.toggle() } } label: {
             Image(systemName: showPhotos ? "person.crop.square.fill" : "person.crop.square")
         }
-        .buttonStyle(SepiaButtonStyle(isActive: showPhotos))
+        .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: showPhotos))
         .help(showPhotos ? L10n.tr("Скрыть фотографии") : L10n.tr("Показать фотографии"))
         .accessibilityLabel(showPhotos ? L10n.tr("Скрыть фотографии") : L10n.tr("Показать фотографии"))
     }
 
     private var fanLevelControls: some View {
         HStack(spacing: 3) {
-            RepeatButton(action: { if fanLevels > 2 { fanLevels -= 1 } }) { Image(systemName: "minus") }
+            RepeatButton(chrome: .toolbar, action: { if fanLevels > 2 { fanLevels -= 1 } }) { Image(systemName: "minus") }
                 .disabled(fanLevels <= 2)
             Text("\(fanLevels)")
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.ink)
                 .frame(width: 14)
-            RepeatButton(action: { if fanLevels < 8 { fanLevels += 1 } }) { Image(systemName: "plus") }
+            RepeatButton(chrome: .toolbar, action: { if fanLevels < 8 { fanLevels += 1 } }) { Image(systemName: "plus") }
                 .disabled(fanLevels >= 8)
             Text(L10n.tr("ур."))
                 .font(SepiaTheme.ui(size: 10))
@@ -743,7 +888,7 @@ struct MainWorkspace: View {
 
     private var zoomControls: some View {
         HStack(spacing: 3) {
-            RepeatButton(action: { stepZoom(-0.1) }) { Image(systemName: "minus") }
+            RepeatButton(chrome: .toolbar, action: { stepZoom(-0.1) }) { Image(systemName: "minus") }
                 .help(L10n.tr("Уменьшить масштаб"))
                 .accessibilityLabel(L10n.tr("Уменьшить масштаб"))
             Text("\(Int(zoom * 100))%")
@@ -753,58 +898,44 @@ struct MainWorkspace: View {
                 .contentTransition(.numericText())
                 .sepiaMotion(SepiaMotion.state, value: Int(zoom * 100))
                 .accessibilityLabel(L10n.tr("Масштаб \(Int(zoom * 100)) процентов"))
-            RepeatButton(action: { stepZoom(0.1) }) { Image(systemName: "plus") }
+            RepeatButton(chrome: .toolbar, action: { stepZoom(0.1) }) { Image(systemName: "plus") }
                 .help(L10n.tr("Увеличить масштаб"))
                 .accessibilityLabel(L10n.tr("Увеличить масштаб"))
             Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
-                .buttonStyle(SepiaIconButtonStyle())
+                .buttonStyle(WorkspaceToolbarIconButtonStyle())
                 .help(L10n.tr("Центрировать и вписать дерево"))
                 .accessibilityLabel(L10n.tr("Центрировать и вписать дерево"))
-            Button { tree.optimizeRoot(); fitRequest += 1 } label: { Image(systemName: "arrow.triangle.2.circlepath") }
-                .buttonStyle(SepiaIconButtonStyle())
-                .help(L10n.tr("Обновить расположение дерева"))
-                .accessibilityLabel(L10n.tr("Обновить расположение дерева"))
+            treeFunctionsMenu
         }
     }
 
-    private var overflowMenu: some View {
+    private var treeFunctionsMenu: some View {
         Menu {
-            Picker(L10n.tr("Вид"), selection: $viewMode) {
-                Label(L10n.tr("Дерево"), systemImage: "rectangle.connected.to.line.below").tag(ViewMode.tree)
-                Label(L10n.tr("Веер предков"), systemImage: "chart.pie").tag(ViewMode.fan)
-                Label(L10n.tr("Карта"), systemImage: "map").tag(ViewMode.map)
-                Label(L10n.tr("Люди"), systemImage: "person.3").tag(ViewMode.people)
-                Label(L10n.tr("Хронология"), systemImage: "calendar").tag(ViewMode.timeline)
-                Label(L10n.tr("Места"), systemImage: "mappin.and.ellipse").tag(ViewMode.places)
-                Label(L10n.tr("Проверка"), systemImage: "checklist").tag(ViewMode.review)
-            }
-            if viewMode == .tree {
-                Picker(L10n.tr("Направление"), selection: $direction) {
-                    Label(L10n.tr("Сверху вниз"), systemImage: "arrow.down").tag(TreeDirection.topDown)
-                    Label(L10n.tr("Слева направо"), systemImage: "arrow.right").tag(TreeDirection.leftRight)
-                }
-                Toggle(L10n.tr("Фотографии"), isOn: $showPhotos)
-            }
-            if viewMode == .fan {
-                Stepper(
-                    L10n.tr("Веер: \(L10n.count(fanLevels, .generation))"),
-                    value: $fanLevels,
-                    in: 2 ... 8
-                )
-            }
+            treeFunctionMenuItems
         } label: {
-            Image(systemName: "ellipsis")
+            Image(systemName: "wrench.and.screwdriver")
                 .frame(width: 30, height: 30)
                 .foregroundColor(SepiaTheme.ink)
-                .background(SepiaTheme.btnBg)
-                .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-                .clipShape(RoundedRectangle(cornerRadius: 7))
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .help(L10n.tr("Ещё"))
-        .accessibilityLabel(L10n.tr("Ещё настройки вида"))
+        .toolbarIconChrome()
+        .help(L10n.tr("Дополнительные функции дерева"))
+        .accessibilityLabel(L10n.tr("Дополнительные функции дерева"))
+    }
+
+    @ViewBuilder
+    private var treeFunctionMenuItems: some View {
+        Button {
+            tree.optimizeRoot()
+            fitRequest += 1
+        } label: {
+            Label(L10n.tr("Обновить расположение дерева"), systemImage: "arrow.triangle.2.circlepath")
+        }
+        Button { showMerge = true } label: {
+            Label(L10n.tr("Слить с локальным GEDCOM"), systemImage: "arrow.triangle.merge")
+        }
     }
 
     /// Quiet, always-visible reassurance that the vault is safe — edits persist
@@ -826,23 +957,6 @@ struct MainWorkspace: View {
         .foregroundColor(SepiaTheme.inkSoft)
         .help(L10n.tr("Дерево сохраняется автоматически после каждого изменения"))
         .accessibilityLabel(L10n.tr("Сохранено в \(savedTime)"))
-    }
-
-    private var actionButtons: some View {
-        HStack(spacing: 6) {
-            Button { showAddSheet = true } label: { Image(systemName: "plus") }
-                .buttonStyle(SepiaButtonStyle())
-                .help(L10n.tr("Добавить новую персону в дерево"))
-                .accessibilityLabel(L10n.tr("Добавить новую персону в дерево"))
-            Button { showExportModal = true } label: { Image(systemName: "square.and.arrow.up") }
-                .buttonStyle(SepiaButtonStyle())
-                .help(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
-                .accessibilityLabel(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
-            Button { showMerge = true } label: { Image(systemName: "arrow.triangle.merge") }
-                .buttonStyle(SepiaButtonStyle())
-                .help(L10n.tr("Слить с локальным GEDCOM"))
-                .accessibilityLabel(L10n.tr("Слить с локальным GEDCOM"))
-        }
     }
 
     private func deletePerson() {
@@ -954,24 +1068,41 @@ struct MainWorkspace: View {
         }
     }
 
-    private func makeHome(_ person: Person) {
-        let previous = tree.homePersonId
-        tree.homePersonId = person.id
-        Task { @MainActor in
-            do {
-                _ = try await store.saveTree(tree)
-                fitRequest += 1
-                showToast(L10n.tr("Домашняя персона: \(person.displayName(language: .current))"))
-            } catch {
-                tree.homePersonId = previous
-                showSaveError = true
-            }
-        }
-    }
-
     /// Speak a transient status message to VoiceOver — the toast is visual-only,
     /// so assistive tech needs an explicit announcement to learn a save happened.
     private func announce(_ message: String) {
         sepiaAnnounce(message)
+    }
+}
+
+/// The native toolbar owns the Liquid Glass surface. Items inside a shared glass
+/// group keep their resting chrome clear and use the archival accent only for state.
+private struct WorkspaceToolbarIconButtonStyle: ButtonStyle {
+    var isActive = false
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundColor(isActive ? .white : SepiaTheme.ink)
+            .frame(width: 30, height: 30)
+            .background {
+                Circle()
+                    .fill(
+                        isActive
+                            ? SepiaTheme.accent
+                            : SepiaTheme.ink.opacity(configuration.isPressed ? 0.10 : 0)
+                    )
+            }
+            .contentShape(Circle())
+            .scaleEffect(configuration.isPressed ? 0.94 : 1)
+            .sepiaMotion(SepiaMotion.press, value: configuration.isPressed)
+    }
+}
+
+private extension View {
+    /// Size and hit region for menus embedded in a shared native toolbar background.
+    func toolbarIconChrome() -> some View {
+        frame(width: 30, height: 30)
+            .contentShape(RoundedRectangle(cornerRadius: 8))
     }
 }
