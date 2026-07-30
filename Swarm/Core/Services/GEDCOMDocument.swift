@@ -350,9 +350,11 @@ public enum GEDCOMCodec {
         let nodes = document.allNodes
         let xrefs = Set(nodes.compactMap(\.xref))
         let unresolved = Set(nodes.compactMap(\.pointer).filter { !xrefs.contains($0) }).sorted()
+        // The id identifies *this* diagnostic, not its kind: a shared id makes every
+        // occurrence after the first vanish from any list drawn by identity.
         for pointer in unresolved {
             diagnostics.append(ImportDiagnostic(
-                id: "gedcom.unresolved-pointer",
+                id: "gedcom.unresolved-pointer.\(pointer)",
                 severity: .warning,
                 message: L10n.tr("Не найдена запись @\(pointer)@."),
                 recordXref: pointer
@@ -376,7 +378,7 @@ public enum GEDCOMCodec {
         missingMedia = Array(Set(missingMedia)).sorted()
         for file in missingMedia {
             diagnostics.append(ImportDiagnostic(
-                id: "gedcom.missing-media",
+                id: "gedcom.missing-media.\(file)",
                 severity: .warning,
                 message: L10n.tr("Связанный файл не найден: \(file).")
             ))

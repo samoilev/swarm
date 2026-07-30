@@ -90,6 +90,12 @@ struct TreeLibraryView: View {
     var onImport: (() -> Void)?
     var onRevealInFinder: ((FamilyTree) -> Void)?
 
+    /// Shown on both import buttons: the file dialog gives no sign that a folder is a
+    /// valid choice, and it is the only choice that brings the media along.
+    private static var importHint: String {
+        L10n.tr("Выберите файл GEDCOM или папку архива целиком — тогда фотографии и вложения перенесутся вместе с деревом")
+    }
+
     @Environment(TreeStore.self) private var store
     @Environment(\.locale) private var locale
 
@@ -324,6 +330,7 @@ struct TreeLibraryView: View {
                     .buttonBorderShape(.capsule)
                     .controlSize(.regular)
                     .fixedSize(horizontal: true, vertical: false)
+                    .help(Self.importHint)
 
                     // ⌘N is owned by the File menu command in SwarmApp; binding it here too
                     // would register the shortcut twice.
@@ -533,12 +540,21 @@ struct TreeLibraryView: View {
                     Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
                 }
                 .buttonStyle(SepiaButtonStyle())
+                .help(Self.importHint)
             }
 
-            Text(L10n.tr("Понимает файлы из Ancestry, Gramps и MyHeritage."))
-                .font(SepiaTheme.ui(size: 11))
-                .foregroundColor(SepiaTheme.inkSoft)
-                .padding(.top, 14)
+            VStack(spacing: 4) {
+                Text(L10n.tr("Понимает файлы из Ancestry, Gramps и MyHeritage."))
+                // Choosing the folder is what carries the photos and attachments across,
+                // and nothing in the file dialog says so.
+                Text(L10n.tr("Можно выбрать и папку архива целиком — вместе с фотографиями и вложениями."))
+            }
+            .font(SepiaTheme.ui(size: 11))
+            .foregroundColor(SepiaTheme.inkSoft)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: 420)
+            .padding(.top, 14)
             Spacer(minLength: 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

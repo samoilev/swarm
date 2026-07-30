@@ -86,6 +86,8 @@ public final class TreeStore {
     private var pendingAttachmentAdds: [UUID: [PendingAttachment]] = [:]
     private var pendingAttachmentDeletes: [UUID: Set<String>] = [:]
     private var pendingImports: [UUID: PendingImport] = [:]
+    /// Keyed by staged GEDCOM path: what an import preview could not bring across.
+    private var pendingImportDiagnostics: [String: [ImportDiagnostic]] = [:]
     private var pendingBundleRestores: [UUID: URL] = [:]
     private var pendingTrashRemovals: [UUID: Set<String>] = [:]
 
@@ -1153,8 +1155,36 @@ public final class TreeStore {
 
     // MARK: - Import external .ged file
 
+    /// Resolve what the user picked into the GEDCOM to read. An exported archive is a
+    /// *folder* — its .ged sits beside Media/ and Attachments/ — and picking that folder
+    /// is what grants access to the siblings, because the file picker grants access to
+    /// the selected item alone. Files are returned unchanged.
+    public func resolveImportSource(_ selection: URL) throws -> URL {
+        let fm = FileManager.default
+        var isDirectory: ObjCBool = false
+        guard fm.fileExists(atPath: selection.path, isDirectory: &isDirectory), isDirectory.boolValue else {
+            return selection
+        }
+        let candidates = try fm.contentsOfDirectory(at: selection, includingPropertiesForKeys: nil)
+            .filter { $0.pathExtension.lowercased() == "ged" && $0.lastPathComponent != Self.originalImportName }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        if candidates.count == 1 { return candidates[0] }
+        // An exported bundle names its GEDCOM after the folder, which settles the case
+        // where the user kept several .ged files side by side.
+        if let named = candidates.first(where: { $0.deletingPathExtension().lastPathComponent == selection.lastPathComponent }) {
+            return named
+        }
+        if candidates.isEmpty { throw TreeStoreError.noGEDCOMInFolder(folder: selection.lastPathComponent) }
+        throw TreeStoreError.ambiguousGEDCOMInFolder(folder: selection.lastPathComponent)
+    }
+
     /// Copy an external GEDCOM and its sibling media folders into private temporary
     /// storage before previewing it. The original is never edited in place.
+    ///
+    /// Only the GEDCOM itself is required. A sibling folder that cannot be read — the
+    /// file picker grants access to the selected item, not to its neighbours — is
+    /// reported through `stagedImportDiagnostics(for:)` and leaves the import standing,
+    /// because a tree without its photos is worth far more than no tree at all.
     public func prepareImportPreview(from source: URL) throws -> URL {
         let fm = FileManager.default
         let root = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
@@ -1167,12 +1197,23 @@ public final class TreeStore {
                 throw TreeStoreError.verificationFailed(path: source.lastPathComponent)
             }
             let base = source.deletingLastPathComponent()
+            var diagnostics: [ImportDiagnostic] = []
             for name in [Self.mediaName, Self.attachmentsName] {
                 let sibling = base.appendingPathComponent(name, isDirectory: true)
-                if fm.fileExists(atPath: sibling.path) {
+                guard fm.fileExists(atPath: sibling.path) else { continue }
+                do {
                     try fm.copyItem(at: sibling, to: root.appendingPathComponent(name, isDirectory: true))
+                } catch {
+                    diagnostics.append(ImportDiagnostic(
+                        id: "import.sibling-unreadable.\(name)",
+                        severity: .warning,
+                        message: L10n.tr(
+                            "Папку «\(name)» рядом с файлом прочитать не удалось, дерево импортируется без неё. Выберите папку архива целиком, чтобы macOS дала доступ к вложенным файлам: \(error.localizedDescription)"
+                        )
+                    ))
                 }
             }
+            pendingImportDiagnostics[destination.standardizedFileURL.path] = diagnostics
             return destination
         } catch {
             try? fm.removeItem(at: root)
@@ -1180,10 +1221,17 @@ public final class TreeStore {
         }
     }
 
+    /// What could not be staged alongside a previewed GEDCOM. Empty when everything the
+    /// archive carried came across.
+    public func stagedImportDiagnostics(for gedcom: URL) -> [ImportDiagnostic] {
+        pendingImportDiagnostics[gedcom.standardizedFileURL.path] ?? []
+    }
+
     public func discardImportPreview(at gedcom: URL) {
         let pendingRoot = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true).standardizedFileURL
         let folder = gedcom.deletingLastPathComponent().standardizedFileURL
         guard folder.path.hasPrefix(pendingRoot.path + "/") else { return }
+        pendingImportDiagnostics[gedcom.standardizedFileURL.path] = nil
         try? FileManager.default.removeItem(at: folder)
         cleanupPendingFolderIfEmpty()
     }
@@ -1199,6 +1247,9 @@ public final class TreeStore {
     private func importGEDCOMVerified(from url: URL) throws -> ImportResult {
         var result = try GEDCOMCodec.parse(url)
         guard result.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: result.report) }
+        // Anything the staging step could not bring across belongs in the tree's own
+        // permanent import report, not only in the preview the user already dismissed.
+        result.report.diagnostics.append(contentsOf: stagedImportDiagnostics(for: url))
         let tree = result.tree
         if trees.contains(where: { $0.id == tree.id }) {
             tree.id = UUID()

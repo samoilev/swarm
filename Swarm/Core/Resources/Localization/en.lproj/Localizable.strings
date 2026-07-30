@@ -322,6 +322,8 @@
 "Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM" = "I understand the warnings; preserved structures will remain in GEDCOM";
 "Не удалось импортировать файл" = "Could Not Import File";
 "Файл повреждён или имеет неподдерживаемый формат.\n\n%@" = "The file is damaged or uses an unsupported format.\n\n%@";
+"Нет доступа к этому файлу. Выберите папку архива целиком — тогда macOS разрешит прочитать и фотографии с вложениями рядом с ним.\n\n%@" = "Swarm was not allowed to read this file. Select the whole archive folder, and macOS will grant access to the photos and attachments stored beside it as well.\n\n%@";
+"Папку «%@» рядом с файлом прочитать не удалось, дерево импортируется без неё. Выберите папку архива целиком, чтобы macOS дала доступ к вложенным файлам: %@" = "The “%@” folder beside the file could not be read, so the tree is being imported without it. Select the whole archive folder to let macOS grant access to the files inside: %@";
 "Объединение деревьев" = "Merge Trees";
 "Добавить людей и факты из другого GEDCOM в «%@», не создавая дубликатов." = "Add people and facts from another GEDCOM to “%@” without creating duplicates.";
 "Если родственник прислал своё дерево или вы выгрузили его из другого сервиса, объединение перенесёт недостающих людей, даты и источники в ваш архив. Совпадающие персоны сольются в одну, а не задвоятся." = "If a relative sent you their tree, or you exported it from another service, merging will bring missing people, dates, and sources into your archive. Matching people will be combined instead of duplicated.";
@@ -494,6 +496,8 @@
 "GEDCOM содержит ошибки, блокирующие импорт." = "The GEDCOM contains errors that block import.";
 "Элемент восстановления больше не существует." = "The recovery item no longer exists.";
 "Перед сохранением требуется безопасная миграция старого формата." = "The old format must be migrated safely before saving.";
+"В папке «%@» нет файла GEDCOM." = "The “%@” folder contains no GEDCOM file.";
+"В папке «%@» несколько файлов GEDCOM. Выберите нужный файл, а не папку." = "The “%@” folder contains several GEDCOM files. Select the file you want instead of the folder.";
 "обнаружена ошибка данных" = "a data error was found";
 "Предпросмотр слияния относится к другому дереву." = "The merge preview belongs to a different tree.";
 "Не удалось создать снимок для отката слияния." = "A rollback snapshot could not be created for the merge.";
@@ -697,6 +701,8 @@
 "Деревьев в архиве: %@" = "Trees in the archive: %@";
 "Здесь будут ваши деревья" = "Your trees will live here";
 "Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac." = "Each tree is its own GEDCOM file with its photographs, and it stays on this Mac.";
+"Можно выбрать и папку архива целиком — вместе с фотографиями и вложениями." = "You can also select a whole archive folder—photos and attachments included.";
+"Выберите файл GEDCOM или папку архива целиком — тогда фотографии и вложения перенесутся вместе с деревом" = "Select a GEDCOM file, or a whole archive folder to bring its photos and attachments across with the tree";
 "Понимает файлы из Ancestry, Gramps и MyHeritage." = "Reads files from Ancestry, Gramps, and MyHeritage.";
 "Ничего не найдено" = "Nothing found";
 "Ни одно дерево не совпадает с «%@» по названию или фамилии." = "No tree matches “%@” by name or surname.";

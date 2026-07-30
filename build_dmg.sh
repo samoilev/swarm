@@ -69,6 +69,18 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <true/>
     <key>NSSupportsAutomaticTermination</key>
     <true/>
+    <!-- Without these, macOS denies access to files in these locations outright
+         instead of asking. An archive holds its photos and attachments in folders
+         beside the .ged, and reading them needs a grant the file picker's
+         single-item permission does not cover. -->
+    <key>NSDesktopFolderUsageDescription</key>
+    <string>Swarm needs access to open family tree archives stored on your Desktop, including their photos and attachments.</string>
+    <key>NSDocumentsFolderUsageDescription</key>
+    <string>Swarm needs access to open family tree archives stored in your Documents folder, including their photos and attachments.</string>
+    <key>NSDownloadsFolderUsageDescription</key>
+    <string>Swarm needs access to open family tree archives stored in your Downloads folder, including their photos and attachments.</string>
+    <key>NSRemovableVolumesUsageDescription</key>
+    <string>Swarm needs access to open family tree archives stored on external drives, including their photos and attachments.</string>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>

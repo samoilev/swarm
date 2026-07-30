@@ -79,7 +79,10 @@ struct ContentView: View {
             queuedOpenURL = nil
             previewGEDCOM(from: url)
         }
-        .fileImporter(isPresented: $showGEDCOMImporter, allowedContentTypes: [gedcomType]) { result in
+        // Folders are selectable too: an exported archive is a folder, and choosing it —
+        // rather than the .ged buried inside — is what lets macOS read the photos and
+        // attachments stored beside the file.
+        .fileImporter(isPresented: $showGEDCOMImporter, allowedContentTypes: [gedcomType, .folder]) { result in
             switch result {
             case .success(let url): previewGEDCOM(from: url)
             case .failure(let error): importError = error.localizedDescription
@@ -111,16 +114,37 @@ struct ContentView: View {
     }
 
     private func previewGEDCOM(from url: URL) {
+        // The scope has to stay open across staging, not just the read of the .ged
+        // itself: a folder selection is what carries access to Media/ and Attachments/.
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
-            let localCopy = try store.prepareImportPreview(from: url)
-            let result = try GEDCOMCodec.parse(localCopy)
+            let source = try store.resolveImportSource(url)
+            let localCopy = try store.prepareImportPreview(from: source)
+            var result = try GEDCOMCodec.parse(localCopy)
+            result.report.diagnostics.append(contentsOf: store.stagedImportDiagnostics(for: localCopy))
             pendingImportURL = localCopy
             importPreview = result
         } catch {
-            importError = L10n.tr("Файл повреждён или имеет неподдерживаемый формат.\n\n\(error.localizedDescription)")
+            importError = importFailureMessage(error)
         }
+    }
+
+    /// A file the app was not allowed to read is not a damaged file, and saying so sends
+    /// the reader off to repair an archive that is perfectly intact.
+    private func importFailureMessage(_ error: Error) -> String {
+        if let storeError = error as? TreeStoreError, let description = storeError.errorDescription {
+            return description
+        }
+        let nsError = error as NSError
+        let denied = nsError.domain == NSCocoaErrorDomain &&
+            (nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
+        if denied {
+            return L10n.tr(
+                "Нет доступа к этому файлу. Выберите папку архива целиком — тогда macOS разрешит прочитать и фотографии с вложениями рядом с ним.\n\n\(error.localizedDescription)"
+            )
+        }
+        return L10n.tr("Файл повреждён или имеет неподдерживаемый формат.\n\n\(error.localizedDescription)")
     }
 
     private func commitImportPreview() {

@@ -35,7 +35,10 @@ struct ImportPreviewView: View {
 
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
-                    ForEach(result.report.diagnostics) { diagnostic in
+                    // Positional identity: the report is fixed while this sheet is open,
+                    // and a diagnostic id repeated across two findings would otherwise
+                    // leave the list holding empty space where a row belongs.
+                    ForEach(Array(result.report.diagnostics.enumerated()), id: \.offset) { _, diagnostic in
                         diagnosticRow(diagnostic)
                     }
                     if !result.report.preservedUnsupportedTags.isEmpty {

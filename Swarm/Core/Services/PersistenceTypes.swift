@@ -130,6 +130,8 @@ public enum TreeStoreError: LocalizedError {
     case validationFailed(issues: [TreeIssue])
     case recoveryItemMissing
     case migrationRequired
+    case noGEDCOMInFolder(folder: String)
+    case ambiguousGEDCOMInFolder(folder: String)
 
     public var errorDescription: String? {
         switch self {
@@ -147,6 +149,10 @@ public enum TreeStoreError: LocalizedError {
             L10n.tr("Элемент восстановления больше не существует.")
         case .migrationRequired:
             L10n.tr("Перед сохранением требуется безопасная миграция старого формата.")
+        case let .noGEDCOMInFolder(folder):
+            L10n.tr("В папке «\(folder)» нет файла GEDCOM.")
+        case let .ambiguousGEDCOMInFolder(folder):
+            L10n.tr("В папке «\(folder)» несколько файлов GEDCOM. Выберите нужный файл, а не папку.")
         }
     }
 }
