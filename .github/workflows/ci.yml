@@ -1,9 +1,22 @@
 name: CI
 
+# macOS runners bill at a 10x minute multiplier on a private repo, so every
+# minute saved here is ten off the bill. Two rules follow from that: only work
+# that genuinely needs macOS runs on macOS, and doc-only pushes run nothing.
+# The two paths-ignore lists are duplicated because GitHub Actions does not
+# support YAML anchors. Keep them in sync.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "docs/**"
   pull_request:
+    paths-ignore:
+      - "**.md"
+      - "LICENSE"
+      - "docs/**"
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,10 +41,22 @@ jobs:
       - name: Swift version
         run: swift --version
 
-      # SwarmCore is the pure logic library; building it first surfaces
-      # API/access-control breaks before the slower SwiftUI app target.
-      - name: Build SwarmCore
-        run: swift build --target SwarmCore
+      # The package has no external dependencies, so this caches compiled objects
+      # of our own code, not checkouts. The exact key almost never hits; the value
+      # is the restore-key fallback letting SwiftPM rebuild only what changed.
+      # index-build is a SourceKit artifact that CI never produces — excluded so a
+      # stale local copy can't bloat the cache.
+      # ponytail: worth it only while restore+save is cheaper than the rebuild it
+      # saves. Watch the step timings; if they aren't, delete this step.
+      - name: Cache SwiftPM build
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .build
+            !.build/index-build
+          key: spm-${{ runner.os }}-${{ hashFiles('**/*.swift', 'Package.swift') }}
+          restore-keys: |
+            spm-${{ runner.os }}-
 
       - name: Build (all targets)
         run: swift build
@@ -41,17 +66,39 @@ jobs:
       - name: Test
         run: swift test
 
+  # Formatting is a text check with no Apple dependency, so it runs on Ubuntu at
+  # the 1x rate instead of macOS at 10x.
   lint:
     name: SwiftFormat
-    runs-on: macos-26
+    runs-on: ubuntu-latest
+    container: swift:6.2
     env:
       # Pin the formatter version so an upstream release with changed default rules
-      # can't fail CI without a code change. Bump this deliberately. Mint builds the
-      # exact tag from source, so no reliance on release-asset packaging.
+      # can't fail CI without a code change. Bump this deliberately. The binary is
+      # built from the exact tag, so no reliance on release-asset packaging.
       SWIFTFORMAT_VERSION: "0.61.1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Install Mint
-        run: brew install mint
-      - name: Check formatting (pinned SwiftFormat)
-        run: mint run nicklockwood/SwiftFormat@${SWIFTFORMAT_VERSION} --lint .
+
+      # Keyed on the version alone: the same tag always produces the same binary,
+      # so this is a hit on every run until SWIFTFORMAT_VERSION changes.
+      - name: Cache SwiftFormat binary
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: swiftformat-bin
+          key: swiftformat-${{ runner.os }}-${{ env.SWIFTFORMAT_VERSION }}
+
+      # The clone goes outside the checkout on purpose: anything left inside it
+      # would be linted as if it were our source.
+      - name: Build pinned SwiftFormat (cache miss only)
+        run: |
+          if [ -x swiftformat-bin/swiftformat ]; then exit 0; fi
+          src="$RUNNER_TEMP/swiftformat-src"
+          git clone --depth 1 --branch "$SWIFTFORMAT_VERSION" \
+            https://github.com/nicklockwood/SwiftFormat "$src"
+          swift build -c release --package-path "$src" --product swiftformat
+          mkdir -p swiftformat-bin
+          cp "$src/.build/release/swiftformat" swiftformat-bin/
+
+      - name: Check formatting
+        run: ./swiftformat-bin/swiftformat --lint .
