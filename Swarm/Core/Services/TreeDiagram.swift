@@ -110,7 +110,6 @@ public struct TreeDiagram: Equatable, Sendable {
         generationCount = generations
     }
 
-
     /// The shape of a record that does not exist yet: a couple, three children, and three
     /// grandchildren under the middle one. The empty library draws it as a dashed ghost and
     /// the language chooser as a watermark, so both screens speak the same visual language

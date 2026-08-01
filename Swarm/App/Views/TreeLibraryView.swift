@@ -1004,4 +1004,3 @@ struct TreeCardView: View {
         return parts.joined(separator: ". ")
     }
 }
-
