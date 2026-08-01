@@ -10,6 +10,11 @@ struct MainWorkspace: View {
     /// Shown once when the workspace opens: the confirmation for a write that happened
     /// on the previous screen (a tree just created, an archive just imported).
     var initialToast: String?
+    /// The library card that is opening into this workspace. Its diagram nodes hand their
+    /// geometry to the matching cards on the canvas, so the record grows out of the card
+    /// rather than replacing it.
+    var morphNamespace: Namespace.ID?
+    var morphingTreeID: UUID?
     let onBack: () -> Void
 
     @State private var viewMode: ViewMode = .tree
@@ -58,10 +63,26 @@ struct MainWorkspace: View {
 
     private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
 
-    init(tree: FamilyTree, store: TreeStore, initialToast: String? = nil, onBack: @escaping () -> Void) {
+    /// Exactly the people the library card drew. Only those can receive geometry from it;
+    /// everyone else arrives on the entrance cascade the canvas already runs.
+    private var morphNodeIDs: Set<UUID> {
+        guard tree.id == morphingTreeID, morphNamespace != nil else { return [] }
+        return Set(store.diagram(for: tree).nodes.map(\.personId))
+    }
+
+    init(
+        tree: FamilyTree,
+        store: TreeStore,
+        initialToast: String? = nil,
+        morphNamespace: Namespace.ID? = nil,
+        morphingTreeID: UUID? = nil,
+        onBack: @escaping () -> Void
+    ) {
         self.tree = tree
         self.store = store
         self.initialToast = initialToast
+        self.morphNamespace = morphNamespace
+        self.morphingTreeID = morphingTreeID
         self.onBack = onBack
         _workspaceIndex = State(initialValue: TreeWorkspaceIndexes(tree: tree))
     }
@@ -212,7 +233,9 @@ struct MainWorkspace: View {
                         lineageLabels: lineageLabels,
                         fitRequest: $fitRequest,
                         initialFocusCompleted: $didPerformInitialTreeFocus,
-                        showPhotos: showPhotos
+                        showPhotos: showPhotos,
+                        morphNamespace: tree.id == morphingTreeID ? morphNamespace : nil,
+                        morphNodeIDs: morphNodeIDs
                     )
                 } else if viewMode == .fan {
                     FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
@@ -541,7 +564,7 @@ struct MainWorkspace: View {
                     hintDivider
                     hint("⌘±", L10n.tr("Масштаб"))
                     hintDivider
-                    hint("↑↓←→", L10n.tr("Родня"))
+                    hint(symbol: "arrowkeys", L10n.tr("Родня"))
                     hintDivider
                     hint("⌘Z", L10n.tr("Отмена"))
                     hintDivider
@@ -560,10 +583,27 @@ struct MainWorkspace: View {
     }
 
     private func hint(_ key: String, _ label: String) -> some View {
-        HStack(spacing: 4) {
+        hint(label) {
             Text(key)
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.ink)
+        }
+    }
+
+    /// The arrow-key hint draws the keys themselves. Four glyphs typed out as "↑↓←→" read
+    /// as a direction, not as a thing on the keyboard the reader is meant to press.
+    private func hint(symbol: String, _ label: String) -> some View {
+        hint(label) {
+            Image(systemName: symbol)
+                .font(.system(size: 11))
+                .foregroundColor(SepiaTheme.ink)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func hint(_ label: String, @ViewBuilder key: () -> some View) -> some View {
+        HStack(spacing: 4) {
+            key()
                 .padding(.horizontal, 4).padding(.vertical, 1)
                 .background(SepiaTheme.btnBg.opacity(0.88))
                 .clipShape(RoundedRectangle(cornerRadius: 4, style: .continuous))

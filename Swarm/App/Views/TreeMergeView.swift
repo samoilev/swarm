@@ -26,7 +26,15 @@ struct TreeMergeView: View {
                         .frame(maxWidth: 560, alignment: .leading)
                 }
                 Spacer()
-                Button { close() } label: { Image(systemName: "xmark") }.buttonStyle(SepiaIconButtonStyle())
+                Button { close() } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(SepiaTheme.ink)
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.circle)
+                .accessibilityLabel(L10n.tr("Закрыть"))
             }.padding(20)
             Divider().overlay(SepiaTheme.toolbarLine)
 
@@ -76,18 +84,28 @@ struct TreeMergeView: View {
                         .frame(maxWidth: 460)
                     Text(L10n.tr("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется."))
                         .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
-                    Button(L10n.tr("Выбрать файл…")) { showImporter = true }.buttonStyle(SepiaButtonStyle(isActive: true))
+                    Button(L10n.tr("Выбрать файл…")) { showImporter = true }
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
                 }
                 Spacer()
             }
 
             Divider().overlay(SepiaTheme.toolbarLine)
-            HStack {
-                Button(L10n.tr("Отмена"), action: close).buttonStyle(SepiaButtonStyle())
+            LiquidGlassActionRow {
+                Button(L10n.tr("Отмена"), action: close)
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .keyboardShortcut(.cancelAction)
                 Spacer()
                 if preview != nil {
                     Button(L10n.tr("Применить с резервной копией")) { applyMerge() }
-                        .buttonStyle(SepiaButtonStyle(isActive: true)).disabled(isApplying)
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
+                        .keyboardShortcut(.defaultAction)
+                        .disabled(isApplying)
                 }
             }.padding(16)
         }

@@ -56,7 +56,9 @@ struct RelationshipView: View {
                 } label: {
                     Label(L10n.tr("Определить связь"), systemImage: "arrow.triangle.branch")
                 }
-                .buttonStyle(SepiaButtonStyle(isActive: true))
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .tint(SepiaTheme.accent)
                 .disabled(personA == nil || personB == nil)
 
                 // Result

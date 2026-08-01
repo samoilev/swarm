@@ -3,10 +3,29 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
+    /// Where the window is. Creating a tree is a destination now, not a sheet: the design
+    /// gives it the whole window, with the card it will produce drawn live beside the form.
+    private enum Destination: Equatable {
+        case library
+        case creating
+        case workspace(FamilyTree)
+
+        static func == (lhs: Destination, rhs: Destination) -> Bool {
+            switch (lhs, rhs) {
+            case (.library, .library), (.creating, .creating): true
+            case let (.workspace(a), .workspace(b)): a.id == b.id
+            default: false
+            }
+        }
+    }
+
     @Environment(TreeStore.self) private var store
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
-    @State private var selectedTree: FamilyTree?
-    @State private var showOnboarding = false
+    @State private var destination: Destination = .library
+    /// The card whose diagram hands its geometry to the canvas while a tree opens.
+    @State private var morphingTreeID: UUID?
+    @Namespace private var treeMorph
     @State private var showGEDCOMImporter = false
     @State private var importError: String?
     @State private var pendingImportURL: URL?
@@ -22,54 +41,83 @@ struct ContentView: View {
     }
 
     var body: some View {
-        Group {
+        // A ZStack rather than a Group: the outgoing and incoming screens have to be in the
+        // hierarchy together for one beat, or the card opening into a tree has nothing to
+        // hand its geometry to.
+        ZStack {
             if !languageChoiceCompleted {
                 LanguageChooserView()
-            } else if let tree = selectedTree {
-                MainWorkspace(
-                    tree: tree,
-                    store: store,
-                    initialToast: pendingToast,
-                    onBack: {
-                        selectedTree = nil
-                        pendingToast = nil
-                    }
-                )
+                    .transition(.opacity)
             } else {
-                TreeLibraryView(
-                    trees: store.trees,
-                    onSelect: { selectedTree = $0 },
-                    onCreate: { showOnboarding = true },
-                    onImport: { showGEDCOMImporter = true },
-                    onRevealInFinder: { tree in
-                        let url = store.gedFileURL(for: tree)
-                        NSWorkspace.shared.activateFileViewerSelecting([url])
-                    }
-                )
+                switch destination {
+                case .workspace(let tree):
+                    MainWorkspace(
+                        tree: tree,
+                        store: store,
+                        initialToast: pendingToast,
+                        morphNamespace: treeMorph,
+                        morphingTreeID: morphingTreeID,
+                        onBack: {
+                            pendingToast = nil
+                            navigate(to: .library)
+                        }
+                    )
+                    // The crossfade runs on its own short clock while the surrounding
+                    // transaction stays on the long spring. Without that split the canvas
+                    // is still transparent for the whole of the morph and the one authored
+                    // moment in the app happens where nobody can see it.
+                    .transition(.opacity.animation(SepiaMotion.crossfade))
+
+                case .creating:
+                    // The write reports its own failures inline and leaves the form live,
+                    // so a failed save no longer surfaces as an *import* error.
+                    OnboardingView(
+                        onCancel: { navigate(to: .library) },
+                        onComplete: { newTree in
+                            _ = try await store.addTreeVerified(newTree)
+                            pendingToast = L10n.tr("Дерево «\(newTree.name)» создано")
+                        },
+                        onOpen: { newTree in open(newTree) }
+                    )
+                    .transition(.opacity)
+
+                case .library:
+                    TreeLibraryView(
+                        trees: store.trees,
+                        onSelect: { open($0) },
+                        onCreate: { navigate(to: .creating) },
+                        onImport: { showGEDCOMImporter = true },
+                        onRevealInFinder: { tree in
+                            let url = store.gedFileURL(for: tree)
+                            NSWorkspace.shared.activateFileViewerSelecting([url])
+                        },
+                        morphNamespace: treeMorph,
+                        morphingTreeID: morphingTreeID
+                    )
+                    // Leaving, the library pulls very slightly toward the reader as it
+                    // fades — the prototype's own gesture. It reads as diving into the
+                    // card rather than as one picture being swapped for another.
+                    .transition(
+                        .asymmetric(
+                            insertion: .opacity,
+                            removal: .opacity.combined(with: .scale(scale: 1.06))
+                        )
+                        .animation(SepiaMotion.crossfade)
+                    )
+                }
             }
         }
-        // The sheet reports its own failures inline and dismisses itself on success, so
-        // a write that fails no longer surfaces as an *import* error over a live form.
-        .sheet(isPresented: $showOnboarding) {
-            OnboardingView { newTree in
-                _ = try await store.addTreeVerified(newTree)
-                pendingToast = L10n.tr("Дерево «\(newTree.name)» создано")
-                selectedTree = newTree
-            }
-        }
+        .sepiaMotion(SepiaMotion.crossfade, value: languageChoiceCompleted)
         .sheet(isPresented: $showHelp) {
             HelpView()
         }
         // No auto-presented sheet on an empty library. The empty state itself offers
         // both ways in (create and import), which a modal that appears before the user
         // has seen the app cannot do.
-        .onReceive(NotificationCenter.default.publisher(for: .newTreeRequested)) { _ in
-            if languageChoiceCompleted { showOnboarding = true }
-        }
         .onReceive(NotificationCenter.default.publisher(for: .openTreeRequested)) { note in
             guard let id = note.object as? UUID,
                   let tree = store.trees.first(where: { $0.id == id }) else { return }
-            selectedTree = tree
+            open(tree)
         }
         .onReceive(NotificationCenter.default.publisher(for: .helpRequested)) { _ in
             showHelp = true
@@ -110,6 +158,41 @@ struct ContentView: View {
             Button("OK", role: .cancel) { importError = nil }
         } message: {
             Text(importError ?? "")
+        }
+    }
+
+    /// The app's one authored moment. A card carries a small drawing of its tree, so
+    /// opening it hands those nodes to the real cards on the canvas and the rest of the
+    /// record fans in around them — rather than cutting from one screen to another.
+    ///
+    /// Under Reduce Motion it is a plain swap, and the morph is skipped entirely: matched
+    /// geometry with no animation to carry it would snap.
+    private func open(_ tree: FamilyTree) {
+        guard !reduceMotion else {
+            morphingTreeID = nil
+            destination = .workspace(tree)
+            return
+        }
+        morphingTreeID = tree.id
+        withAnimation(SepiaMotion.layout) { destination = .workspace(tree) }
+        // Release the morph once it has settled. Cards that keep publishing geometry for a
+        // transition that finished will fight the canvas the next time the layout moves.
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(900))
+            if case .workspace(let current) = destination, current.id == tree.id {
+                morphingTreeID = nil
+            }
+        }
+    }
+
+    /// Every other screen change is a crossfade — the library and the new-tree flow are two
+    /// rooms in one window, not two places on a map.
+    private func navigate(to next: Destination) {
+        morphingTreeID = nil
+        if reduceMotion {
+            destination = next
+        } else {
+            withAnimation(SepiaMotion.crossfade) { destination = next }
         }
     }
 
@@ -155,7 +238,7 @@ struct ContentView: View {
                 store.discardImportPreview(at: url)
                 pendingImportURL = nil
                 importPreview = nil
-                selectedTree = result.tree
+                open(result.tree)
             } catch {
                 importError = error.localizedDescription
             }

@@ -761,3 +761,18 @@
 "Восстановление и поддержка" = "Recovery and Support";
 "В меню архива откройте восстановление, чтобы вернуть прошлую редакцию, удалённый файл или резервную копию. Перед восстановлением Swarm показывает, что именно будет заменено. Для помощи или сообщения об ошибке откройте страницу поддержки; не прикладывайте приватные семейные данные." = "Open Recovery from the archive menu to restore an earlier revision, a deleted file, or a backup. Swarm shows exactly what will be replaced before restoring. For help or to report a bug, open the support page; do not attach private family data.";
 "Открыть поддержку на GitHub" = "Open GitHub Support";
+
+/* Library and new-tree flow — the 2026 redesign */
+"Библиотека" = "Library";
+"Новая запись" = "New Tree";
+"Вернуться к библиотеке" = "Back to library";
+"Назовите запись" = "Name the record";
+"Один файл GEDCOM, одна папка, на этом Mac. Название можно изменить в любой момент." = "One GEDCOM file, one folder, on this Mac. You can rename it whenever you like.";
+"Дерево начинается со связи. Выберите, кем приходится второй человек — или пропустите и добавьте родственников позже." = "A tree begins with a link. Pick how the second person relates to the first — or skip and add relatives later.";
+"Записано, проверено и сверено с диском. Дерево откроется на первом человеке." = "Written, checksummed and verified. The tree opens on the first person.";
+"Пропустить родственника" = "Skip the relative";
+"Записано на диск" = "Written to disk";
+"Как она будет выглядеть в библиотеке" = "How it will sit in the library";
+"Карточка берёт форму у самого дерева — ничей портрет не подменяет собой всю семью." = "The card takes its shape from the tree itself — nobody’s portrait stands in for the whole family.";
+"Фамилия подставлена от «%@» — на этой стороне родства она обычно общая. Измените, если это не так." = "The surname is pre-filled from “%@” — relatives on this side usually share it. Change it if she kept her own.";
+"пока без дат" = "no dates yet";

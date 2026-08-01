@@ -39,53 +39,68 @@ struct LanguageChooserView: View {
 
     var body: some View {
         ZStack {
-            SepiaTheme.toolbarBg.ignoresSafeArea()
-            VStack(spacing: 22) {
-                Image(systemName: "person.3.fill")
-                    .font(.system(size: 34, weight: .light))
-                    .foregroundStyle(SepiaTheme.accent)
-                    .accessibilityHidden(true)
+            SepiaPaperField(blooms: SepiaPaperField.single)
 
-                VStack(spacing: 7) {
-                    Text("Выберите язык / Choose your language")
-                        .font(SepiaTheme.display(size: 28))
-                        .foregroundStyle(SepiaTheme.ink)
-                        .multilineTextAlignment(.center)
-                        .accessibilityAddTraits(.isHeader)
-                    Text("Язык можно изменить в любой момент.\nYou can change this at any time.")
-                        .font(SepiaTheme.body(size: 14))
-                        .foregroundStyle(SepiaTheme.inkSoft)
-                        .multilineTextAlignment(.center)
-                }
+            // A ghost of the thing the app is for, sitting far enough back to be texture
+            // rather than illustration. It also introduces the drawing every library card
+            // will use, before the reader has seen one.
+            TreeDiagramView(diagram: .placeholder, style: .watermark, scale: 2.9)
 
-                HStack(spacing: 12) {
-                    languageButton(.russian)
-                    languageButton(.english)
+            VStack(spacing: 8) {
+                Text("Choose your language\nВыберите язык")
+                    .font(SepiaTheme.display(size: 24))
+                    .foregroundStyle(SepiaTheme.ink)
+                    .multilineTextAlignment(.center)
+                    .accessibilityAddTraits(.isHeader)
+                Text("You can change this at any time.\nЯзык можно изменить в любой момент.")
+                    .font(SepiaTheme.body(size: 13.5))
+                    .foregroundStyle(SepiaTheme.inkSoft)
+                    .multilineTextAlignment(.center)
+
+                GlassEffectContainer(spacing: 12) {
+                    HStack(spacing: 12) {
+                        languageButton(.russian)
+                        languageButton(.english)
+                    }
                 }
+                .padding(.top, 18)
             }
-            .padding(38)
-            .background(SepiaTheme.paper)
-            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(SepiaTheme.cardLine, lineWidth: 1)
-            }
-            .shadow(color: SepiaTheme.ink.opacity(0.12), radius: 20, y: 8)
+            .padding(.top, 44)
+            .padding(.horizontal, 48)
+            .padding(.bottom, 40)
+            .frame(width: 560)
+            .glassEffect(
+                .regular.tint(SepiaTheme.paper.opacity(0.66)),
+                in: RoundedRectangle(cornerRadius: 26, style: .continuous)
+            )
+            .shadow(color: SepiaTheme.ink.opacity(0.34), radius: 35, y: 20)
         }
+        // Lights and the wordmark, and nothing else: the app introduces itself before it
+        // asks anything.
+        .toolbar {
+            ToolbarItem(placement: .navigation) { SepiaWordmark() }
+                .sharedBackgroundVisibility(.hidden)
+        }
+        .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
+        .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
         .onAppear { focusedLanguage = .russian }
     }
 
+    /// Both buttons wear the same neutral glass. Neither is pre-selected — the choice is
+    /// the entire point of the screen, and tinting one of them answers it for the reader.
     private func languageButton(_ language: AppLanguage) -> some View {
         Button {
             languageRaw = language.rawValue
             choiceCompleted = true
         } label: {
             Text(language.displayName)
-                .font(SepiaTheme.ui(size: 15))
+                .font(SepiaTheme.ui(size: 16))
                 .fontWeight(.semibold)
-                .frame(width: 128, height: 42)
+                .foregroundStyle(SepiaTheme.ink)
+                .frame(width: 170, height: 46)
         }
-        .buttonStyle(SepiaButtonStyle(isActive: true))
+        .buttonStyle(.glass)
+        .buttonBorderShape(.capsule)
         .focused($focusedLanguage, equals: language)
         .accessibilityHint(
             language == .russian
@@ -112,7 +127,8 @@ struct HelpView: View {
                 Spacer()
                 LanguageSwitchControl()
                 Button(L10n.tr("Закрыть")) { dismiss() }
-                    .buttonStyle(SepiaButtonStyle())
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
             }
             .padding(22)

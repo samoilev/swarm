@@ -61,11 +61,17 @@ struct ImportPreviewView: View {
                     .toggleStyle(.checkbox).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.ink).padding(.horizontal, 18)
             }
             Divider().overlay(SepiaTheme.toolbarLine)
-            HStack {
-                Button(L10n.tr("Отмена"), action: onCancel).buttonStyle(SepiaButtonStyle())
+            LiquidGlassActionRow {
+                Button(L10n.tr("Отмена"), action: onCancel)
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .keyboardShortcut(.cancelAction)
                 Spacer()
                 Button(L10n.tr("Импортировать проверенную копию"), action: onImport)
-                    .buttonStyle(SepiaButtonStyle(isActive: true))
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.capsule)
+                    .tint(SepiaTheme.accent)
+                    .keyboardShortcut(.defaultAction)
                     .disabled(!result.report.blockingErrors.isEmpty || (needsConfirmation && !confirmedWarnings))
             }.padding(16)
         }

@@ -178,7 +178,10 @@ struct AddPersonView: View {
                             }
                             Button { pendingRels.append(PendingRelation()) } label: {
                                 Label(L10n.tr("Добавить связь"), systemImage: "plus")
-                            }.buttonStyle(SepiaButtonStyle()).padding(.top, 4)
+                            }
+                            .buttonStyle(.glass)
+                            .buttonBorderShape(.capsule)
+                            .padding(.top, 4)
                         }
                     }
                     .padding(.horizontal, 24).padding(.bottom, 20)
@@ -186,11 +189,17 @@ struct AddPersonView: View {
 
                 Divider().overlay(SepiaTheme.toolbarLine)
 
-                HStack {
-                    Button(L10n.tr("Отмена")) { dismiss() }.buttonStyle(SepiaButtonStyle())
+                LiquidGlassActionRow {
+                    Button(L10n.tr("Отмена")) { dismiss() }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
+                        .keyboardShortcut(.cancelAction)
                     Spacer()
                     Button(L10n.tr("Добавить")) { addPerson() }
-                        .buttonStyle(SepiaButtonStyle(isActive: true))
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.capsule)
+                        .tint(SepiaTheme.accent)
+                        .keyboardShortcut(.defaultAction)
                         .disabled(isSaving)
                         .disabled(givenNames.isEmpty && surname.isEmpty)
                 }

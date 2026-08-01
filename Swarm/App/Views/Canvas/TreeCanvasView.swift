@@ -14,6 +14,10 @@ struct TreeCanvasView: View {
     @Binding var fitRequest: Int
     @Binding var initialFocusCompleted: Bool
     var showPhotos: Bool = false
+    /// Set while a library card is opening into this canvas. The cards for `morphNodeIDs`
+    /// take their arrival geometry from the card's diagram instead of the entrance cascade.
+    var morphNamespace: Namespace.ID?
+    var morphNodeIDs: Set<UUID> = []
 
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
@@ -120,6 +124,8 @@ struct TreeCanvasView: View {
                     cardW: cardW,
                     cardH: cardH,
                     isLeftRight: direction == .leftRight,
+                    morphNamespace: morphNamespace,
+                    morphNodeIDs: morphNodeIDs,
                     onSelect: { person, commandClick in
                         if commandClick {
                             // CMD+click: set as secondary (max 2)
@@ -794,6 +800,8 @@ private struct TreeContentLayer: View, Equatable {
     let cardW: CGFloat
     let cardH: CGFloat
     let isLeftRight: Bool
+    var morphNamespace: Namespace.ID?
+    var morphNodeIDs: Set<UUID> = []
     let onSelect: (Person, Bool) -> Void
 
     /// Flipped on the first frame so the tree cascades in rather than appearing all at once.
@@ -813,7 +821,8 @@ private struct TreeContentLayer: View, Equatable {
             l.superSample == r.superSample &&
             l.isLeftRight == r.isLeftRight &&
             l.highlightedIds == r.highlightedIds &&
-            l.lineageLabels == r.lineageLabels
+            l.lineageLabels == r.lineageLabels &&
+            l.morphNodeIDs == r.morphNodeIDs
     }
 
     /// Entrance delay for a card, proportional to how far along the tree's growth axis it
@@ -823,7 +832,7 @@ private struct TreeContentLayer: View, Equatable {
         let t = isLeftRight
             ? node.x / max(layout.totalWidth, 1)
             : node.y / max(layout.totalHeight, 1)
-        return min(SepiaMotion.entranceStagger, Double(t) * SepiaMotion.entranceStagger)
+        return SepiaMotion.stagger(fraction: Double(t))
     }
 
     var body: some View {
@@ -832,7 +841,10 @@ private struct TreeContentLayer: View, Equatable {
             ForEach(layout.nodes, id: \.person.id) { node in
                 let isPrimary = selectedId == node.person.id
                 let isSecondary = secondaryId == node.person.id
-                let shown = didAppear || reduceMotion
+                // A card the library drew arrives by growing out of the card, not by
+                // cascading — it is already on screen, at a smaller size, somewhere else.
+                let isMorphing = morphNodeIDs.contains(node.person.id)
+                let shown = didAppear || reduceMotion || isMorphing
                 PersonCardView(
                     person: node.person,
                     isSelected: isPrimary,
@@ -848,6 +860,13 @@ private struct TreeContentLayer: View, Equatable {
                 .scaleEffect(shown ? 1 : 0.94)
                 .sepiaMotion(SepiaMotion.select.delay(entranceDelay(node)), value: shown)
                 .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
+                // Applied after `.position` on purpose: while the morph runs, the card's
+                // geometry comes from the diagram node it grew out of, not from the layout.
+                .modifier(TreeMorphGeometry(
+                    namespace: isMorphing ? morphNamespace : nil,
+                    personId: node.person.id,
+                    isSource: false
+                ))
                 // A person added or deleted rides the layout morph's transaction: the new
                 // card scales in while its new neighbours glide aside, and a removed one
                 // collapses as the tree closes the gap.

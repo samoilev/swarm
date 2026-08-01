@@ -30,9 +30,6 @@ struct TreeSummary {
     let surnames: [String]
     let firstYear: Int?
     let lastYear: Int?
-    /// The person whose portrait anchors the card, when one has a photo.
-    let portraitPerson: Person?
-    let monogram: String
 
     // ponytail: recomputed per card body evaluation. It is one pass over `people` for
     // trees of a few thousand, which is microseconds. If trees grow past ~50k people,
@@ -63,12 +60,6 @@ struct TreeSummary {
             .map(\.key)
         firstYear = earliest
         lastYear = latestDeath ?? latestBirth
-
-        let home = tree.homePerson
-        portraitPerson = (home?.hasPhoto == true) ? home : tree.people.first(where: \.hasPhoto)
-
-        let source = tree.name.trimmingCharacters(in: .whitespaces)
-        monogram = source.isEmpty ? "·" : String(source.prefix(1)).uppercased()
     }
 
     /// "1876 — 1954", "1876", or nil when the tree carries no dated events at all.
@@ -89,6 +80,10 @@ struct TreeLibraryView: View {
     let onCreate: () -> Void
     var onImport: (() -> Void)?
     var onRevealInFinder: ((FamilyTree) -> Void)?
+    /// Handed down by `ContentView` for the one card that is opening, so its diagram nodes
+    /// can hand their geometry to the real cards on the canvas.
+    var morphNamespace: Namespace.ID?
+    var morphingTreeID: UUID?
 
     /// Shown on both import buttons: the file dialog gives no sign that a folder is a
     /// valid choice, and it is the only choice that brings the media along.
@@ -98,6 +93,9 @@ struct TreeLibraryView: View {
 
     @Environment(TreeStore.self) private var store
     @Environment(\.locale) private var locale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Flipped on the first frame so the grid cascades in rather than appearing at once.
+    @State private var didAppear = false
 
     // Delete flow
     @State private var treeToDelete: FamilyTree?
@@ -156,12 +154,9 @@ struct TreeLibraryView: View {
 
     var body: some View {
         ZStack {
-            SepiaTheme.paper.ignoresSafeArea()
+            background
 
             VStack(spacing: 0) {
-                header
-                toolbar
-                Divider().overlay(SepiaTheme.line)
                 migrationBanner
 
                 if trees.isEmpty {
@@ -173,6 +168,9 @@ struct TreeLibraryView: View {
                 }
             }
         }
+        .toolbar { libraryToolbar }
+        .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
+        .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
         .frame(minWidth: 600, minHeight: 400)
         .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in
             // ⌘F means "find" wherever you are; in the library that is the tree filter.
@@ -277,97 +275,87 @@ struct TreeLibraryView: View {
 
     // MARK: - Chrome
 
-    private var header: some View {
-        Text(L10n.tr("Swarm"))
-            .font(SepiaTheme.display(size: 32))
-            .foregroundColor(SepiaTheme.ink)
-            .padding(.top, 34)
-            .padding(.bottom, 24)
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isHeader)
-    }
-
-    private var toolbar: some View {
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: 10) {
-                if showsFilter {
-                    filterField()
-                }
-                Spacer(minLength: 12)
-                toolbarActions
-            }
-
-            VStack(spacing: 8) {
-                HStack(spacing: 10) {
-                    Spacer(minLength: 0)
-                    toolbarActions
-                }
-                if showsFilter {
-                    filterField(width: nil)
-                }
-            }
+    /// A warm paper field for a library with records in it. The empty library falls back
+    /// to plain `paper`: the ghost tree at its centre is the only thing that should be
+    /// drawing the eye there.
+    @ViewBuilder private var background: some View {
+        if trees.isEmpty {
+            SepiaTheme.paper.ignoresSafeArea()
+        } else {
+            SepiaPaperField(blooms: SepiaPaperField.library)
         }
-        .padding(.horizontal, 24)
-        .padding(.vertical, 12)
     }
 
-    @ViewBuilder private var toolbarActions: some View {
+    /// The library and the workspace draw the same row: one unified toolbar, traffic lights
+    /// inline at its leading edge, the wordmark immediately after them. The library used to
+    /// float its own title in the content area below a stock title bar, which made one
+    /// window look like two applications.
+    @ToolbarContentBuilder private var libraryToolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigation) {
+            SepiaWordmark(label: L10n.tr("Библиотека"))
+        }
+        .sharedBackgroundVisibility(.hidden)
+
+        ToolbarSpacer(.flexible)
+
+        if showsFilter {
+            ToolbarItem(placement: .automatic) {
+                filterField()
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+
         if trees.count > 1 {
-            sortMenu
+            ToolbarItem(placement: .automatic) {
+                sortMenu
+            }
+            .sharedBackgroundVisibility(.hidden)
         }
 
-        GlassEffectContainer(spacing: 8) {
-            HStack(spacing: 8) {
-                // On an empty library these two live in the empty state itself, 300pt below.
-                // Showing them twice on one screen is noise, not reinforcement.
-                if !trees.isEmpty {
-                    Button(action: { onImport?() }) {
-                        Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
-                            .lineLimit(1)
-                            .frame(height: 16)
-                    }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.regular)
-                    .fixedSize(horizontal: true, vertical: false)
-                    .help(Self.importHint)
-
-                    // ⌘N is owned by the File menu command in SwarmApp; binding it here too
-                    // would register the shortcut twice.
-                    Button(action: onCreate) {
-                        Label(L10n.tr("Новое дерево"), systemImage: "plus")
-                            .lineLimit(1)
-                            .frame(height: 16)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .buttonBorderShape(.capsule)
-                    .controlSize(.regular)
-                    .tint(SepiaTheme.accent)
-                    .fixedSize(horizontal: true, vertical: false)
-                }
-
-                // Recovery is a once-a-year rescue tool. It stays reachable, but it no
-                // longer sits at the front door with the same weight as creating a tree.
-                Menu {
-                    Button(L10n.tr("Восстановить из резервной копии…")) { showRecovery = true }
-                    Button(L10n.tr("Показать папку хранилища")) {
-                        NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(SepiaTheme.ink)
-                        .frame(width: 16, height: 16)
+        ToolbarItemGroup(placement: .primaryAction) {
+            // On an empty library these two live in the empty state itself, 300pt below.
+            // Showing them twice on one screen is noise, not reinforcement.
+            if !trees.isEmpty {
+                Button(action: { onImport?() }) {
+                    Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                        .lineLimit(1)
                 }
                 .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .controlSize(.regular)
-                .menuIndicator(.hidden)
-                .fixedSize()
-                .help(L10n.tr("Обслуживание архива"))
-                .accessibilityLabel(L10n.tr("Обслуживание архива"))
+                .buttonBorderShape(.capsule)
+                // Toolbars drop a Label's title by default. These two are the doors into
+                // the app; an unlabelled tray glyph and a bare + do not name themselves.
+                .labelStyle(.titleAndIcon)
+                .help(Self.importHint)
+
+                Button(action: onCreate) {
+                    Label(L10n.tr("Новое дерево"), systemImage: "plus")
+                        .lineLimit(1)
+                }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .labelStyle(.titleAndIcon)
+                .tint(SepiaTheme.accent)
             }
+
+            // Recovery is a once-a-year rescue tool. It stays reachable, but it no
+            // longer sits at the front door with the same weight as creating a tree.
+            Menu {
+                Button(L10n.tr("Восстановить из резервной копии…")) { showRecovery = true }
+                Button(L10n.tr("Показать папку хранилища")) {
+                    NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(SepiaTheme.ink)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .menuIndicator(.hidden)
+            .help(L10n.tr("Обслуживание архива"))
+            .accessibilityLabel(L10n.tr("Обслуживание архива"))
         }
+        .sharedBackgroundVisibility(.hidden)
     }
 
     private var sortMenu: some View {
@@ -395,20 +383,22 @@ struct TreeLibraryView: View {
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .sepiaControlChrome()
+        .padding(.horizontal, 12)
+        .frame(height: 30)
+        .glassEffect(.regular, in: Capsule())
         .help(L10n.tr("Порядок деревьев"))
         .accessibilityLabel(L10n.tr("Порядок деревьев"))
     }
 
-    private func filterField(width: CGFloat? = 230) -> some View {
-        HStack(spacing: 6) {
+    private func filterField(width: CGFloat = 206) -> some View {
+        HStack(spacing: 7) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 11))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .accessibilityHidden(true)
             TextField(L10n.tr("Название или фамилия"), text: $filterText)
                 .textFieldStyle(.plain)
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaTheme.ui(size: 12.5))
                 .foregroundColor(SepiaTheme.ink)
                 .focused($filterFocused)
                 .onSubmit { if let first = visibleTrees.first { onSelect(first) } }
@@ -417,17 +407,17 @@ struct TreeLibraryView: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 11))
                         .foregroundColor(SepiaTheme.inkSoft)
-                        .frame(width: 20, height: 20)
+                        .frame(width: 18, height: 18)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(L10n.tr("Очистить фильтр"))
             }
         }
-        .padding(.horizontal, 8)
-        .frame(width: width)
-        .frame(maxWidth: width == nil ? .infinity : nil)
-        .sepiaControlChrome()
+        .padding(.horizontal, 12)
+        .frame(width: width, height: 30)
+        .glassEffect(.regular, in: Capsule())
+        .sepiaMotion(SepiaMotion.state, value: filterText.isEmpty)
     }
 
     // MARK: - Content
@@ -435,7 +425,8 @@ struct TreeLibraryView: View {
     private var grid: some View {
         ScrollView {
             gridContent
-                .padding(Self.pagePadding)
+                .padding(.horizontal, Self.pagePadding)
+                .padding(.vertical, 22)
         }
         .background(widthReader)
     }
@@ -463,24 +454,34 @@ struct TreeLibraryView: View {
     }
 
     private var gridContent: some View {
-        LazyVGrid(
+        let visible = visibleTrees
+        return LazyVGrid(
             columns: [GridItem(.adaptive(minimum: Self.cardMinWidth, maximum: 420), spacing: Self.gridGutter)],
             spacing: Self.gridGutter
         ) {
-            ForEach(visibleTrees, id: \.id) { tree in
-                card(for: tree)
+            ForEach(Array(visible.enumerated()), id: \.element.id) { index, tree in
+                card(for: tree, at: index, of: visible.count)
             }
         }
+        // The library arrives as a shelf being set down, not as twelve independent cards.
+        // Resting opacity is 1: a cascade that somehow never fires still leaves a library.
+        .onAppear { didAppear = true }
     }
 
-    private func card(for tree: FamilyTree) -> some View {
-        TreeCardView(
+    private func card(for tree: FamilyTree, at index: Int, of count: Int) -> some View {
+        let shown = didAppear || reduceMotion
+        return TreeCardView(
             tree: tree,
+            diagram: store.diagram(for: tree),
+            morphNamespace: tree.id == morphingTreeID ? morphNamespace : nil,
             onSelect: { onSelect(tree) },
             onReveal: { onRevealInFinder?(tree) },
             onRename: { startRename(tree) },
             onDelete: { treeToDelete = tree }
         )
+        .opacity(shown ? 1 : 0)
+        .scaleEffect(shown ? 1 : 0.97)
+        .sepiaMotion(SepiaMotion.select.delay(SepiaMotion.stagger(index, of: count)), value: shown)
         .focused($focusedTreeID, equals: tree.id)
         .onMoveCommand { direction in move(direction, from: tree.id) }
         .onKeyPress(.return) {
@@ -518,30 +519,52 @@ struct TreeLibraryView: View {
     private var emptyLibrary: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 24)
+
+            // A tree waiting to be filled in: the same drawing a real card carries, with
+            // everything but the first person still dashed.
+            TreeDiagramView(diagram: .placeholder, style: .ghost, scale: 1.7)
+                .padding(.bottom, 44)
+                .opacity(didAppear || reduceMotion ? 1 : 0)
+                .sepiaMotion(SepiaMotion.state, value: didAppear)
+
             VStack(spacing: 10) {
                 Text(L10n.tr("Здесь будут ваши деревья"))
-                    .font(SepiaTheme.display(size: 22))
+                    .font(SepiaTheme.display(size: 30))
                     .foregroundColor(SepiaTheme.ink)
                 Text(L10n.tr("Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac."))
-                    .font(SepiaTheme.body(size: 13.5))
-                    .foregroundColor(SepiaTheme.ink)
+                    .font(SepiaTheme.body(size: 15))
+                    .foregroundColor(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 420)
+                    .frame(maxWidth: 440)
             }
-            .padding(.bottom, 22)
 
-            HStack(spacing: 10) {
-                Button(action: onCreate) {
-                    Label(L10n.tr("Новое дерево"), systemImage: "plus")
+            GlassEffectContainer(spacing: 10) {
+                HStack(spacing: 10) {
+                    Button(action: onCreate) {
+                        Label(L10n.tr("Новое дерево"), systemImage: "plus")
+                            .font(SepiaTheme.ui(size: 14.5))
+                            .fontWeight(.semibold)
+                            .frame(height: 40)
+                            .padding(.horizontal, 8)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.capsule)
+                    .tint(SepiaTheme.accent)
+
+                    Button(action: { onImport?() }) {
+                        Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                            .font(SepiaTheme.ui(size: 14.5))
+                            .fontWeight(.semibold)
+                            .frame(height: 40)
+                            .padding(.horizontal, 8)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .help(Self.importHint)
                 }
-                .buttonStyle(SepiaButtonStyle(isActive: true))
-                Button(action: { onImport?() }) {
-                    Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
-                }
-                .buttonStyle(SepiaButtonStyle())
-                .help(Self.importHint)
             }
+            .padding(.top, 26)
 
             VStack(spacing: 4) {
                 Text(L10n.tr("Понимает файлы из Ancestry, Gramps и MyHeritage."))
@@ -549,16 +572,18 @@ struct TreeLibraryView: View {
                 // and nothing in the file dialog says so.
                 Text(L10n.tr("Можно выбрать и папку архива целиком — вместе с фотографиями и вложениями."))
             }
-            .font(SepiaTheme.ui(size: 11))
+            .font(SepiaTheme.ui(size: 12))
             .foregroundColor(SepiaTheme.inkSoft)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .frame(maxWidth: 420)
-            .padding(.top, 14)
+            .frame(maxWidth: 460)
+            .padding(.top, 20)
+
             Spacer(minLength: 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 24)
+        .onAppear { didAppear = true }
     }
 
     private var noMatches: some View {
@@ -760,6 +785,8 @@ struct TreeLibraryView: View {
 
 struct TreeCardView: View {
     let tree: FamilyTree
+    let diagram: TreeDiagram
+    var morphNamespace: Namespace.ID?
     let onSelect: () -> Void
     var onReveal: (() -> Void)?
     var onRename: (() -> Void)?
@@ -769,6 +796,9 @@ struct TreeCardView: View {
     @Environment(\.isFocused) private var isFocused
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+
+    static let height: CGFloat = 182
+    static let plateHeight: CGFloat = 80
 
     private var summary: TreeSummary { TreeSummary(tree: tree) }
 
@@ -780,99 +810,146 @@ struct TreeCardView: View {
     }
 
     var body: some View {
-        Button(action: onSelect) {
-            HStack(alignment: .top, spacing: 14) {
-                TreePortrait(person: summary.portraitPerson, monogram: summary.monogram)
-                    .frame(width: 66)
-                    .frame(maxHeight: .infinity)
-
-                // Fills the card's height so the Spacer below can actually push the
-                // facts to the bottom edge. Without this the column sizes to its
-                // content and a tree with no subtitle sits a line higher than its
-                // neighbours — the grid stops reading as rows.
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(tree.name)
-                            .font(SepiaTheme.display(size: 17))
-                            .foregroundColor(SepiaTheme.ink)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .help(tree.name)
-                        // The actions menu is an overlay sibling of this Button, not
-                        // part of its label. Reserve its visual footprint here.
-                        Spacer(minLength: 34)
-                    }
-
-                    // The subtitle row is always rendered, blank or not. Trees without
-                    // one would otherwise sit a line higher than their neighbours and
-                    // the grid would stop reading as rows.
-                    Text(subtitleText)
-                        .font(SepiaTheme.body(size: 12))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-                        .help(tree.subtitle ?? "")
-
-                    Spacer(minLength: 6)
-
-                    // Reserved for the same reason as the subtitle row above.
-                    Text(summary.surnames.isEmpty ? " " : summary.surnames.joined(separator: " · "))
-                        .font(SepiaTheme.ui(size: 12))
-                        .foregroundColor(SepiaTheme.accent2)
-                        .lineLimit(1)
-
-                    Text(factsLine)
-                        .font(SepiaTheme.ui(size: 11.5))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-
-                    Text(updatedLabel)
-                        .font(SepiaTheme.ui(size: 11))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .lineLimit(1)
+        // The lift and the shadow live out here, wrapping both the card and its actions
+        // menu. Applied inside the Button they moved the card out from under its own
+        // overflow button, which then sat 2pt adrift for the whole hover.
+        ZStack(alignment: .topTrailing) {
+            Button(action: onSelect) {
+                VStack(spacing: 0) {
+                    plate
+                    caption
                 }
-                .frame(maxHeight: .infinity, alignment: .top)
+                .frame(maxWidth: .infinity)
+                .frame(height: Self.height)
+                // Tinted toward white: over a paper-coloured pane, untinted glass lands
+                // within a few percent of the background and the grid stops reading as
+                // cards at all.
+                .glassEffect(
+                    .regular.tint(.white.opacity(0.34)),
+                    in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                )
+                .overlay(
+                    // A white hairline, not a palette colour: it is the glass edge
+                    // catching light, the same highlight the material draws on its top.
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .strokeBorder(.white.opacity(0.6), lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                // The whole tile is the target. Without this the hit area is only the
+                // text and the plate, and the empty half of a short caption does nothing.
+                .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .overlay(
+                    // Keyboard focus is drawn explicitly: `.plain` opts out of the system
+                    // ring, and without this the grid is untraversable for anyone not
+                    // using a pointer.
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .strokeBorder(SepiaTheme.accent, lineWidth: 2)
+                        .padding(-3)
+                        .opacity(isFocused ? 1 : 0)
+                )
             }
-            // Flexible first, then padded, then pinned to 116: a fixed frame applied
-            // to an intrinsically-sized child centres it instead of stretching it,
-            // which is what left the portrait short and the rows misaligned.
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(14)
-            .frame(height: 116)
-            .background(isHovering ? SepiaTheme.cardBgHover : SepiaTheme.cardBg)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .strokeBorder(isHovering ? SepiaTheme.cardLineStrong : SepiaTheme.cardLine, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .overlay(
-                // Keyboard focus is drawn explicitly: `.plain` opts out of the system
-                // ring, and without this the grid is untraversable for anyone not
-                // using a pointer.
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(SepiaTheme.accent, lineWidth: 2)
-                    .padding(-3)
-                    .opacity(isFocused ? 1 : 0)
-            )
-        }
-        .buttonStyle(.plain)
-        .focusable()
-        .accessibilityLabel(accessibilityDescription)
-        .accessibilityHint(L10n.tr("Открыть дерево"))
-        .overlay(alignment: .topTrailing) {
-            // An overlay keeps this Menu outside the Button label, so macOS exposes
-            // "open tree" and "tree actions" as two honest, focusable controls.
+            .buttonStyle(.plain)
+            .focusable()
+            // macOS draws its own blue ring over the accent one above, and two rings on
+            // one card is one ring too many. The sepia ring belongs to this app.
+            .focusEffectDisabled()
+            .accessibilityLabel(accessibilityDescription)
+            .accessibilityHint(L10n.tr("Открыть дерево"))
+
+            // A sibling of the Button, not part of its label, so macOS exposes "open
+            // tree" and "tree actions" as two honest, focusable controls.
             actionsMenu
-                .padding(.top, 8)
-                .padding(.trailing, 12)
+                .padding(.top, Self.plateHeight + 9)
+                .padding(.trailing, 14)
         }
+        // Hover is a lift, never a tint change. A card that changes colour under the
+        // pointer reads as a state; a card that rises reads as something you can take.
+        .shadow(
+            color: SepiaTheme.ink.opacity(isHovering ? 0.40 : 0.28),
+            radius: isHovering ? 16 : 9,
+            y: isHovering ? 11 : 5
+        )
+        .offset(y: isHovering ? -2 : 0)
         .contextMenu { menuItems }
-        .onHover { hovering in
-            if reduceMotion {
-                isHovering = hovering
-            } else {
-                withAnimation(.easeOut(duration: 0.15)) { isHovering = hovering }
-            }
+        .sepiaMotion(SepiaMotion.hover, value: isHovering)
+        .sepiaMotion(SepiaMotion.select, value: isFocused)
+        .onHover { isHovering = $0 }
+    }
+
+    /// The card's visual anchor: this tree's own top generations, drawn in the canvas's
+    /// language. Never a portrait — one arbitrary person cannot stand for a whole family,
+    /// and an identical glyph on every card is what made the old library unreadable.
+    private var plate: some View {
+        ZStack {
+            LinearGradient(
+                colors: [SepiaTheme.photoA, SepiaTheme.photoB],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .opacity(0.5)
+
+            // The plate prints its caption in the top-left corner, so the drawing keeps
+            // clear of that band rather than running its eldest generation through it.
+            TreeDiagramView(diagram: diagram, morphNamespace: morphNamespace, topInset: 14)
         }
+        .frame(height: Self.plateHeight)
+        .frame(maxWidth: .infinity)
+        .clipped()
+        .overlay(alignment: .topLeading) {
+            SepiaTrackedLabel(
+                L10n.count(diagram.generationCount, .generation),
+                size: 9,
+                color: SepiaTheme.inkSoft.opacity(0.75)
+            )
+            .padding(.leading, 10)
+            .padding(.top, 9)
+        }
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(.white.opacity(0.5)).frame(height: 1)
+        }
+    }
+
+    private var caption: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(tree.name)
+                    .font(SepiaTheme.display(size: 18))
+                    .foregroundColor(SepiaTheme.ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .help(tree.name)
+                // The actions menu is an overlay sibling of this Button, not part of
+                // its label. Reserve its visual footprint here.
+                Spacer(minLength: 34)
+            }
+
+            // The subtitle row is always rendered, blank or not. Trees without one would
+            // otherwise sit a line higher than their neighbours and the grid would stop
+            // reading as rows.
+            Text(subtitleText)
+                .font(SepiaTheme.body(size: 12))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .lineLimit(1)
+                .help(tree.subtitle ?? "")
+
+            Spacer(minLength: 6)
+
+            // Reserved for the same reason as the subtitle row above.
+            Text(summary.surnames.isEmpty ? " " : summary.surnames.joined(separator: " · "))
+                .font(SepiaTheme.ui(size: 12))
+                .fontWeight(.bold)
+                .foregroundColor(SepiaTheme.accent2)
+                .lineLimit(1)
+
+            Text(factsLine)
+                .font(SepiaTheme.ui(size: 11.5))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.top, 11)
+        .padding(.horizontal, 14)
+        .padding(.bottom, 12)
     }
 
     private var actionsMenu: some View {
@@ -899,12 +976,11 @@ struct TreeCardView: View {
         return subtitle
     }
 
-    /// "1876 — 1954 · 42 чел.", degrading to just the count when the tree has no dates.
+    /// "1876 — 1954 · 42 человека · изменено вчера". One line now, not three: the three
+    /// facts are one thought — how big this record is and how fresh it is.
     private var factsLine: String {
-        if let lifespan = summary.lifespan {
-            return "\(lifespan) · \(summary.peopleLabel)"
-        }
-        return summary.peopleLabel
+        let facts = [summary.lifespan, summary.peopleLabel, updatedLabel].compactMap { $0 }
+        return facts.joined(separator: " · ")
     }
 
     private var updatedLabel: String {
@@ -925,51 +1001,7 @@ struct TreeCardView: View {
         if let subtitle = tree.subtitle, !subtitle.isEmpty { parts.append(subtitle) }
         if !summary.surnames.isEmpty { parts.append(summary.surnames.joined(separator: ", ")) }
         parts.append(factsLine)
-        parts.append(updatedLabel)
         return parts.joined(separator: ". ")
     }
 }
 
-/// The card's visual anchor. A real portrait when the tree has one, otherwise the tree's
-/// own initial set in the archive's serif — never a shared icon, because an identical
-/// glyph on every card is exactly what made the old library unreadable.
-struct TreePortrait: View {
-    let person: Person?
-    let monogram: String
-
-    @State private var image: NSImage?
-
-    var body: some View {
-        ZStack {
-            if let image {
-                Image(nsImage: image)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } else {
-                LinearGradient(
-                    colors: [SepiaTheme.photoA, SepiaTheme.photoB],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                Text(monogram)
-                    .font(SepiaTheme.display(size: 30))
-                    .foregroundColor(SepiaTheme.ink.opacity(0.55))
-            }
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 6))
-        .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(SepiaTheme.cardRule, lineWidth: 1))
-        .accessibilityHidden(true)
-        .task(id: person?.id) {
-            guard let person, person.hasPhoto else {
-                image = nil
-                return
-            }
-            // Decoding off the main actor keeps a grid of portraits from stuttering
-            // the first paint of the library.
-            let data = person.photoData
-            image = await Task.detached(priority: .utility) {
-                data.flatMap { NSImage(data: $0) }
-            }.value
-        }
-    }
-}

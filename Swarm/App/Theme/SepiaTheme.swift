@@ -113,6 +113,19 @@ enum SepiaMotion {
     static let crossfade = Animation.easeInOut(duration: 0.18)
     /// Longest stagger the entrance cascade may span, however tall the tree is.
     static let entranceStagger: Double = 0.30
+
+    /// Delay for something arriving `fraction` of the way through a group's entrance.
+    /// Clamped to `entranceStagger`, so nothing ever waits longer than the whole cascade.
+    static func stagger(fraction: Double) -> Double {
+        entranceStagger * min(max(fraction, 0), 1)
+    }
+
+    /// Delay for the nth of `count` siblings arriving as one group — a grid of cards, a
+    /// row of nodes. A library of forty trees opens in the same beat as a library of four.
+    static func stagger(_ index: Int, of count: Int) -> Double {
+        guard count > 1 else { return 0 }
+        return stagger(fraction: Double(index) / Double(count - 1))
+    }
 }
 
 /// Applies an animation unless the user has asked for less motion. Reads the environment
@@ -225,31 +238,48 @@ extension View {
     /// the system placeholder (3.85:1, below AA) and the system focus ring. Here the fill,
     /// the placeholder (`inkSoft`, 5.64:1) and the focus ring (`accent`, 5.27:1 against the
     /// fill) are all drawn deliberately.
-    func sepiaFieldChrome(isFocused: Bool, placeholder: String = "", isEmpty: Bool = false) -> some View {
-        padding(.horizontal, 9)
-            .frame(height: 30)
+    /// `height`, `radius` and `fontSize` are parameters rather than a second copy of this
+    /// modifier: the new-tree flow wants a taller, rounder field for its 17pt values, and
+    /// a fork would sooner or later drift on the fill or the placeholder colour.
+    func sepiaFieldChrome(
+        isFocused: Bool,
+        placeholder: String = "",
+        isEmpty: Bool = false,
+        height: CGFloat = 30,
+        radius: CGFloat = 6,
+        fontSize: CGFloat = 15
+    ) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        let inset: CGFloat = height >= 40 ? 14 : 9
+        return padding(.horizontal, inset)
+            .frame(height: height)
             .background {
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 6).fill(SepiaTheme.fieldBg)
+                    shape.fill(SepiaTheme.fieldBg)
                     if isEmpty, !placeholder.isEmpty {
                         Text(placeholder)
-                            .font(SepiaTheme.body(size: 15))
+                            .font(SepiaTheme.body(size: fontSize))
                             .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(1)
-                            .padding(.horizontal, 9)
+                            .padding(.horizontal, inset)
                             .allowsHitTesting(false)
                             .accessibilityHidden(true)
                     }
                 }
             }
             .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(
-                        isFocused ? SepiaTheme.accent : SepiaTheme.cardLine,
-                        lineWidth: isFocused ? 2 : 1
-                    )
+                shape.strokeBorder(
+                    isFocused ? SepiaTheme.accent : SepiaTheme.cardLine,
+                    lineWidth: isFocused ? (height >= 40 ? 1.5 : 2) : 1
+                )
             )
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .clipShape(shape)
+            .shadow(
+                color: SepiaTheme.ink.opacity(isFocused && height >= 40 ? 0.08 : 0),
+                radius: 8,
+                y: 2
+            )
+            .sepiaMotion(SepiaMotion.state, value: isFocused)
     }
 
     /// The resting chrome of a sepia control. `SepiaButtonStyle` covers Buttons; menus

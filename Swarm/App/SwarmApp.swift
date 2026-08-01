@@ -8,7 +8,6 @@ struct SwarmApp: App {
 
     @State private var store: TreeStore
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
-    @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
 
     init() {
         AppLanguage.migrateLegacyPreferenceIfNeeded()
@@ -47,11 +46,11 @@ struct SwarmApp: App {
         .defaultSize(width: 1280, height: 800)
         .commands {
             CommandGroup(replacing: .newItem) {
-                Button(L10n.tr("Новое дерево")) {
-                    NotificationCenter.default.post(name: .newTreeRequested, object: nil)
-                }
-                .keyboardShortcut("n")
-                .disabled(!languageChoiceCompleted)
+                // No File▸New Tree and no ⌘N. Creating a record is a rare, deliberate act
+                // that now takes over the whole window — and a shortcut that could fire it
+                // over an open tree would throw the reader out of one without asking. The
+                // library's own button is the only door in.
+                //
                 // Someone who opens the same tree every morning shouldn't have to walk
                 // the library grid to get to it.
                 Menu(L10n.tr("Открыть недавнее")) {
@@ -141,7 +140,6 @@ private struct AboutCommands: Commands {
 }
 
 extension Notification.Name {
-    static let newTreeRequested = Notification.Name("newTreeRequested")
     /// Object is the `FamilyTree.id` to open.
     static let openTreeRequested = Notification.Name("openTreeRequested")
     static let zoomInRequested = Notification.Name("zoomInRequested")

@@ -46,6 +46,23 @@ public final class TreeStore {
     /// boundaries to prove the previously committed bundle remains usable.
     @ObservationIgnored public var faultInjector: ((PersistenceFaultPoint) throws -> Void)?
 
+    /// Card diagrams, keyed on the tree and the moment it was last written. A diagram is
+    /// a walk over the top three generations, which is cheap — but the library rebuilds
+    /// every card body on hover, filter and sort, and a grid of large archives should not
+    /// re-walk on each of those. Observation is skipped: this is derived from `trees`, and
+    /// reading it must not make a view depend on it.
+    @ObservationIgnored private var diagramCache: [UUID: (updatedAt: Date, diagram: TreeDiagram)] = [:]
+
+    /// The card diagram for `tree`, recomputed only when the tree has been written since.
+    public func diagram(for tree: FamilyTree) -> TreeDiagram {
+        if let cached = diagramCache[tree.id], cached.updatedAt == tree.updatedAt {
+            return cached.diagram
+        }
+        let diagram = TreeDiagram(tree: tree)
+        diagramCache[tree.id] = (tree.updatedAt, diagram)
+        return diagram
+    }
+
     private let storageFolder: URL
 
     /// The root storage directory (for "Reveal in Finder" when a load fails).
