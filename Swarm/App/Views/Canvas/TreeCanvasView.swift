@@ -18,6 +18,11 @@ struct TreeCanvasView: View {
     /// take their arrival geometry from the card's diagram instead of the entrance cascade.
     var morphNamespace: Namespace.ID?
     var morphNodeIDs: Set<UUID> = []
+    /// Width of floating chrome covering the trailing edge — the inspector card. The
+    /// canvas still *draws* the full width, so the record runs on under the glass
+    /// instead of stopping at a seam, but every fit, focus and pan bound is measured
+    /// against the part of it the reader can actually see.
+    var trailingInset: CGFloat = 0
 
     private let cardW: CGFloat = 210
     private let cardH: CGFloat = 90
@@ -55,6 +60,12 @@ struct TreeCanvasView: View {
     var body: some View {
         GeometryReader { geo in
             let layout = cachedLayout ?? makeLayout()
+            // The viewport the reader has: everything below measures against this,
+            // while the two `.frame(width: geo.size…)` below keep drawing the whole pane.
+            let viewSize = CGSize(
+                width: max(1, geo.size.width - trailingInset),
+                height: geo.size.height
+            )
 
             ZStack(alignment: .topLeading) {
                 // Dot grid background (Miro-style) — fills the viewport, tap to deselect
@@ -153,14 +164,14 @@ struct TreeCanvasView: View {
                 // Minimap — only once the tree is zoomed in past the viewport, so there's
                 // enough off-screen content to need an overview.
                 if !layout.nodes.isEmpty,
-                   layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height {
+                   layout.totalWidth * zoom > viewSize.width || layout.totalHeight * zoom > viewSize.height {
                     TreeMinimap(
-                        layout: layout, generation: layoutGeneration, zoom: zoom, panOffset: panOffset, viewSize: geo.size,
+                        layout: layout, generation: layoutGeneration, zoom: zoom, panOffset: panOffset, viewSize: viewSize,
                         selectedId: selectedPerson?.id, cardW: cardW, cardH: cardH,
                         onRecenter: { treePoint in
                             recenter(
                                 onTreePoint: treePoint,
-                                viewSize: geo.size,
+                                viewSize: viewSize,
                                 layout: layout,
                                 animated: false
                             )
@@ -170,10 +181,10 @@ struct TreeCanvasView: View {
                     .transition(.opacity)
                 }
             }
-            .sepiaMotion(SepiaMotion.crossfade, value: layout.totalWidth * zoom > geo.size.width || layout.totalHeight * zoom > geo.size.height)
+            .sepiaMotion(SepiaMotion.crossfade, value: layout.totalWidth * zoom > viewSize.width || layout.totalHeight * zoom > viewSize.height)
             .background(
                 // Mouse-wheel / scroll zoom, soft and anchored to the cursor.
-                ScrollWheelZoom { deltaY, location in
+                ScrollWheelZoom(ignoreTrailing: trailingInset) { deltaY, location in
                     cancelInitialFocus()
                     var factor = 1 + deltaY * wheelZoomSensitivity
                     factor = min(1.25, max(0.8, factor))
@@ -186,7 +197,7 @@ struct TreeCanvasView: View {
                     )
                     let newPan = constrainedPan(
                         proposedPan,
-                        viewSize: geo.size,
+                        viewSize: viewSize,
                         treeWidth: layout.totalWidth,
                         treeHeight: layout.totalHeight,
                         atZoom: newZoom
@@ -210,7 +221,7 @@ struct TreeCanvasView: View {
                         )
                         panOffset = constrainedPan(
                             proposedPan,
-                            viewSize: geo.size,
+                            viewSize: viewSize,
                             treeWidth: layout.totalWidth,
                             treeHeight: layout.totalHeight,
                             atZoom: zoom
@@ -230,7 +241,7 @@ struct TreeCanvasView: View {
                     InertiaDriver { dt in
                         coast(
                             dt,
-                            viewSize: geo.size,
+                            viewSize: viewSize,
                             treeWidth: layout.totalWidth,
                             treeHeight: layout.totalHeight
                         )
@@ -257,15 +268,15 @@ struct TreeCanvasView: View {
                         // Zoom about the viewport centre so the content doesn't
                         // lurch toward a corner (the scaleEffect anchor is topLeading).
                         let ratio = newZoom / magnifyStart
-                        let cx = geo.size.width / 2
-                        let cy = geo.size.height / 2
+                        let cx = viewSize.width / 2
+                        let cy = viewSize.height / 2
                         let proposedPan = CGSize(
                             width: cx - (cx - panAtMagnifyStart.width) * ratio,
                             height: cy - (cy - panAtMagnifyStart.height) * ratio
                         )
                         panOffset = constrainedPan(
                             proposedPan,
-                            viewSize: geo.size,
+                            viewSize: viewSize,
                             treeWidth: layout.totalWidth,
                             treeHeight: layout.totalHeight,
                             atZoom: newZoom
@@ -284,19 +295,19 @@ struct TreeCanvasView: View {
                 if isNewCanvas { cachedLayout = makeLayout() }
                 if !initialFocusCompleted {
                     fitToScreen(
-                        viewSize: geo.size,
+                        viewSize: viewSize,
                         treeWidth: layout.totalWidth,
                         treeHeight: layout.totalHeight,
                         animated: false
                     )
                     initialFocusCompleted = true
-                    scheduleInitialHomeFocus(viewSize: geo.size, layout: layout)
+                    scheduleInitialHomeFocus(viewSize: viewSize, layout: layout)
                 } else if isNewCanvas {
                     // Re-entering the tree (for example after opening the inspector or
                     // visiting another view) keeps the user's zoom instead of replaying
                     // the opening fit. A fresh pan state is simply anchored on home.
                     focusHome(
-                        viewSize: geo.size,
+                        viewSize: viewSize,
                         layout: layout,
                         targetZoom: zoom,
                         animated: false
@@ -312,26 +323,26 @@ struct TreeCanvasView: View {
                 cancelInitialFocus()
                 // An edit shouldn't yank the viewport: re-fit only when the new layout no
                 // longer fits at the current zoom. Direction changes and ⌘0 always re-fit.
-                applyLayout(makeLayout(), viewSize: geo.size, refit: .ifOverflowing)
+                applyLayout(makeLayout(), viewSize: viewSize, refit: .ifOverflowing)
             }
             .onChange(of: direction) { _, _ in
                 cancelInitialFocus()
-                applyLayout(makeLayout(), viewSize: geo.size, refit: .always)
+                applyLayout(makeLayout(), viewSize: viewSize, refit: .always)
             }
             .onChange(of: fitRequest) { _, _ in
                 cancelInitialFocus()
-                fitToScreen(viewSize: geo.size, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
+                fitToScreen(viewSize: viewSize, treeWidth: layout.totalWidth, treeHeight: layout.totalHeight)
             }
             .onChange(of: selectedPerson?.id) { _, newValue in
                 // Selecting a person (canvas tap, search, inspector link, arrow key) glides
                 // the canvas to center them when they're off-screen, keeping the zoom.
                 if newValue != nil {
                     cancelInitialFocus()
-                    centerOnSelected(viewSize: geo.size, layout: layout)
+                    centerOnSelected(viewSize: viewSize, layout: layout)
                     canvasFocused = true
                 }
             }
-            .onChange(of: geo.size) { _, newSize in
+            .onChange(of: viewSize) { _, newSize in
                 let bounded = constrainedPan(
                     panOffset,
                     viewSize: newSize,
@@ -344,11 +355,11 @@ struct TreeCanvasView: View {
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
                 cancelInitialFocus()
-                applyZoomStep(delta: 0.1, viewSize: geo.size, layout: layout)
+                applyZoomStep(delta: 0.1, viewSize: viewSize, layout: layout)
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
                 cancelInitialFocus()
-                applyZoomStep(delta: -0.1, viewSize: geo.size, layout: layout)
+                applyZoomStep(delta: -0.1, viewSize: viewSize, layout: layout)
             }
             // Arrow keys walk the tree by relationship: ↑ parent, ↓ child,
             // ←/→ spouses and siblings along their visual axis.
@@ -1044,20 +1055,27 @@ private struct MinimapNodes: View, Equatable {
 /// to mouse clicks (`hitTest` returns nil), so card taps and dragging to pan are
 /// untouched — only scrolling while the cursor is over the canvas is consumed.
 struct ScrollWheelZoom: NSViewRepresentable {
+    /// Trailing strip the catcher must not claim. The monitor is installed on the
+    /// window, so once the canvas runs full width underneath the floating inspector it
+    /// would otherwise turn a scroll *inside that card* into a zoom of the tree behind.
+    var ignoreTrailing: CGFloat = 0
     let onScroll: (_ deltaY: CGFloat, _ location: CGPoint) -> Void
 
     func makeNSView(context: Context) -> CatcherView {
         let v = CatcherView()
         v.onScroll = onScroll
+        v.ignoreTrailing = ignoreTrailing
         return v
     }
 
     func updateNSView(_ nsView: CatcherView, context: Context) {
         nsView.onScroll = onScroll
+        nsView.ignoreTrailing = ignoreTrailing
     }
 
     final class CatcherView: NSView {
         var onScroll: ((CGFloat, CGPoint) -> Void)?
+        var ignoreTrailing: CGFloat = 0
         private var monitor: Any?
 
         override var isFlipped: Bool {
@@ -1078,6 +1096,7 @@ struct ScrollWheelZoom: NSViewRepresentable {
                         guard let self, let w = self.window, event.window === w else { return event }
                         let locView = self.convert(event.locationInWindow, from: nil)
                         guard self.bounds.contains(locView) else { return event }
+                        guard locView.x < self.bounds.maxX - self.ignoreTrailing else { return event }
                         let dy = event.hasPreciseScrollingDeltas ? event.scrollingDeltaY : event.deltaY
                         if dy != 0 {
                             self.onScroll?(dy, locView)

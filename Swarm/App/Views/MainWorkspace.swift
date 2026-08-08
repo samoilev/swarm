@@ -65,6 +65,31 @@ struct MainWorkspace: View {
 
     private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
 
+    /// Tree and fan are free canvases: they can be drawn edge to edge and centred in
+    /// whatever is left uncovered. Map and the four list views cannot, so they keep the
+    /// inspector in a column of its own.
+    private var inspectorFloats: Bool { [.tree, .fan].contains(viewMode) }
+
+    /// How much of the canvas's trailing edge the floating card is sitting on.
+    private var canvasTrailingInset: CGFloat {
+        selectedPerson != nil && inspectorFloats ? inspectorWidth : 0
+    }
+
+    private var inspectorPanel: some View {
+        InspectorPanel(
+            person: $selectedPerson,
+            tree: tree,
+            store: store,
+            width: $inspectorWidth,
+            onEdit: { editingPerson = $0 },
+            onDelete: { person in
+                personToDelete = person
+                showDeleteConfirm = true
+            }
+        )
+        .transition(.move(edge: .trailing).combined(with: .opacity))
+    }
+
     private var activeZoom: CGFloat {
         switch viewMode {
         case .tree: treeZoom
@@ -106,14 +131,19 @@ struct MainWorkspace: View {
                 HStack(spacing: 0) {
                     canvasArea
 
-                    if selectedPerson != nil {
-                        InspectorPanel(person: $selectedPerson, tree: tree, store: store, width: $inspectorWidth, onEdit: { person in
-                            editingPerson = person
-                        }, onDelete: { person in
-                            personToDelete = person
-                            showDeleteConfirm = true
-                        })
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    // A list-shaped view gets its own column: its rows run to the edge,
+                    // and anything sliding under floating glass would simply be hidden.
+                    if selectedPerson != nil, !inspectorFloats {
+                        inspectorPanel
+                    }
+                }
+                // A free canvas keeps its full width and the card floats over it, so the
+                // record carries on beneath the glass instead of ending at a seam. The
+                // canvas is told how much of its trailing edge is covered, so fitting and
+                // centring still answer to the part of it the reader can see.
+                .overlay(alignment: .trailing) {
+                    if selectedPerson != nil, inspectorFloats {
+                        inspectorPanel
                     }
                 }
                 // Keyed on *whether* a person is selected, not on which one: the panel
@@ -246,10 +276,18 @@ struct MainWorkspace: View {
                         initialFocusCompleted: $didPerformInitialTreeFocus,
                         showPhotos: showPhotos,
                         morphNamespace: tree.id == morphingTreeID ? morphNamespace : nil,
-                        morphNodeIDs: morphNodeIDs
+                        morphNodeIDs: morphNodeIDs,
+                        trailingInset: canvasTrailingInset
                     )
                 } else if viewMode == .fan {
-                    FanChartView(tree: tree, zoom: $fanZoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
+                    FanChartView(
+                        tree: tree,
+                        zoom: $fanZoom,
+                        selectedPerson: $selectedPerson,
+                        fitRequest: $fitRequest,
+                        maxGen: $fanLevels,
+                        trailingInset: canvasTrailingInset
+                    )
                 } else if viewMode == .map {
                     MapChartView(tree: tree, zoom: $mapZoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                 } else if viewMode == .people {
@@ -288,17 +326,27 @@ struct MainWorkspace: View {
         // drawn a different way.
         .sepiaMotion(SepiaMotion.crossfade, value: viewMode)
         .sepiaMotion(SepiaMotion.state, value: tree.people.isEmpty)
+        // The record may run under the inspector card, but nothing the user is meant to
+        // read or click may: these centre themselves in the uncovered part of the canvas.
         .overlay(alignment: .top) {
-            dualSelectHint.sepiaMotion(SepiaMotion.state, value: dualSelectHintSeen)
+            dualSelectHint
+                .sepiaMotion(SepiaMotion.state, value: dualSelectHintSeen)
+                .padding(.trailing, canvasTrailingInset)
         }
         .overlay(alignment: .top) {
-            relationshipBanner.sepiaMotion(SepiaMotion.state, value: relationshipName)
+            relationshipBanner
+                .sepiaMotion(SepiaMotion.state, value: relationshipName)
+                .padding(.trailing, canvasTrailingInset)
         }
         .overlay(alignment: .top) {
-            searchBar.sepiaMotion(SepiaMotion.state, value: searchActive)
+            searchBar
+                .sepiaMotion(SepiaMotion.state, value: searchActive)
+                .padding(.trailing, canvasTrailingInset)
         }
         .overlay(alignment: .bottom) {
-            firstRelativePrompt.sepiaMotion(SepiaMotion.state, value: tree.people.count)
+            firstRelativePrompt
+                .sepiaMotion(SepiaMotion.state, value: tree.people.count)
+                .padding(.trailing, canvasTrailingInset)
         }
         // Six shortcuts are noise on a tree nobody can navigate yet: ↑↓←→ walks kin,
         // ⌘-click names a relationship, ⌘F searches. All of it needs a second person.

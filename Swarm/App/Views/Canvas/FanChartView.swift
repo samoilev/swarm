@@ -7,6 +7,9 @@ struct FanChartView: View {
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
     @Binding var maxGen: Int
+    /// Width of floating chrome over the trailing edge (the inspector card). The fan
+    /// keeps drawing the whole pane and centres itself in what stays visible.
+    var trailingInset: CGFloat = 0
     private let rootR: CGFloat = 78
     private let ringW: CGFloat = 92
     private let sweep: Double = 180
@@ -19,6 +22,10 @@ struct FanChartView: View {
     var body: some View {
         GeometryReader { geo in
             let layout = computeFan()
+            let viewSize = CGSize(
+                width: max(1, geo.size.width - trailingInset),
+                height: geo.size.height
+            )
 
             ZStack {
                 // Wedges
@@ -63,19 +70,19 @@ struct FanChartView: View {
             .onAppear {
                 magnifyStart = zoom
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                    fitToScreen(viewSize: viewSize, chartWidth: layout.width, chartHeight: layout.height)
                 }
             }
             .onChange(of: zoom) { _, newVal in magnifyStart = newVal }
             .onChange(of: maxGen) { _, _ in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                    fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                    fitToScreen(viewSize: viewSize, chartWidth: layout.width, chartHeight: layout.height)
                 }
             }
             .onChange(of: fitRequest) { _, _ in
-                fitToScreen(viewSize: geo.size, chartWidth: layout.width, chartHeight: layout.height)
+                fitToScreen(viewSize: viewSize, chartWidth: layout.width, chartHeight: layout.height)
             }
-            .onChange(of: geo.size) { _, newSize in
+            .onChange(of: viewSize) { _, newSize in
                 fitToScreen(viewSize: newSize, chartWidth: layout.width, chartHeight: layout.height)
             }
             .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
