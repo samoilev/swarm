@@ -66,7 +66,7 @@ struct ContentView: View {
                     // transaction stays on the long spring. Without that split the canvas
                     // is still transparent for the whole of the morph and the one authored
                     // moment in the app happens where nobody can see it.
-                    .transition(.opacity.animation(SepiaMotion.crossfade))
+                    .transition(.opacity)
 
                 case .creating:
                     // The write reports its own failures inline and leaves the form live,
@@ -102,12 +102,12 @@ struct ContentView: View {
                             insertion: .opacity,
                             removal: .opacity.combined(with: .scale(scale: 1.06))
                         )
-                        .animation(SepiaMotion.crossfade)
                     )
                 }
             }
         }
         .sepiaMotion(SepiaMotion.crossfade, value: languageChoiceCompleted)
+        .sepiaSystemAccessibility()
         .sheet(isPresented: $showHelp) {
             HelpView()
         }
@@ -201,14 +201,17 @@ struct ContentView: View {
         // itself: a folder selection is what carries access to Media/ and Attachments/.
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        var stagedURL: URL?
         do {
             let source = try store.resolveImportSource(url)
             let localCopy = try store.prepareImportPreview(from: source)
-            var result = try GEDCOMCodec.parse(localCopy)
+            stagedURL = localCopy
+            var result = try GEDCOMCodec.preview(localCopy)
             result.report.diagnostics.append(contentsOf: store.stagedImportDiagnostics(for: localCopy))
             pendingImportURL = localCopy
             importPreview = result
         } catch {
+            if let stagedURL { store.discardImportPreview(at: stagedURL) }
             importError = importFailureMessage(error)
         }
     }

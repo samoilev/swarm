@@ -106,7 +106,14 @@ public final class TreeWorkspaceIndexes {
     }
 
     private static func timelineEntries(_ person: Person) -> [TimelineEntry] {
-        person.events.map { event in
+        person.events.filter { event in
+            // Editors keep placeholder event objects while fields are empty. A living
+            // person must not acquire a synthetic undated death row from that draft.
+            if event.kind == .death, person.isLiving {
+                return event.date != nil || event.place != nil || event.value?.isEmpty == false || event.notes?.isEmpty == false
+            }
+            return true
+        }.map { event in
             TimelineEntry(
                 personID: person.id,
                 unionID: nil,

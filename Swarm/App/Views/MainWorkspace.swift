@@ -21,7 +21,9 @@ struct MainWorkspace: View {
     @State private var direction: TreeDirection = .topDown
     @State private var selectedPerson: Person?
     @State private var secondaryPerson: Person?
-    @State private var zoom: CGFloat = 0.8
+    @State private var treeZoom: CGFloat = 0.8
+    @State private var fanZoom: CGFloat = 0.8
+    @State private var mapZoom: CGFloat = 0.85
     @State private var showExportModal = false
     @State private var showAddSheet = false
     @State private var editingPerson: Person?
@@ -62,6 +64,15 @@ struct MainWorkspace: View {
     enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
 
     private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
+
+    private var activeZoom: CGFloat {
+        switch viewMode {
+        case .tree: treeZoom
+        case .fan: fanZoom
+        case .map: mapZoom
+        default: treeZoom
+        }
+    }
 
     /// Exactly the people the library card drew. Only those can receive geometry from it;
     /// everyone else arrives on the entrance cascade the canvas already runs.
@@ -225,7 +236,7 @@ struct MainWorkspace: View {
                     TreeCanvasView(
                         tree: tree,
                         direction: direction,
-                        zoom: $zoom,
+                        zoom: $treeZoom,
                         selectedPerson: $selectedPerson,
                         secondaryPerson: $secondaryPerson,
                         highlightedIds: highlightedBranch,
@@ -238,9 +249,9 @@ struct MainWorkspace: View {
                         morphNodeIDs: morphNodeIDs
                     )
                 } else if viewMode == .fan {
-                    FanChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
+                    FanChartView(tree: tree, zoom: $fanZoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, maxGen: $fanLevels)
                 } else if viewMode == .map {
-                    MapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                    MapChartView(tree: tree, zoom: $mapZoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
                 } else if viewMode == .people {
                     PeopleWorkspaceView(
                         tree: tree,
@@ -876,12 +887,16 @@ struct MainWorkspace: View {
             .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: direction == .topDown))
             .help(L10n.tr("Сверху вниз"))
             .accessibilityLabel(L10n.tr("Направление: сверху вниз"))
+            .accessibilityValue(direction == .topDown ? L10n.tr("Выбрано") : L10n.tr("Не выбрано"))
+            .accessibilityAddTraits(direction == .topDown ? .isSelected : [])
             Button { direction = .leftRight } label: {
                 Image(systemName: "arrow.right")
             }
             .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: direction == .leftRight))
             .help(L10n.tr("Слева направо"))
             .accessibilityLabel(L10n.tr("Направление: слева направо"))
+            .accessibilityValue(direction == .leftRight ? L10n.tr("Выбрано") : L10n.tr("Не выбрано"))
+            .accessibilityAddTraits(direction == .leftRight ? .isSelected : [])
         }
     }
 
@@ -914,14 +929,17 @@ struct MainWorkspace: View {
     /// Step the zoom. On the tree canvas this goes through the same notification the ⌘±
     /// menu items use, so the step is anchored to the viewport centre and springs — the
     /// buttons used to set `zoom` directly, which left `panOffset` untouched and lurched
-    /// the whole tree toward the top-left corner. Fan and map don't observe those
-    /// notifications, so they keep the direct step.
+    /// the whole tree toward the top-left corner. Fan and map use their own bindings.
     private func stepZoom(_ delta: CGFloat) {
         if viewMode == .tree {
             NotificationCenter.default.post(name: delta > 0 ? .zoomInRequested : .zoomOutRequested, object: nil)
         } else {
             withAnimation(reduceMotion ? nil : SepiaMotion.state) {
-                zoom = min(1.6, max(0.25, zoom + delta))
+                if viewMode == .fan {
+                    fanZoom = min(1.6, max(0.25, fanZoom + delta))
+                } else if viewMode == .map {
+                    mapZoom = min(1.6, max(0.25, mapZoom + delta))
+                }
             }
         }
     }
@@ -931,13 +949,13 @@ struct MainWorkspace: View {
             RepeatButton(chrome: .toolbar, action: { stepZoom(-0.1) }) { Image(systemName: "minus") }
                 .help(L10n.tr("Уменьшить масштаб"))
                 .accessibilityLabel(L10n.tr("Уменьшить масштаб"))
-            Text("\(Int(zoom * 100))%")
+            Text("\(Int(activeZoom * 100))%")
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 34)
                 .contentTransition(.numericText())
-                .sepiaMotion(SepiaMotion.state, value: Int(zoom * 100))
-                .accessibilityLabel(L10n.tr("Масштаб \(Int(zoom * 100)) процентов"))
+                .sepiaMotion(SepiaMotion.state, value: Int(activeZoom * 100))
+                .accessibilityLabel(L10n.tr("Масштаб \(Int(activeZoom * 100)) процентов"))
             RepeatButton(chrome: .toolbar, action: { stepZoom(0.1) }) { Image(systemName: "plus") }
                 .help(L10n.tr("Увеличить масштаб"))
                 .accessibilityLabel(L10n.tr("Увеличить масштаб"))

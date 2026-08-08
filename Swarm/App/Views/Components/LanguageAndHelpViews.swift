@@ -62,6 +62,7 @@ struct LanguageChooserView: View {
                         languageButton(.russian)
                         languageButton(.english)
                     }
+                    .focusSection()
                 }
                 .padding(.top, 18)
             }
@@ -83,7 +84,8 @@ struct LanguageChooserView: View {
         }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
-        .onAppear { focusedLanguage = .russian }
+        .defaultFocus($focusedLanguage, .russian)
+        .onAppear { DispatchQueue.main.async { focusedLanguage = .russian } }
     }
 
     /// Both buttons wear the same neutral glass. Neither is pre-selected — the choice is
@@ -101,6 +103,7 @@ struct LanguageChooserView: View {
         }
         .buttonStyle(.glass)
         .buttonBorderShape(.capsule)
+        .focusable()
         .focused($focusedLanguage, equals: language)
         .accessibilityHint(
             language == .russian
@@ -112,6 +115,7 @@ struct LanguageChooserView: View {
 
 struct HelpView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
 
     var body: some View {
         VStack(spacing: 0) {
@@ -155,7 +159,7 @@ struct HelpView: View {
                     )
                     helpSection(
                         L10n.tr("Клавиатура"),
-                        L10n.tr("⌘N — новое дерево, ⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево.")
+                        L10n.tr("⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево.")
                     )
                     helpSection(
                         L10n.tr("Карта и конфиденциальность"),
@@ -174,6 +178,7 @@ struct HelpView: View {
                 .padding(24)
             }
         }
+        .id(languageRaw)
         .frame(width: 680, height: 650)
         .background(SepiaTheme.paper)
     }

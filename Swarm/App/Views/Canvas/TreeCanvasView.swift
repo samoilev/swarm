@@ -838,51 +838,101 @@ private struct TreeContentLayer: View, Equatable {
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Cards (connectors are a separate sibling layer — see TreeConnectorsLayer).
-            ForEach(layout.nodes, id: \.person.id) { node in
-                let isPrimary = selectedId == node.person.id
-                let isSecondary = secondaryId == node.person.id
-                // A card the library drew arrives by growing out of the card, not by
-                // cascading — it is already on screen, at a smaller size, somewhere else.
-                let isMorphing = morphNodeIDs.contains(node.person.id)
-                let shown = didAppear || reduceMotion || isMorphing
-                PersonCardView(
-                    person: node.person,
-                    isSelected: isPrimary,
-                    isSecondarySelected: isSecondary,
-                    isHome: homeId == node.person.id,
-                    isHighlighted: highlightedIds.contains(node.person.id),
-                    lineageLabel: lineageLabels[node.person.id],
-                    showPhoto: showPhotos,
-                    scale: superSample
-                )
-                .equatable()
-                .opacity(shown ? 1 : 0)
-                .scaleEffect(shown ? 1 : 0.94)
-                .sepiaMotion(SepiaMotion.select.delay(entranceDelay(node)), value: shown)
-                .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
-                // Applied after `.position` on purpose: while the morph runs, the card's
-                // geometry comes from the diagram node it grew out of, not from the layout.
-                .modifier(TreeMorphGeometry(
-                    namespace: isMorphing ? morphNamespace : nil,
-                    personId: node.person.id,
-                    isSource: false
-                ))
-                // A person added or deleted rides the layout morph's transaction: the new
-                // card scales in while its new neighbours glide aside, and a removed one
-                // collapses as the tree closes the gap.
-                .transition(.scale(scale: 0.9).combined(with: .opacity))
-                .onTapGesture {
-                    onSelect(node.person, NSEvent.modifierFlags.contains(.command))
+            if layout.nodes.count > 1_200 {
+                largeTreeCanvas
+            } else {
+                ForEach(layout.nodes, id: \.person.id) { node in
+                    let isPrimary = selectedId == node.person.id
+                    let isSecondary = secondaryId == node.person.id
+                    // A card the library drew arrives by growing out of the card, not by
+                    // cascading — it is already on screen, at a smaller size, somewhere else.
+                    let isMorphing = morphNodeIDs.contains(node.person.id)
+                    let shown = didAppear || reduceMotion || isMorphing
+                    PersonCardView(
+                        person: node.person,
+                        isSelected: isPrimary,
+                        isSecondarySelected: isSecondary,
+                        isHome: homeId == node.person.id,
+                        isHighlighted: highlightedIds.contains(node.person.id),
+                        lineageLabel: lineageLabels[node.person.id],
+                        showPhoto: showPhotos,
+                        scale: superSample
+                    )
+                    .equatable()
+                    .opacity(shown ? 1 : 0)
+                    .scaleEffect(shown ? 1 : 0.94)
+                    .sepiaMotion(SepiaMotion.select.delay(entranceDelay(node)), value: shown)
+                    .position(x: (node.x + cardW / 2) * superSample, y: (node.y + cardH / 2) * superSample)
+                    .modifier(TreeMorphGeometry(
+                        namespace: isMorphing ? morphNamespace : nil,
+                        personId: node.person.id,
+                        isSource: false
+                    ))
+                    .transition(.scale(scale: 0.9).combined(with: .opacity))
+                    .onTapGesture {
+                        onSelect(node.person, NSEvent.modifierFlags.contains(.command))
+                    }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(node.person.accessibilityDescription)
+                    .accessibilityHint(L10n.tr("Выбрать персону"))
+                    .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
+                    .accessibilityAction { onSelect(node.person, false) }
                 }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(node.person.accessibilityDescription)
-                .accessibilityHint(L10n.tr("Выбрать персону"))
-                .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
-                .accessibilityAction { onSelect(node.person, false) }
             }
         }
         .frame(width: layout.totalWidth * superSample, height: layout.totalHeight * superSample, alignment: .topLeading)
         .onAppear { didAppear = true }
+    }
+
+    /// Thousands of individual SwiftUI card subtrees overwhelm layout and AX. At this
+    /// scale a batched canvas keeps pan/zoom responsive; search or a click still selects
+    /// a person, and selected/home names remain legible without drawing 5,000 text views.
+    private var largeTreeCanvas: some View {
+        Canvas { context, _ in
+            for node in layout.nodes {
+                let rect = CGRect(
+                    x: node.x * superSample,
+                    y: node.y * superSample,
+                    width: cardW * superSample,
+                    height: cardH * superSample
+                )
+                let id = node.person.id
+                let selected = id == selectedId || id == secondaryId
+                let emphasized = selected || id == homeId || highlightedIds.contains(id)
+                let fill = selected ? SepiaTheme.fanSel : (emphasized ? SepiaTheme.cardBgHover : SepiaTheme.cardBg)
+                let path = Path(roundedRect: rect, cornerRadius: 10 * superSample)
+                context.fill(path, with: .color(fill))
+                context.stroke(
+                    path,
+                    with: .color(selected ? SepiaTheme.accent : SepiaTheme.cardLine),
+                    lineWidth: (selected ? 2 : 1) * superSample
+                )
+                if emphasized {
+                    let label = node.person.displayName(language: .current).isEmpty
+                        ? L10n.tr("Без имени")
+                        : node.person.displayName(language: .current)
+                    context.draw(
+                        Text(label).font(SepiaTheme.ui(size: 12 * superSample)).foregroundStyle(SepiaTheme.ink),
+                        at: CGPoint(x: rect.midX, y: rect.midY),
+                        anchor: .center
+                    )
+                }
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture(coordinateSpace: .local) { location in
+            guard let node = layout.nodes.first(where: { node in
+                CGRect(
+                    x: node.x * superSample,
+                    y: node.y * superSample,
+                    width: cardW * superSample,
+                    height: cardH * superSample
+                ).contains(location)
+            }) else { return }
+            onSelect(node.person, NSEvent.modifierFlags.contains(.command))
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(L10n.tr("Большое дерево: \(layout.nodes.count) персон"))
     }
 }
 

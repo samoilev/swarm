@@ -1,6 +1,11 @@
 import AppKit
 import XCTest
 
+private let swarmUITestHostURL = URL(fileURLWithPath: #filePath)
+    .deletingLastPathComponent()
+    .deletingLastPathComponent()
+    .appendingPathComponent(".build/debug/SwarmUITestHost.app", isDirectory: true)
+
 final class SwarmUITests: XCTestCase {
     private var app: XCUIApplication!
     private var storageURL: URL!
@@ -10,7 +15,7 @@ final class SwarmUITests: XCTestCase {
         storageURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("swarm-ui-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: storageURL, withIntermediateDirectories: true)
-        app = XCUIApplication()
+        app = XCUIApplication(url: swarmUITestHostURL)
         app.launchArguments = ["-appLanguage", "ru", "--storage-folder", storageURL.path]
         app.launch()
     }
@@ -233,7 +238,7 @@ final class SwarmEnglishUITests: XCTestCase {
         storageURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("swarm-ui-en-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: storageURL, withIntermediateDirectories: true)
-        app = XCUIApplication()
+        app = XCUIApplication(url: swarmUITestHostURL)
         app.launchArguments = [
             "-appLanguage", "en",
             "-appLanguageChoiceCompleted", "YES",
@@ -305,4 +310,5 @@ final class SwarmEnglishUITests: XCTestCase {
         app.buttons["English"].click()
         XCTAssertTrue(app.buttons["New Tree"].waitForExistence(timeout: 3))
     }
+
 }

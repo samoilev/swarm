@@ -157,9 +157,17 @@ struct PlacesWorkspaceView: View {
     @State private var unpinnedOnly = false
 
     private var entries: [PlaceWorkspaceEntry] {
-        index.placeEntries.filter {
+        let filtered = index.placeEntries.filter {
             (query.isEmpty || placeName($0.place).localizedCaseInsensitiveContains(query)) &&
                 (!unpinnedOnly || !$0.place.hasValidCoordinates)
+        }
+        guard !query.isEmpty else { return filtered }
+        return filtered.sorted {
+            if $0.place.hasValidCoordinates != $1.place.hasValidCoordinates {
+                return $0.place.hasValidCoordinates
+            }
+            if $0.eventCount != $1.eventCount { return $0.eventCount > $1.eventCount }
+            return placeName($0.place).localizedStandardCompare(placeName($1.place)) == .orderedAscending
         }
     }
 

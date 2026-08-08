@@ -33,11 +33,11 @@ public struct GEDCOMParser {
     ]
     /// Level-1 tags the parser fully models inside a FAM record.
     private static let modeledFamTags: Set<String> = [
-        "HUSB", "WIFE", "CHIL", "MARR", "DIV", "_STAT", "_FTSID"
+        "HUSB", "WIFE", "CHIL", "MARR", "DIV", "_PART", "_SEPR", "_STAT", "_FTSID"
     ]
     /// Sub-tags of a modeled event (BIRT/DEAT/BURI/MARR) the parser consumes; anything
     /// else under the event is preserved as an event extra.
-    private static let modeledEventSubTags: Set<String> = ["DATE", "PLAC", "MAP", "LATI", "LONG", "_COORD"]
+    private static let modeledEventSubTags: Set<String> = ["DATE", "PLAC", "MAP", "LATI", "LONG", "_COORD", "_PLACID"]
     /// Top-level record tags the parser models (everything else is kept verbatim).
     private static let modeledRecordTags: Set<String> = ["HEAD", "INDI", "FAM", "TRLR"]
     private static let modeledHeadTags: Set<String> = [
@@ -48,10 +48,7 @@ public struct GEDCOMParser {
         let raw = try Data(contentsOf: url)
         // GEDCOM files in the wild are often Windows-1251 (common for Russian
         // genealogy) or UTF-16, not UTF-8 — fall back instead of failing the import.
-        let content = String(data: raw, encoding: .utf8)
-            ?? String(data: raw, encoding: .windowsCP1251)
-            ?? String(data: raw, encoding: .utf16)
-            ?? String(decoding: raw, as: UTF8.self)
+        let content = GEDCOMTextDecoder.decode(raw)
         return parse(gedcom: content, mediaFolder: url.deletingLastPathComponent().appendingPathComponent("Media"))
     }
 
@@ -139,7 +136,8 @@ public struct GEDCOMParser {
             records: records,
             indiUUIDs: indiUUIDs,
             famUUIDs: famUUIDs,
-            unions: unions
+            unions: unions,
+            sourceUUIDs: sourceUUIDs
         )
 
         return ParsedTree(
@@ -241,6 +239,24 @@ public struct GEDCOMParser {
         return result
     }
 
+    private static func unmodeledEventBranches(
+        record: [String],
+        kinds: Set<GenealogyEvent.Kind>
+    ) -> [GenealogyEvent.Kind: [[String]]] {
+        var result: [GenealogyEvent.Kind: [[String]]] = [:]
+        for branch in level1Branches(of: record) {
+            guard let head = branch.first.flatMap(parseLine),
+                  let kind = eventKind(forGEDCOMTag: head.tag), kinds.contains(kind) else { continue }
+            for child in branches(in: branch, atLevel: 2) {
+                guard let line = child.first.flatMap(parseLine),
+                      !modeledEventSubTags.contains(line.tag),
+                      line.tag != "NOTE", line.tag != "SOUR" else { continue }
+                result[kind, default: []].append(child)
+            }
+        }
+        return result
+    }
+
     private static func parseCitation(branch: [String], sourceID: UUID) -> Citation {
         var page: String?
         var detail: String?
@@ -311,7 +327,10 @@ public struct GEDCOMParser {
                 case "NSFX": name.suffix = line.value.isEmpty ? nil : line.value
                 case "NICK": name.nickname = line.value.isEmpty ? nil : line.value
                 case "_PATR": name.patronymic = line.value.isEmpty ? nil : line.value
-                case "_MARNM": name.maidenName = flat.surname
+                case "_MARNM":
+                    let married = parseName(line.value)
+                    name.maidenName = name.surname
+                    name.surname = married.surname.isEmpty ? married.given : married.surname
                 case "SOUR":
                     if let pointer = line.pointer, let sourceID = sourceUUIDs[pointer] {
                         name.citations.append(parseCitation(branch: child, sourceID: sourceID))
@@ -391,13 +410,21 @@ public struct GEDCOMParser {
         records: [[String]],
         indiUUIDs: [String: UUID],
         famUUIDs: [String: UUID],
-        unions: [Union]
+        unions: [Union],
+        sourceUUIDs: [String: UUID]
     ) -> [ParentLink] {
+        struct Evidence {
+            var id: UUID?
+            var kind: ParentageKind
+            var citations: [Citation]
+            var notes: String?
+        }
         let unionsByID = Dictionary(uniqueKeysWithValues: unions.map { ($0.id, $0) })
         var explicitKinds: [String: ParentageKind] = [:]
+        var evidence: [String: Evidence] = [:]
         for record in records {
             guard let head = record.first.flatMap(parseLine), head.tag == "INDI",
-                  let indiXref = head.xref, indiUUIDs[indiXref] != nil else { continue }
+                  let indiXref = head.xref, let childID = indiUUIDs[indiXref] else { continue }
             for branch in level1Branches(of: record) {
                 guard let famLine = branch.first.flatMap(parseLine), famLine.tag == "FAMC",
                       let famXref = famLine.pointer else { continue }
@@ -407,6 +434,25 @@ public struct GEDCOMParser {
                     kind = ParentageKind(gedcomValue: line.value)
                 }
                 explicitKinds["\(indiXref)|\(famXref)"] = kind
+                for linkBranch in branches(in: branch, atLevel: 2) {
+                    guard let linkLine = linkBranch.first.flatMap(parseLine), linkLine.tag == "_PLINK",
+                          let parentXref = linkLine.pointer, let parentID = indiUUIDs[parentXref] else { continue }
+                    var parsed = Evidence(id: nil, kind: kind, citations: [], notes: nil)
+                    for child in branches(in: linkBranch, atLevel: 3) {
+                        guard let childLine = child.first.flatMap(parseLine) else { continue }
+                        switch childLine.tag {
+                        case "_FTSID": parsed.id = UUID(uuidString: childLine.value)
+                        case "PEDI", "_PEDI": parsed.kind = ParentageKind(gedcomValue: childLine.value)
+                        case "NOTE": parsed.notes = joinedText(branch: child)
+                        case "SOUR":
+                            if let pointer = childLine.pointer, let sourceID = sourceUUIDs[pointer] {
+                                parsed.citations.append(parseCitation(branch: child, sourceID: sourceID))
+                            }
+                        default: break
+                        }
+                    }
+                    evidence["\(childID)|\(famXref)|\(parentID)"] = parsed
+                }
             }
         }
 
@@ -417,7 +463,16 @@ public struct GEDCOMParser {
                 let childXref = indiUUIDs.first(where: { $0.value == childID })?.key
                 let kind = childXref.flatMap { explicitKinds["\($0)|\(famXref)"] } ?? .biological
                 for parentID in union.partnerIds {
-                    result.append(ParentLink(parentID: parentID, childID: childID, unionID: unionID, kind: kind))
+                    let parsed = evidence["\(childID)|\(famXref)|\(parentID)"]
+                    result.append(ParentLink(
+                        id: parsed?.id ?? UUID(),
+                        parentID: parentID,
+                        childID: childID,
+                        unionID: unionID,
+                        kind: parsed?.kind ?? kind,
+                        citations: parsed?.citations ?? [],
+                        notes: parsed?.notes
+                    ))
                 }
             }
         }
@@ -459,6 +514,8 @@ public struct GEDCOMParser {
         case "OCCU": .occupation
         case "EDUC": .education
         case "MARR": .marriage
+        case "_PART": .partnership
+        case "_SEPR": .separation
         case "DIV": .divorce
         case "RESI": .residence
         case "IMMI": .immigration
@@ -574,11 +631,14 @@ public struct GEDCOMParser {
         var isLiving = true
         var birthLat: Double? = nil
         var birthLon: Double? = nil
+        var birthDatasetID: String? = nil
         var deathLat: Double? = nil
         var deathLon: Double? = nil
+        var deathDatasetID: String? = nil
         var burialPlace: String? = nil
         var burialLat: Double? = nil
         var burialLon: Double? = nil
+        var burialDatasetID: String? = nil
         var occupation: String? = nil
         var education: String? = nil
         var notes: String? = nil
@@ -685,6 +745,15 @@ public struct GEDCOMParser {
                 default: break
                 }
 
+            case 3:
+                guard tagAtLevel[2] == "PLAC", tag == "_PLACID" else { break }
+                switch tagAtLevel[1] ?? "" {
+                case "BIRT": birthDatasetID = value.isEmpty ? nil : value
+                case "DEAT": deathDatasetID = value.isEmpty ? nil : value
+                case "BURI": burialDatasetID = value.isEmpty ? nil : value
+                default: break
+                }
+
             case 4:
                 // Standard coordinates: <EVENT> › PLAC › MAP › LATI/LONG.
                 let ctx1 = tagAtLevel[1] ?? ""
@@ -744,16 +813,33 @@ public struct GEDCOMParser {
         person.gedcomXref = xref
         if let birthGEDCOMDate { person.setStructuredDate(birthGEDCOMDate, for: .birth) }
         if let deathGEDCOMDate { person.setStructuredDate(deathGEDCOMDate, for: .death) }
+        if let birthDatasetID, var place = person.event(ofKind: .birth)?.place {
+            place.datasetID = birthDatasetID; place.isCustom = false
+            person.setStructuredPlace(place, for: .birth)
+        }
+        if let deathDatasetID, var place = person.event(ofKind: .death)?.place {
+            place.datasetID = deathDatasetID; place.isCustom = false
+            person.setStructuredPlace(place, for: .death)
+        }
+        if let burialDatasetID, var place = person.event(ofKind: .burial)?.place {
+            place.datasetID = burialDatasetID; place.isCustom = false
+            person.setStructuredPlace(place, for: .burial)
+        }
         let parsedNames = parseNames(record: record, sourceUUIDs: sourceUUIDs)
         if !parsedNames.isEmpty { person.names = parsedNames }
         let structuredAttachments = parseAttachments(record: record, sourceUUIDs: sourceUUIDs)
         if !structuredAttachments.isEmpty { person.attachments = structuredAttachments }
         let parsedCitations = parseCitations(record: record, sourceUUIDs: sourceUUIDs)
+        let rawEventBranches = unmodeledEventBranches(record: record, kinds: [.occupation, .education])
         person.citations = parsedCitations.person
-        for (kind, citations) in parsedCitations.events where !citations.isEmpty {
+        let detailedEventKinds = Set(parsedCitations.events.keys)
+            .union(parsedCitations.eventNotes.keys)
+            .union(rawEventBranches.keys)
+        for kind in detailedEventKinds {
             var event = person.event(ofKind: kind) ?? GenealogyEvent(kind: kind)
-            event.citations = citations
+            event.citations = parsedCitations.events[kind] ?? []
             if let note = parsedCitations.eventNotes[kind] { event.notes = note }
+            event.rawGEDCOMBranches = rawEventBranches[kind] ?? []
             person.replaceEvent(event)
         }
         let unknowns = collectUnknowns(record: record, modeledTags: modeledIndiTags)
@@ -776,9 +862,21 @@ public struct GEDCOMParser {
         var marriageDate: String? = nil
         var marriageGEDCOMDate: GenealogyDate? = nil
         var marriagePlace: String? = nil
+        var marriageDatasetID: String? = nil
         var divorceDate: GenealogyDate? = nil
         var divorcePlace: String? = nil
+        var divorceDatasetID: String? = nil
+        var partnershipDate: GenealogyDate? = nil
+        var partnershipPlace: String? = nil
+        var partnershipDatasetID: String? = nil
+        var separationDate: GenealogyDate? = nil
+        var separationPlace: String? = nil
+        var separationDatasetID: String? = nil
         var status: String? = nil
+        var hasMarriage = false
+        var hasDivorce = false
+        var hasPartnership = false
+        var hasSeparation = false
         var childrenIds: [UUID] = []
         var tagAtLevel: [Int: String] = [:]
 
@@ -797,8 +895,10 @@ public struct GEDCOMParser {
                 case "HUSB": if let p = line.pointer { partner1Id = indiUUIDs[p] }
                 case "WIFE": if let p = line.pointer { partner2Id = indiUUIDs[p] }
                 case "CHIL": if let p = line.pointer, let cid = indiUUIDs[p] { childrenIds.append(cid) }
-                case "MARR": break
-                case "DIV": status = "divorced"
+                case "MARR": hasMarriage = true
+                case "DIV": hasDivorce = true
+                case "_PART": hasPartnership = true
+                case "_SEPR": hasSeparation = true
                 case "_STAT": status = line.value.isEmpty ? nil : line.value
                 default: break
                 }
@@ -811,6 +911,19 @@ public struct GEDCOMParser {
                 case ("MARR", "PLAC"): marriagePlace = line.value
                 case ("DIV", "DATE"): divorceDate = GenealogyDate(rawGEDCOM: line.value)
                 case ("DIV", "PLAC"): divorcePlace = line.value
+                case ("_PART", "DATE"): partnershipDate = GenealogyDate(rawGEDCOM: line.value)
+                case ("_PART", "PLAC"): partnershipPlace = line.value
+                case ("_SEPR", "DATE"): separationDate = GenealogyDate(rawGEDCOM: line.value)
+                case ("_SEPR", "PLAC"): separationPlace = line.value
+                default: break
+                }
+            case 3:
+                guard tagAtLevel[2] == "PLAC", tag == "_PLACID" else { break }
+                switch tagAtLevel[1] ?? "" {
+                case "MARR": marriageDatasetID = line.value.isEmpty ? nil : line.value
+                case "DIV": divorceDatasetID = line.value.isEmpty ? nil : line.value
+                case "_PART": partnershipDatasetID = line.value.isEmpty ? nil : line.value
+                case "_SEPR": separationDatasetID = line.value.isEmpty ? nil : line.value
                 default: break
                 }
             default: break
@@ -822,31 +935,51 @@ public struct GEDCOMParser {
             partner2Id: partner2Id,
             marriageDate: marriageDate,
             marriagePlace: marriagePlace,
-            status: status,
+            status: status ?? (hasSeparation ? "separated" : (hasDivorce ? "divorced" : nil)),
             childrenIds: childrenIds
         )
         union.id = uuid
         union.gedcomXref = xref
-        if marriageGEDCOMDate != nil || marriagePlace != nil {
+        if hasMarriage || marriageGEDCOMDate != nil || marriagePlace != nil {
             union.setStructuredEvent(GenealogyEvent(
                 kind: .marriage,
                 date: marriageGEDCOMDate,
-                place: marriagePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+                place: marriagePlace.map { PlaceReference(datasetID: marriageDatasetID, displayName: $0, isCustom: marriageDatasetID == nil) }
             ))
         }
-        if status == "divorced" {
+        if hasDivorce || divorceDate != nil || divorcePlace != nil {
             union.setStructuredEvent(GenealogyEvent(
                 kind: .divorce,
                 date: divorceDate,
-                place: divorcePlace.map { PlaceReference(displayName: $0, isCustom: true) }
+                place: divorcePlace.map { PlaceReference(datasetID: divorceDatasetID, displayName: $0, isCustom: divorceDatasetID == nil) }
+            ))
+        }
+        if hasPartnership || partnershipDate != nil || partnershipPlace != nil {
+            union.setStructuredEvent(GenealogyEvent(
+                kind: .partnership,
+                date: partnershipDate,
+                place: partnershipPlace.map { PlaceReference(datasetID: partnershipDatasetID, displayName: $0, isCustom: partnershipDatasetID == nil) }
+            ))
+        }
+        if hasSeparation || separationDate != nil || separationPlace != nil {
+            union.setStructuredEvent(GenealogyEvent(
+                kind: .separation,
+                date: separationDate,
+                place: separationPlace.map { PlaceReference(datasetID: separationDatasetID, displayName: $0, isCustom: separationDatasetID == nil) }
             ))
         }
         let parsedCitations = parseCitations(record: record, sourceUUIDs: sourceUUIDs)
+        let rawEventBranches = unmodeledEventBranches(record: record, kinds: [.divorce, .partnership, .separation])
         union.citations = parsedCitations.person
-        for (kind, citations) in parsedCitations.events where [.marriage, .divorce].contains(kind) {
+        let detailedEventKinds = Set(parsedCitations.events.keys)
+            .union(parsedCitations.eventNotes.keys)
+            .union(rawEventBranches.keys)
+            .filter { [.marriage, .divorce, .partnership, .separation].contains($0) }
+        for kind in detailedEventKinds {
             var event = union.event(ofKind: kind) ?? GenealogyEvent(kind: kind)
-            event.citations = citations
+            event.citations = parsedCitations.events[kind] ?? []
             if let note = parsedCitations.eventNotes[kind] { event.notes = note }
+            event.rawGEDCOMBranches = rawEventBranches[kind] ?? []
             union.setStructuredEvent(event)
         }
         let unknowns = collectUnknowns(record: record, modeledTags: modeledFamTags)

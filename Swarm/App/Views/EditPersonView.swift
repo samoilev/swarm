@@ -26,6 +26,7 @@ struct EditPersonView: View {
     @State private var originalBirthDate: GenealogyDate?
     @State private var birthPlace: String = ""
     @State private var birthCoords: String = ""
+    @State private var originalBirthCoords: String = ""
     @State private var selectedBirthPlace: PlaceEntry?
     @State private var deathDate: String = ""
     @State private var deathDateEnd: String = ""
@@ -33,10 +34,12 @@ struct EditPersonView: View {
     @State private var originalDeathDate: GenealogyDate?
     @State private var deathPlace: String = ""
     @State private var deathCoords: String = ""
+    @State private var originalDeathCoords: String = ""
     @State private var selectedDeathPlace: PlaceEntry?
     @State private var isLiving: Bool = true
     @State private var burialPlace: String = ""
     @State private var burialCoords: String = ""
+    @State private var originalBurialCoords: String = ""
     @State private var selectedBurialPlace: PlaceEntry?
     @State private var occupation: String = ""
     @State private var education: String = ""
@@ -730,13 +733,15 @@ struct EditPersonView: View {
     }
 
     private func attachFiles(_ urls: [URL]) {
-        for url in urls {
-            do {
-                let attachment = try store.prepareAttachment(in: tree, sourceURL: url)
-                editingPerson.attachments.append(attachment)
-                preparedAttachmentIDs.insert(attachment.id)
-            } catch {
-                log.error("Failed to attach \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+        Task { @MainActor in
+            for url in urls {
+                do {
+                    let attachment = try await store.prepareAttachmentAsync(in: tree, sourceURL: url)
+                    editingPerson.attachments.append(attachment)
+                    preparedAttachmentIDs.insert(attachment.id)
+                } catch {
+                    log.error("Failed to attach \(url.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                }
             }
         }
     }
@@ -869,6 +874,7 @@ struct EditPersonView: View {
         birthQualifier = loadedBirth.qualifier
         birthPlace = source.birthPlace ?? ""
         birthCoords = formatCoords(source.birthLat, source.birthLon)
+        originalBirthCoords = birthCoords
         let loadedDeath = displayDate(source.event(ofKind: .death)?.date)
         originalDeathDate = source.event(ofKind: .death)?.date
         deathDate = loadedDeath.text
@@ -876,6 +882,7 @@ struct EditPersonView: View {
         deathQualifier = loadedDeath.qualifier
         deathPlace = source.deathPlace ?? ""
         deathCoords = formatCoords(source.deathLat, source.deathLon)
+        originalDeathCoords = deathCoords
         isLiving = source.isLiving
         burialPlace = source.burialPlace ?? ""
         if let lat = source.burialLat, let lon = source.burialLon {
@@ -883,6 +890,7 @@ struct EditPersonView: View {
         } else {
             burialCoords = ""
         }
+        originalBurialCoords = burialCoords
         occupation = source.occupation ?? ""
         education = source.education ?? ""
         notes = source.notes ?? ""
@@ -890,7 +898,10 @@ struct EditPersonView: View {
     }
 
     private func savePerson() {
-        guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
+        let birthCoordinatesAccepted = birthCoords == originalBirthCoords || validCoordinateText(birthCoords)
+        let deathCoordinatesAccepted = isLiving || deathCoords == originalDeathCoords || validCoordinateText(deathCoords)
+        let burialCoordinatesAccepted = isLiving || burialCoords == originalBurialCoords || validCoordinateText(burialCoords)
+        guard birthCoordinatesAccepted, deathCoordinatesAccepted, burialCoordinatesAccepted else {
             saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
             return
         }
@@ -939,7 +950,7 @@ struct EditPersonView: View {
             person.setStructuredPlace(selectedDeathPlace.placeReference, for: .death)
         }
         person.isLiving = isLiving
-        person.burialPlace = burialPlace.isEmpty ? nil : burialPlace
+        person.burialPlace = isLiving || burialPlace.isEmpty ? nil : burialPlace
         let graveCoords = isLiving ? nil : parseGraveCoords(burialCoords)
         person.burialLat = graveCoords?.lat
         person.burialLon = graveCoords?.lon

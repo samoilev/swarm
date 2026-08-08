@@ -1,5 +1,34 @@
 import Foundation
 
+enum GEDCOMTextDecoder {
+    static func decode(_ data: Data) -> String {
+        let bytes = [UInt8](data.prefix(512))
+        if bytes.starts(with: [0xFF, 0xFE]) || bytes.starts(with: [0xFE, 0xFF]),
+           let text = String(data: data, encoding: .utf16) {
+            return text
+        }
+
+        let pairCount = bytes.count / 2
+        if pairCount >= 4 {
+            let evenNULs = stride(from: 0, to: pairCount * 2, by: 2).filter { bytes[$0] == 0 }.count
+            let oddNULs = stride(from: 1, to: pairCount * 2, by: 2).filter { bytes[$0] == 0 }.count
+            let threshold = max(2, pairCount / 4)
+            if oddNULs >= threshold, oddNULs > evenNULs * 2,
+               let text = String(data: data, encoding: .utf16LittleEndian) {
+                return text
+            }
+            if evenNULs >= threshold, evenNULs > oddNULs * 2,
+               let text = String(data: data, encoding: .utf16BigEndian) {
+                return text
+            }
+        }
+
+        if let text = String(data: data, encoding: .utf8) { return text }
+        if let text = String(data: data, encoding: .windowsCP1251) { return text }
+        return String(decoding: data, as: UTF8.self)
+    }
+}
+
 // MARK: - Lossless GEDCOM syntax tree
 
 public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
@@ -255,9 +284,28 @@ public enum GEDCOMCodec {
     ]
 
     public static func parse(_ url: URL) throws -> ImportResult {
-        let text = try decode(Data(contentsOf: url))
+        let text = GEDCOMTextDecoder.decode(try Data(contentsOf: url))
         let document = try GEDCOMDocument.parse(text)
         return try project(document: document, text: text, baseURL: url.deletingLastPathComponent())
+    }
+
+    /// Preview keeps parse/structure failures inside the import sheet so its blocking
+    /// state is visible and testable. The verified import path still throws and can
+    /// never commit this placeholder result.
+    public static func preview(_ url: URL) throws -> ImportResult {
+        do {
+            return try parse(url)
+        } catch let error as GEDCOMCodecError {
+            let tree = FamilyTree(name: url.deletingPathExtension().lastPathComponent)
+            let document = GEDCOMDocument(records: [])
+            let report = ImportReport(diagnostics: [ImportDiagnostic(
+                id: "gedcom.blocking-structure",
+                severity: .error,
+                message: error.localizedDescription
+            )])
+            tree.importReport = report
+            return ImportResult(tree: tree, document: document, report: report)
+        }
     }
 
     public static func parse(_ text: String, baseURL: URL? = nil) throws -> ImportResult {
@@ -361,6 +409,21 @@ public enum GEDCOMCodec {
             ))
         }
 
+        for record in document.records where record.tag == "INDI" {
+            let livingMarker = record.children.first { $0.tag == "_LIVING" }
+            let markedLiving = livingMarker.map {
+                ["1", "Y", "YES", "TRUE"].contains($0.value.uppercased())
+            } ?? false
+            if markedLiving, record.children.contains(where: { $0.tag == "DEAT" }) {
+                diagnostics.append(ImportDiagnostic(
+                    id: "gedcom.living-death-conflict.\(record.xref ?? record.id.uuidString)",
+                    severity: .warning,
+                    message: L10n.tr("Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки."),
+                    recordXref: record.xref
+                ))
+            }
+        }
+
         var missingMedia: [String] = []
         if let baseURL {
             for node in nodes where node.tag == "FILE" && !node.value.isEmpty {
@@ -396,10 +459,4 @@ public enum GEDCOMCodec {
         return ImportResult(tree: tree, document: document, report: report)
     }
 
-    private static func decode(_ data: Data) -> String {
-        if let text = String(data: data, encoding: .utf8) { return text }
-        if let text = String(data: data, encoding: .windowsCP1251) { return text }
-        if let text = String(data: data, encoding: .utf16) { return text }
-        return String(decoding: data, as: UTF8.self)
-    }
 }

@@ -57,7 +57,8 @@ public final class Union: Identifiable, Codable, Hashable {
     }
 
     public var partnerIds: [UUID] {
-        [partner1Id, partner2Id].compactMap { $0 }
+        var seen = Set<UUID>()
+        return [partner1Id, partner2Id].compactMap { $0 }.filter { seen.insert($0).inserted }
     }
 
     public func event(ofKind kind: GenealogyEvent.Kind) -> GenealogyEvent? {

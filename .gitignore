@@ -10,6 +10,7 @@ dist/
 xcuserdata/
 DerivedData/
 geonames_tmp/
+outputs/e2e-current-source-2026-08-01/swarm-e2e-current-source.xlsx
 
 # Impeccable critique snapshots / notes — local only
 .impeccable/

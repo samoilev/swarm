@@ -79,15 +79,25 @@ struct SepiaTheme {
     static let pinBurial = Color(hex: "6b5b95")
 
     static func display(size: CGFloat) -> Font {
-        .system(size: size, weight: .semibold, design: .serif)
+        .custom("New York", size: size, relativeTo: .title2).weight(.semibold)
     }
 
     static func body(size: CGFloat) -> Font {
-        .system(size: size, design: .serif)
+        .custom("New York", size: size, relativeTo: .body)
     }
 
     static func ui(size: CGFloat) -> Font {
-        .system(size: size, weight: .medium, design: .serif)
+        .custom("New York", size: size, relativeTo: .caption).weight(.medium)
+    }
+}
+
+private struct SepiaSystemAccessibilityModifier: ViewModifier {
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if contrast == .increased { content.contrast(1.16) }
+        else { content }
     }
 }
 
@@ -141,6 +151,12 @@ private struct SepiaMotionModifier<V: Equatable>: ViewModifier {
 }
 
 extension View {
+    /// Strengthens the custom sepia palette for the system Increase Contrast setting.
+    /// Typography uses relative custom fonts above, so Larger Text scales in parallel.
+    func sepiaSystemAccessibility() -> some View {
+        modifier(SepiaSystemAccessibilityModifier())
+    }
+
     /// `.animation(_:value:)` that collapses to an instant change under Reduce Motion.
     func sepiaMotion(_ animation: Animation, value: some Equatable) -> some View {
         modifier(SepiaMotionModifier(animation: animation, value: value))

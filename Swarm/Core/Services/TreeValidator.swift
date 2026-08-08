@@ -147,6 +147,17 @@ public enum TreeValidator {
         }
 
         for person in tree.people {
+            if person.givenNames.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+               person.surname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                issues.append(warning(
+                    id: "person.\(person.id).identity.missing-name",
+                    code: "identity.missing-name",
+                    title: L10n.tr("Не указано имя"),
+                    message: L10n.tr("У персоны не указаны ни имя, ни фамилия."),
+                    personID: person.id,
+                    field: "name"
+                ))
+            }
             validateDates(person.events, owner: "person.\(person.id)", personID: person.id, unionID: nil, into: &issues)
             validateCoordinates(person.events, owner: "person.\(person.id)", personID: person.id, unionID: nil, into: &issues)
             validateChronology(person, into: &issues)
@@ -164,7 +175,7 @@ public enum TreeValidator {
             let allPersonCitations = person.citations + person.events.flatMap(\.citations) +
                 person.names.flatMap(\.citations) + person.attachments.flatMap(\.citations)
             for citation in allPersonCitations where !sourceIDs.contains(citation.sourceID) {
-                issues.append(error(
+                issues.append(warning(
                     id: "person.\(person.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
@@ -217,7 +228,7 @@ public enum TreeValidator {
                 ))
             }
             for citation in union.citations + union.events.flatMap(\.citations) where !sourceIDs.contains(citation.sourceID) {
-                issues.append(error(
+                issues.append(warning(
                     id: "union.\(union.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
@@ -230,7 +241,7 @@ public enum TreeValidator {
 
         for link in tree.parentLinks {
             for citation in link.citations where !sourceIDs.contains(citation.sourceID) {
-                issues.append(error(
+                issues.append(warning(
                     id: "parent-link.\(link.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
@@ -376,7 +387,7 @@ public enum TreeValidator {
         guard let birth = person.event(ofKind: .birth)?.date?.year,
               let death = person.event(ofKind: .death)?.date?.year else { return }
         if death < birth {
-            issues.append(warning(
+            issues.append(error(
                 id: "person.\(person.id).chronology.death-before-birth",
                 code: "chronology.death-before-birth",
                 title: L10n.tr("Хронология требует проверки"),

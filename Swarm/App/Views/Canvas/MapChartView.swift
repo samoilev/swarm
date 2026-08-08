@@ -11,11 +11,15 @@ struct MapChartView: View {
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
 
     var body: some View {
-        if providerRaw == MapProviderSetting.appleMaps.rawValue {
-            AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
-        } else {
-            OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+        Group {
+            if providerRaw == MapProviderSetting.appleMaps.rawValue {
+                AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+            } else {
+                OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+            }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in zoom = min(2.0, zoom + 0.1) }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in zoom = max(0.2, zoom - 0.1) }
     }
 }
 
@@ -25,6 +29,7 @@ struct AppleMapChartView: View {
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 55, longitude: 40),
@@ -95,7 +100,7 @@ struct AppleMapChartView: View {
             let clampedLon = max(0.5, min(newLonDelta, 360))
             currentSpan = MKCoordinateSpan(latitudeDelta: clampedLat, longitudeDelta: clampedLon)
 
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                 mapPosition = .region(MKCoordinateRegion(center: currentCenter, span: currentSpan))
             }
         }
@@ -386,7 +391,7 @@ struct AppleMapChartView: View {
         currentSpan = span
         lastZoom = zoom
 
-        withAnimation(.easeInOut(duration: 0.5)) {
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.5)) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
     }

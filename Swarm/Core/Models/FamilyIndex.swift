@@ -54,7 +54,7 @@ public struct FamilyIndex {
     public func parentEdges(of childID: UUID) -> [ParentEdge] {
         var result: [UUID: ParentEdge] = [:]
         for union in childOfAll[childID] ?? [] {
-            for parentID in union.partnerIds where byId[parentID] != nil {
+            for parentID in union.partnerIds where parentID != childID && byId[parentID] != nil {
                 result[parentID] = ParentEdge(
                     parentID: parentID,
                     childID: childID,
@@ -62,7 +62,7 @@ public struct FamilyIndex {
                 )
             }
         }
-        for link in parentLinksByChild[childID] ?? [] where byId[link.parentID] != nil {
+        for link in parentLinksByChild[childID] ?? [] where link.parentID != childID && byId[link.parentID] != nil {
             result[link.parentID] = ParentEdge(
                 parentID: link.parentID,
                 childID: childID,
@@ -75,7 +75,7 @@ public struct FamilyIndex {
     public func childEdges(of parentID: UUID) -> [ParentEdge] {
         var result: [UUID: ParentEdge] = [:]
         for union in unionsOf[parentID] ?? [] {
-            for childID in union.childrenIds where byId[childID] != nil {
+            for childID in union.childrenIds where childID != parentID && byId[childID] != nil {
                 result[childID] = ParentEdge(
                     parentID: parentID,
                     childID: childID,
@@ -83,7 +83,7 @@ public struct FamilyIndex {
                 )
             }
         }
-        for link in childLinksByParent[parentID] ?? [] where byId[link.childID] != nil {
+        for link in childLinksByParent[parentID] ?? [] where link.childID != parentID && byId[link.childID] != nil {
             result[link.childID] = ParentEdge(
                 parentID: parentID,
                 childID: link.childID,

@@ -756,6 +756,13 @@
 "Используйте схему дерева, список людей, хронологию, места, проверку данных, веер предков и карту. Все режимы работают с одной семейной записью." = "Use the tree diagram, people list, timeline, places, data review, ancestor fan, and map. Every workspace uses the same family record.";
 "Клавиатура" = "Keyboard";
 "⌘N — новое дерево, ⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево." = "⌘N — new tree, ⌘F — find a person, ⌘Z — undo, ⇧⌘Z — redo, ⌘+ and ⌘− — zoom, ⌘0 — fit the tree.";
+"⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево." = "⌘F — find a person, ⌘Z — undo, ⇧⌘Z — redo, ⌘+ and ⌘− — zoom, ⌘0 — fit the tree.";
+"Большое дерево: %@ персон" = "Large tree: %@ people";
+"Выбрано" = "Selected";
+"Не выбрано" = "Not selected";
+"Не указано имя" = "Missing name";
+"У персоны не указаны ни имя, ни фамилия." = "This person has neither a given name nor a surname.";
+"Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки." = "The record is marked living but also contains death data; the original data was preserved for review.";
 "Карта и конфиденциальность" = "Maps and Privacy";
 "Поиск мест и офлайн-карта используют встроенный индекс. Apple Maps получает область просмотра только тогда, когда выбран системный провайдер; имена людей и семейные заметки Apple не передаются." = "Place search and the offline map use the built-in index. Apple Maps receives the visible region only when the system provider is selected; people’s names and family notes are not sent to Apple.";
 "Восстановление и поддержка" = "Recovery and Support";

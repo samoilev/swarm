@@ -240,7 +240,7 @@ struct AddPersonView: View {
             deathDate: isLiving ? nil : (deathDate.isEmpty ? nil : FamilyDate.normalize(deathDate)),
             deathPlace: isLiving ? nil : (deathPlace.isEmpty ? nil : deathPlace),
             isLiving: isLiving,
-            burialPlace: burialPlace.isEmpty ? nil : burialPlace,
+            burialPlace: isLiving || burialPlace.isEmpty ? nil : burialPlace,
             occupation: occupation.isEmpty ? nil : occupation,
             education: education.isEmpty ? nil : education,
             notes: notes.isEmpty ? nil : notes

@@ -612,7 +612,10 @@ public final class TreeStore {
         tree.reconcileParentLinks()
         tree.migrateLegacySources()
 
-        let current = folderMap[tree.id].flatMap { fm.fileExists(atPath: $0.path) ? $0 : nil }
+        if let mappedFolder = folderMap[tree.id], !fm.fileExists(atPath: mappedFolder.path) {
+            throw TreeStoreError.treeFolderMissing
+        }
+        let current = folderMap[tree.id]
         let validation = TreeValidator.validate(tree, context: TreeValidationContext(
             acceptedBaselineIssueIDs: tree.acceptedBaselineIssueIDs,
             treeFolderURL: current
@@ -631,6 +634,16 @@ public final class TreeStore {
             try fm.copyItem(at: current, to: staging)
         } else {
             try fm.createDirectory(at: staging, withIntermediateDirectories: true)
+        }
+        for directory in [
+            staging.appendingPathComponent(Self.mediaName, isDirectory: true),
+            staging.appendingPathComponent(Self.attachmentsName, isDirectory: true),
+            staging.appendingPathComponent(Self.metadataName, isDirectory: true)
+                .appendingPathComponent(Self.historyName, isDirectory: true),
+            staging.appendingPathComponent(Self.metadataName, isDirectory: true)
+                .appendingPathComponent(Self.trashName, isDirectory: true),
+        ] {
+            try fm.createDirectory(at: directory, withIntermediateDirectories: true)
         }
         if let restore = pendingBundleRestores[tree.id] {
             try copyDirectoryContents(from: restore, to: staging)
@@ -1345,6 +1358,50 @@ public final class TreeStore {
         try fm.copyItem(at: sourceURL, to: temporary)
         pendingAttachmentAdds[tree.id, default: []].append(PendingAttachment(temporaryURL: temporary, storedName: storedName))
         return Attachment(storedName: storedName, originalName: originalName)
+    }
+
+    /// Async UI path: copy large bytes away from the main actor, then register the
+    /// completed private staging file in one short state mutation.
+    @MainActor
+    public func prepareAttachmentAsync(in tree: FamilyTree, sourceURL: URL) async throws -> Attachment {
+        try Task.checkCancellation()
+        let pendingFolder = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+        let treeID = tree.id
+        let copy = Task.detached(priority: .userInitiated) {
+            let fm = FileManager.default
+            try fm.createDirectory(at: pendingFolder, withIntermediateDirectories: true)
+            let originalName = sourceURL.lastPathComponent
+            let ext = sourceURL.pathExtension
+            let storedName = ext.isEmpty ? UUID().uuidString : "\(UUID().uuidString).\(ext)"
+            let temporary = pendingFolder.appendingPathComponent(storedName)
+            let scoped = sourceURL.startAccessingSecurityScopedResource()
+            defer { if scoped { sourceURL.stopAccessingSecurityScopedResource() } }
+            do {
+                try Task.checkCancellation()
+                try fm.copyItem(at: sourceURL, to: temporary)
+                try Task.checkCancellation()
+                return (temporary, storedName, originalName)
+            } catch {
+                try? fm.removeItem(at: temporary)
+                throw error
+            }
+        }
+        let prepared = try await withTaskCancellationHandler {
+            try await copy.value
+        } onCancel: {
+            copy.cancel()
+        }
+        do {
+            try Task.checkCancellation()
+        } catch {
+            try? FileManager.default.removeItem(at: prepared.0)
+            throw error
+        }
+        pendingAttachmentAdds[treeID, default: []].append(PendingAttachment(
+            temporaryURL: prepared.0,
+            storedName: prepared.1
+        ))
+        return Attachment(storedName: prepared.1, originalName: prepared.2)
     }
 
     public func discardPreparedAttachment(_ attachment: Attachment, in tree: FamilyTree) {

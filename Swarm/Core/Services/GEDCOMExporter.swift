@@ -116,25 +116,25 @@ public struct GEDCOMSerializer {
                 to: &lines
             )
             appendPersonEvent(
-                p.event(ofKind: .death),
+                p.isLiving ? nil : p.event(ofKind: .death),
                 kind: .death,
-                fallbackDate: p.deathDate,
-                fallbackPlace: p.deathPlace,
-                fallbackLat: p.deathLat,
-                fallbackLon: p.deathLon,
-                extras: p.eventExtras["DEAT"] ?? [],
+                fallbackDate: p.isLiving ? nil : p.deathDate,
+                fallbackPlace: p.isLiving ? nil : p.deathPlace,
+                fallbackLat: p.isLiving ? nil : p.deathLat,
+                fallbackLon: p.isLiving ? nil : p.deathLon,
+                extras: p.isLiving ? [] : (p.eventExtras["DEAT"] ?? []),
                 force: !p.isLiving,
                 sourceXref: sourceXref,
                 to: &lines
             )
             appendPersonEvent(
-                p.event(ofKind: .burial),
+                p.isLiving ? nil : p.event(ofKind: .burial),
                 kind: .burial,
                 fallbackDate: nil,
-                fallbackPlace: p.burialPlace,
-                fallbackLat: p.burialLat,
-                fallbackLon: p.burialLon,
-                extras: p.eventExtras["BURI"] ?? [],
+                fallbackPlace: p.isLiving ? nil : p.burialPlace,
+                fallbackLat: p.isLiving ? nil : p.burialLat,
+                fallbackLon: p.isLiving ? nil : p.burialLon,
+                extras: p.isLiving ? [] : (p.eventExtras["BURI"] ?? []),
                 force: false,
                 sourceXref: sourceXref,
                 to: &lines
@@ -198,15 +198,27 @@ public struct GEDCOMSerializer {
             for union in idx.unionsOf[p.id] ?? [] {
                 if let fx = famXref[union.id] { lines.append("1 FAMS @\(fx)@") }
             }
-            if let pu = idx.childOf[p.id], let fx = famXref[pu.id] {
+            for pu in idx.childOfAll[p.id] ?? [] {
+                guard let fx = famXref[pu.id] else { continue }
                 lines.append("1 FAMC @\(fx)@")
-                let kinds = Set(tree.parentLinks.filter { $0.childID == p.id && $0.unionID == pu.id }.map(\.kind))
+                let links = tree.parentLinks.filter { $0.childID == p.id && $0.unionID == pu.id }
+                let kinds = Set(links.map(\.kind))
                 let kind = kinds.count == 1 ? kinds.first! : (kinds.isEmpty ? .biological : .uncertain)
                 switch kind {
                 case .biological, .adoptive, .foster:
                     lines.append("2 PEDI \(kind.gedcomValue)")
                 case .step, .uncertain:
                     lines.append("2 _PEDI \(kind.gedcomValue)")
+                }
+                for link in links {
+                    guard let parentXref = indiXref[link.parentID] else { continue }
+                    lines.append("2 _PLINK @\(parentXref)@")
+                    lines.append("3 _FTSID \(link.id.uuidString)")
+                    lines.append("3 PEDI \(link.kind.gedcomValue)")
+                    if let notes = link.notes, !notes.isEmpty {
+                        appendMultiline(level: 3, tag: "NOTE", value: notes, to: &lines)
+                    }
+                    appendCitations(link.citations, level: 3, sourceXref: sourceXref, to: &lines)
                 }
             }
 
@@ -358,6 +370,7 @@ public struct GEDCOMSerializer {
             place?.displayName ?? fallbackPlace,
             lat: place?.latitude ?? fallbackLat,
             lon: place?.longitude ?? fallbackLon,
+            datasetID: place?.datasetID,
             to: &lines
         )
         if let type = event?.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
@@ -382,7 +395,9 @@ public struct GEDCOMSerializer {
         else { lines.append("1 \(event.kind.gedcomTag)") }
         if event.kind == .custom, let type = event.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
         if let date = event.date { lines.append("2 DATE \(date.canonicalGEDCOMValue)") }
-        if let place = event.place { appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, to: &lines) }
+        if let place = event.place {
+            appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, datasetID: place.datasetID, to: &lines)
+        }
         if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
         appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
         for branch in event.rawGEDCOMBranches { lines.append(contentsOf: branch) }
@@ -397,7 +412,9 @@ public struct GEDCOMSerializer {
     ) {
         lines.append("1 \(event.kind.gedcomTag)")
         if let date = event.date { lines.append("2 DATE \(date.canonicalGEDCOMValue)") }
-        if let place = event.place { appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, to: &lines) }
+        if let place = event.place {
+            appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, datasetID: place.datasetID, to: &lines)
+        }
         if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
         appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
         for mediaID in event.mediaIDs {
@@ -556,9 +573,16 @@ public struct GEDCOMSerializer {
     /// `3 MAP / 4 LATI / 4 LONG` triple so other genealogy software reads them.
     /// If coordinates exist but there is no place to host a MAP, fall back to the
     /// private `2 _COORD lat lon` so the app's own data still round-trips.
-    private static func appendPlace(_ place: String?, lat: Double?, lon: Double?, to lines: inout [String]) {
+    private static func appendPlace(
+        _ place: String?,
+        lat: Double?,
+        lon: Double?,
+        datasetID: String? = nil,
+        to lines: inout [String]
+    ) {
         if let place, !place.isEmpty {
             lines.append("2 PLAC \(place)")
+            if let datasetID, !datasetID.isEmpty { lines.append("3 _PLACID \(datasetID)") }
             if let lat, let lon {
                 lines.append("3 MAP")
                 lines.append("4 LATI \(gedLat(lat))")

@@ -14,6 +14,7 @@ struct FanChartView: View {
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
     @State private var magnifyStart: CGFloat = 1.0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         GeometryReader { geo in
@@ -25,7 +26,7 @@ struct FanChartView: View {
                     FanWedgeShape(wedge: wedge, cx: layout.cx, cy: layout.cy, isSelected: selectedPerson?.id == wedge.personId, isHome: tree.homePersonId == wedge.personId)
                         .onTapGesture {
                             if let pid = wedge.personId, let p = tree.person(byId: pid) {
-                                withAnimation(.easeInOut(duration: 0.15)) { selectedPerson = p }
+                                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.15)) { selectedPerson = p }
                             }
                         }
                         .accessibilityElement(children: .ignore)
@@ -77,6 +78,12 @@ struct FanChartView: View {
             .onChange(of: geo.size) { _, newSize in
                 fitToScreen(viewSize: newSize, chartWidth: layout.width, chartHeight: layout.height)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
+                zoom = min(2.0, zoom + 0.1)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
+                zoom = max(0.2, zoom - 0.1)
+            }
             .background {
                 Color.clear
                     .contentShape(Rectangle())
@@ -96,7 +103,7 @@ struct FanChartView: View {
         let scaledH = chartHeight * newZoom
         let offsetX = (viewSize.width - scaledW) / 2
         let offsetY = (viewSize.height - scaledH) / 2
-        withAnimation(.easeInOut(duration: 0.3)) {
+        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
             zoom = newZoom
             panOffset = CGSize(width: offsetX, height: offsetY)
             dragStart = CGSize(width: offsetX, height: offsetY)
@@ -272,6 +279,8 @@ struct FanWedgeShape: View {
                         .font(SepiaTheme.display(size: 13))
                         .fontWeight(.semibold)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.45)
+                        .allowsTightening(true)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
                             .font(SepiaTheme.body(size: 9))
@@ -279,6 +288,7 @@ struct FanWedgeShape: View {
                     }
                 }
                 .foregroundColor(SepiaTheme.ink)
+                .frame(width: wedge.rOuter * 1.55)
                 .position(x: cx, y: cy - wedge.rOuter * 0.4)
             }
         }
@@ -312,6 +322,8 @@ struct FanWedgeShape: View {
                         .font(SepiaTheme.display(size: 13))
                         .fontWeight(.semibold)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.45)
+                        .allowsTightening(true)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
                             .font(SepiaTheme.body(size: 9))
@@ -319,6 +331,7 @@ struct FanWedgeShape: View {
                     }
                 }
                 .foregroundColor(SepiaTheme.ink)
+                .frame(width: wedge.rOuter * 1.55)
                 .position(x: cx, y: cy + wedge.rOuter * 0.4)
             }
         }
@@ -344,6 +357,7 @@ struct FanWedgeShape: View {
                 let arcLen = midR * CGFloat(arcSpan * .pi / 180)
 
                 wedgeText(person: person, arcLen: arcLen, gen: wedge.gen)
+                    .frame(width: max(28, min(arcLen * 0.78, (wedge.rOuter - wedge.rInner) * 1.65)))
                     .rotationEffect(textAngle(midA))
                     .position(x: tx, y: ty)
             }
@@ -362,6 +376,8 @@ struct FanWedgeShape: View {
                     .fontWeight(.medium)
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.45)
+                    .allowsTightening(true)
                 if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                     Text("(\(maiden))".uppercased())
                         .font(SepiaTheme.ui(size: max(6, fontSize - 1.5)))
@@ -383,6 +399,8 @@ struct FanWedgeShape: View {
                     .font(SepiaTheme.ui(size: max(7, fontSize - 0.5)))
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.45)
+                    .allowsTightening(true)
                 if !person.yearFrom.isEmpty {
                     Text(person.yearFrom)
                         .font(SepiaTheme.body(size: max(6, fontSize - 2.5)))
@@ -397,6 +415,8 @@ struct FanWedgeShape: View {
                     .font(SepiaTheme.ui(size: max(7, fontSize - 1)))
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.45)
+                    .allowsTightening(true)
                 if !person.yearFrom.isEmpty {
                     Text(person.yearFrom)
                         .font(SepiaTheme.body(size: max(5.5, fontSize - 3)))

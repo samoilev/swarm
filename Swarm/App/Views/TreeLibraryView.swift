@@ -793,7 +793,6 @@ struct TreeCardView: View {
     var onDelete: (() -> Void)?
 
     @Environment(\.locale) private var locale
-    @Environment(\.isFocused) private var isFocused
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
 
@@ -838,21 +837,8 @@ struct TreeCardView: View {
                 // The whole tile is the target. Without this the hit area is only the
                 // text and the plate, and the empty half of a short caption does nothing.
                 .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    // Keyboard focus is drawn explicitly: `.plain` opts out of the system
-                    // ring, and without this the grid is untraversable for anyone not
-                    // using a pointer.
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .strokeBorder(SepiaTheme.accent, lineWidth: 2)
-                        .padding(-3)
-                        .opacity(isFocused ? 1 : 0)
-                )
             }
             .buttonStyle(.plain)
-            .focusable()
-            // macOS draws its own blue ring over the accent one above, and two rings on
-            // one card is one ring too many. The sepia ring belongs to this app.
-            .focusEffectDisabled()
             .accessibilityLabel(accessibilityDescription)
             .accessibilityHint(L10n.tr("Открыть дерево"))
 
@@ -872,7 +858,6 @@ struct TreeCardView: View {
         .offset(y: isHovering ? -2 : 0)
         .contextMenu { menuItems }
         .sepiaMotion(SepiaMotion.hover, value: isHovering)
-        .sepiaMotion(SepiaMotion.select, value: isFocused)
         .onHover { isHovering = $0 }
     }
 

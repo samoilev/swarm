@@ -201,13 +201,20 @@ struct PersonCardsPDFExporter {
     }
 
     private static func drawFooter(_ person: Person) {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineBreakMode = .byTruncatingTail
         let attr: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 8.5),
-            .foregroundColor: NSColor(SepiaTheme.inkSoft)
+            .foregroundColor: NSColor(SepiaTheme.inkSoft),
+            .paragraphStyle: paragraph,
         ]
-        NSAttributedString(string: person.displayName(language: .current), attributes: attr)
-            .draw(at: NSPoint(x: margin, y: footerBaseline))
         let brand = NSAttributedString(string: L10n.tr("Swarm"), attributes: attr)
+        let availableNameWidth = max(0, pageW - margin * 2 - brand.size().width - 16)
+        NSAttributedString(string: person.displayName(language: .current), attributes: attr)
+            .draw(
+                with: NSRect(x: margin, y: footerBaseline, width: availableNameWidth, height: 12),
+                options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine]
+            )
         brand.draw(at: NSPoint(x: pageW - margin - brand.size().width, y: footerBaseline))
     }
 
