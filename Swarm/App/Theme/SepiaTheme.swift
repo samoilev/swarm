@@ -94,7 +94,6 @@ struct SepiaTheme {
 private struct SepiaSystemAccessibilityModifier: ViewModifier {
     @Environment(\.colorSchemeContrast) private var contrast
 
-    @ViewBuilder
     func body(content: Content) -> some View {
         if contrast == .increased { content.contrast(1.16) }
         else { content }

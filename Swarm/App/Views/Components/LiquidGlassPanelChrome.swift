@@ -102,6 +102,7 @@ struct SepiaWordmark: View {
             Text("Swarm")
                 .font(SepiaTheme.display(size: 21))
                 .foregroundStyle(SepiaTheme.ink)
+                .offset(y: 1)
 
             if let label, !label.isEmpty {
                 HStack(alignment: .center, spacing: 9) {

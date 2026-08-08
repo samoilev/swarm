@@ -796,8 +796,8 @@ struct TreeCardView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
 
-    static let height: CGFloat = 182
-    static let plateHeight: CGFloat = 80
+    static let height: CGFloat = 198
+    static let plateHeight: CGFloat = 96
 
     private var summary: TreeSummary { TreeSummary(tree: tree) }
 
@@ -886,8 +886,8 @@ struct TreeCardView: View {
                 size: 9,
                 color: SepiaTheme.inkSoft.opacity(0.75)
             )
-            .padding(.leading, 10)
-            .padding(.top, 9)
+            .padding(.leading, 11)
+            .padding(.top, 10)
         }
         .overlay(alignment: .bottom) {
             Rectangle().fill(.white.opacity(0.5)).frame(height: 1)
@@ -898,7 +898,7 @@ struct TreeCardView: View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text(tree.name)
-                    .font(SepiaTheme.display(size: 18))
+                    .font(SepiaTheme.display(size: 21))
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
@@ -932,7 +932,7 @@ struct TreeCardView: View {
                 .lineLimit(1)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(.top, 11)
+        .padding(.top, 13)
         .padding(.horizontal, 14)
         .padding(.bottom, 12)
     }

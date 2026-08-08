@@ -284,7 +284,7 @@ public enum GEDCOMCodec {
     ]
 
     public static func parse(_ url: URL) throws -> ImportResult {
-        let text = GEDCOMTextDecoder.decode(try Data(contentsOf: url))
+        let text = try GEDCOMTextDecoder.decode(Data(contentsOf: url))
         let document = try GEDCOMDocument.parse(text)
         return try project(document: document, text: text, baseURL: url.deletingLastPathComponent())
     }

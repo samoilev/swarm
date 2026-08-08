@@ -87,7 +87,7 @@ struct DefectRegressionTests {
         #expect(parsed.parentLinks.first?.citations.first?.page == "12")
     }
 
-    @Test func validationSeveritiesMissingNamesAndMalformedLinksAreSafe() throws {
+    @Test func validationSeveritiesMissingNamesAndMalformedLinksAreSafe() {
         let tree = FamilyTree(name: "Validation")
         let nameless = Person()
         nameless.events = [

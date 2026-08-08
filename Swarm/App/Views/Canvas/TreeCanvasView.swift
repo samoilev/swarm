@@ -838,7 +838,7 @@ private struct TreeContentLayer: View, Equatable {
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Cards (connectors are a separate sibling layer — see TreeConnectorsLayer).
-            if layout.nodes.count > 1_200 {
+            if layout.nodes.count > 1200 {
                 largeTreeCanvas
             } else {
                 ForEach(layout.nodes, id: \.person.id) { node in
