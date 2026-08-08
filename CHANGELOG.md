@@ -11,6 +11,25 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.0.0] — 2026-08-08
+
+Swarm is rebuilt on native macOS 26 chrome throughout, so this release **requires macOS
+26 or later** and drops support for earlier systems.
+
+### Added
+
+- Tree cards in the library draw a scaled picture of the record itself, taken from the
+  layout engine and cached on the tree store, instead of one arbitrary person's
+  photograph standing in for a whole family.
+- Opening a tree hands the card's nodes to the canvas through matched geometry, so the
+  record grows out of the card rather than cutting to it.
+- Creating a tree takes the whole window, with the card it will produce drawn live
+  beside the form.
+- Exact lineage connections and shortest-path relationship highlighting between two
+  selected people.
+- Regression coverage for lineage, relationship paths, layout, localization, GEDCOM
+  round-trips, and the UI.
+
 ### Changed
 
 - The opened-tree workspace now uses the native macOS 26 unified toolbar and Liquid
@@ -21,6 +40,21 @@ single English record of what changed and when.
   Liquid Glass headers, selection controls, and action groups. Language selection has
   been removed from tree creation and remains available in Settings.
 - Selecting two people now emphasizes only their shortest relationship path.
+- The library shares the unified toolbar the tree workspace already uses, with the
+  traffic lights inline. It used to draw its own title under a stock title bar, so one
+  window read as two applications.
+- The person inspector floats over the canvas instead of sitting in an opaque slab
+  welded to the window edge. Tree and fan draw their full width beneath it, and both
+  take a trailing inset so fit, focus and pan bounds still measure the uncovered
+  viewport. Map and the list views keep their own column, where rows sliding under
+  glass would be lost.
+- The inspector header puts back, edit and close on one row, with a rounded portrait
+  and a placeholder, and moves delete past the record where it is labelled.
+- Larger tree previews and titles in the library, with adjusted generation labels and
+  a realigned toolbar wordmark.
+- Compact toolbar overflow and the library's action controls.
+- Keyboard navigation, canvas bounds, the minimap, and initial centering.
+- Deployment targets and release metadata raised to macOS 26.
 
 ### Fixed
 
@@ -28,6 +62,19 @@ single English record of what changed and when.
   unrelated part of a shared sibling connector.
 - Selected and lineage cards retain their opaque archival fills, and the command-hint
   pill and minimap keep crisp, continuous edges.
+- Importing accepts an archive folder, not only the `.ged` file inside it.
+- GEDCOM names, places, evidence, events, and UTF-16 data survive a round trip.
+- Validation, archives, attachments, and living-person handling are hardened.
+- Scrolling inside the floating inspector no longer zooms the tree behind it. The
+  window-wide scroll monitor only checked bounds, so a full-width canvas caught scrolls
+  meant for the card; it now skips the covered trailing strip.
+
+### Removed
+
+- ⌘N and File ▸ New Tree. Creating a record is rare and deliberate, and a shortcut
+  firing a full-window takeover over an open tree would throw the reader out of one
+  without asking. The library's own button is the only door in.
+- Redundant language selectors and legacy interface copy.
 
 ## [2.3.0] — 2026-07-29
 
@@ -446,7 +493,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v2.2.1...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.0.0...HEAD
+[3.0.0]: https://github.com/samoilev/swarm/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/samoilev/swarm/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/samoilev/swarm/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/samoilev/swarm/compare/v2.1.0...v2.2.0
