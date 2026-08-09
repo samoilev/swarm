@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm — family trees, offline, on your own disk. macOS 26+, GEDCOM 5.5.1, MIT." />
+  <img src="docs/swarm-readme-banner-2560.png" width="100%" alt="Swarm" />
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
