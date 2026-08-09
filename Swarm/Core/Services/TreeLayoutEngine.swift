@@ -5,6 +5,9 @@ import Foundation
 public enum LayoutDirection: Equatable {
     case topDown
     case leftRight
+    /// Ancestors at the bottom, descendants climbing — the shape most printed
+    /// genealogies use. Geometrically a top-down layout flipped about its own centre.
+    case bottomUp
 }
 
 /// A laid-out person card position (top-left origin).
@@ -104,6 +107,13 @@ public struct TreeLayoutEngine {
     }
 
     public func layout(tree: FamilyTree, direction: LayoutDirection) -> TreeLayout {
+        // Bottom-up is top-down seen in a mirror. Flipping the finished drawing keeps
+        // one copy of the tidy-tree maths instead of threading a sign through every
+        // depth, bus and elbow calculation below.
+        if direction == .bottomUp {
+            return flippedVertically(layout(tree: tree, direction: .topDown))
+        }
+
         // Bind config to locals so the algorithm body reads as a self-contained unit.
         let cardW = config.cardW
         let cardH = config.cardH
@@ -698,6 +708,38 @@ public struct TreeLayoutEngine {
             highlightRoutes: highlightRoutes,
             totalWidth: max(totalWidth, 600),
             totalHeight: max(totalHeight, 400)
+        )
+    }
+
+    /// Mirror a finished layout about the horizontal centre line of its own canvas.
+    /// Cards are placed by their top-left corner, so a node's flipped origin has to
+    /// account for the card's own height; bare points do not.
+    private func flippedVertically(_ layout: TreeLayout) -> TreeLayout {
+        let height = layout.totalHeight
+        let cardH = config.cardH
+        func flip(_ point: CGPoint) -> CGPoint {
+            CGPoint(x: point.x, y: height - point.y)
+        }
+
+        return TreeLayout(
+            nodes: layout.nodes.map {
+                TreeNode(person: $0.person, x: $0.x, y: height - $0.y - cardH)
+            },
+            links: layout.links.map { link in
+                TreeLink(
+                    id: link.id,
+                    segments: link.segments.map { LinkSegment(from: flip($0.from), to: flip($0.to)) }
+                )
+            },
+            highlightRoutes: layout.highlightRoutes.map { route in
+                TreeHighlightRoute(
+                    id: route.id,
+                    segments: route.segments.map { LinkSegment(from: flip($0.from), to: flip($0.to)) },
+                    connections: route.connections
+                )
+            },
+            totalWidth: layout.totalWidth,
+            totalHeight: height
         )
     }
 }

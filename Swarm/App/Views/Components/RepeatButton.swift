@@ -37,25 +37,36 @@ private struct RepeatIconButtonStyle: ButtonStyle {
         @State private var mouseUpMonitor: Any?
 
         var body: some View {
-            configuration.label
-                .frame(width: 30, height: 30)
-                .foregroundColor(SepiaTheme.ink)
-                .background(chrome == .sepia ? SepiaTheme.btnBg : Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 7)
-                        .strokeBorder(
-                            chrome == .sepia ? SepiaTheme.cardLine : Color.clear,
-                            lineWidth: 1
-                        )
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 7))
-                .opacity(configuration.isPressed ? 0.8 : 1.0)
-                .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
-                .sepiaMotion(SepiaMotion.press, value: configuration.isPressed)
+            sized
                 .onChange(of: configuration.isPressed) { _, pressed in
                     if pressed { start() } else { stop() }
                 }
                 .onDisappear { stop() }
+        }
+
+        @ViewBuilder private var sized: some View {
+            switch chrome {
+            case .toolbar:
+                // In the toolbar these steppers stand beside plain icon buttons, so they
+                // answer the pointer the same way: one hover/press disc, no border.
+                configuration.label
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(SepiaTheme.ink)
+                    .modifier(WorkspaceToolbarIconChrome(isPressed: configuration.isPressed))
+            case .sepia:
+                configuration.label
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(SepiaTheme.ink)
+                    .background(SepiaTheme.btnBg)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 7)
+                            .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 7))
+                    .opacity(configuration.isPressed ? 0.8 : 1.0)
+                    .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
+                    .sepiaMotion(SepiaMotion.press, value: configuration.isPressed)
+            }
         }
 
         private func start() {

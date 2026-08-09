@@ -74,7 +74,7 @@ struct LayoutEngineTests {
         #expect(layout.totalWidth > 0 && layout.totalHeight > 0)
     }
 
-    @Test(arguments: [LayoutDirection.topDown, .leftRight])
+    @Test(arguments: [LayoutDirection.topDown, .bottomUp, .leftRight])
     func childBranchesCarryIndependentHighlightRoutes(direction: LayoutDirection) throws {
         let (t, people) = familyTree()
         let layout = TreeLayoutEngine(config: config).layout(tree: t, direction: direction)
@@ -97,7 +97,7 @@ struct LayoutEngineTests {
             let drop = route.segments[2]
             #expect(stem.to == branch.from)
             #expect(branch.to == drop.from)
-            if direction == .topDown {
+            if direction != .leftRight {
                 #expect(branch.from.y == branch.to.y)
                 #expect(drop.from.x == drop.to.x)
             } else {
@@ -112,6 +112,38 @@ struct LayoutEngineTests {
         #expect(marriage.connections == [
             FamilyConnection(parents[0].id, parents[1].id),
         ])
+    }
+
+    /// Bottom-up is the top-down drawing mirrored: same canvas, same columns, same
+    /// spacing — parents below their children instead of above.
+    @Test func bottomUpMirrorsTopDown() throws {
+        let (t, people) = familyTree()
+        let engine = TreeLayoutEngine(config: config)
+        let down = engine.layout(tree: t, direction: .topDown)
+        let up = engine.layout(tree: t, direction: .bottomUp)
+
+        #expect(up.totalWidth == down.totalWidth)
+        #expect(up.totalHeight == down.totalHeight)
+        #expect(up.nodes.count == down.nodes.count)
+
+        for upNode in up.nodes {
+            let downNode = try #require(down.nodes.first { $0.person.id == upNode.person.id })
+            #expect(upNode.x == downNode.x)
+            #expect(upNode.y == down.totalHeight - downNode.y - config.cardH)
+        }
+
+        // The point of the mode: a parent sits below their child, not above.
+        let dad = try #require(up.nodes.first { $0.person.id == people[0].id })
+        let child = try #require(up.nodes.first { $0.person.id == people[2].id })
+        #expect(dad.y > child.y)
+
+        // Cards must not collide after the flip either.
+        for i in 0 ..< up.nodes.count {
+            for j in (i + 1) ..< up.nodes.count {
+                let a = rect(up.nodes[i]).insetBy(dx: 0.5, dy: 0.5)
+                #expect(a.intersects(rect(up.nodes[j])) == false)
+            }
+        }
     }
 
     @Test func disconnectedPeopleAreStillPlaced() {

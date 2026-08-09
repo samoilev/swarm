@@ -708,7 +708,13 @@ struct TreeCanvasView: View {
 
     /// Build the tidy-tree layout via the pure engine in SwarmCore.
     private func makeLayout() -> TreeLayout {
-        TreeLayoutEngine().layout(tree: tree, direction: direction == .leftRight ? .leftRight : .topDown)
+        // Qualified: SwiftUI ships its own LayoutDirection (leading/trailing).
+        let engineDirection: SwarmCore.LayoutDirection = switch direction {
+        case .topDown: .topDown
+        case .bottomUp: .bottomUp
+        case .leftRight: .leftRight
+        }
+        return TreeLayoutEngine().layout(tree: tree, direction: engineDirection)
     }
 }
 

@@ -61,7 +61,7 @@ struct MainWorkspace: View {
     @State private var workspaceWidth: CGFloat = 1200
 
     enum ViewMode: String, CaseIterable { case tree, fan, map, people, timeline, places, review }
-    enum TreeDirection: String { case topDown = "TB", leftRight = "LR" }
+    enum TreeDirection: String { case topDown = "TB", bottomUp = "BT", leftRight = "LR" }
 
     private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
 
@@ -741,6 +741,16 @@ struct MainWorkspace: View {
         }
         .sharedBackgroundVisibility(.visible)
 
+        // The overflow sits beside the controls it stands in for, not across the bar
+        // next to the save clock — it is the tail of this group, not a trailing action.
+        if usesCompactToolbar {
+            ToolbarSpacer(.fixed)
+            ToolbarItem(placement: .automatic) {
+                compactToolbarOverflow
+            }
+            .sharedBackgroundVisibility(.hidden)
+        }
+
         if !usesCompactToolbar, viewMode == .tree {
             ToolbarSpacer(.fixed)
             ToolbarItemGroup(placement: .automatic) {
@@ -771,27 +781,16 @@ struct MainWorkspace: View {
 
         ToolbarSpacer(.flexible)
 
-        if usesCompactToolbar {
-            ToolbarItem(placement: .automatic) {
-                compactToolbarOverflow
-            }
-            .sharedBackgroundVisibility(.hidden)
-        } else {
-            ToolbarItem(placement: .automatic) {
-                savedStatus
-            }
-            .sharedBackgroundVisibility(.hidden)
-        }
-
-        ToolbarSpacer(.fixed)
-
+        // Save clock rides in the trailing group rather than as its own item: the
+        // builder tops out at ten children and the compact overflow now claims one.
         ToolbarItemGroup(placement: .primaryAction) {
+            savedStatus
+                .padding(.trailing, 6)
+
             Button { showAddSheet = true } label: {
                 HStack(spacing: 6) {
                     Image(systemName: "plus")
-                    if !usesCompactToolbar {
-                        Text(L10n.tr("Добавить родственника"))
-                    }
+                    Text(L10n.tr("Добавить родственника"))
                 }
                 .fixedSize()
             }
@@ -818,6 +817,8 @@ struct MainWorkspace: View {
                 Picker(L10n.tr("Направление дерева"), selection: $direction) {
                     Label(L10n.tr("Сверху вниз"), systemImage: "arrow.down")
                         .tag(TreeDirection.topDown)
+                    Label(L10n.tr("Снизу вверх"), systemImage: "arrow.up")
+                        .tag(TreeDirection.bottomUp)
                     Label(L10n.tr("Слева направо"), systemImage: "arrow.right")
                         .tag(TreeDirection.leftRight)
                 }
@@ -863,7 +864,9 @@ struct MainWorkspace: View {
             Image(systemName: "chevron.right.2")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(SepiaTheme.ink)
-                .frame(width: 30, height: 30)
+                // 34, not 30: the export button and the Add Relative capsule beside it
+                // are 34 tall, and a 30pt circle read as a different class of control.
+                .frame(width: 34, height: 34)
                 .contentShape(Circle())
                 .glassEffect(.regular.interactive(), in: Circle())
         }
@@ -915,13 +918,18 @@ struct MainWorkspace: View {
                 Button { viewMode = .places } label: { Label(L10n.tr("Места"), systemImage: "mappin.and.ellipse") }
                 Button { viewMode = .review } label: { Label(L10n.tr("Проверка"), systemImage: "checklist") }
             } label: {
-                Image(systemName: [.fan, .people, .timeline, .places, .review].contains(viewMode) ? "square.grid.2x2.fill" : "square.grid.2x2")
+                let isActive = [.fan, .people, .timeline, .places, .review].contains(viewMode)
+                Image(systemName: isActive ? "square.grid.2x2.fill" : "square.grid.2x2")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(isActive ? .white : SepiaTheme.ink)
                     .frame(width: 30, height: 30)
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize()
-            .toolbarIconChrome()
+            // The grid menu is one of the view-mode choices, so it wears the accent disc
+            // when its section is the one on screen — the two buttons beside it do.
+            .toolbarIconChrome(isActive: [.fan, .people, .timeline, .places, .review].contains(viewMode))
             .help(L10n.tr("Варианты отображения"))
             .accessibilityLabel(L10n.tr("Варианты отображения"))
         }
@@ -937,6 +945,14 @@ struct MainWorkspace: View {
             .accessibilityLabel(L10n.tr("Направление: сверху вниз"))
             .accessibilityValue(direction == .topDown ? L10n.tr("Выбрано") : L10n.tr("Не выбрано"))
             .accessibilityAddTraits(direction == .topDown ? .isSelected : [])
+            Button { direction = .bottomUp } label: {
+                Image(systemName: "arrow.up")
+            }
+            .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: direction == .bottomUp))
+            .help(L10n.tr("Снизу вверх"))
+            .accessibilityLabel(L10n.tr("Направление: снизу вверх"))
+            .accessibilityValue(direction == .bottomUp ? L10n.tr("Выбрано") : L10n.tr("Не выбрано"))
+            .accessibilityAddTraits(direction == .bottomUp ? .isSelected : [])
             Button { direction = .leftRight } label: {
                 Image(systemName: "arrow.right")
             }
@@ -961,12 +977,16 @@ struct MainWorkspace: View {
         HStack(spacing: 3) {
             RepeatButton(chrome: .toolbar, action: { if fanLevels > 2 { fanLevels -= 1 } }) { Image(systemName: "minus") }
                 .disabled(fanLevels <= 2)
+                .help(L10n.tr("Меньше поколений"))
+                .accessibilityLabel(L10n.tr("Меньше поколений"))
             Text("\(fanLevels)")
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.ink)
                 .frame(width: 14)
             RepeatButton(chrome: .toolbar, action: { if fanLevels < 8 { fanLevels += 1 } }) { Image(systemName: "plus") }
                 .disabled(fanLevels >= 8)
+                .help(L10n.tr("Больше поколений"))
+                .accessibilityLabel(L10n.tr("Больше поколений"))
             Text(L10n.tr("ур."))
                 .font(SepiaTheme.ui(size: 10))
                 .foregroundColor(SepiaTheme.inkSoft)
@@ -1020,6 +1040,7 @@ struct MainWorkspace: View {
             treeFunctionMenuItems
         } label: {
             Image(systemName: "wrench.and.screwdriver")
+                .font(.system(size: 12, weight: .semibold))
                 .frame(width: 30, height: 30)
                 .foregroundColor(SepiaTheme.ink)
         }
@@ -1183,6 +1204,47 @@ struct MainWorkspace: View {
 
 /// The native toolbar owns the Liquid Glass surface. Items inside a shared glass
 /// group keep their resting chrome clear and use the archival accent only for state.
+///
+/// One disc, one set of states, for every icon control in that shared group — buttons,
+/// menus and the auto-repeat steppers alike. The system's own hover highlight only
+/// reaches controls that carry their own glass (home, export, the compact overflow),
+/// so without this the entire middle of the bar answered the pointer with nothing
+/// while its two ends lit up.
+struct WorkspaceToolbarIconChrome: ViewModifier {
+    var isActive = false
+    var isPressed = false
+
+    @State private var isHovered = false
+    /// A clamped stepper (fan levels at 2, say) must not light up under the pointer.
+    @Environment(\.isEnabled) private var isEnabled
+
+    func body(content: Content) -> some View {
+        content
+            .frame(width: 30, height: 30)
+            .background {
+                Circle()
+                    .fill(
+                        isActive
+                            ? SepiaTheme.accent
+                            : SepiaTheme.ink.opacity(isPressed ? 0.10 : isHovered && isEnabled ? 0.06 : 0)
+                    )
+            }
+            .contentShape(Circle())
+            .scaleEffect(isPressed ? 0.94 : 1)
+            .onHover { isHovered = $0 }
+            .sepiaMotion(SepiaMotion.hover, value: isHovered)
+            .sepiaMotion(SepiaMotion.press, value: isPressed)
+    }
+}
+
+extension View {
+    /// Resting chrome for menus embedded in the shared native toolbar background.
+    /// `isActive` tints the disc the same way a selected icon button is tinted.
+    func toolbarIconChrome(isActive: Bool = false) -> some View {
+        modifier(WorkspaceToolbarIconChrome(isActive: isActive))
+    }
+}
+
 private struct WorkspaceToolbarIconButtonStyle: ButtonStyle {
     var isActive = false
 
@@ -1190,25 +1252,8 @@ private struct WorkspaceToolbarIconButtonStyle: ButtonStyle {
         configuration.label
             .font(.system(size: 12, weight: .semibold))
             .foregroundColor(isActive ? .white : SepiaTheme.ink)
-            .frame(width: 30, height: 30)
-            .background {
-                Circle()
-                    .fill(
-                        isActive
-                            ? SepiaTheme.accent
-                            : SepiaTheme.ink.opacity(configuration.isPressed ? 0.10 : 0)
-                    )
-            }
-            .contentShape(Circle())
-            .scaleEffect(configuration.isPressed ? 0.94 : 1)
-            .sepiaMotion(SepiaMotion.press, value: configuration.isPressed)
-    }
-}
-
-private extension View {
-    /// Size and hit region for menus embedded in a shared native toolbar background.
-    func toolbarIconChrome() -> some View {
-        frame(width: 30, height: 30)
-            .contentShape(RoundedRectangle(cornerRadius: 8))
+            .modifier(
+                WorkspaceToolbarIconChrome(isActive: isActive, isPressed: configuration.isPressed)
+            )
     }
 }

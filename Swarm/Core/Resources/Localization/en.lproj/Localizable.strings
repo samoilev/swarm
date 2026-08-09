@@ -127,8 +127,10 @@
 "Направление" = "Direction";
 "Направление дерева" = "Tree Direction";
 "Сверху вниз" = "Top to Bottom";
+"Снизу вверх" = "Bottom to Top";
 "Слева направо" = "Left to Right";
 "Направление: сверху вниз" = "Direction: top to bottom";
+"Направление: снизу вверх" = "Direction: bottom to top";
 "Направление: слева направо" = "Direction: left to right";
 "Фотографии" = "Photos";
 "Показать фотографии" = "Show Photos";
