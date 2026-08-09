@@ -36,12 +36,12 @@ struct TrustCompletenessTests {
         let tree = FamilyTree(name: "Живое дерево")
         let person = Person(givenNames: "Анна")
         tree.people = [person]
-        let session = try EditSession(tree: tree)
-        let draftPerson = try #require(session.draftTree.people.first)
+        let draft = try tree.deepCopy()
+        let draftPerson = try #require(draft.people.first)
         draftPerson.notes = "Черновик"
         draftPerson.attachments = [Attachment(storedName: "draft.pdf", originalName: "draft.pdf")]
-        session.draftTree.sourceRecords = [SourceRecord(title: "Черновой источник")]
-        session.draftTree.unions = [Union(partner1Id: draftPerson.id)]
+        draft.sourceRecords = [SourceRecord(title: "Черновой источник")]
+        draft.unions = [Union(partner1Id: draftPerson.id)]
 
         #expect(person.notes == nil)
         #expect(person.attachments.isEmpty)
@@ -266,7 +266,7 @@ struct TrustCompletenessTests {
         let local = FamilyTree(name: "Локальное")
         let same = Person(givenNames: "Иван", surname: "Петров")
         local.people = [same]
-        store.addTree(local)
+        try await store.addTreeVerified(local)
 
         let incoming = FamilyTree(name: "Входящее")
         let matching = Person(givenNames: "Иван", surname: "Петров")
@@ -295,13 +295,13 @@ struct TrustCompletenessTests {
         let local = FamilyTree(name: "Local")
         let localPerson = Person(givenNames: "Анна")
         local.people = [localPerson]
-        localStore.addTree(local)
+        try await localStore.addTreeVerified(local)
 
         let incoming = FamilyTree(name: "Incoming")
         let incomingPerson = Person(givenNames: "Анна")
         incomingPerson.id = localPerson.id
         incoming.people = [incomingPerson]
-        incomingStore.addTree(incoming)
+        try await incomingStore.addTreeVerified(incoming)
         let bytes = Data("merge evidence".utf8)
         let sourceFile = sourceTemp.url.appendingPathComponent("evidence.txt")
         try bytes.write(to: sourceFile)
@@ -328,20 +328,22 @@ struct TrustCompletenessTests {
         #expect(localPerson.event(ofKind: .birth)?.mediaIDs == [mergedAttachment.id.uuidString])
     }
 
-    @Test func stagedFaultsLeaveCommittedGEDCOMByteForByteUsable() throws {
+    @Test func stagedFaultsLeaveCommittedGEDCOMByteForByteUsable() async throws {
         let temp = try Temp()
         let store = TreeStore(storageFolder: temp.url)
         let tree = FamilyTree(name: "Транзакция")
         let person = Person(givenNames: "До", surname: "Сбоя")
         tree.people = [person]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
         let gedcomURL = store.gedFileURL(for: tree)
         let committed = try Data(contentsOf: gedcomURL)
 
         for point in [PersistenceFaultPoint.gedcomWrite, .historyPrune, .directorySwap] {
             person.givenNames = "После \(point.rawValue)"
             store.faultInjector = { if $0 == point { throw CocoaError(.fileWriteUnknown) } }
-            #expect(store.saveTree(tree) == nil)
+            var saveFailed = false
+            do { _ = try await store.saveTree(tree) } catch { saveFailed = true }
+            #expect(saveFailed)
             #expect(try Data(contentsOf: gedcomURL) == committed)
             #expect(TreeStore(storageFolder: temp.url).trees.first?.people.first?.givenNames == "До")
         }
@@ -351,13 +353,13 @@ struct TrustCompletenessTests {
         try FileManager.default.createDirectory(at: exportFolder, withIntermediateDirectories: true)
         store.faultInjector = { if $0 == .exportCopy { throw CocoaError(.fileWriteUnknown) } }
         var exportFailed = false
-        do { _ = try store.exportTree(tree, toDirectory: exportFolder) }
+        do { _ = try await store.exportTree(tree, to: exportFolder) }
         catch { exportFailed = true }
         #expect(exportFailed)
         #expect(try (FileManager.default.contentsOfDirectory(at: exportFolder, includingPropertiesForKeys: nil)).isEmpty)
     }
 
-    @Test func originalImportFailureDoesNotCommitTree() throws {
+    @Test func originalImportFailureDoesNotCommitTree() async throws {
         let temp = try Temp()
         let sourceFolder = try Temp()
         let source = sourceFolder.url.appendingPathComponent("input.ged")
@@ -365,7 +367,7 @@ struct TrustCompletenessTests {
         let store = TreeStore(storageFolder: temp.url)
         store.faultInjector = { if $0 == .originalImportCopy { throw CocoaError(.fileWriteUnknown) } }
         var failed = false
-        do { _ = try store.importGEDCOM(from: source) }
+        do { _ = try await store.importGEDCOM(from: source) }
         catch { failed = true }
         #expect(failed)
         #expect(store.trees.isEmpty)
@@ -381,7 +383,7 @@ struct TrustCompletenessTests {
         let tree = FamilyTree(name: "Восстановление")
         let person = Person(givenNames: "Анна")
         tree.people = [person]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
 
         let attachment = try store.prepareAttachment(in: tree, sourceURL: source)
         person.attachments.append(attachment)
@@ -406,7 +408,7 @@ struct TrustCompletenessTests {
         let tree = FamilyTree(name: "Журнал файлов")
         let person = Person(givenNames: "Анна")
         tree.people = [person]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
 
         let attachment = try store.prepareAttachment(in: tree, sourceURL: source)
         person.attachments = [attachment]
@@ -426,7 +428,7 @@ struct TrustCompletenessTests {
         let tree = FamilyTree(name: "Портрет")
         let person = Person(givenNames: "До")
         tree.people = [person]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
         let gedcom = store.gedFileURL(for: tree)
         let before = try Data(contentsOf: gedcom)
 
@@ -446,7 +448,7 @@ struct TrustCompletenessTests {
         let tree = FamilyTree(name: "История")
         let person = Person(givenNames: "Редакция")
         tree.people = [person]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
 
         for revision in 0 ..< 55 {
             person.notes = "Версия \(revision)"
@@ -456,12 +458,12 @@ struct TrustCompletenessTests {
         #expect(revisions.count == 50)
     }
 
-    @Test func archivedTreeCanBeRestoredIntoLibrary() throws {
+    @Test func archivedTreeCanBeRestoredIntoLibrary() async throws {
         let temp = try Temp()
         let store = TreeStore(storageFolder: temp.url)
         let tree = FamilyTree(name: "Архив")
         tree.people = [Person(givenNames: "Анна")]
-        store.addTree(tree)
+        try await store.addTreeVerified(tree)
 
         let archiveURL = store.archiveTree(tree)
         #expect(FileManager.default.fileExists(atPath: archiveURL.path))

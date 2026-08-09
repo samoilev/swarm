@@ -22,8 +22,8 @@ public struct FamilyIndex {
     /// All people indexed by ID
     public private(set) var byId: [UUID: Person] = [:]
     /// Explicit GEDCOM parentage links, indexed independently of family unions.
-    public private(set) var parentLinksByChild: [UUID: [ParentLink]] = [:]
-    public private(set) var childLinksByParent: [UUID: [ParentLink]] = [:]
+    private var parentLinksByChild: [UUID: [ParentLink]] = [:]
+    private var childLinksByParent: [UUID: [ParentLink]] = [:]
 
     public init(tree: FamilyTree) {
         self.tree = tree

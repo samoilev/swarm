@@ -30,14 +30,14 @@ struct ArchiveRoundTripTests {
         let tree = FamilyTree(name: "Архив")
         let person = Person(givenNames: "Анна", surname: "Иванова")
         tree.people = [person]
-        store.addTree(tree)
+        _ = try await store.addTreeVerified(tree)
 
         let attachment = try store.prepareAttachment(in: tree, sourceURL: attachmentSource)
         person.photoData = portrait
         person.attachments = [attachment]
         _ = try await store.saveTree(tree)
 
-        return try store.exportTree(tree, toDirectory: exports.url)
+        return try await store.exportTree(tree, to: exports.url).finalURL
     }
 
     @Test func exportedArchiveReimportsWithPhotosAndAttachments() async throws {

@@ -196,7 +196,9 @@ public enum L10n {
         Int(value.prefix(while: \.isNumber))
     }
 
-    private static func englishOrdinal(_ value: Int) -> String {
+    /// "1st", "2nd", "13th". Shared with `KinshipFormatter`, which builds the same
+    /// ordinals for cousin degrees and great-grandparent generations.
+    static func englishOrdinal(_ value: Int) -> String {
         let remainder100 = value % 100
         let suffix = if (11 ... 13).contains(remainder100) {
             "th"

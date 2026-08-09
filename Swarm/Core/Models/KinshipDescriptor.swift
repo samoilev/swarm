@@ -530,18 +530,7 @@ public struct KinshipFormatter: Sendable {
     }
 
     private static func englishOrdinal(_ value: Int) -> String {
-        let remainder100 = value % 100
-        let suffix = if (11 ... 13).contains(remainder100) {
-            "th"
-        } else {
-            switch value % 10 {
-            case 1: "st"
-            case 2: "nd"
-            case 3: "rd"
-            default: "th"
-            }
-        }
-        return "\(value)\(suffix)"
+        L10n.englishOrdinal(value)
     }
 }
 

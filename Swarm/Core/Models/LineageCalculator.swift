@@ -89,7 +89,7 @@ public struct LineageCalculator {
         for edge in index.parentEdges(of: personID) {
             guard let parent = index.byId[edge.parentID],
                   visited.insert(parent.id).inserted else { continue }
-            let pathKinds = uniqueParentage(
+            let pathKinds = ParentageKind.unique(
                 parentage + (edge.kind == .biological ? [] : [edge.kind])
             )
             ids.insert(parent.id)
@@ -124,7 +124,7 @@ public struct LineageCalculator {
         for edge in index.childEdges(of: personID) {
             guard let child = index.byId[edge.childID],
                   visited.insert(child.id).inserted else { continue }
-            let pathKinds = uniqueParentage(
+            let pathKinds = ParentageKind.unique(
                 parentage + (edge.kind == .biological ? [] : [edge.kind])
             )
             ids.insert(child.id)
@@ -166,10 +166,5 @@ public struct LineageCalculator {
         by kinds: [ParentageKind]
     ) -> KinshipDescriptor {
         kinds.reduce(descriptor) { .qualified(base: $0, kind: $1) }
-    }
-
-    private func uniqueParentage(_ kinds: [ParentageKind]) -> [ParentageKind] {
-        var seen = Set<ParentageKind>()
-        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
     }
 }

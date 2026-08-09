@@ -478,22 +478,10 @@ struct TreeCanvasView: View {
         animation: Animation? = nil,
         animated: Bool = true
     ) {
-        guard treeWidth > 0, treeHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
-
-        let margin: CGFloat = 20
-        let availW = viewSize.width - margin * 2
-        let availH = viewSize.height - margin * 2
-
-        let scaleW = availW / treeWidth
-        let scaleH = availH / treeHeight
-        let newZoom = min(min(scaleW, scaleH), 1.6) // don't exceed max zoom
-        let clampedZoom = max(0.2, newZoom)
-
-        // Center the tree in the viewport
-        let scaledW = treeWidth * clampedZoom
-        let scaledH = treeHeight * clampedZoom
-        let offsetX = (viewSize.width - scaledW) / 2
-        let offsetY = (viewSize.height - scaledH) / 2
+        guard let fit = canvasFitTransform(
+            viewSize: viewSize,
+            content: CGSize(width: treeWidth, height: treeHeight)
+        ) else { return }
 
         coastVelocity = .zero // a fit overrides any momentum still in flight
 
@@ -501,10 +489,10 @@ struct TreeCanvasView: View {
             ? (animation ?? .easeInOut(duration: 0.3))
             : nil
         withAnimation(fitAnimation) {
-            zoom = clampedZoom
-            panOffset = CGSize(width: offsetX, height: offsetY)
-            dragStart = CGSize(width: offsetX, height: offsetY)
-            magnifyStart = clampedZoom
+            zoom = fit.zoom
+            panOffset = fit.offset
+            dragStart = fit.offset
+            magnifyStart = fit.zoom
         }
     }
 

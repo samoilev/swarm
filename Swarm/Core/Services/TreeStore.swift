@@ -41,7 +41,6 @@ public final class TreeStore {
     /// to. Pending migration is not a load failure — those trees are readable — so it is
     /// surfaced separately from `lastLoadError`.
     public private(set) var pendingMigrations: [PendingMigration] = []
-    public var pendingMigrationCount: Int { pendingMigrations.count }
     /// Production leaves this nil. Integration tests inject failures at transaction
     /// boundaries to prove the previously committed bundle remains usable.
     @ObservationIgnored public var faultInjector: ((PersistenceFaultPoint) throws -> Void)?
@@ -72,7 +71,6 @@ public final class TreeStore {
     private var folderMap: [UUID: URL] = [:]
     private var legacyFileMap: [UUID: URL] = [:]
 
-    private static let gedName = "tree.ged"
     private static let mediaName = "Media"
     private static let attachmentsName = "Attachments"
     private static let archivedName = "Archived"
@@ -535,7 +533,7 @@ public final class TreeStore {
             } else {
                 let components = item.displayName.components(separatedBy: "--Original--")
                 let stored = components[0].components(separatedBy: "--Attachments--").last ?? item.displayName
-                let original = components.count > 1 ? (decodedFilename(components[1]) ?? stored) : stored
+                let original = components.count > 1 ? (Base64Filename.decode(components[1]) ?? stored) : stored
                 let prepared = try prepareAttachment(in: tree, sourceURL: item.url)
                 preparedForRollback = prepared
                 var renamed = prepared
@@ -564,31 +562,6 @@ public final class TreeStore {
     }
 
     // MARK: - Save a specific tree to its .ged file
-
-    public func save() {
-        for tree in trees {
-            _ = saveTree(tree)
-        }
-    }
-
-    /// Source-compatibility bridge for older integrations. App workflows call the
-    /// async throwing overload and react to its receipt.
-    @discardableResult
-    public func saveTree(_ tree: FamilyTree) -> SaveReceipt? {
-        if legacyFileMap[tree.id] != nil {
-            lastSaveError = L10n.tr("Сначала выполните безопасную миграцию этого дерева в разделе восстановления.")
-            return nil
-        }
-        do {
-            let receipt = try persistTree(tree)
-            lastSaveError = nil
-            return receipt
-        } catch {
-            log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
-            lastSaveError = L10n.tr("Не удалось сохранить «\(tree.name)»: \(error.localizedDescription)")
-            return nil
-        }
-    }
 
     public func saveTree(_ tree: FamilyTree) async throws -> SaveReceipt {
         do {
@@ -895,7 +868,7 @@ public final class TreeStore {
             try fm.createDirectory(at: trash, withIntermediateDirectories: true)
             var base = "\(timestamp())--\(category)--\(file.lastPathComponent)"
             if let original = originalNames[file.lastPathComponent] {
-                base += "--Original--\(encodedFilename(original))"
+                base += "--Original--\(Base64Filename.encode(original))"
             }
             let destination = uniqueURL(trash.appendingPathComponent(base))
             try fm.moveItem(at: file, to: destination)
@@ -1026,18 +999,6 @@ public final class TreeStore {
         return formatter.string(from: Date())
     }
 
-    private func encodedFilename(_ value: String) -> String {
-        Data(value.utf8).base64EncodedString().replacingOccurrences(of: "/", with: "_")
-            .replacingOccurrences(of: "+", with: "-").replacingOccurrences(of: "=", with: "")
-    }
-
-    private func decodedFilename(_ value: String) -> String? {
-        var base64 = value.replacingOccurrences(of: "_", with: "/").replacingOccurrences(of: "-", with: "+")
-        while base64.count % 4 != 0 { base64 += "=" }
-        guard let data = Data(base64Encoded: base64) else { return nil }
-        return String(data: data, encoding: .utf8)
-    }
-
     private func inject(_ point: PersistenceFaultPoint) throws {
         try faultInjector?(point)
     }
@@ -1049,11 +1010,7 @@ public final class TreeStore {
         try? FileManager.default.removeItem(at: folder)
     }
 
-    public func addTree(_ tree: FamilyTree) {
-        guard saveTree(tree) != nil else { return }
-        if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
-    }
-
+    @discardableResult
     public func addTreeVerified(_ tree: FamilyTree) async throws -> SaveReceipt {
         let receipt = try await saveTree(tree)
         if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
@@ -1076,15 +1033,6 @@ public final class TreeStore {
     }
 
     /// Rename a tree's title and subtitle, then persist to its .ged file.
-    public func renameTree(_ tree: FamilyTree, name: String, subtitle: String?) {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { return }
-        tree.name = trimmedName
-        let trimmedSub = subtitle?.trimmingCharacters(in: .whitespacesAndNewlines)
-        tree.subtitle = (trimmedSub?.isEmpty ?? true) ? nil : trimmedSub
-        _ = saveTree(tree)
-    }
-
     public func renameTreeVerified(_ tree: FamilyTree, name: String, subtitle: String?) async throws -> SaveReceipt {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: L10n.tr("Название не может быть пустым.")) }
@@ -1126,17 +1074,11 @@ public final class TreeStore {
     /// Export a faithful copy of a tree (.ged + photos + attachments) into a `<name>/`
     /// bundle inside the chosen directory, so it can be re-imported later. Does not
     /// remove the tree — the caller decides whether to follow with `deleteTree`.
-    /// Returns the bundle URL.
-    @discardableResult
-    public func exportTree(_ tree: FamilyTree, toDirectory directory: URL) throws -> URL {
-        try exportTreeVerified(tree, toDirectory: directory).finalURL
-    }
-
-    public func exportTree(_ tree: FamilyTree, to directory: URL) async throws -> ExportReceipt {
+    public func exportTree(_ tree: FamilyTree, to directory: URL) async throws -> SaveReceipt {
         try exportTreeVerified(tree, toDirectory: directory)
     }
 
-    private func exportTreeVerified(_ tree: FamilyTree, toDirectory directory: URL) throws -> ExportReceipt {
+    private func exportTreeVerified(_ tree: FamilyTree, toDirectory directory: URL) throws -> SaveReceipt {
         let fm = FileManager.default
         guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
         let name = sanitizedFileName(tree.name)
@@ -1264,10 +1206,6 @@ public final class TreeStore {
         pendingImportDiagnostics[gedcom.standardizedFileURL.path] = nil
         try? FileManager.default.removeItem(at: folder)
         cleanupPendingFolderIfEmpty()
-    }
-
-    public func importGEDCOM(from url: URL) throws -> FamilyTree {
-        try importGEDCOMVerified(from: url).tree
     }
 
     public func importGEDCOM(from url: URL) async throws -> ImportResult {
@@ -1418,18 +1356,6 @@ public final class TreeStore {
         return attachmentURL(attachment, in: tree)
     }
 
-    /// Remove an attachment's file from disk, unlink it from the person, and persist.
-    public func removeAttachment(_ attachment: Attachment, from person: Person, in tree: FamilyTree) {
-        let originalIndex = person.attachments.firstIndex(where: { $0.id == attachment.id })
-        person.attachments.removeAll { $0.id == attachment.id }
-        pendingAttachmentDeletes[tree.id, default: []].insert(attachment.storedName)
-        person.updatedAt = Date()
-        if saveTree(tree) == nil {
-            if let originalIndex { person.attachments.insert(attachment, at: min(originalIndex, person.attachments.count)) }
-            pendingAttachmentDeletes[tree.id]?.remove(attachment.storedName)
-        }
-    }
-
     /// Delete every attachment file belonging to a person (used when the person is
     /// removed). Does not persist — the caller saves the tree afterward.
     public func deleteAttachmentFiles(of person: Person, in tree: FamilyTree) {
@@ -1461,31 +1387,6 @@ public final class TreeStore {
     private func gedFile(in folder: URL) -> URL? {
         guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) else { return nil }
         return files.first { $0.pathExtension.lowercased() == "ged" && $0.lastPathComponent != Self.originalImportName }
-    }
-
-    /// Ensure the tree has a folder named after it (readable & unique), renaming the
-    /// existing folder when the name changed. Returns the folder and updates folderMap.
-    private func reconcileFolder(for tree: FamilyTree) -> URL {
-        let fm = FileManager.default
-        let desired = sanitizedFileName(tree.name)
-        if let current = folderMap[tree.id], fm.fileExists(atPath: current.path) {
-            let target = uniqueFolderURL(named: desired, excluding: current)
-            if target.lastPathComponent != current.lastPathComponent {
-                do {
-                    try fm.moveItem(at: current, to: target)
-                    folderMap[tree.id] = target
-                    return target
-                } catch {
-                    log.error("Could not rename \(current.lastPathComponent, privacy: .public) → \(target.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                    return current
-                }
-            }
-            return current
-        }
-        let target = uniqueFolderURL(named: desired, excluding: nil)
-        try? fm.createDirectory(at: target, withIntermediateDirectories: true)
-        folderMap[tree.id] = target
-        return target
     }
 
     /// A storage-folder URL named `base`, suffixed " 2", " 3", … to avoid colliding

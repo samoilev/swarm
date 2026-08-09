@@ -6,9 +6,6 @@ import Foundation
 /// Handles GEDCOM format on import: "5 MAR 1978", "MAR 1978", "1978"
 public enum FamilyDate {
 
-    /// Standard display format
-    public static let displayFormat = "dd.MM.yyyy"
-
     // MARK: - Parse any date string into components
 
     public struct Components: Hashable, Sendable {
@@ -282,12 +279,14 @@ public enum FamilyDate {
     }
 
     private static func isValid(day: Int, month: Int, year: Int) -> Bool {
-        guard year >= 1 && year <= 9999 else { return false }
-        guard month >= 1 && month <= 12 else { return false }
-        // Reject impossible days for the given month (e.g. 31 Feb), honouring leap years.
-        let leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0
-        let daysInMonth = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-        guard day >= 1 && day <= daysInMonth[month - 1] else { return false }
-        return true
+        // `isValidDate` rejects impossible days for the month (e.g. 31 Feb) and gets
+        // leap years right, so the calendar owns the rule rather than a local table.
+        guard year >= 1, year <= 9999 else { return false }
+        return DateComponents(
+            calendar: Calendar(identifier: .gregorian),
+            year: year,
+            month: month,
+            day: day
+        ).isValidDate
     }
 }

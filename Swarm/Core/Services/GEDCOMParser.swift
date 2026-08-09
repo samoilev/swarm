@@ -525,54 +525,11 @@ public struct GEDCOMParser {
 
     // MARK: - Line tokenizer
 
-    /// One parsed GEDCOM line. `xref` is the optional `@X@` *record id* before the tag
-    /// (e.g. `0 @I1@ INDI`); `pointer` is an `@X@` *pointer value* after the tag
-    /// (e.g. `1 HUSB @I1@`). `value` is the free-text remainder otherwise.
-    private struct GEDCOMLine {
-        let level: Int
-        let xref: String?
-        let tag: String
-        let pointer: String?
-        let value: String
-    }
-
-    private static func parseLine(_ raw: String) -> GEDCOMLine? {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return nil }
-        guard let sp1 = trimmed.firstIndex(of: " ") else {
-            // A bare level with no tag is malformed — ignore.
-            return nil
-        }
-        guard let level = Int(trimmed[..<sp1]) else { return nil }
-        var rest = String(trimmed[trimmed.index(after: sp1)...]).trimmingCharacters(in: .whitespaces)
-
-        // Optional record xref immediately after the level: "@X@ TAG ...".
-        var xref: String? = nil
-        if rest.hasPrefix("@"), let close = rest.dropFirst().firstIndex(of: "@") {
-            xref = String(rest[rest.index(after: rest.startIndex) ..< close])
-            rest = String(rest[rest.index(after: close)...]).trimmingCharacters(in: .whitespaces)
-        }
-
-        // Tag is the next whitespace-delimited token.
-        let tag: String
-        let afterTag: String
-        if let sp2 = rest.firstIndex(of: " ") {
-            tag = String(rest[..<sp2])
-            afterTag = String(rest[rest.index(after: sp2)...]).trimmingCharacters(in: .whitespaces)
-        } else {
-            tag = rest
-            afterTag = ""
-        }
-
-        // A value that is exactly "@X@" is a pointer, not free text.
-        var pointer: String? = nil
-        var value = afterTag
-        if afterTag.hasPrefix("@"), afterTag.hasSuffix("@"), afterTag.count >= 2 {
-            let inner = afterTag.dropFirst().dropLast()
-            if !inner.contains("@") { pointer = String(inner); value = "" }
-        }
-
-        return GEDCOMLine(level: level, xref: xref, tag: tag, pointer: pointer, value: value)
+    /// Tokenize one line, tolerating anything that isn't a GEDCOM line by skipping it.
+    /// Shares `GEDCOMNode`'s tokenizer so the tree parser and the document parser can
+    /// never disagree about where a tag ends and its value begins.
+    private static func parseLine(_ raw: String) -> GEDCOMNode? {
+        GEDCOMNode(rawLine: raw)
     }
 
     /// Parse a GEDCOM `LATI`/`LONG` value ("N55.75", "E37.61", "S12.3", "W4.1", or a

@@ -306,29 +306,9 @@ struct AddPersonView: View {
 
     /// Resolve a picked place to coordinates and fill the bound field. Only fires when
     /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-    private func prefillCoords(for place: PlaceEntry, into coords: Binding<String>) {
-        if let c = GeocodingService.shared.coordinate(for: place) {
-            coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude)
-        }
-    }
 
     /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
-    private func parseGraveCoords(_ s: String) -> (lat: Double, lon: Double)? {
-        let parts = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else { return nil }
-        return (lat, lon)
-    }
 
-    private func parsedDate(
-        text: String,
-        end: String,
-        qualifier: GenealogyDate.Qualifier
-    ) -> GenealogyDate? {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
-        let range = qualifier == .between || qualifier == .fromTo
-        let value = GenealogyDate(userInput: text, qualifier: qualifier, endValue: range ? end : nil)
-        return value.isValid ? value : nil
-    }
 
     private func validCoordinateText(_ value: String) -> Bool {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)

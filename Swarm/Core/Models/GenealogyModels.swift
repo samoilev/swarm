@@ -501,6 +501,14 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
         default: self = .uncertain
         }
     }
+
+    /// The qualifiers accumulated along a lineage path, in first-seen order and without
+    /// repeats. `biological` is dropped: it is the default a path is qualified *away*
+    /// from, so it never earns a word in the label.
+    static func unique(_ kinds: [ParentageKind]) -> [ParentageKind] {
+        var seen = Set<ParentageKind>()
+        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
+    }
 }
 
 public struct ParentLink: Identifiable, Codable, Hashable, Sendable {

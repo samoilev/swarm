@@ -101,20 +101,15 @@ struct FanChartView: View {
     }
 
     private func fitToScreen(viewSize: CGSize, chartWidth: CGFloat, chartHeight: CGFloat) {
-        guard chartWidth > 0, chartHeight > 0, viewSize.width > 0, viewSize.height > 0 else { return }
-        let margin: CGFloat = 20
-        let scaleW = (viewSize.width - margin * 2) / chartWidth
-        let scaleH = (viewSize.height - margin * 2) / chartHeight
-        let newZoom = max(0.2, min(min(scaleW, scaleH), 1.6))
-        let scaledW = chartWidth * newZoom
-        let scaledH = chartHeight * newZoom
-        let offsetX = (viewSize.width - scaledW) / 2
-        let offsetY = (viewSize.height - scaledH) / 2
+        guard let fit = canvasFitTransform(
+            viewSize: viewSize,
+            content: CGSize(width: chartWidth, height: chartHeight)
+        ) else { return }
         withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
-            zoom = newZoom
-            panOffset = CGSize(width: offsetX, height: offsetY)
-            dragStart = CGSize(width: offsetX, height: offsetY)
-            magnifyStart = newZoom
+            zoom = fit.zoom
+            panOffset = fit.offset
+            dragStart = fit.offset
+            magnifyStart = fit.zoom
         }
     }
 

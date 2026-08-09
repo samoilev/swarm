@@ -323,7 +323,7 @@ struct OfflineVectorMapView: View {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .birth, fallback: person.birthPlace),
+                    placeName: person.presentationPlace(kind: .birth, fallback: person.birthPlace),
                     kind: .birth,
                     coordinate: birth
                 ))
@@ -332,7 +332,7 @@ struct OfflineVectorMapView: View {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .death, fallback: person.deathPlace),
+                    placeName: person.presentationPlace(kind: .death, fallback: person.deathPlace),
                     kind: .death,
                     coordinate: death
                 ))
@@ -341,7 +341,7 @@ struct OfflineVectorMapView: View {
                 result.append(OfflineMapAnnotation(
                     personID: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .burial, fallback: person.burialPlace),
+                    placeName: person.presentationPlace(kind: .burial, fallback: person.burialPlace),
                     kind: .burial,
                     coordinate: burial
                 ))
@@ -351,15 +351,6 @@ struct OfflineVectorMapView: View {
         }
         annotations = result
         routes = newRoutes
-    }
-
-    private func presentationPlace(
-        _ person: Person,
-        kind: GenealogyEvent.Kind,
-        fallback: String?
-    ) -> String {
-        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
-        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func coordinate(latitude: Double?, longitude: Double?, place: String?) -> OfflineCoordinate? {
@@ -480,7 +471,7 @@ struct OfflinePersonMiniMap: View {
             result.append(OfflineMapAnnotation(
                 personID: person.id,
                 personName: person.displayName(language: .current),
-                placeName: presentationPlace(.birth, fallback: person.birthPlace),
+                placeName: person.presentationPlace(kind: .birth, fallback: person.birthPlace),
                 kind: .birth, coordinate: coordinate
             ))
         }
@@ -488,19 +479,11 @@ struct OfflinePersonMiniMap: View {
             result.append(OfflineMapAnnotation(
                 personID: person.id,
                 personName: person.displayName(language: .current),
-                placeName: presentationPlace(.death, fallback: person.deathPlace),
+                placeName: person.presentationPlace(kind: .death, fallback: person.deathPlace),
                 kind: .death, coordinate: coordinate
             ))
         }
         return result
-    }
-
-    private func presentationPlace(
-        _ kind: GenealogyEvent.Kind,
-        fallback: String?
-    ) -> String {
-        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
-        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func miniCoordinate(_ latitude: Double?, _ longitude: Double?, _ place: String?) -> OfflineCoordinate? {

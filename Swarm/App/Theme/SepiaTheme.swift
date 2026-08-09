@@ -66,13 +66,8 @@ struct SepiaTheme {
     static let fanEmpty = Color(hex: "e4d8bf")
     static let fanSel = Color(hex: "edcfa8")
     static let fanLine = Color(hex: "c7b389")
-    static let posterBg = Color(hex: "f4ecd6")
 
     // Map view colors
-    static let mapSea = Color(hex: "dde8e4")
-    static let mapLand = Color(hex: "f2ead7")
-    static let mapBorder = Color(hex: "b8a880")
-    static let mapGrid = Color(hex: "c8bea0").opacity(0.4)
     static let mapLine = Color(hex: "8a6d2f").opacity(0.7)
     static let pinBirth = Color(hex: "4a8c6e")
     static let pinDeath = Color(hex: "9c4a2f")

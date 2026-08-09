@@ -309,7 +309,7 @@ struct AppleMapChartView: View {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .birth, fallback: person.birthPlace),
+                    placeName: person.presentationPlace(kind: .birth, fallback: person.birthPlace),
                     eventType: .birth,
                     coordinate: coord
                 ))
@@ -318,7 +318,7 @@ struct AppleMapChartView: View {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .death, fallback: person.deathPlace),
+                    placeName: person.presentationPlace(kind: .death, fallback: person.deathPlace),
                     eventType: .death,
                     coordinate: coord
                 ))
@@ -327,7 +327,7 @@ struct AppleMapChartView: View {
                 newAnnotations.append(PersonMapAnnotation(
                     personId: person.id,
                     personName: person.displayName(language: .current),
-                    placeName: presentationPlace(person, kind: .burial, fallback: person.burialPlace),
+                    placeName: person.presentationPlace(kind: .burial, fallback: person.burialPlace),
                     eventType: .burial,
                     coordinate: coord
                 ))
@@ -348,15 +348,6 @@ struct AppleMapChartView: View {
 
         // Fit map to show all annotations
         fitToAnnotations()
-    }
-
-    private func presentationPlace(
-        _ person: Person,
-        kind: GenealogyEvent.Kind,
-        fallback: String?
-    ) -> String {
-        guard let reference = person.event(ofKind: kind)?.place else { return fallback ?? "" }
-        return PlacesDatabase.shared.presentationName(for: reference, language: .current)
     }
 
     private func fitToAnnotations() {

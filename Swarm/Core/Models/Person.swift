@@ -118,10 +118,6 @@ public final class Person: Identifiable, Codable, Hashable {
             case .unknown: L10n.tr("Не указан", language: language)
             }
         }
-
-        public var russianName: String {
-            displayName
-        }
     }
 
     public init(

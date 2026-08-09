@@ -61,6 +61,48 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
         self.children = children
     }
 
+    /// Tokenize one physical line: `level [@xref@] tag [value|@pointer@]`. Returns nil
+    /// when the text is not structurally a GEDCOM line, leaving the two callers free to
+    /// disagree about what that means: the document parser turns nil into a thrown
+    /// error, the tree parser skips the line and carries on. The tag keeps its source
+    /// casing here — canonicalising is the document parser's rule, not the format's.
+    init?(rawLine raw: String) {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let firstSpace = trimmed.firstIndex(of: " "),
+              let level = Int(trimmed[..<firstSpace]) else { return nil }
+        var rest = String(trimmed[trimmed.index(after: firstSpace)...])
+            .trimmingCharacters(in: .whitespaces)
+
+        var xref: String?
+        if rest.first == "@", let closing = rest.dropFirst().firstIndex(of: "@") {
+            xref = String(rest[rest.index(after: rest.startIndex) ..< closing])
+            rest = String(rest[rest.index(after: closing)...]).trimmingCharacters(in: .whitespaces)
+        }
+        guard !rest.isEmpty else { return nil }
+
+        let tag: String
+        let tail: String
+        if let space = rest.firstIndex(of: " ") {
+            tag = String(rest[..<space])
+            tail = String(rest[rest.index(after: space)...]).trimmingCharacters(in: .whitespaces)
+        } else {
+            tag = rest
+            tail = ""
+        }
+
+        // A value that is exactly "@X@" is a pointer, not free text.
+        let pointer: String?
+        let value: String
+        if tail.count >= 2, tail.first == "@", tail.last == "@", !tail.dropFirst().dropLast().contains("@") {
+            pointer = String(tail.dropFirst().dropLast())
+            value = ""
+        } else {
+            pointer = nil
+            value = tail
+        }
+        self.init(level: level, xref: xref, tag: tag, pointer: pointer, value: value, rawLine: raw)
+    }
+
     public var renderedLine: String {
         if !rawLine.isEmpty { return rawLine }
         var tokens = [String(level)]
@@ -139,46 +181,16 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         return node
     }
 
+    /// The strict reading of a line: a document that will be re-exported verbatim may
+    /// not contain a line we failed to understand, so anything the shared tokenizer
+    /// rejects — or any tag that isn't a tag — is an error rather than a skipped line.
     private static func parseLine(_ raw: String, lineNumber: Int) throws -> GEDCOMNode {
-        let trimmed = raw.trimmingCharacters(in: .whitespaces)
-        guard let firstSpace = trimmed.firstIndex(of: " "),
-              let level = Int(trimmed[..<firstSpace]), level >= 0 else {
+        guard var node = GEDCOMNode(rawLine: raw), node.level >= 0,
+              node.tag.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
             throw GEDCOMCodecError.invalidLine(line: lineNumber, content: raw)
         }
-        var rest = String(trimmed[trimmed.index(after: firstSpace)...])
-            .trimmingCharacters(in: .whitespaces)
-        guard !rest.isEmpty else { throw GEDCOMCodecError.invalidLine(line: lineNumber, content: raw) }
-
-        var xref: String?
-        if rest.first == "@", let closing = rest.dropFirst().firstIndex(of: "@") {
-            xref = String(rest[rest.index(after: rest.startIndex) ..< closing])
-            rest = String(rest[rest.index(after: closing)...]).trimmingCharacters(in: .whitespaces)
-        }
-        guard !rest.isEmpty else { throw GEDCOMCodecError.invalidLine(line: lineNumber, content: raw) }
-
-        let tag: String
-        let tail: String
-        if let space = rest.firstIndex(of: " ") {
-            tag = String(rest[..<space]).uppercased()
-            tail = String(rest[rest.index(after: space)...]).trimmingCharacters(in: .whitespaces)
-        } else {
-            tag = rest.uppercased()
-            tail = ""
-        }
-        guard tag.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" }) else {
-            throw GEDCOMCodecError.invalidLine(line: lineNumber, content: raw)
-        }
-
-        let pointer: String?
-        let value: String
-        if tail.count >= 2, tail.first == "@", tail.last == "@", !tail.dropFirst().dropLast().contains("@") {
-            pointer = String(tail.dropFirst().dropLast())
-            value = ""
-        } else {
-            pointer = nil
-            value = tail
-        }
-        return GEDCOMNode(level: level, xref: xref, tag: tag, pointer: pointer, value: value, rawLine: raw)
+        node.tag = node.tag.uppercased()
+        return node
     }
 }
 

@@ -34,7 +34,23 @@ public struct SaveReceipt: Codable, Hashable, Sendable {
     }
 }
 
-public typealias ExportReceipt = SaveReceipt
+/// Trash filenames embed the file's original (user-facing) name. It is base64'd with a
+/// URL-safe alphabet so it survives as one path component whatever it contained.
+enum Base64Filename {
+    static func encode(_ value: String) -> String {
+        Data(value.utf8).base64EncodedString()
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    static func decode(_ value: String) -> String? {
+        var base64 = value.replacingOccurrences(of: "_", with: "/").replacingOccurrences(of: "-", with: "+")
+        while base64.count % 4 != 0 { base64 += "=" }
+        guard let data = Data(base64Encoded: base64) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+}
 
 public struct RecoveryItem: Identifiable, Hashable, Sendable {
     public enum Kind: String, Sendable {
@@ -67,7 +83,7 @@ public struct RecoveryItem: Identifiable, Hashable, Sendable {
         switch kind {
         case .deletedFile:
             let parts = displayName.components(separatedBy: "--Original--")
-            if parts.count > 1, let decoded = Self.decodeFilename(parts[1]) { return decoded }
+            if parts.count > 1, let decoded = Base64Filename.decode(parts[1]) { return decoded }
             return parts[0].components(separatedBy: "--").last ?? displayName
         case .revision:
             return L10n.tr("Сохранение")
@@ -79,13 +95,6 @@ public struct RecoveryItem: Identifiable, Hashable, Sendable {
         case .archivedTree:
             return displayName
         }
-    }
-
-    private static func decodeFilename(_ value: String) -> String? {
-        var base64 = value.replacingOccurrences(of: "_", with: "/").replacingOccurrences(of: "-", with: "+")
-        while base64.count % 4 != 0 { base64 += "=" }
-        guard let data = Data(base64Encoded: base64) else { return nil }
-        return String(data: data, encoding: .utf8)
     }
 }
 

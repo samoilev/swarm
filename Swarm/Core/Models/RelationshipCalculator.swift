@@ -186,7 +186,7 @@ public struct RelationshipCalculator {
 
         for (ancestorID, firstPath) in firstAncestors {
             guard let secondPath = secondAncestors[ancestorID] else { continue }
-            let parentage = uniqueParentage(firstPath.parentage + secondPath.parentage)
+            let parentage = ParentageKind.unique(firstPath.parentage + secondPath.parentage)
             let candidate = (
                 stepsUp: firstPath.depth,
                 stepsDown: secondPath.depth,
@@ -210,7 +210,7 @@ public struct RelationshipCalculator {
         while !queue.isEmpty {
             let (current, path) = queue.removeFirst()
             for edge in idx.parentEdges(of: current) {
-                let parentage = uniqueParentage(
+                let parentage = ParentageKind.unique(
                     path.parentage + (edge.kind == .biological ? [] : [edge.kind])
                 )
                 let candidate = AncestorPath(depth: path.depth + 1, parentage: parentage)
@@ -223,11 +223,6 @@ public struct RelationshipCalculator {
             }
         }
         return result
-    }
-
-    private func uniqueParentage(_ kinds: [ParentageKind]) -> [ParentageKind] {
-        var seen = Set<ParentageKind>()
-        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
     }
 
     private func ancestorPathKey(_ path: AncestorPath) -> String {

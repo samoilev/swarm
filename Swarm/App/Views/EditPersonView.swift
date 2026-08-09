@@ -50,7 +50,7 @@ struct EditPersonView: View {
     @State private var showAttachmentImporter = false
     @State private var addRelType: AddRelType = .none
     @State private var addRelPersonId: UUID?
-    @State private var editSession: EditSession?
+    @State private var editSession: FamilyTree?
     @State private var isHomePerson = false
     @State private var preparedAttachmentIDs: Set<UUID> = []
     @State private var saveError: String?
@@ -83,7 +83,7 @@ struct EditPersonView: View {
         }
     }
 
-    private var editingTree: FamilyTree { editSession?.draftTree ?? tree }
+    private var editingTree: FamilyTree { editSession ?? tree }
     private var editingPerson: Person { editingTree.person(byId: person.id) ?? person }
 
     enum AddRelType: CaseIterable {
@@ -831,18 +831,8 @@ struct EditPersonView: View {
 
     /// Resolve a picked place to coordinates and fill the bound field. Only fires when
     /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-    private func prefillCoords(for place: PlaceEntry, into coords: Binding<String>) {
-        if let c = GeocodingService.shared.coordinate(for: place) {
-            coords.wrappedValue = String(format: "%.5f, %.5f", c.latitude, c.longitude)
-        }
-    }
 
     /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
-    private func parseGraveCoords(_ s: String) -> (lat: Double, lon: Double)? {
-        let parts = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-        guard parts.count == 2, let lat = Double(parts[0]), let lon = Double(parts[1]) else { return nil }
-        return (lat, lon)
-    }
 
     private func resizeImage(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
         let size = image.size
@@ -859,7 +849,7 @@ struct EditPersonView: View {
     }
 
     private func loadPerson() {
-        if editSession == nil { editSession = try? EditSession(tree: tree) }
+        if editSession == nil { editSession = try? tree.deepCopy() }
         let source = editingPerson
         isHomePerson = tree.homePersonId == person.id
         givenNames = source.givenNames
@@ -990,20 +980,6 @@ struct EditPersonView: View {
         return (-90 ... 90).contains(coordinates.lat) && (-180 ... 180).contains(coordinates.lon)
     }
 
-    private func parsedDate(
-        text: String,
-        end: String,
-        qualifier: GenealogyDate.Qualifier,
-        original: GenealogyDate?
-    ) -> GenealogyDate? {
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
-        if let original, original.start == nil, text == original.rawValue, qualifier == original.qualifier {
-            return original
-        }
-        let range = qualifier == .between || qualifier == .fromTo
-        let value = GenealogyDate(userInput: text, qualifier: qualifier, endValue: range ? end : nil)
-        return value.isValid ? value : nil
-    }
 
     private func displayDate(_ date: GenealogyDate?) -> (text: String, end: String, qualifier: GenealogyDate.Qualifier) {
         guard let date else { return ("", "", .exact) }

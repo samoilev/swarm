@@ -88,11 +88,11 @@ struct TreeStoreTests {
         #expect(try Data(contentsOf: legacyMetadata.appendingPathComponent("legacy.txt")) == Data("legacy".utf8))
     }
 
-    @Test func saveThenLoadRoundTrips() throws {
+    @Test func saveThenLoadRoundTrips() async throws {
         let temp = Temp()
         let store = TreeStore(storageFolder: temp.url)
         let tree = makeTree()
-        store.addTree(tree)
+        _ = try await store.addTreeVerified(tree)
         let id = tree.id
 
         // A fresh store over the same folder must re-read the tree from disk.
@@ -109,21 +109,21 @@ struct TreeStoreTests {
         #expect(loaded.homePersonId == loaded.people.first?.id)
     }
 
-    @Test func readableFolderNamedAfterTree() {
+    @Test func readableFolderNamedAfterTree() async throws {
         let temp = Temp()
         let store = TreeStore(storageFolder: temp.url)
-        store.addTree(makeTree())
+        _ = try await store.addTreeVerified(makeTree())
         let entries = (try? FileManager.default.contentsOfDirectory(atPath: temp.url.path)) ?? []
         // Folder is named after the tree (readable), not a bare UUID.
         #expect(entries.contains("Семья Ивановых"))
     }
 
-    @Test func renameMovesFolderAndKeepsIdentity() {
+    @Test func renameMovesFolderAndKeepsIdentity() async throws {
         let temp = Temp()
         let store = TreeStore(storageFolder: temp.url)
         let tree = makeTree()
-        store.addTree(tree)
-        store.renameTree(tree, name: "Род Петровых", subtitle: nil)
+        _ = try await store.addTreeVerified(tree)
+        _ = try await store.renameTreeVerified(tree, name: "Род Петровых", subtitle: nil)
 
         let entries = Set((try? FileManager.default.contentsOfDirectory(atPath: temp.url.path)) ?? [])
         #expect(entries.contains("Род Петровых"))
@@ -134,23 +134,23 @@ struct TreeStoreTests {
         #expect(reloaded.trees.first?.id == tree.id) // same identity after rename
     }
 
-    @Test func collidingNamesGetDistinctFolders() {
+    @Test func collidingNamesGetDistinctFolders() async throws {
         let temp = Temp()
         let store = TreeStore(storageFolder: temp.url)
         let t1 = FamilyTree(name: "Дерево")
         let t2 = FamilyTree(name: "Дерево")
-        store.addTree(t1)
-        store.addTree(t2)
+        _ = try await store.addTreeVerified(t1)
+        _ = try await store.addTreeVerified(t2)
         let entries = Set((try? FileManager.default.contentsOfDirectory(atPath: temp.url.path)) ?? [])
         #expect(entries.contains("Дерево"))
         #expect(entries.contains("Дерево 2")) // second tree suffixed, not clobbered
         #expect(TreeStore(storageFolder: temp.url).trees.count == 2)
     }
 
-    @Test func corruptGedIsSkippedNotFatal() {
+    @Test func corruptGedIsSkippedNotFatal() async throws {
         let temp = Temp()
         let store = TreeStore(storageFolder: temp.url)
-        store.addTree(makeTree())
+        _ = try await store.addTreeVerified(makeTree())
 
         // Drop a garbage tree folder alongside the good one.
         let bad = temp.url.appendingPathComponent("Битое", isDirectory: true)
@@ -163,7 +163,7 @@ struct TreeStoreTests {
         #expect(reloaded.trees.contains { $0.name == "Семья Ивановых" })
     }
 
-    @Test func importPreservesOriginalFileVerbatim() throws {
+    @Test func importPreservesOriginalFileVerbatim() async throws {
         let temp = Temp()
         let inbox = Temp() // source lives outside the storage folder
         let fm = FileManager.default
@@ -180,7 +180,7 @@ struct TreeStoreTests {
         try raw.write(to: src, atomically: true, encoding: .utf8)
 
         let store = TreeStore(storageFolder: temp.url)
-        let tree = try store.importGEDCOM(from: src)
+        let tree = try await store.importGEDCOM(from: src).tree
 
         // The verbatim copy exists and matches the source byte-for-byte.
         let original = store.gedFileURL(for: tree).deletingLastPathComponent()
@@ -189,7 +189,7 @@ struct TreeStoreTests {
         #expect(try Data(contentsOf: original) == Data(contentsOf: src))
 
         // A subsequent save (which prunes stale .ged files) must not delete it.
-        store.saveTree(tree)
+        _ = try await store.saveTree(tree)
         #expect(fm.fileExists(atPath: original.path))
 
         // Reloading must pick the working file, not the original copy.
@@ -198,7 +198,7 @@ struct TreeStoreTests {
         #expect(reloaded.trees.first?.name == "Импортированное")
     }
 
-    @Test func importCarriesPhotosAndLazyLoads() throws {
+    @Test func importCarriesPhotosAndLazyLoads() async throws {
         let temp = Temp()
         let inbox = Temp()
         let fm = FileManager.default
@@ -222,7 +222,7 @@ struct TreeStoreTests {
         try bytes.write(to: srcMedia.appendingPathComponent("I1.jpg"))
 
         let store = TreeStore(storageFolder: temp.url)
-        let tree = try store.importGEDCOM(from: src)
+        let tree = try await store.importGEDCOM(from: src).tree
         // The portrait was copied into the tree's own Media/ folder…
         let treeMedia = store.gedFileURL(for: tree).deletingLastPathComponent()
             .appendingPathComponent("Media/I1.jpg")
@@ -238,7 +238,7 @@ struct TreeStoreTests {
 
         // Editing a non-photo field and saving must NOT drop or rewrite the portrait.
         person.occupation = "Писатель"
-        reloaded.saveTree(reloaded.trees[0])
+        _ = try await reloaded.saveTree(reloaded.trees[0])
         #expect(fm.fileExists(atPath: treeMedia.path))
         #expect(try Data(contentsOf: treeMedia) == bytes)
     }
@@ -270,7 +270,7 @@ struct TreeStoreTests {
 
         // Discovery is read-only: the old bytes remain untouched until the user runs
         // the explicit, backup-protected migration transaction.
-        #expect(store.pendingMigrationCount == 1)
+        #expect(store.pendingMigrations.count == 1)
         #expect(fm.fileExists(atPath: temp.url.appendingPathComponent("\(id.uuidString).ged").path))
 
         // A pending migration is not a load failure — this tree opened. Reporting it as
@@ -287,7 +287,7 @@ struct TreeStoreTests {
         // Only after the verified transaction is the flat source moved into Recovery.
         let entries = Set((try? fm.contentsOfDirectory(atPath: temp.url.path)) ?? [])
         #expect(!entries.contains("\(id.uuidString).ged")) // flat file consumed
-        #expect(store.pendingMigrationCount == 0)
+        #expect(store.pendingMigrations.count == 0)
     }
 
     @Test func oldFolderLayoutIsPendingMigrationNotLoadFailure() throws {

@@ -289,6 +289,13 @@ public final class FamilyTree: Identifiable, Codable {
         reconcileParentLinks()
     }
 
+    /// An isolated working copy. `FamilyTree`, `Person` and `Union` are reference types
+    /// shared across every view, so an editor mutates this instead: nothing it changes
+    /// can reach the live tree until the caller validates and persists it.
+    public func deepCopy() throws -> FamilyTree {
+        try JSONDecoder().decode(FamilyTree.self, from: JSONEncoder().encode(self))
+    }
+
     /// Copy a snapshot's content into this live instance (shared across many views),
     /// then bump `layoutVersion` so canvases recompute. Identity and `createdAt` stay.
     public func applyContent(of snapshot: FamilyTree) {
