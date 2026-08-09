@@ -115,6 +115,10 @@ struct InspectorPanel: View {
             .padding(.bottom, 18)
         }
         .scrollContentBackground(.hidden)
+        // The overlay scroller lands on the trailing edge, right over the close button,
+        // and swallows the click until it fades. The fades below already say there is
+        // more card; the bar only cost us a hit target.
+        .scrollIndicators(.hidden)
         // Both ends of the record dissolve instead of being sheared off by the panel's
         // own corners. Fixed heights, not fractions: the fade must stay the same weight
         // whether the window is 600pt tall or 1400. `.scrollEdgeEffectStyle` would be

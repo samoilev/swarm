@@ -1,18 +1,13 @@
 /* App and settings */
 "Язык" = "Language";
 "Язык интерфейса" = "Interface language";
-"Настройки Swarm" = "Swarm Settings";
+"Настройки" = "Settings";
 "Переключить язык интерфейса" = "Switch the interface language";
 "Карта и конфиденциальность" = "Maps and privacy";
 "Провайдер карты" = "Map provider";
-"Карта, подписи и координаты обрабатываются на этом Mac без сетевых тайлов." = "The map, labels, and coordinates are processed on this Mac without network tiles.";
-"Apple Maps загружает сетевые тайлы. Apple может получить область просмотра карты." = "Apple Maps loads network tiles. Apple may receive the visible map region.";
-"Swarm не передаёт Apple имена людей, события, заметки или подписи маркеров. Для Apple Maps передаётся только необходимая самому системному картографическому сервису область просмотра. Переключитесь на офлайн-карту, если не хотите и этого." = "Swarm does not send people's names, events, notes, or marker labels to Apple. Apple Maps receives only the visible region required by the system map service itself. Switch to the offline map if you do not want even that.";
-"Локальные данные" = "Local data";
-"Поиск мест использует встроенный локальный индекс. Выбранный идентификатор, подпись и координаты сохраняются в GEDCOM, поэтому обновление справочника не перемещает историческое место." = "Place search uses the built-in local index. The selected identifier, label, and coordinates are saved in GEDCOM, so an index update cannot move a historical place.";
-"Справочник мест основан на GeoNames и охватывает бывший СССР, Европу и всю Северную Америку. Офлайн-карта использует встроенные упрощённые векторы Natural Earth 1:110m (public domain)." = "The GeoNames place index covers the former USSR, Europe, and all of North America. The offline map uses bundled simplified Natural Earth 1:110m vectors (public domain).";
+"Ничего не уходит в сеть." = "Nothing leaves this Mac.";
+"Apple видит область просмотра карты." = "Apple sees the visible map region.";
 "Восстановление" = "Recovery";
-"Хранятся последние 50 редакций GEDCOM. Удалённые и заменённые файлы доступны 30 дней. Резервная копия перед миграцией v2 не удаляется автоматически." = "The latest 50 GEDCOM revisions are kept. Deleted and replaced files remain available for 30 days. The backup made before the v2 migration is not deleted automatically.";
 
 /* App commands and common actions */
 "Новое дерево" = "New Tree";
@@ -482,8 +477,8 @@
 " и " = " and ";
 " по " = " to ";
 "Офлайн-карта" = "Offline Map";
-"Подробная карта с городами и рельефом. Загружает тайлы через интернет." = "A detailed map with cities and terrain. Loads tiles over the internet.";
-"Упрощённые контуры стран из встроенных данных. Работает без сети." = "Simplified country outlines from bundled data. Works offline.";
+"Подробная. Нужна сеть." = "Detailed. Needs internet.";
+"Контуры стран. Без сети." = "Country outlines. Offline.";
 "Сохранение" = "Save";
 "Перед обновлением формата" = "Before Format Upgrade";
 "Перед слиянием" = "Before Merge";
@@ -745,15 +740,13 @@
 
 /* Help */
 "Справка Swarm" = "Swarm Help";
-"Краткий путеводитель по семейному архиву" = "A quick guide to your family archive";
 "Первые шаги" = "First Steps";
-"Создайте дерево или импортируйте GEDCOM, затем добавляйте людей и связывайте их как родителей, супругов, детей или братьев и сестёр. Изменения сохраняются автоматически." = "Create a tree or import a GEDCOM file, then add people and link them as parents, spouses, children, or siblings. Changes are saved automatically.";
-"Даты и термины" = "Dates and Terminology";
-"Можно вводить полные и частичные даты, диапазоны и уточнения «около», «до» или «после». В английском интерфейсе используйте однозначную форму 5 Mar 1978; GEDCOM сохраняется в стандартном формате." = "You can enter full or partial dates, ranges, and qualifiers such as about, before, or after. In English, use the unambiguous 5 Mar 1978 form; GEDCOM is stored in its standard format.";
-"Родство" = "Kinship";
-"Выберите человека, затем удерживайте ⌘ и выберите второго. Swarm покажет родство, включая неполнородные связи, двоюродное родство со смещением поколений и родство по браку." = "Select one person, then hold ⌘ and select another. Swarm shows the relationship, including half relationships, cousins with removed generations, and relationships by marriage.";
+"Создайте дерево или импортируйте GEDCOM. Добавляйте людей и связывайте их: родители, супруги, дети, братья и сёстры. Сохранение автоматическое." = "Create a tree or import a GEDCOM. Add people and link them: parents, spouses, children, siblings. Saving is automatic.";
+"Даты" = "Dates";
+"Полные и частичные даты, диапазоны, «около», «до», «после». В английском интерфейсе пишите 5 Mar 1978." = "Full or partial dates, ranges, and about / before / after. In English, write 5 Mar 1978.";
+"Выберите человека, затем ⌘-щелчок по второму. Swarm покажет родство — неполнородное, двоюродное, по браку." = "Select a person, then ⌘-click a second. Swarm names the relationship — half, cousin, or by marriage.";
 "Рабочие пространства" = "Workspaces";
-"Используйте схему дерева, список людей, хронологию, места, проверку данных, веер предков и карту. Все режимы работают с одной семейной записью." = "Use the tree diagram, people list, timeline, places, data review, ancestor fan, and map. Every workspace uses the same family record.";
+"Дерево, люди, хронология, места, проверка, веер предков, карта. Все работают с одной записью." = "Tree, people, timeline, places, review, ancestor fan, map. All work on one record.";
 "Клавиатура" = "Keyboard";
 "⌘N — новое дерево, ⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево." = "⌘N — new tree, ⌘F — find a person, ⌘Z — undo, ⇧⌘Z — redo, ⌘+ and ⌘− — zoom, ⌘0 — fit the tree.";
 "⌘F — найти человека, ⌘Z — отменить, ⇧⌘Z — повторить, ⌘+ и ⌘− — масштаб, ⌘0 — вписать дерево." = "⌘F — find a person, ⌘Z — undo, ⇧⌘Z — redo, ⌘+ and ⌘− — zoom, ⌘0 — fit the tree.";
@@ -763,14 +756,16 @@
 "Не указано имя" = "Missing name";
 "У персоны не указаны ни имя, ни фамилия." = "This person has neither a given name nor a surname.";
 "Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки." = "The record is marked living but also contains death data; the original data was preserved for review.";
-"Карта и конфиденциальность" = "Maps and Privacy";
-"Поиск мест и офлайн-карта используют встроенный индекс. Apple Maps получает область просмотра только тогда, когда выбран системный провайдер; имена людей и семейные заметки Apple не передаются." = "Place search and the offline map use the built-in index. Apple Maps receives the visible region only when the system provider is selected; people’s names and family notes are not sent to Apple.";
-"Восстановление и поддержка" = "Recovery and Support";
-"В меню архива откройте восстановление, чтобы вернуть прошлую редакцию, удалённый файл или резервную копию. Перед восстановлением Swarm показывает, что именно будет заменено. Для помощи или сообщения об ошибке откройте страницу поддержки; не прикладывайте приватные семейные данные." = "Open Recovery from the archive menu to restore an earlier revision, a deleted file, or a backup. Swarm shows exactly what will be replaced before restoring. For help or to report a bug, open the support page; do not attach private family data.";
+"Карта и данные" = "Maps and Data";
+"Поиск мест и офлайн-карта работают локально: индекс GeoNames (бывший СССР, Европа, Северная Америка) и векторы Natural Earth. Координаты хранятся в GEDCOM. Apple Maps видит только область просмотра." = "Place search and the offline map run locally: a GeoNames index (former USSR, Europe, North America) and Natural Earth vectors. Coordinates are stored in the GEDCOM. Apple Maps sees only the visible region.";
+"Меню архива → восстановление. Хранятся 50 последних редакций, удалённые файлы — 30 дней. Swarm показывает, что будет заменено, до замены." = "Archive menu → Recovery. The last 50 revisions are kept, deleted files for 30 days. Swarm shows what will be replaced before replacing it.";
+"Поддержка" = "Support";
+"Ошибки и вопросы — на GitHub. Не прикладывайте семейные данные." = "Report bugs and ask questions on GitHub. Don’t attach family data.";
 "Открыть поддержку на GitHub" = "Open GitHub Support";
 
 /* Library and new-tree flow — the 2026 redesign */
 "Библиотека" = "Library";
+"и другие" = "and others";
 "Новая запись" = "New Tree";
 "Вернуться к библиотеке" = "Back to library";
 "Назовите запись" = "Name the record";

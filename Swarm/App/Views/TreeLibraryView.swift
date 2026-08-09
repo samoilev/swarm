@@ -28,6 +28,8 @@ struct TreeSummary {
     let peopleCount: Int
     /// The two most common surnames, most frequent first.
     let surnames: [String]
+    /// The tree carries surnames beyond the two shown.
+    let hasMoreSurnames: Bool
     let firstYear: Int?
     let lastYear: Int?
 
@@ -58,6 +60,7 @@ struct TreeSummary {
             .sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }
             .prefix(2)
             .map(\.key)
+        hasMoreSurnames = surnameCounts.count > 2
         firstYear = earliest
         lastYear = latestDeath ?? latestBirth
     }
@@ -71,6 +74,14 @@ struct TreeSummary {
 
     var peopleLabel: String {
         L10n.count(peopleCount, .person)
+    }
+
+    /// "Тюненко · Мальцев", plus "и другие" when the tree holds more than the two shown.
+    /// Empty when nobody in the tree carries a surname.
+    var surnamesLine: String {
+        guard !surnames.isEmpty else { return "" }
+        let named = surnames.joined(separator: " · ")
+        return hasMoreSurnames ? named + " · " + L10n.tr("и другие") : named
     }
 }
 
@@ -316,17 +327,21 @@ struct TreeLibraryView: View {
             // On an empty library these two live in the empty state itself, 300pt below.
             // Showing them twice on one screen is noise, not reinforcement.
             if !trees.isEmpty {
+                // Icon only, so the row still fits a ~600pt window. Once the toolbar
+                // overflows, AppKit collapses the flexible spacer and left-packs whatever
+                // survived into the middle of the bar — keeping the row narrow is the only
+                // way New Tree stays where it belongs, against the trailing edge.
                 Button(action: { onImport?() }) {
                     Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
-                        .lineLimit(1)
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.capsule)
-                // Toolbars drop a Label's title by default. These two are the doors into
-                // the app; an unlabelled tray glyph and a bare + do not name themselves.
-                .labelStyle(.titleAndIcon)
+                .labelStyle(.iconOnly)
                 .help(Self.importHint)
+                .accessibilityLabel(L10n.tr("Импорт GEDCOM"))
 
+                // Toolbars drop a Label's title by default. This is the front door of the
+                // app, and a bare + does not name itself.
                 Button(action: onCreate) {
                     Label(L10n.tr("Новое дерево"), systemImage: "plus")
                         .lineLimit(1)
@@ -920,7 +935,7 @@ struct TreeCardView: View {
             Spacer(minLength: 6)
 
             // Reserved for the same reason as the subtitle row above.
-            Text(summary.surnames.isEmpty ? " " : summary.surnames.joined(separator: " · "))
+            Text(summary.surnamesLine.isEmpty ? " " : summary.surnamesLine)
                 .font(SepiaTheme.ui(size: 12))
                 .fontWeight(.bold)
                 .foregroundColor(SepiaTheme.accent2)
@@ -984,7 +999,7 @@ struct TreeCardView: View {
     private var accessibilityDescription: String {
         var parts = [tree.name]
         if let subtitle = tree.subtitle, !subtitle.isEmpty { parts.append(subtitle) }
-        if !summary.surnames.isEmpty { parts.append(summary.surnames.joined(separator: ", ")) }
+        if !summary.surnamesLine.isEmpty { parts.append(summary.surnamesLine) }
         parts.append(factsLine)
         return parts.joined(separator: ". ")
     }

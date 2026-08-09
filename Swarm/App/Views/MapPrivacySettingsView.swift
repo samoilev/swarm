@@ -10,53 +10,41 @@ struct MapPrivacySettingsView: View {
         ZStack {
             LiquidGlassPanelBackground()
 
-            VStack(spacing: 0) {
-                LiquidGlassPanelHeader(title: L10n.tr("Настройки Swarm"))
-                    .padding(14)
+            VStack(alignment: .leading, spacing: 26) {
+                // The window frame carries no title, so the panel names itself once,
+                // centred over both sections.
+                Text(L10n.tr("Настройки"))
+                    .font(SepiaTheme.display(size: 26))
+                    .foregroundStyle(SepiaTheme.ink)
+                    .frame(maxWidth: .infinity)
+                    .accessibilityAddTraits(.isHeader)
 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 26) {
-                        settingsSection(L10n.tr("Язык"), systemImage: "globe") {
-                            LiquidGlassActionRow {
-                                ForEach(AppLanguage.allCases) { language in
-                                    languageButton(language)
-                                }
-                            }
-                        }
-
-                        settingsSection(L10n.tr("Карта и конфиденциальность"), systemImage: "map") {
-                            LiquidGlassActionRow {
-                                ForEach(MapProviderSetting.allCases) { provider in
-                                    providerButton(provider)
-                                }
-                            }
-                            .id(languageRaw)
-
-                            privacyNotice
-                        }
-
-                        settingsSection(L10n.tr("Локальные данные"), systemImage: "internaldrive") {
-                            Text(L10n.tr("Поиск мест использует встроенный локальный индекс. Выбранный идентификатор, подпись и координаты сохраняются в GEDCOM, поэтому обновление справочника не перемещает историческое место."))
-                                .font(SepiaTheme.body(size: 12.5))
-                                .foregroundStyle(SepiaTheme.ink)
-
-                            Text(L10n.tr("Справочник мест основан на GeoNames и охватывает бывший СССР, Европу и всю Северную Америку. Офлайн-карта использует встроенные упрощённые векторы Natural Earth 1:110m (public domain)."))
-                                .font(SepiaTheme.ui(size: 11))
-                                .foregroundStyle(SepiaTheme.inkSoft)
-                        }
-
-                        settingsSection(L10n.tr("Восстановление"), systemImage: "clock.arrow.circlepath") {
-                            Text(L10n.tr("Хранятся последние 50 редакций GEDCOM. Удалённые и заменённые файлы доступны 30 дней. Резервная копия перед миграцией v2 не удаляется автоматически."))
-                                .font(SepiaTheme.body(size: 12.5))
-                                .foregroundStyle(SepiaTheme.ink)
+                settingsSection(L10n.tr("Язык"), systemImage: "globe") {
+                    LiquidGlassActionRow {
+                        ForEach(AppLanguage.allCases) { language in
+                            languageButton(language)
                         }
                     }
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 24)
+                }
+
+                settingsSection(L10n.tr("Карта и конфиденциальность"), systemImage: "map") {
+                    LiquidGlassActionRow {
+                        ForEach(MapProviderSetting.allCases) { provider in
+                            providerButton(provider)
+                        }
+                    }
+                    .id(languageRaw)
+
+                    privacyNotice
                 }
             }
+            .padding(24)
         }
-        .frame(width: 560, height: 590)
+        // Two sections of fixed-height controls: the window takes its height from them
+        // rather than reserving room for content that is no longer here.
+        .frame(width: 560)
+        // Blanks the tab/window title macOS would otherwise fill with "Swarm Settings".
+        .navigationTitle(Text(verbatim: ""))
     }
 
     private func settingsSection(
@@ -71,9 +59,6 @@ struct MapPrivacySettingsView: View {
                 .accessibilityAddTraits(.isHeader)
 
             content()
-
-            Divider()
-                .overlay(SepiaTheme.fieldLine)
         }
     }
 
@@ -82,7 +67,7 @@ struct MapPrivacySettingsView: View {
         let isSelected = currentLanguage == language
         choiceButton(
             title: language.displayName,
-            subtitle: language == .russian ? "Русский интерфейс" : "English interface",
+            subtitle: nil,
             isSelected: isSelected
         ) {
             languageBinding.wrappedValue = language
@@ -104,7 +89,7 @@ struct MapPrivacySettingsView: View {
     @ViewBuilder
     private func choiceButton(
         title: String,
-        subtitle: String,
+        subtitle: String?,
         isSelected: Bool,
         action: @escaping () -> Void
     ) -> some View {
@@ -127,7 +112,7 @@ struct MapPrivacySettingsView: View {
         }
     }
 
-    private func choiceLabel(title: String, subtitle: String, isSelected: Bool) -> some View {
+    private func choiceLabel(title: String, subtitle: String?, isSelected: Bool) -> some View {
         HStack(spacing: 7) {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 12, weight: .semibold))
@@ -137,10 +122,12 @@ struct MapPrivacySettingsView: View {
                 Text(title)
                     .font(SepiaTheme.ui(size: 11.5))
                     .fontWeight(.semibold)
-                Text(subtitle)
-                    .font(SepiaTheme.ui(size: 9.5))
-                    .opacity(0.82)
-                    .lineLimit(2)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(SepiaTheme.ui(size: 9.5))
+                        .opacity(0.82)
+                        .lineLimit(1)
+                }
             }
 
             Spacer(minLength: 4)
@@ -151,20 +138,14 @@ struct MapPrivacySettingsView: View {
     }
 
     private var privacyNotice: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(
-                currentProvider == .offlineVector
-                    ? L10n.tr("Карта, подписи и координаты обрабатываются на этом Mac без сетевых тайлов.")
-                    : L10n.tr("Apple Maps загружает сетевые тайлы. Apple может получить область просмотра карты."),
-                systemImage: currentProvider == .offlineVector ? "network.slash" : "network"
-            )
-            .font(SepiaTheme.body(size: 12.5))
-            .foregroundStyle(SepiaTheme.ink)
-
-            Text(L10n.tr("Swarm не передаёт Apple имена людей, события, заметки или подписи маркеров. Для Apple Maps передаётся только необходимая самому системному картографическому сервису область просмотра. Переключитесь на офлайн-карту, если не хотите и этого."))
-                .font(SepiaTheme.ui(size: 11))
-                .foregroundStyle(SepiaTheme.inkSoft)
-        }
+        Label(
+            currentProvider == .offlineVector
+                ? L10n.tr("Ничего не уходит в сеть.")
+                : L10n.tr("Apple видит область просмотра карты."),
+            systemImage: currentProvider == .offlineVector ? "network.slash" : "network"
+        )
+        .font(SepiaTheme.body(size: 12.5))
+        .foregroundStyle(SepiaTheme.ink)
     }
 
     private var currentProvider: MapProviderSetting {
