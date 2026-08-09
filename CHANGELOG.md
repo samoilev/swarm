@@ -11,6 +11,53 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.1.0] — 2026-08-09
+
+### Added
+
+- A bottom-to-top tree layout, the shape most printed genealogies use, with ancestors
+  at the bottom. It is a vertical flip of the finished top-down drawing rather than a
+  sign threaded through every depth, bus and elbow calculation.
+- Hover states on the toolbar's shared-glass icons. The system highlight only reaches
+  controls that carry their own glass, so the ends of the bar lit up under the pointer
+  while the whole middle answered with nothing. Buttons, menus and the auto-repeat
+  steppers now share one chrome treatment: the fill is gated on the control being
+  enabled, so a clamped stepper stays dead, the grid menu wears the accent disc while
+  its section is on screen, and the fan-level steppers carry the help labels zoom
+  already had.
+- Three or more surnames on a library card render as “и другие” / “and others”.
+
+### Changed
+
+- Help was rewritten to one idea per section and now carries the local-data and
+  recovery facts that Settings used to state itself.
+- The Settings window takes its height from its content instead of a hardcoded 590pt.
+- Import GEDCOM in the library toolbar is icon-only, so the row stops overflowing at
+  the 600pt minimum width. Past overflow AppKit collapses the flexible spacer and
+  left-packs the survivors, which used to drag New Tree off the trailing edge.
+- The README banner and social preview center the wordmark and drop their taglines,
+  which still claimed macOS 14+ after the requirement moved to 26.
+- Internal cleanup of dead code and duplicated helpers, 161 lines lighter with no
+  change in behaviour: unreachable tree-store members are gone, the sync/async API
+  pairs collapse to the verified form that surfaces write failures, drifting copies of
+  the date, place, parentage, editor-field, fit-to-screen and GEDCOM-tokenizer helpers
+  are hoisted to one home, and the hand-rolled leap-year table gives way to
+  `DateComponents.isValidDate`.
+
+### Fixed
+
+- The serif theme renders New York through the `.serif` design. `NSFont(name: "New
+  York")` is nil — it is a system face, not an installed family — so the custom font
+  fell back to SF and every weight applied on top of it logged “Unable to update Font
+  Descriptor's weight”, around twenty lines per launch.
+- The inspector hides its scroll indicators. The overlay scroller landed on the close
+  button and swallowed the click until it faded.
+
+### Removed
+
+- Settings drops its in-panel title, its section dividers, and the local-data and
+  recovery blocks.
+
 ## [3.0.0] — 2026-08-08
 
 Swarm is rebuilt on native macOS 26 chrome throughout, so this release **requires macOS
@@ -493,7 +540,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.1.0...HEAD
+[3.1.0]: https://github.com/samoilev/swarm/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/samoilev/swarm/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/samoilev/swarm/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/samoilev/swarm/compare/v2.2.0...v2.2.1
