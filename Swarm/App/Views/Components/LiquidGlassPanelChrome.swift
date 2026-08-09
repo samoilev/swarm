@@ -105,17 +105,18 @@ struct SepiaWordmark: View {
                 .offset(y: 1)
 
             if let label, !label.isEmpty {
-                HStack(alignment: .center, spacing: 9) {
-                    Circle()
-                        .fill(SepiaTheme.accent)
-                        .frame(width: 4, height: 4)
-                        .accessibilityHidden(true)
-                    SepiaTrackedLabel(label)
-                }
-                // Nudged down against the mathematical centre. The label is all capitals,
-                // so it carries no descender and its ink sits high inside its own frame;
-                // centring the frames leaves it visibly above the middle of the wordmark.
-                .offset(y: 1.5)
+                // Both sit below the mathematical centre, and the label a point further
+                // than the dot. The label is all capitals, so it carries no descender and
+                // its ink rides high inside its own frame; a circle has no such bias, so
+                // the two need different nudges to look level with the wordmark.
+                Circle()
+                    .fill(SepiaTheme.accent)
+                    .frame(width: 4, height: 4)
+                    .offset(y: 1.5)
+                    .accessibilityHidden(true)
+
+                SepiaTrackedLabel(label)
+                    .offset(y: 2.5)
             }
         }
         .accessibilityElement(children: .combine)

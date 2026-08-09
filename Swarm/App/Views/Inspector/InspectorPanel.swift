@@ -69,16 +69,13 @@ struct InspectorPanel: View {
             .accessibilityHidden(true)
     }
 
-    /// One piece of glass carrying the whole record, lifted off the workspace paper.
-    /// The old panel was an opaque slab welded to the window edge with a 1px rule;
-    /// this is the same surface the library cards and the toolbar are made of.
+    /// One solid card carrying the whole record, lifted off the workspace paper by its
+    /// shadow rather than by translucency.
     private func panel(_ person: Person) -> some View {
         details(person)
-            // Fill first, then glass — over paper-coloured ground untinted glass lands
-            // within a few percent of the background, and the panel stops reading as a
-            // panel at all. Same reasoning as the library card's white tint.
-            .background(SepiaTheme.panelBg.opacity(0.42), in: panelShape)
-            .glassEffect(.regular.tint(.white.opacity(0.18)), in: panelShape)
+            // Opaque paper, not glass: the record has to stay readable over whatever
+            // part of the tree happens to sit behind it.
+            .background(SepiaTheme.panelBg, in: panelShape)
             .overlay {
                 // A white hairline, not a palette colour: it is the glass edge catching
                 // light, the same highlight the material draws along its own top.
