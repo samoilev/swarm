@@ -73,10 +73,10 @@ struct SepiaTheme {
     static let pinDeath = Color(hex: "9c4a2f")
     static let pinBurial = Color(hex: "6b5b95")
 
-    // New York is a system face, not an installed family: NSFont(name: "New York") is
-    // nil, so `Font.custom("New York", …)` fell back to the default font and every
-    // .weight()/.fontWeight() on top of it logged "Unable to update Font Descriptor's
-    // weight". The .serif design *is* New York and takes weights properly.
+    /// New York is a system face, not an installed family: `NSFont(name: "New York")` is
+    /// nil, so `Font.custom("New York", …)` fell back to the default font and every
+    /// `.weight()`/`.fontWeight()` on top of it logged "Unable to update Font Descriptor's
+    /// weight". The `.serif` design *is* New York and takes weights properly.
     static func display(size: CGFloat) -> Font {
         .system(size: size, weight: .semibold, design: .serif)
     }
