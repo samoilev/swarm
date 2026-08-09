@@ -829,11 +829,6 @@ struct EditPersonView: View {
         return String(format: "%.5f, %.5f", lat, lon)
     }
 
-    /// Resolve a picked place to coordinates and fill the bound field. Only fires when
-    /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-
-    /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
-
     private func resizeImage(_ image: NSImage, maxDimension: CGFloat) -> NSImage {
         let size = image.size
         guard size.width > maxDimension || size.height > maxDimension else { return image }
@@ -979,7 +974,6 @@ struct EditPersonView: View {
         guard let coordinates = parseGraveCoords(trimmed) else { return false }
         return (-90 ... 90).contains(coordinates.lat) && (-180 ... 180).contains(coordinates.lon)
     }
-
 
     private func displayDate(_ date: GenealogyDate?) -> (text: String, end: String, qualifier: GenealogyDate.Qualifier) {
         guard let date else { return ("", "", .exact) }

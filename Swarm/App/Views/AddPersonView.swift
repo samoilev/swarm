@@ -304,12 +304,6 @@ struct AddPersonView: View {
         }
     }
 
-    /// Resolve a picked place to coordinates and fill the bound field. Only fires when
-    /// a suggestion is chosen from the list, so manual entries keep their manual coords.
-
-    /// Parses "lat, lon" (decimal degrees) into a coordinate pair, or nil if invalid.
-
-
     private func validCoordinateText(_ value: String) -> Bool {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return true }

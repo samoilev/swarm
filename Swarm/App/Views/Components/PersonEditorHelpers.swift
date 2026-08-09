@@ -1,9 +1,9 @@
 import SwarmCore
 import SwiftUI
 
-/// Field logic shared by the add-person and edit-person sheets. Both collect the same
-/// dates and coordinates through the same controls, so the parsing lives once — a fork
-/// here would sooner or later drift on what counts as a valid entry in one sheet only.
+// Field logic shared by the add-person and edit-person sheets. Both collect the same
+// dates and coordinates through the same controls, so the parsing lives once — a fork
+// here would sooner or later drift on what counts as a valid entry in one sheet only.
 
 /// Fill a coordinate field from a place the user picked, which always carries its own
 /// exact coordinates. A place with none leaves the field untouched.
