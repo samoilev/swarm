@@ -1,0 +1,3786 @@
+0 HEAD
+1 SOUR SwarmFamilyTreePacks
+2 NAME Swarm public-release family-tree pack builder
+2 VERS 2.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 _TREEID F82139D7-52F4-4203-AA33-C98FE896A8A2
+1 _FTSVER 2
+1 _NAME The Tudors: Succession and the Union of the Crowns
+1 _SUBTITLE From Henry VII to James VI and I
+1 _HOME @I600E172C0E60@
+1 _ROOT @F69EF033C0B43@
+0 @I22956ED4A2E0@ INDI
+1 _FTSID 15E2A5B7-59EC-5786-A982-C424473DBF97
+1 NAME Edmund /Tudor/
+2 GIVN Edmund
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Edmund Tudor
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1430
+2 PLAC Much Hadham Hall
+3 MAP
+4 LATI N51.854371
+4 LONG E0.072438
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Edmund Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q361204
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q4285968
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 3 NOV 1456
+2 PLAC Carmarthen
+3 MAP
+4 LATI N51.856944
+4 LONG W4.316389
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Edmund Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q361204
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q835835
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St Davids Cathedral
+3 MAP
+4 LATI N51.881944
+4 LONG W5.267778
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Edmund Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q361204
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1300003
+3 NOTE Locality coordinates, not a street address.
+1 OCCU aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Edmund Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q361204
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Edmund Tudor appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1430 at Much Hadha
+2 CONC m Hall. The recorded death date is 3 NOV 1456 atCarmarthen. Documented unions in this tree connect this person with Margaret Beaufort. Public biographical sources identify the following occupation or p
+2 CONC ublic role: aristocrat. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or i
+2 CONC nfer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-edmund-portrait.jpg
+2 FORM JPEG
+1 FAMS @F2C650DBA4863@
+0 @IA16183117E22@ INDI
+1 _FTSID 6D7CC930-FD64-536A-A751-C937D174672F
+1 NAME Margaret /Beaufort/
+2 GIVN Margaret
+2 SURN Beaufort
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Margaret Beaufort
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 31 MAY 1443
+2 PLAC Bedfordshire
+3 MAP
+4 LATI N52.079580
+4 LONG W0.448204
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Margaret Beaufort
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229202
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q67387552
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 29 JUN 1509
+2 PLAC Westminster
+3 MAP
+4 LATI N51.499500
+4 LONG W0.133300
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Margaret Beaufort
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229202
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q189960
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Margaret Beaufort
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229202
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU philanthropist; educator
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Margaret Beaufort
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229202
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Margaret Beaufort appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 31 MAY 1443 a
+2 CONC t Bedfordshire. The recorded death date is 29 JUN 1509 at Westminster. Documented unions in this tree connect this person with Edmund Tudor. Public biographical sources identify the following occupati
+2 CONC on or public role: philanthropist; educator. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the c
+2 CONC ommissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-margaret-beaufort-portrait.jpg
+2 FORM JPEG
+1 FAMS @F2C650DBA4863@
+0 @IB359A5B58C80@ INDI
+1 _FTSID 37C123E3-4FAB-51C7-88C0-E74D3184F965
+1 NAME Edward /York/
+2 GIVN Edward
+2 SURN York
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Edward IV
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 APR 1442
+2 PLAC Rouen
+3 MAP
+4 LATI N49.443056
+4 LONG E1.102500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Edward IV
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q160341
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q30974
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 9 APR 1483
+2 PLAC Palace of Westminster
+3 MAP
+4 LATI N51.499444
+4 LONG W0.124167
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Edward IV
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q160341
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62408
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St George's Chapel, Windsor
+3 MAP
+4 LATI N51.483611
+4 LONG W0.606944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Edward IV
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q160341
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2449634
+3 NOTE Locality coordinates, not a street address.
+1 OCCU monarch
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Edward IV
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q160341
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Edward IV appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 APR 1442 at Rouen. T
+2 CONC he recorded death date is 9 APR 1483 at Palaceof Westminster. Documented unions in this tree connect this person with Elizabeth Woodville. Public biographical sources identify the following occupation o
+2 CONC r public role: monarch. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or i
+2 CONC nfer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-edward-iv-portrait.jpg
+2 FORM JPEG
+1 FAMS @F7131CEAF25F6@
+0 @I83527BCCDA2D@ INDI
+1 _FTSID 4E3989E8-31F6-5292-B170-525528328CA9
+1 NAME Elizabeth /Woodville/
+2 GIVN Elizabeth
+2 SURN Woodville
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Elizabeth Woodville
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1437
+2 PLAC Grafton Regis
+3 MAP
+4 LATI N52.114500
+4 LONG W0.896500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Elizabeth Woodville
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229214
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2136210
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 8 JUN 1492
+2 PLAC Bermondsey
+3 MAP
+4 LATI N51.498600
+4 LONG W0.075700
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Elizabeth Woodville
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229214
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q822040
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St George's Chapel, Windsor
+3 MAP
+4 LATI N51.483611
+4 LONG W0.606944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Elizabeth Woodville
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229214
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2449634
+3 NOTE Locality coordinates, not a street address.
+1 OCCU consort; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Elizabeth Woodville
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229214
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Elizabeth Woodville appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1437 at Gra
+2 CONC fton Regis. The recorded death date is 8 JUN 1492 at Bermondsey. Documented unions in this tree connect this person with Edward IV. Public biographical sources identify the following occupation or pub
+2 CONC lic role: consort; aristocrat. This summary is confined to cited genealogical facts and selectedpublic activities needed to interpret the graph; it does not extend the family beyond the commissioned c
+2 CONC ast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-elizabeth-woodville-portrait.jpg
+2 FORM JPEG
+1 FAMS @F7131CEAF25F6@
+0 @I2F803BFD9873@ INDI
+1 _FTSID 82773CCD-14D5-54F7-AB83-949015971913
+1 NAME Henry /Tudor/
+2 GIVN Henry
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry VII
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 JAN 1457
+2 PLAC Pembroke Castle
+3 MAP
+4 LATI N51.676944
+4 LONG W4.920556
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry VII
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q675493
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1422235
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 21 APR 1509
+2 PLAC Richmond Palace
+3 MAP
+4 LATI N51.460389
+4 LONG W0.310219
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry VII
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q675493
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1059945
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Henry VII
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q675493
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU monarch; royalty
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry VII
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q675493
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry VII appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 JAN 1457 at Pembro
+2 CONC ke Castle. The recorded death date is 21 APR 1509 at Richmond Palace. Within the defined scope, the recorded parents are Edmund Tudor and Margaret Beaufort. Documented unions in this tree connect this p
+2 CONC erson with Elizabeth of York. Public biographical sources identify the following occupation orpublic role: monarch; royalty. This summary is confined to cited genealogical facts and selected public ac
+2 CONC tivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-henry-vii-portrait.jpg
+2 FORM JPEG
+1 FAMS @F69EF033C0B43@
+1 FAMC @F2C650DBA4863@
+2 PEDI birth
+2 _PLINK @I22956ED4A2E0@
+3 _FTSID E4FB350A-8CBE-5024-A1BE-863224474E2E
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Edmund Tudor is recorded as biological parent of Henry VII
+4 QUAY high
+2 _PLINK @IA16183117E22@
+3 _FTSID 637BF471-FADF-5384-8E0C-7F5C0469B522
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Margaret Beaufort is recorded as biological parent of Henry VII
+4 QUAY high
+1 EVEN King of England
+2 TYPE Succession
+2 DATE 22 AUG 1485
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession of Henry VII
+3 QUAY high
+0 @IEFBE62D5394B@ INDI
+1 _FTSID 9DB98091-CB69-58E3-A670-16848B8DFF2E
+1 NAME Elizabeth /York/
+2 GIVN Elizabeth
+2 SURN York
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Elizabeth of York
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 11 FEB 1466
+2 PLAC Palace of Westminster
+3 MAP
+4 LATI N51.499444
+4 LONG W0.124167
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Elizabeth of York
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q207953
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62408
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 11 FEB 1503
+2 PLAC Tower of London
+3 MAP
+4 LATI N51.508200
+4 LONG W0.076198
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Elizabeth of York
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q207953
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62378
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Elizabeth of York
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q207953
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU royalty
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Elizabeth of York
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q207953
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Elizabeth of York appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 11 FEB 1466 a
+2 CONC t Palace of Westminster. The recorded death dateis 11 FEB 1503 at Tower of London. Within the defined scope, the recorded parents are Edward IV and Elizabeth Woodville. Documented unions in this tree c
+2 CONC onnect this person with Henry VII. Public biographical sources identify the following occupation or public role: royalty. This summary is confined to cited genealogical facts and selected public activ
+2 CONC ities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-elizabeth-york-portrait.jpg
+2 FORM JPEG
+1 FAMS @F69EF033C0B43@
+1 FAMC @F7131CEAF25F6@
+2 PEDI birth
+2 _PLINK @IB359A5B58C80@
+3 _FTSID 303E3BE8-1795-546A-BB4E-3F1BA179A186
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Edward IV is recorded as biological parent of Elizabeth of York
+4 QUAY high
+2 _PLINK @I83527BCCDA2D@
+3 _FTSID 3D5C234A-3567-5A08-9901-9E4A51648397
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth Woodville is recorded as biological parent of Elizabeth of York
+4 QUAY high
+0 @I56C2B2A2709E@ INDI
+1 _FTSID 7907553B-43F7-544E-9CAF-D5AB25E30D80
+1 NAME Arthur /Tudor/
+2 GIVN Arthur
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Arthur Tudor
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 19 SEP 1486
+2 PLAC Winchester
+3 MAP
+4 LATI N51.063333
+4 LONG W1.308611
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Arthur Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q711801
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q172157
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 2 APR 1502
+2 PLAC Ludlow Castle
+3 MAP
+4 LATI N52.367200
+4 LONG W2.723010
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Arthur Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q711801
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q576369
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Worcester Cathedral
+3 MAP
+4 LATI N52.188700
+4 LONG W2.220800
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Arthur Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q711801
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1630367
+3 NOTE Locality coordinates, not a street address.
+1 OCCU royalty
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Arthur Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q711801
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Arthur Tudor appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 19 SEP 1486 at Win
+2 CONC chester. The recorded death date is 2 APR 1502 at Ludlow Castle. Within the defined scope, the recorded parents are Henry VII and Elizabeth of York. Documented unions in this tree connect this person w
+2 CONC ith Catherine of Aragon. Public biographical sources identify the following occupation or public role: royalty. This summary is confined to cited genealogical facts and selected public activities need
+2 CONC ed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @F3626488A0D93@
+1 FAMC @F69EF033C0B43@
+2 PEDI birth
+2 _PLINK @I2F803BFD9873@
+3 _FTSID A79ACBB3-DE68-52BA-94C0-EC0450A7CB87
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VII is recorded as biological parent of Arthur Tudor
+4 QUAY high
+2 _PLINK @IEFBE62D5394B@
+3 _FTSID 3906BDDE-1A4B-5CF0-84E9-227680D21B05
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth of York is recorded as biological parent of Arthur Tudor
+4 QUAY high
+0 @I18BCBCD3E1B7@ INDI
+1 _FTSID 1C59E38D-1AA0-5C59-A59F-BB81990D723D
+1 NAME Margaret /Tudor/
+2 GIVN Margaret
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Margaret Tudor
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 28 NOV 1489
+2 PLAC London
+3 MAP
+4 LATI N51.507222
+4 LONG W0.127500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Margaret Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q523140
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q84
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 18 OCT 1541
+2 PLAC Methven
+3 MAP
+4 LATI N56.415000
+4 LONG W3.580000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Margaret Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q523140
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q3778610
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Perth
+3 MAP
+4 LATI N56.395833
+4 LONG W3.433333
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Margaret Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q523140
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q203000
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Margaret Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q523140
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Margaret Tudor appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 NOV 1489 at L
+2 CONC ondon. The recorded death date is 18 OCT 1541 atMethven. Within the defined scope, the recorded parents are Henry VII and Elizabeth of York. Documented unions in this tree connect this person with Jam
+2 CONC es IV of Scotland, Archibald Douglas, Henry Stewart. Public biographical sources identify the following occupation or public role: politician. This summary is confined to cited genealogical facts and s
+2 CONC elected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-margaret-portrait.jpg
+2 FORM JPEG
+1 FAMS @FBCB6C76F8199@
+1 FAMS @F3DCB3B5A9731@
+1 FAMS @FABDF1E9099B9@
+1 FAMC @F69EF033C0B43@
+2 PEDI birth
+2 _PLINK @I2F803BFD9873@
+3 _FTSID F96BDAEB-20CE-56D0-B562-8C0355BEC10B
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VII is recorded as biological parent of Margaret Tudor
+4 QUAY high
+2 _PLINK @IEFBE62D5394B@
+3 _FTSID 3D39FE81-01C6-56D3-901C-17BE10A06BCE
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth of York is recorded as biological parent of Margaret Tudor
+4 QUAY high
+0 @I600E172C0E60@ INDI
+1 _FTSID B600884F-0F2B-5DEA-9DE0-68593E3F31E9
+1 NAME Henry /Tudor/
+2 GIVN Henry
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry VIII
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 JUN 1491
+2 PLAC Palace of Placentia
+3 MAP
+4 LATI N51.482222
+4 LONG W0.006667
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry VIII
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q38370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1424839
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 28 JAN 1547
+2 PLAC Palace of Whitehall
+3 MAP
+4 LATI N51.504444
+4 LONG W0.125556
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry VIII
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q38370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q391620
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St George's Chapel, Windsor
+3 MAP
+4 LATI N51.483611
+4 LONG W0.606944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Henry VIII
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q38370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2449634
+3 NOTE Locality coordinates, not a street address.
+1 OCCU monarch; composer
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry VIII
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q38370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry VIII appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 JUN 1491 at Palac
+2 CONC e of Placentia. The recorded death date is 28 JAN 1547 at Palace of Whitehall. Within the defined scope, the recorded parents are Henry VII and Elizabeth of York. Documented unions in this tree connec
+2 CONC t this person with Catherine of Aragon, Anne Boleyn, Jane Seymour, Anne of Cleves, Catherine Howard, Catherine Parr, Elizabeth Blount. Public biographical sources identify the following occupation or p
+2 CONC ublic role: monarch; composer. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond
+1 OBJE
+2 FILE tudor-henry-viii-portrait.jpg
+2 FORM JPEG
+1 _ATTC
+2 FILE Attachments/tudor-succession-attachment-1.jpg
+2 TITL Family tree of monarchs, using PD-Art portraits
+2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
+2 SOUR @S73838B4606BD@
+3 PAGE file description page
+3 EVEN Family tree of monarchs, using PD-Art portraits
+3 QUAY high
+3 NOTE Citation supports the attachment identity and provenance, not genealogical relationships.
+1 _ATTC
+2 FILE Attachments/tudor-succession-attachment-2.jpg
+2 TITL British 17th Century, Family Tree with Portraits of Henry VII, Henry VIII, Elizabeth, James, and Charles, NGA 57679.jpg
+2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
+2 SOUR @SD945ED4A243F@
+3 PAGE file description page
+3 EVEN British 17th Century, Family Tree with Portraits of Henry VII, Henry VIII, Elizabeth, James, and Charles, NGA 57679.jpg
+3 QUAY high
+3 NOTE Citation supports the attachment identity and provenance, not genealogical relationships.
+1 FAMS @F4978185A6FD0@
+1 FAMS @F3126AAA2162D@
+1 FAMS @FC8D72A33FA16@
+1 FAMS @FA13E9F840407@
+1 FAMS @FB5A0DB0CCFCB@
+1 FAMS @F52B3B0EDC0FE@
+1 FAMS @FA5E5140E3FF9@
+1 FAMC @F69EF033C0B43@
+2 PEDI birth
+2 _PLINK @I2F803BFD9873@
+3 _FTSID 54C28C4C-ACC5-546E-9E1B-59206BE83D60
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VII is recorded as biological parent of Henry VIII
+4 QUAY high
+2 _PLINK @IEFBE62D5394B@
+3 _FTSID FBB51D5A-ABE5-5928-A53B-2496D6B6F97B
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth of York is recorded as biological parent of Henry VIII
+4 QUAY high
+1 EVEN King of England
+2 TYPE Succession
+2 DATE 22 APR 1509
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession of Henry VIII
+3 QUAY high
+0 @I8944A5579527@ INDI
+1 _FTSID 0BB32FBA-1164-5F85-897B-A75531935797
+1 NAME Mary /Tudor/
+2 GIVN Mary
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary Tudor
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 18 MAR 1496
+2 PLAC Richmond Palace
+3 MAP
+4 LATI N51.460389
+4 LONG W0.310219
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q588852
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1059945
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 25 JUN 1533
+2 PLAC Westhorpe Hall
+3 MAP
+4 LATI N52.282381
+4 LONG E1.005708
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary Tudor
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q588852
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q7988903
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St. Mary's Church, Bury St. Edmunds
+3 MAP
+4 LATI N52.242400
+4 LONG E0.717200
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Mary Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q588852
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q7590158
+3 NOTE Locality coordinates, not a street address.
+1 OCCU consort
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary Tudor
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q588852
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary Tudor appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 18 MAR 1496 at Richm
+2 CONC ond Palace. The recorded death date is 25 JUN 1533 at Westhorpe Hall. Within the defined scope, the recorded parents are Henry VII and Elizabeth of York. Documented unions in this tree connect this pe
+2 CONC rson with Louis XII of France, Charles Brandon. Public biographical sources identify the following occupation or public role: consort. This summary is confined to cited genealogical facts and selected p
+2 CONC ublic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-mary-portrait.jpg
+2 FORM JPEG
+1 FAMS @FF20B3CFCF14B@
+1 FAMS @FD15CADDF478B@
+1 FAMC @F69EF033C0B43@
+2 PEDI birth
+2 _PLINK @I2F803BFD9873@
+3 _FTSID F15C2E78-DC6E-5900-80F1-D52A7070B435
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VII is recorded as biological parent of Mary Tudor
+4 QUAY high
+2 _PLINK @IEFBE62D5394B@
+3 _FTSID 2805227F-0C60-5A2C-9CD0-E3CD80711AA7
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth of York is recorded as biological parent of Mary Tudor
+4 QUAY high
+0 @I596659C1D1C6@ INDI
+1 _FTSID 26D24A94-3BE0-5357-8CD4-AD43938918C4
+1 NAME Catherine /Trastámara/
+2 GIVN Catherine
+2 SURN Trastámara
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Catherine of Aragon
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 16 DEC 1485
+2 PLAC Alcalá de Henares
+3 MAP
+4 LATI N40.481815
+4 LONG W3.364305
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Catherine of Aragon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162819
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q46940
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 7 JAN 1536
+2 PLAC Kimbolton Castle
+3 MAP
+4 LATI N52.295600
+4 LONG W0.387160
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Catherine of Aragon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162819
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q501080
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Peterborough Cathedral
+3 MAP
+4 LATI N52.572500
+4 LONG W0.239444
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Catherine of Aragon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162819
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1259104
+3 NOTE Locality coordinates, not a street address.
+1 OCCU diplomat; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Catherine of Aragon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162819
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Catherine of Aragon appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 16 DEC 1485 a
+2 CONC t Alcalá de Henares. The recorded death dateis 7 JAN 1536 at Kimbolton Castle. Documented unions in this tree connect this person with Arthur Tudor, Henry VIII. Public biographical sources identify t
+2 CONC he following occupation or public role: diplomat; aristocrat. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the f
+2 CONC amily beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-catherine-aragon-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3626488A0D93@
+1 FAMS @F4978185A6FD0@
+0 @I245BDE6B59E2@ INDI
+1 _FTSID 2647E6EE-7AB7-546C-A95E-21C85E95119F
+1 NAME James /Stuart/
+2 GIVN James
+2 SURN Stuart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for James IV of Scotland
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 17 MAR 1473
+2 PLAC Holyrood Abbey
+3 MAP
+4 LATI N55.953161
+4 LONG W3.171575
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of James IV of Scotland
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137906
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q966862
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 9 SEP 1513
+2 PLAC Northumberland
+3 MAP
+4 LATI N55.166667
+4 LONG W2.000000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of James IV of Scotland
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137906
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23079
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; monarch
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of James IV of Scotland
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137906
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE James IV of Scotland appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 17 MAR 147
+2 CONC 3 at Holyrood Abbey. The recorded death date is9 SEP 1513 at Northumberland. Documented unions in this tree connect this person with Margaret Tudor. Public biographical sources identify the following o
+2 CONC ccupation or public role: politician; monarch. This summary is confined to cited genealogicalfacts and selected public activities needed to interpret the graph; it does not extend the family beyond th
+2 CONC e commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-james-iv-portrait.jpg
+2 FORM JPEG
+1 FAMS @FBCB6C76F8199@
+0 @I96FA38DC647E@ INDI
+1 _FTSID ECD4BB9B-F97B-5E96-9D04-D64B5C00446F
+1 NAME Archibald /Douglas/
+2 GIVN Archibald
+2 SURN Douglas
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Archibald Douglas
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1489
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Archibald Douglas
+3 QUAY high
+1 DEAT
+2 DATE 1557
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Archibald Douglas
+3 QUAY high
+1 NOTE Archibald Douglas appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1489. The rec
+2 CONC orded death date is 1557. Documented unions in this tree connect this person with Margaret Tudor. This summary is confined to cited genealogical facts and selected public activities needed to interpre
+2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing detailsfrom names, portraits, households, or succession.
+1 FAMS @F3DCB3B5A9731@
+0 @I19A8B5E4D942@ INDI
+1 _FTSID AF30FA49-56D1-57C7-B680-F43815B4E812
+1 NAME Henry /Stewart/
+2 GIVN Henry
+2 SURN Stewart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry Stewart
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1495
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry Stewart
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q108285485
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 1552
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry Stewart
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q108285485
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 OCCU naval officer
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry Stewart
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q108285485
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry Stewart appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1495. The recorde
+2 CONC d death date is 1552. Documented unions in thistree connect this person with Margaret Tudor. Public biographical sources identify the following occupation or public role: naval officer. This summary i
+2 CONC s confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, por
+2 CONC traits, households, or succession.
+1 FAMS @FABDF1E9099B9@
+0 @IB06648417BC2@ INDI
+1 _FTSID 67546352-7F77-5B39-8F5F-940E6F348DFD
+1 NAME James /Stuart/
+2 GIVN James
+2 SURN Stuart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for James V of Scotland
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 10 APR 1512
+2 PLAC Linlithgow Palace
+3 MAP
+4 LATI N55.978500
+4 LONG W3.600970
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of James V of Scotland
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137814
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q564868
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 14 DEC 1542
+2 PLAC Falkland Palace
+3 MAP
+4 LATI N56.254800
+4 LONG W3.206090
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of James V of Scotland
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137814
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q565345
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyrood Abbey
+3 MAP
+4 LATI N55.953161
+4 LONG W3.171575
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of James V of Scotland
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137814
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q966862
+3 NOTE Locality coordinates, not a street address.
+1 OCCU poet; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of James V of Scotland
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q137814
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE James V of Scotland appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 10 APR 1512 a
+2 CONC t Linlithgow Palace. The recorded death date is 14 DEC 1542 at Falkland Palace. Within the defined scope, the recorded parents are Margaret Tudor and James IV of Scotland. Documented unions in this tr
+2 CONC ee connect this person with Mary of Guise. Public biographical sources identify the followingoccupation or public role: poet; aristocrat. This summary is confined to cited genealogical facts and selec
+2 CONC ted public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fromnames, portraits, households, or
+1 OBJE
+2 FILE tudor-james-v-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD252DCF994BC@
+1 FAMC @FBCB6C76F8199@
+2 PEDI birth
+2 _PLINK @I245BDE6B59E2@
+3 _FTSID F4A94FEA-750E-5A71-9657-F69DFA257559
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN James IV of Scotland is recorded as biological parent of James V of Scotland
+4 QUAY high
+2 _PLINK @I18BCBCD3E1B7@
+3 _FTSID 3ACA8148-5099-5337-9B41-0AEC9FA38681
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Margaret Tudor is recorded as biological parent of James V of Scotland
+4 QUAY high
+0 @I28EE641821D7@ INDI
+1 _FTSID 2824FFAC-83A3-5F9E-8E11-A4130E128F95
+1 NAME Margaret /Douglas/
+2 GIVN Margaret
+2 SURN Douglas
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Margaret Douglas
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 8 OCT 1515
+2 PLAC Northumberland
+3 MAP
+4 LATI N55.166667
+4 LONG W2.000000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Margaret Douglas
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q433161
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23079
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 7 MAR 1578
+2 PLAC London Borough of Hackney
+3 MAP
+4 LATI N51.544722
+4 LONG W0.057500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Margaret Douglas
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q433161
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q205679
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Margaret Douglas
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q433161
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Margaret Douglas
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q433161
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Margaret Douglas appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 8 OCT 1515 at N
+2 CONC orthumberland. The recorded death date is 7 MAR1578 at London Borough of Hackney. Within the defined scope, the recorded parents are Margaret Tudor and Archibald Douglas. Documented unions in this tre
+2 CONC e connect this person with Matthew Stewart. Public biographical sources identify the followingoccupation or public role: lady-in-waiting. This summary is confined to cited genealogical facts and selec
+2 CONC ted public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fromnames, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-margaret-douglas-portrait.jpg
+2 FORM JPEG
+1 FAMS @F46E664FD4A76@
+1 FAMC @F3DCB3B5A9731@
+2 PEDI birth
+2 _PLINK @I96FA38DC647E@
+3 _FTSID 87AF609D-DAA6-5ED0-B575-66B6BF0D17FF
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Archibald Douglas is recorded as biological parent of Margaret Douglas
+4 QUAY high
+2 _PLINK @I18BCBCD3E1B7@
+3 _FTSID D0327A0E-28E3-535B-9F15-82DCFEF6624C
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Margaret Tudor is recorded as biological parent of Margaret Douglas
+4 QUAY high
+0 @I1582D491B041@ INDI
+1 _FTSID 59FC1495-75AD-5973-BE79-35D000779B26
+1 NAME Anne /Boleyn/
+2 GIVN Anne
+2 SURN Boleyn
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Anne Boleyn
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1501
+2 PLAC Blickling Hall
+3 MAP
+4 LATI N52.811700
+4 LONG E1.231680
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Anne Boleyn
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q80823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q17535638
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 19 MAY 1536
+2 PLAC Tower of London
+3 MAP
+4 LATI N51.508200
+4 LONG W0.076198
+2 NOTE Executed; recorded neutrally as the manner in which the documented life ended.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Anne Boleyn
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q80823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62378
+1 BURI
+2 PLAC Church of St Peter ad Vincula, Tower Hamlets
+3 MAP
+4 LATI N51.508600
+4 LONG W0.076944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Anne Boleyn
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q80823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1938714
+3 NOTE Locality coordinates, not a street address.
+1 OCCU aristocrat; lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Anne Boleyn
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q80823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Anne Boleyn appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1501 at Blickling H
+2 CONC all. The recorded death date is 19 MAY 1536 at Tower of London. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or pub
+2 CONC lic role: aristocrat; lady-in-waiting. This summary is confined to cited genealogical facts andselected public activities needed to interpret the graph; it does not extend the family beyond the commis
+2 CONC sioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-anne-boleyn-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3126AAA2162D@
+0 @I05C0284F9089@ INDI
+1 _FTSID D6C8C32D-B2D1-5059-B987-CDE8A1735B82
+1 NAME Jane /Seymour/
+2 GIVN Jane
+2 SURN Seymour
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Jane Seymour
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1508
+2 PLAC Wulfhall
+3 MAP
+4 LATI N51.355000
+4 LONG W1.654000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Jane Seymour
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q182637
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q8039169
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 24 OCT 1537
+2 PLAC Hampton Court Palace
+3 MAP
+4 LATI N51.403400
+4 LONG W0.337499
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Jane Seymour
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q182637
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q205666
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St George's Chapel, Windsor
+3 MAP
+4 LATI N51.483611
+4 LONG W0.606944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Jane Seymour
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q182637
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2449634
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Jane Seymour
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q182637
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Jane Seymour appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1508 at Wulfhall. T
+2 CONC he recorded death date is 24 OCT 1537 at Hampton Court Palace. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or publ
+2 CONC ic role: lady-in-waiting. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast o
+2 CONC r infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-jane-seymour-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC8D72A33FA16@
+0 @ICE152C53897D@ INDI
+1 _FTSID 24A9964F-7733-5FEC-98ED-D04FFDB85228
+1 NAME Anne /La Marck/
+2 GIVN Anne
+2 SURN La Marck
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Anne of Cleves
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 28 JUN 1515
+2 PLAC Düsseldorf
+3 MAP
+4 LATI N51.225556
+4 LONG E6.776667
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Anne of Cleves
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q57126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1718
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 16 JUL 1557
+2 PLAC London
+3 MAP
+4 LATI N51.507222
+4 LONG W0.127500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Anne of Cleves
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q57126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q84
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Anne of Cleves
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q57126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Anne of Cleves
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q57126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Anne of Cleves appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 JUN 1515 at D
+2 CONC üsseldorf. The recorded death date is 16 JUL 1557 at London. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or publi
+2 CONC c role: aristocrat. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or inf
+2 CONC er missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-anne-cleves-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA13E9F840407@
+0 @I7549124CB6D0@ INDI
+1 _FTSID 5E131FB8-C0A6-591A-98E5-3270D3EB485B
+1 NAME Catherine /Howard/
+2 GIVN Catherine
+2 SURN Howard
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Catherine Howard
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1523
+2 PLAC Lambeth
+3 MAP
+4 LATI N51.490300
+4 LONG W0.119300
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Catherine Howard
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q188926
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q148349
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 13 FEB 1542
+2 PLAC Tower of London
+3 MAP
+4 LATI N51.508200
+4 LONG W0.076198
+2 NOTE Executed; recorded neutrally as the manner in which the documented life ended.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Catherine Howard
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q188926
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62378
+1 BURI
+2 PLAC Church of St Peter ad Vincula, Tower Hamlets
+3 MAP
+4 LATI N51.508600
+4 LONG W0.076944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Catherine Howard
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q188926
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1938714
+3 NOTE Locality coordinates, not a street address.
+1 OCCU consort; lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Catherine Howard
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q188926
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Catherine Howard appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1523 at Lambet
+2 CONC h. The recorded death date is 13 FEB 1542 at Tower of London. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or publi
+2 CONC c role: consort; lady-in-waiting. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commission
+2 CONC ed cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-catherine-howard-portrait.jpg
+2 FORM JPEG
+1 FAMS @FB5A0DB0CCFCB@
+0 @I87B52783942E@ INDI
+1 _FTSID FF1B5064-43FA-508C-8C1B-35EFDC9381A8
+1 NAME Catherine /Parr/
+2 GIVN Catherine
+2 SURN Parr
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Catherine Parr
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1512
+2 PLAC Kendal
+3 MAP
+4 LATI N54.326000
+4 LONG W2.745000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Catherine Parr
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q192943
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q994575
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 5 SEP 1548
+2 PLAC Sudeley Castle
+3 MAP
+4 LATI N51.947222
+4 LONG W1.956111
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Catherine Parr
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q192943
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q631473
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Sudeley Castle
+3 MAP
+4 LATI N51.947222
+4 LONG W1.956111
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Catherine Parr
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q192943
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q631473
+3 NOTE Locality coordinates, not a street address.
+1 OCCU writer; lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Catherine Parr
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q192943
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Catherine Parr appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1512 at Kendal. T
+2 CONC he recorded death date is 5 SEP 1548 at SudeleyCastle. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or public role: w
+2 CONC riter; lady-in-waiting. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or i
+2 CONC nfer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-catherine-parr-portrait.jpg
+2 FORM JPEG
+1 FAMS @F52B3B0EDC0FE@
+0 @I2F40354525B1@ INDI
+1 _FTSID 15DCA488-E4B9-5612-A135-BCE05AB40FA8
+1 NAME Elizabeth /Blount/
+2 GIVN Elizabeth
+2 SURN Blount
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Elizabeth Blount
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1500
+2 PLAC Kinlet
+3 MAP
+4 LATI N52.416700
+4 LONG W2.416670
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Elizabeth Blount
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237170
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q3876882
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 1539
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Elizabeth Blount
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237170
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 OCCU lady-in-waiting; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Elizabeth Blount
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237170
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Elizabeth Blount appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1500 at Kinlet
+2 CONC . The recorded death date is 1539. Documented unions in this tree connect this person with Henry VIII. Public biographical sources identify the following occupation or public role: lady-in-waiting; ar
+2 CONC istocrat. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing d
+2 CONC etails from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-elizabeth-blount-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA5E5140E3FF9@
+0 @I4C9D5EA8AD98@ INDI
+1 _FTSID B695D97C-1A26-5CE0-ADB4-26C8DDAAFF9C
+1 NAME Mary /Tudor/
+2 GIVN Mary
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary I
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 18 FEB 1516
+2 PLAC Palace of Placentia
+3 MAP
+4 LATI N51.482222
+4 LONG W0.006667
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary I
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q82674
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1424839
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 17 NOV 1558
+2 PLAC St James's Palace
+3 MAP
+4 LATI N51.504722
+4 LONG W0.137778
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary I
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q82674
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q272162
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Mary I
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q82674
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary I
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q82674
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary I appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 18 FEB 1516 at Palace of P
+2 CONC lacentia. The recorded death date is 17 NOV 1558 at St James's Palace. Within the defined scope, the recorded parents are Henry VIII and Catherine of Aragon. Public biographical sources identify the f
+2 CONC ollowing occupation or public role: politician; aristocrat. This summary is confined to citedgenealogical facts and selected public activities needed to interpret the graph; it does not extend the fam
+2 CONC ily beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-mary-i-portrait.jpg
+2 FORM JPEG
+1 FAMC @F4978185A6FD0@
+2 PEDI birth
+2 _PLINK @I600E172C0E60@
+3 _FTSID 87E893F5-D214-568F-A120-306105371B7B
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VIII is recorded as biological parent of Mary I
+4 QUAY high
+2 _PLINK @I596659C1D1C6@
+3 _FTSID 32A02E3D-23ED-5FDD-BBA1-E41DAC0D4919
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Catherine of Aragon is recorded as biological parent of Mary I
+4 QUAY high
+1 EVEN Queen of England
+2 TYPE Succession
+2 DATE 19 JUL 1553
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession of Mary I
+3 QUAY high
+0 @I2D78D8636F5A@ INDI
+1 _FTSID F4B413DB-C93A-5BDC-A0E5-AE47B0F2937D
+1 NAME Elizabeth /Tudor/
+2 GIVN Elizabeth
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Elizabeth I
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 7 SEP 1533
+2 PLAC Palace of Placentia
+3 MAP
+4 LATI N51.482222
+4 LONG W0.006667
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Elizabeth I
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q7207
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1424839
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 24 MAR 1603
+2 PLAC Richmond Palace
+3 MAP
+4 LATI N51.460389
+4 LONG W0.310219
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Elizabeth I
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q7207
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1059945
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Elizabeth I
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q7207
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU queen
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Elizabeth I
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q7207
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Elizabeth I appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 SEP 1533 at Palac
+2 CONC e of Placentia. The recorded death date is 24 MAR 1603 at Richmond Palace. Within the defined scope, the recorded parents are Henry VIII and Anne Boleyn. Public biographical sources identify the follo
+2 CONC wing occupation or public role: queen. This summary is confined to cited genealogical facts andselected public activities needed to interpret the graph; it does not extend the family beyond the commis
+2 CONC sioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-elizabeth-i-portrait.jpg
+2 FORM JPEG
+1 FAMC @F3126AAA2162D@
+2 PEDI birth
+2 _PLINK @I600E172C0E60@
+3 _FTSID 49D5CA3E-B571-52F9-A86F-A23DCF50DCF6
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VIII is recorded as biological parent of Elizabeth I
+4 QUAY high
+2 _PLINK @I1582D491B041@
+3 _FTSID B8FD792F-9B1C-501F-9B6E-B7CA8BC35EC4
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Anne Boleyn is recorded as biological parent of Elizabeth I
+4 QUAY high
+1 EVEN Queen of England
+2 TYPE Succession
+2 DATE 17 NOV 1558
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession of Elizabeth I
+3 QUAY high
+0 @IB4572F77A709@ INDI
+1 _FTSID 1DD72BC7-0358-5787-811A-53BADB789C1C
+1 NAME Edward /Tudor/
+2 GIVN Edward
+2 SURN Tudor
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Edward VI
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 12 OCT 1537
+2 PLAC Hampton Court Palace
+3 MAP
+4 LATI N51.403400
+4 LONG W0.337499
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Edward VI
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q83229
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q205666
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 6 JUL 1553
+2 PLAC Palace of Placentia
+3 MAP
+4 LATI N51.482222
+4 LONG W0.006667
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Edward VI
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q83229
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1424839
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Edward VI
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q83229
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU monarch; aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Edward VI
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q83229
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Edward VI appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 OCT 1537 at Hampto
+2 CONC n Court Palace. The recorded death date is 6 JUL1553 at Palace of Placentia. Within the defined scope, the recorded parents are Henry VIII and Jane Seymour. Public biographical sources identify the fo
+2 CONC llowing occupation or public role: monarch; aristocrat. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family b
+2 CONC eyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FC8D72A33FA16@
+2 PEDI birth
+2 _PLINK @I600E172C0E60@
+3 _FTSID 731C73D8-958F-5E71-AD06-AC737F7DCF97
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VIII is recorded as biological parent of Edward VI
+4 QUAY high
+2 _PLINK @I05C0284F9089@
+3 _FTSID FB84F920-5229-574E-9969-187241CC2392
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Jane Seymour is recorded as biological parent of Edward VI
+4 QUAY high
+1 EVEN King of England
+2 TYPE Succession
+2 DATE 28 JAN 1547
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession of Edward VI
+3 QUAY high
+0 @I796D0C53A599@ INDI
+1 _FTSID D17B91C7-466D-577A-A1BE-E2AC3907001C
+1 NAME Henry /FitzRoy/
+2 GIVN Henry
+2 SURN FitzRoy
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry FitzRoy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 15 JUN 1519
+2 PLAC Blackmore
+3 MAP
+4 LATI N51.689400
+4 LONG E0.326600
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry FitzRoy
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q358863
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2674543
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 23 JUL 1536
+2 PLAC St James's Palace
+3 MAP
+4 LATI N51.504722
+4 LONG W0.137778
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry FitzRoy
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q358863
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q272162
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Suffolk
+3 MAP
+4 LATI N52.200000
+4 LONG E1.000000
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Henry FitzRoy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q358863
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23111
+3 NOTE Locality coordinates, not a street address.
+1 OCCU aristocrat
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry FitzRoy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q358863
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry FitzRoy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 15 JUN 1519 at Bl
+2 CONC ackmore. The recorded death date is 23 JUL 1536at St James's Palace. Within the defined scope, the recorded parents are Henry VIII and Elizabeth Blount. Public biographical sources identify the follow
+2 CONC ing occupation or public role: aristocrat. This summary is confined to cited genealogical factsand selected public activities needed to interpret the graph; it does not extend the family beyond the co
+2 CONC mmissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FA5E5140E3FF9@
+2 PEDI birth
+2 _PLINK @I600E172C0E60@
+3 _FTSID CDD873AA-7A72-5772-B9D3-1D8AF0C53B78
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry VIII is recorded as biological parent of Henry FitzRoy
+4 QUAY high
+2 _PLINK @I2F40354525B1@
+3 _FTSID E23422BD-5B65-5E12-836A-A4FAEB549A6A
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Elizabeth Blount is recorded as biological parent of Henry FitzRoy
+4 QUAY high
+0 @IF333C1559ADF@ INDI
+1 _FTSID E9C4DD71-9C9A-52B5-BAF8-418DF62D75FB
+1 NAME Louis /Valois-Orléans/
+2 GIVN Louis
+2 SURN Valois-Orléans
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Louis XII of France
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 27 JUN 1462
+2 PLAC Château de Blois
+3 MAP
+4 LATI N47.585501
+4 LONG E1.330950
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Louis XII of France
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q58514
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q4055
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 1 JAN 1515
+2 PLAC Hôtel des Tournelles
+3 MAP
+4 LATI N48.854444
+4 LONG E2.365000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Louis XII of France
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q58514
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1476769
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Basilica of Saint-Denis
+3 MAP
+4 LATI N48.935556
+4 LONG E2.359722
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Louis XII of France
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q58514
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q184407
+3 NOTE Locality coordinates, not a street address.
+1 OCCU sovereign
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Louis XII of France
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q58514
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Louis XII of France appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 27 JUN 1462 a
+2 CONC t Château de Blois. The recorded death date is 1 JAN 1515 at Hôtel des Tournelles. Documented unions in this tree connect this person with Mary Tudor. Public biographical sources identify the follow
+2 CONC ing occupation or public role: sovereign. This summary is confined to cited genealogical factsand selected public activities needed to interpret the graph; it does not extend the family beyond the com
+2 CONC missioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-louis-xii-portrait.jpg
+2 FORM JPEG
+1 FAMS @FF20B3CFCF14B@
+0 @IC3F22763FD12@ INDI
+1 _FTSID 1E51CB1F-65B5-5893-9D4C-C16B894BD5B9
+1 NAME Charles /Brandon/
+2 GIVN Charles
+2 SURN Brandon
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Charles Brandon
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1484
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Charles Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q337635
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 22 AUG 1545
+2 PLAC Guildford Castle
+3 MAP
+4 LATI N51.233900
+4 LONG W0.572659
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Charles Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q337635
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q139629
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC St George's Chapel, Windsor
+3 MAP
+4 LATI N51.483611
+4 LONG W0.606944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Charles Brandon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q337635
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2449634
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Charles Brandon appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1484. The recor
+2 CONC ded death date is 22 AUG 1545 at Guildford Castle. Documented unions in this tree connect this person with Mary Tudor. This summary is confined to cited genealogical facts and selected public activiti
+2 CONC es needed to interpret the graph; it does not extend the family beyond the commissioned cast orinfer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-charles-brandon-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD15CADDF478B@
+0 @IA296D3DC6E7F@ INDI
+1 _FTSID 81FB46E4-C15C-564D-AD60-B2C9A6281DCF
+1 NAME Frances /Brandon/
+2 GIVN Frances
+2 SURN Brandon
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Frances Brandon
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 16 JUL 1517
+2 PLAC Hertfordshire
+3 MAP
+4 LATI N51.900000
+4 LONG W0.200000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Frances Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q3410
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 30 NOV 1559
+2 PLAC Surrey
+3 MAP
+4 LATI N51.250000
+4 LONG W0.450000
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Frances Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23276
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Frances Brandon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lady-in-waiting
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Frances Brandon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q237126
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Frances Brandon appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 16 JUL 1517 at H
+2 CONC ertfordshire. The recorded death date is 30 NOV1559 at Surrey. Within the defined scope, the recorded parents are Mary Tudor and Charles Brandon. Documented unions in this tree connect this person wit
+2 CONC h Henry Grey. Public biographical sources identify the following occupation or public role: lady-in-waiting. This summary is confined to cited genealogical facts and selected public activities needed t
+2 CONC o interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households,or succession.
+1 OBJE
+2 FILE tudor-frances-brandon-portrait.jpg
+2 FORM JPEG
+1 FAMS @F0D3B3B6DCCC3@
+1 FAMC @FD15CADDF478B@
+2 PEDI birth
+2 _PLINK @IC3F22763FD12@
+3 _FTSID 1B4F5FD6-3CD3-582E-8B25-4C6A21C20D3D
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Charles Brandon is recorded as biological parent of Frances Brandon
+4 QUAY high
+2 _PLINK @I8944A5579527@
+3 _FTSID 68A7F4AC-2676-5168-BD81-5D5EDA289B38
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Mary Tudor is recorded as biological parent of Frances Brandon
+4 QUAY high
+0 @I743B30F4607A@ INDI
+1 _FTSID E51DF2D9-184F-5DAF-B82B-39DED71CC9DD
+1 NAME Eleanor /Brandon/
+2 GIVN Eleanor
+2 SURN Brandon
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Eleanor Brandon
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1519
+2 PLAC Westhorpe Hall
+3 MAP
+4 LATI N52.282381
+4 LONG E1.005708
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Eleanor Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q465590
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q7988903
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 7 OCT 1547
+2 PLAC Brougham Castle
+3 MAP
+4 LATI N54.653300
+4 LONG W2.718020
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Eleanor Brandon
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q465590
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2968700
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holy Trinity Church
+3 MAP
+4 LATI N53.963300
+4 LONG W2.016100
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Eleanor Brandon
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q465590
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q15224728
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Eleanor Brandon appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1519 at Westhor
+2 CONC pe Hall. The recorded death date is 7 OCT 1547 at Brougham Castle. Within the defined scope, the recorded parents are Mary Tudor and Charles Brandon. This summary is confined to cited genealogical fac
+2 CONC ts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-eleanor-brandon-portrait.jpg
+2 FORM JPEG
+1 FAMC @FD15CADDF478B@
+2 PEDI birth
+2 _PLINK @IC3F22763FD12@
+3 _FTSID 7CD51E7E-99EA-5CC8-B8A9-CDB5D6BAD028
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Charles Brandon is recorded as biological parent of Eleanor Brandon
+4 QUAY high
+2 _PLINK @I8944A5579527@
+3 _FTSID 45B2298F-03CF-51BF-A044-B336DEED57E9
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Mary Tudor is recorded as biological parent of Eleanor Brandon
+4 QUAY high
+0 @I05DEAB2EC125@ INDI
+1 _FTSID A1D792D0-7496-52EF-AB8F-EDA1E6E7F4E5
+1 NAME Mary /Guise/
+2 GIVN Mary
+2 SURN Guise
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary of Guise
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 22 NOV 1515
+2 PLAC Bar-le-Duc
+3 MAP
+4 LATI N48.771667
+4 LONG E5.167222
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary of Guise
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229846
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q185721
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 11 JUN 1560
+2 PLAC Edinburgh Castle
+3 MAP
+4 LATI N55.948700
+4 LONG W3.200730
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary of Guise
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229846
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q212065
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Abbaye Saint-Pierre-les-Dames de Reims
+3 MAP
+4 LATI N49.252842
+4 LONG E4.037708
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Mary of Guise
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229846
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2212738
+3 NOTE Locality coordinates, not a street address.
+1 OCCU king; regent
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary of Guise
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q229846
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary of Guise appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 22 NOV 1515 at Ba
+2 CONC r-le-Duc. The recorded death date is 11 JUN 1560at Edinburgh Castle. Documented unions in this tree connect this person with James V of Scotland. Public biographical sources identify the following occ
+2 CONC upation or public role: king; regent. This summary is confined to cited genealogical facts andselected public activities needed to interpret the graph; it does not extend the family beyond the commiss
+2 CONC ioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-mary-guise-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD252DCF994BC@
+0 @I2DC2389AF544@ INDI
+1 _FTSID 7405A7A5-B0E7-54C9-B956-706D73254E77
+1 NAME Mary /Stuart/
+2 GIVN Mary
+2 SURN Stuart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary, Queen of Scots
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 8 DEC 1542
+2 PLAC Linlithgow Palace
+3 MAP
+4 LATI N55.978500
+4 LONG W3.600970
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary, Queen of Scots
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q564868
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 8 FEB 1587
+2 PLAC Fotheringhay Castle
+3 MAP
+4 LATI N52.524200
+4 LONG W0.435720
+2 NOTE Executed; recorded neutrally as the manner in which the documented life ended.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary, Queen of Scots
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1439593
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Mary, Queen of Scots
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; sovereign
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary, Queen of Scots
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Mary, Queen of Scots
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary, Queen of Scots appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 8 DEC 1542 a
+2 CONC t Linlithgow Palace. The recorded death date is 8 FEB 1587 at Fotheringhay Castle. Within the defined scope, the recorded parents are James V of Scotland and Mary of Guise. Documented unions in this t
+2 CONC ree connect this person with Henry Stuart, Lord Darnley. Public biographical sources identifythe following occupation or public role: politician; sovereign. This summary is confined to cited genealogi
+2 CONC cal facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits,
+1 OBJE
+2 FILE tudor-mary-scots-portrait.jpg
+2 FORM JPEG
+1 FAMS @F536A5EA6BEE5@
+1 FAMC @FD252DCF994BC@
+2 PEDI birth
+2 _PLINK @IB06648417BC2@
+3 _FTSID 186A4434-8ADB-5EDE-8A12-22F77329AB63
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN James V of Scotland is recorded as biological parent of Mary, Queen of Scots
+4 QUAY high
+2 _PLINK @I05DEAB2EC125@
+3 _FTSID 4A970C93-3CCC-52C1-B3F4-266B528778F2
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Mary of Guise is recorded as biological parent of Mary, Queen of Scots
+4 QUAY high
+1 RESI
+2 PLAC Scotland
+3 MAP
+4 LATI N57.00000000
+4 LONG W5.00000000
+3 _PID tudor-succession-place-q22
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Mary, Queen of Scots
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q131412
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @I0FFA6229DB09@ INDI
+1 _FTSID 10F5A241-D590-5862-9536-1B2EA6B2A6FC
+1 NAME Matthew /Stewart/
+2 GIVN Matthew
+2 SURN Stewart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Matthew Stewart
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 21 SEP 1516
+2 PLAC Dumbarton
+3 MAP
+4 LATI N55.948611
+4 LONG W4.547222
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Matthew Stewart
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q727905
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q34779
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 4 SEP 1571
+2 PLAC Stirling
+3 MAP
+4 LATI N56.116600
+4 LONG W3.936900
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Matthew Stewart
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q727905
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q182923
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Church of the Holy Rude, Stirling
+3 MAP
+4 LATI N56.120793
+4 LONG W3.944539
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Matthew Stewart
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q727905
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1783051
+3 NOTE Locality coordinates, not a street address.
+1 OCCU regent
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Matthew Stewart
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q727905
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Matthew Stewart appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 21 SEP 1516 at D
+2 CONC umbarton. The recorded death date is 4 SEP 1571at Stirling. Documented unions in this tree connect this person with Margaret Douglas. Public biographical sources identify the following occupation or p
+2 CONC ublic role: regent. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or inf
+2 CONC er missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-matthew-stewart-portrait.jpg
+2 FORM JPEG
+1 FAMS @F46E664FD4A76@
+0 @I0DD5E4648647@ INDI
+1 _FTSID 29DFFB94-13AF-50EB-BEAF-3D804D1F8033
+1 NAME Henry /Stuart/
+2 GIVN Henry
+2 SURN Stuart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry Stuart, Lord Darnley
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 7 DEC 1545
+2 PLAC Temple Newsam
+3 MAP
+4 LATI N53.784200
+4 LONG W1.459500
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry Stuart, Lord Darnley
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q312381
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q2748017
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 10 FEB 1567
+2 PLAC Edinburgh
+3 MAP
+4 LATI N55.953333
+4 LONG W3.189167
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry Stuart, Lord Darnley
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q312381
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23436
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyrood Abbey
+3 MAP
+4 LATI N55.953161
+4 LONG W3.171575
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Henry Stuart, Lord Darnley
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q312381
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q966862
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry Stuart, Lord Darnley
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q312381
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry Stuart, Lord Darnley appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 DE
+2 CONC C 1545 at Temple Newsam. The recorded death dateis 10 FEB 1567 at Edinburgh. Within the defined scope, the recorded parents are Margaret Douglas and Matthew Stewart. Documented unions in this tree con
+2 CONC nect this person with Mary, Queen of Scots. Public biographical sources identify the followingoccupation or public role: politician. This summary is confined to cited genealogical facts and selected p
+2 CONC ublic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE tudor-darnley-portrait.jpg
+2 FORM JPEG
+1 FAMS @F536A5EA6BEE5@
+1 FAMC @F46E664FD4A76@
+2 PEDI birth
+2 _PLINK @I0FFA6229DB09@
+3 _FTSID 027032DD-55B5-5367-A8A6-EDBF6B740733
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Matthew Stewart is recorded as biological parent of Henry Stuart, Lord Darnley
+4 QUAY high
+2 _PLINK @I28EE641821D7@
+3 _FTSID 3430458F-F2B6-5C15-85E0-0F6745BC763C
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Margaret Douglas is recorded as biological parent of Henry Stuart, Lord Darnley
+4 QUAY high
+0 @I0A4EB5A7B925@ INDI
+1 _FTSID FCDFB1B9-6027-588B-81F5-AC6DF7C6F692
+1 NAME James /Stuart/
+2 GIVN James
+2 SURN Stuart
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for James VI of Scotland and I of England
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 19 JUN 1566
+2 PLAC Edinburgh
+3 MAP
+4 LATI N55.953333
+4 LONG W3.189167
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of James VI of Scotland and I of England
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q23436
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 27 MAR 1625
+2 PLAC Theobalds House
+3 MAP
+4 LATI N51.689200
+4 LONG W0.055735
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of James VI of Scotland and I of England
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q512922
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westminster Abbey
+3 MAP
+4 LATI N51.499400
+4 LONG W0.127367
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of James VI of Scotland and I of England
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q5933
+3 NOTE Locality coordinates, not a street address.
+1 OCCU poet; writer
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of James VI of Scotland and I of England
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC tutor
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of James VI of Scotland and I of England
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of James VI of Scotland and I of England
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE James VI of Scotland and I of England appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth d
+2 CONC ate is 19 JUN 1566 at Edinburgh. The recorded death date is 27 MAR 1625 at Theobalds House. Within the defined scope, the recorded parents are Mary, Queen of Scots and Henry Stuart, Lord Darnley. Publ
+2 CONC ic biographical sources identify the following occupation or public role: poet; writer. Recordededucation includes tutor. This summary is confined to cited genealogical facts and selected public activ
+2 CONC ities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits,households, or succession.
+1 OBJE
+2 FILE tudor-james-vi-i-portrait.jpg
+2 FORM JPEG
+1 FAMC @F536A5EA6BEE5@
+2 PEDI birth
+2 _PLINK @I0DD5E4648647@
+3 _FTSID 4EB424B5-2830-5156-BE97-99AB622B91FE
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry Stuart, Lord Darnley is recorded as biological parent of James VI of Scotland and I of England
+4 QUAY high
+2 _PLINK @I2DC2389AF544@
+3 _FTSID E2AEA8D0-7A6D-5A25-A87A-E4007CF410AD
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Mary, Queen of Scots is recorded as biological parent of James VI of Scotland and I of England
+4 QUAY high
+1 RESI
+2 PLAC Stirling Castle
+3 MAP
+4 LATI N56.12388889
+4 LONG W3.94777778
+3 _PID tudor-succession-place-q756268
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of James VI of Scotland and I of England
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q79972
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EVEN King of Scots
+2 TYPE Succession
+2 DATE 24 JUL 1567
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession as James VI of Scotland
+3 QUAY high
+1 EVEN King of England and Ireland
+2 TYPE Union of the Crowns
+2 DATE 24 MAR 1603
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Accession as James I of England and Ireland
+3 QUAY high
+0 @IE167336C7343@ INDI
+1 _FTSID D22D99DB-E9AD-5200-A2AA-E069802F8A12
+1 NAME Henry /Grey/
+2 GIVN Henry
+2 SURN Grey
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry Grey
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1517
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q75721963
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 1554
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q75721963
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry Grey appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1517. The recorded d
+2 CONC eath date is 1554. Documented unions in this tree connect this person with Frances Brandon. This summary is confined to cited genealogical facts and selected public activities needed to interpret the g
+2 CONC raph; it does not extend the family beyond the commissioned cast or infer missing details fromnames, portraits, households, or succession.
+1 FAMS @F0D3B3B6DCCC3@
+0 @IF97F329100F1@ INDI
+1 _FTSID 096BBA9E-193A-5B72-A692-D7AA0CCB8238
+1 NAME Jane /Grey/
+2 GIVN Jane
+2 SURN Grey
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Lady Jane Grey
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE OCT 1537
+2 PLAC Bradgate House
+3 MAP
+4 LATI N52.686600
+4 LONG W1.211070
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Lady Jane Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162356
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q16985100
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 12 FEB 1554
+2 PLAC Tower of London
+3 MAP
+4 LATI N51.508200
+4 LONG W0.076198
+2 NOTE Executed; recorded neutrally as the manner in which the documented life ended.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Lady Jane Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162356
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q62378
+1 BURI
+2 PLAC Church of St Peter ad Vincula, Tower Hamlets
+3 MAP
+4 LATI N51.508600
+4 LONG W0.076944
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Lady Jane Grey
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162356
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID tudor-succession-place-q1938714
+3 NOTE Locality coordinates, not a street address.
+1 OCCU queen regnant
+2 SOUR @S8BAFD291F581@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Lady Jane Grey
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q162356
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Lady Jane Grey appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is OCT 1537 at Brad
+2 CONC gate House. The recorded death date is 12 FEB 1554 at Tower of London. Within the defined scope, the recorded parents are Frances Brandon and Henry Grey. Public biographical sources identify the follo
+2 CONC wing occupation or public role: queen regnant. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond t
+2 CONC he commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F0D3B3B6DCCC3@
+2 PEDI birth
+2 _PLINK @IE167336C7343@
+3 _FTSID D398D744-8C60-5920-B810-C432827FC3FE
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry Grey is recorded as biological parent of Lady Jane Grey
+4 QUAY high
+2 _PLINK @IA296D3DC6E7F@
+3 _FTSID C38348A4-368B-580B-8EFA-F134F67274E3
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Frances Brandon is recorded as biological parent of Lady Jane Grey
+4 QUAY high
+0 @I65223F510698@ INDI
+1 _FTSID F0475FB5-229B-564A-83A1-C44920CA8D4C
+1 NAME Katherine /Grey/
+2 GIVN Katherine
+2 SURN Grey
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Lady Katherine Grey
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1540
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Lady Katherine Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q75258832
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 26 JAN 1568
+2 NOTE Historic Royal Palaces records her death in January 1568; the exact date is cross-checked against the corrected Wikidata person record Q242291.
+2 SOUR @S1DFB498A7BF5@
+3 PAGE section: A royal prisoner
+3 EVEN Katherine died in January 1568 aged twenty-seven.
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q242291
+3 EVEN Correct person record; exact death date 26 January 1568.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Lady Katherine Grey appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1540. The r
+2 CONC ecorded death date is 28 JAN 1920. Within the defined scope, the recorded parents are Frances Brandon and Henry Grey. This summary is confined to cited genealogical facts and selected public activitie
+2 CONC s needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F0D3B3B6DCCC3@
+2 PEDI birth
+2 _PLINK @IE167336C7343@
+3 _FTSID 09127BC7-0EBE-5356-A20D-BA51206E2B76
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry Grey is recorded as biological parent of Lady Katherine Grey
+4 QUAY high
+2 _PLINK @IA296D3DC6E7F@
+3 _FTSID 5374E1A8-8DB3-5C22-AA2D-52BF74977676
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Frances Brandon is recorded as biological parent of Lady Katherine Grey
+4 QUAY high
+0 @I0BF5FBD295D4@ INDI
+1 _FTSID 7A93F1AC-5224-5D0C-8A02-7DCBEE280A77
+1 NAME Mary /Grey/
+2 GIVN Mary
+2 SURN Grey
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Lady Mary Grey
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1545
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Lady Mary Grey
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q75269696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 20 APR 1578
+2 NOTE The Folger Shakespeare Library's Elizabethan Court Day by Day records Lady Mary Grey's death on 20 April 1578.
+2 SOUR @SBB7CF4EBDBA0@
+3 PAGE 20 April 1578 entry
+3 EVEN Lady Mary Grey died at her house in St Botolph on 20 April 1578.
+3 QUAY high
+2 SOUR @S5F6A0E4ED775@
+3 PAGE Q242918
+3 EVEN Correct person record; death date 20 April 1578.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Lady Mary Grey appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1545. The record
+2 CONC ed death date is 31 MAY 1710. Within the definedscope, the recorded parents are Frances Brandon and Henry Grey. This summary is confined to cited genealogical facts and selected public activities need
+2 CONC ed to interpret the graph; it does not extend the family beyond the commissioned cast or infermissing details from names, portraits, households, or succession.
+1 FAMC @F0D3B3B6DCCC3@
+2 PEDI birth
+2 _PLINK @IE167336C7343@
+3 _FTSID D47EC29E-C96E-5013-9171-F3E07E3CEF55
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Henry Grey is recorded as biological parent of Lady Mary Grey
+4 QUAY high
+2 _PLINK @IA296D3DC6E7F@
+3 _FTSID 5C12E2C0-8AF0-5825-88EC-5244F7438ECC
+3 PEDI birth
+3 SOUR @S8BAFD291F581@
+4 PAGE page title / relevant entry
+4 EVEN Frances Brandon is recorded as biological parent of Lady Mary Grey
+4 QUAY high
+0 @F2C650DBA4863@ FAM
+1 _FTSID 2F622CB4-5C90-53E6-92D6-685551FC7CDB
+1 HUSB @I22956ED4A2E0@
+1 WIFE @IA16183117E22@
+1 CHIL @I2F803BFD9873@
+1 MARR
+2 DATE 1455
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edmund Tudor and Margaret Beaufort
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edmund Tudor and Margaret Beaufort
+2 QUAY high
+0 @F7131CEAF25F6@ FAM
+1 _FTSID 3D6308FE-9C88-5814-BECF-6783FC50FCE3
+1 HUSB @IB359A5B58C80@
+1 WIFE @I83527BCCDA2D@
+1 CHIL @IEFBE62D5394B@
+1 MARR
+2 DATE 1464
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward IV and Elizabeth Woodville
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward IV and Elizabeth Woodville
+2 QUAY high
+0 @F69EF033C0B43@ FAM
+1 _FTSID 9ABA5A6E-BF4A-5B93-A886-905F28F7EC56
+1 HUSB @I2F803BFD9873@
+1 WIFE @IEFBE62D5394B@
+1 CHIL @I56C2B2A2709E@
+1 CHIL @I18BCBCD3E1B7@
+1 CHIL @I600E172C0E60@
+1 CHIL @I8944A5579527@
+1 MARR
+2 DATE 1486
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VII and Elizabeth of York
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VII and Elizabeth of York
+2 QUAY high
+0 @F3626488A0D93@ FAM
+1 _FTSID 63898144-AB4A-5A6E-AD9C-E95674EC12DF
+1 HUSB @I56C2B2A2709E@
+1 WIFE @I596659C1D1C6@
+1 MARR
+2 DATE 1501
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Arthur Tudor and Catherine of Aragon
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Arthur Tudor and Catherine of Aragon
+2 QUAY high
+0 @FBCB6C76F8199@ FAM
+1 _FTSID CAFDDE31-9CFC-53AE-A1CB-9D5688A39FD2
+1 HUSB @I245BDE6B59E2@
+1 WIFE @I18BCBCD3E1B7@
+1 CHIL @IB06648417BC2@
+1 MARR
+2 DATE 1503
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and James IV of Scotland
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and James IV of Scotland
+2 QUAY high
+0 @F3DCB3B5A9731@ FAM
+1 _FTSID 3F529F90-B9CA-53F3-9E7C-F1895E50DC58
+1 HUSB @I96FA38DC647E@
+1 WIFE @I18BCBCD3E1B7@
+1 CHIL @I28EE641821D7@
+1 MARR
+2 DATE 1514
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 DIV
+2 DATE 1527
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and Archibald Douglas
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and Archibald Douglas
+2 QUAY high
+0 @FABDF1E9099B9@ FAM
+1 _FTSID E18BBB75-29C9-5E2A-9E68-175BE2B3DB38
+1 HUSB @I19A8B5E4D942@
+1 WIFE @I18BCBCD3E1B7@
+1 MARR
+2 DATE 1528
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and Henry Stewart
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Tudor and Henry Stewart
+2 QUAY high
+0 @F4978185A6FD0@ FAM
+1 _FTSID 581E004D-E007-5B15-A8CF-C939E59E8AE6
+1 HUSB @I600E172C0E60@
+1 WIFE @I596659C1D1C6@
+1 CHIL @I4C9D5EA8AD98@
+1 MARR
+2 DATE 1509
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine of Aragon
+2 QUAY high
+1 EVEN
+2 TYPE Annulment
+2 DATE 1533
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine of Aragon
+2 QUAY high
+0 @F3126AAA2162D@ FAM
+1 _FTSID 42005E6F-9064-56A0-839E-A3BD5E3CFA98
+1 HUSB @I600E172C0E60@
+1 WIFE @I1582D491B041@
+1 CHIL @I2D78D8636F5A@
+1 MARR
+2 DATE 1533
+2 NOTE The marriage ended before Anne Boleyn's execution; the sequence is recorded neutrally.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Anne Boleyn
+2 QUAY high
+1 NOTE The marriage ended before Anne Boleyn's execution; the sequence is recorded neutrally.
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Anne Boleyn
+2 QUAY high
+0 @FC8D72A33FA16@ FAM
+1 _FTSID EA0244E2-29B5-51A0-9A97-CEAC9CEE0790
+1 HUSB @I600E172C0E60@
+1 WIFE @I05C0284F9089@
+1 CHIL @IB4572F77A709@
+1 MARR
+2 DATE 1536
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Jane Seymour
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Jane Seymour
+2 QUAY high
+0 @FA13E9F840407@ FAM
+1 _FTSID 7A478315-5C0B-5BAA-855A-EDE9AC4E8100
+1 HUSB @I600E172C0E60@
+1 WIFE @ICE152C53897D@
+1 MARR
+2 DATE 1540
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Anne of Cleves
+2 QUAY high
+1 EVEN
+2 TYPE Annulment
+2 DATE 1540
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Anne of Cleves
+2 QUAY high
+0 @FB5A0DB0CCFCB@ FAM
+1 _FTSID 0076ABC3-8845-54B2-A297-6EE9BFC0CBFC
+1 HUSB @I600E172C0E60@
+1 WIFE @I7549124CB6D0@
+1 MARR
+2 DATE 1540
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine Howard
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine Howard
+2 QUAY high
+0 @F52B3B0EDC0FE@ FAM
+1 _FTSID A55BF17A-4A84-5A72-AC6F-8583BFF6253D
+1 HUSB @I600E172C0E60@
+1 WIFE @I87B52783942E@
+1 MARR
+2 DATE 1543
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine Parr
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Henry VIII and Catherine Parr
+2 QUAY high
+0 @FA5E5140E3FF9@ FAM
+1 _FTSID A1348741-8B14-5DD5-8493-B049FBECFA1F
+1 HUSB @I600E172C0E60@
+1 WIFE @I2F40354525B1@
+1 CHIL @I796D0C53A599@
+1 _PART
+2 DATE 1518
+2 NOTE Documented non-marital partnership; it is not represented as a marriage.
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the partnership
+3 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented partnership between Henry VIII and Elizabeth Blount
+2 QUAY high
+1 NOTE Documented non-marital partnership; it is not represented as a marriage.
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented partnership between Henry VIII and Elizabeth Blount
+2 QUAY high
+0 @FF20B3CFCF14B@ FAM
+1 _FTSID A6ABD727-17CE-5754-AE5A-D3167AEE0E43
+1 HUSB @IF333C1559ADF@
+1 WIFE @I8944A5579527@
+1 MARR
+2 DATE 1514
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary Tudor and Louis XII of France
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary Tudor and Louis XII of France
+2 QUAY high
+0 @FD15CADDF478B@ FAM
+1 _FTSID 8DDCA543-3172-5A1B-96F6-9B9619CD0D9D
+1 HUSB @IC3F22763FD12@
+1 WIFE @I8944A5579527@
+1 CHIL @IA296D3DC6E7F@
+1 CHIL @I743B30F4607A@
+1 MARR
+2 DATE 1515
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary Tudor and Charles Brandon
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary Tudor and Charles Brandon
+2 QUAY high
+0 @FD252DCF994BC@ FAM
+1 _FTSID 51F3771A-FC44-5473-B7B3-AC97849F2CD3
+1 HUSB @IB06648417BC2@
+1 WIFE @I05DEAB2EC125@
+1 CHIL @I2DC2389AF544@
+1 MARR
+2 DATE 1538
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between James V of Scotland and Mary of Guise
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between James V of Scotland and Mary of Guise
+2 QUAY high
+0 @F46E664FD4A76@ FAM
+1 _FTSID 6E0AE91F-E6B2-5079-BD84-BBC236B72EB9
+1 HUSB @I0FFA6229DB09@
+1 WIFE @I28EE641821D7@
+1 CHIL @I0DD5E4648647@
+1 MARR
+2 DATE 1544
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Douglas and Matthew Stewart
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Margaret Douglas and Matthew Stewart
+2 QUAY high
+0 @F536A5EA6BEE5@ FAM
+1 _FTSID 719DB8B5-52D3-5F9B-AEDB-FC44A7F855C4
+1 HUSB @I0DD5E4648647@
+1 WIFE @I2DC2389AF544@
+1 CHIL @I0A4EB5A7B925@
+1 MARR
+2 DATE 1565
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary, Queen of Scots and Henry Stuart, Lord Darnley
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Mary, Queen of Scots and Henry Stuart, Lord Darnley
+2 QUAY high
+0 @F0D3B3B6DCCC3@ FAM
+1 _FTSID E65B507F-3450-5259-8FBF-37A2789C1D29
+1 HUSB @IE167336C7343@
+1 WIFE @IA296D3DC6E7F@
+1 CHIL @IF97F329100F1@
+1 CHIL @I65223F510698@
+1 CHIL @I0BF5FBD295D4@
+1 MARR
+2 DATE 1533
+2 SOUR @S8BAFD291F581@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Frances Brandon and Henry Grey
+2 QUAY high
+1 SOUR @S8BAFD291F581@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Frances Brandon and Henry Grey
+2 QUAY high
+0 @S8BAFD291F581@ SOUR
+1 _FTSID D1D42198-CDF6-577F-A5F6-6C8E5B279D09
+1 TITL Kings and Queens of England and Britain
+1 AUTH Historic Royal Palaces
+1 REPO Historic Royal Palaces
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.hrp.org.uk/kings-and-queens-of-england-and-britain/
+0 @S64CCE51995CF@ SOUR
+1 _FTSID AD35C144-04BA-58DC-B07D-D5346ED2C419
+1 TITL Henry VIII’s wives: six queens, six women
+1 AUTH Historic Royal Palaces
+1 REPO Historic Royal Palaces
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.hrp.org.uk/hampton-court-palace/history-and-stories/henry-viiis-wives-six-queens-six-women/
+0 @S36D5D3819CF3@ SOUR
+1 _FTSID DC12AFCE-E624-5AE5-8595-1B960ECFC7A5
+1 TITL Henry VIII's children
+1 AUTH Historic Royal Palaces
+1 REPO Historic Royal Palaces
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.hrp.org.uk/hampton-court-palace/history-and-stories/henry-viiis-children/
+0 @S8A8ED57FFF2C@ SOUR
+1 _FTSID 0636C95A-B753-5D51-B8EE-0D08E83FF0B8
+1 TITL The Tudors
+1 AUTH Royal Collection Trust
+1 REPO Royal Collection Trust
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.rct.uk/collection/themes/exhibitions/the-tudors/the-queens-gallery-buckingham-palace
+0 @S73838B4606BD@ SOUR
+1 _FTSID CF0CA663-51E5-5168-A53A-7B5ACDC72915
+1 TITL British kings - Lancaster-York-Tudor family tree by shakko.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Wikimedia Commons
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
+1 _URL https://commons.wikimedia.org/wiki/File:British_kings_-_Lancaster-York-Tudor_family_tree_by_shakko.jpg
+0 @SD945ED4A243F@ SOUR
+1 _FTSID 536BC6D1-F696-51A8-86CD-309592AA0EEE
+1 TITL British 17th Century, Family Tree with Portraits of Henry VII, Henry VIII, Elizabeth, James, and Charles, NGA 57679.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Wikimedia Commons
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
+1 _URL https://commons.wikimedia.org/wiki/File:British_17th_Century%2C_Family_Tree_with_Portraits_of_Henry_VII%2C_Henry_VIII%2C_Elizabeth%2C_James%2C_and_Charles%2C_NGA_57679.jpg
+0 @S5F6A0E4ED775@ SOUR
+1 _FTSID 4DDC9AD8-E4E0-5433-A956-11116F83CDA6
+1 TITL Wikidata structured statements (supplementary discovery)
+1 AUTH Wikimedia Foundation contributors
+1 PUBL Wikidata
+1 REPO Wikidata
+1 NOTE structured discovery index; 2026-08-09; Supplementary discovery only; never the sole evidence for a relationship or vital event.
+1 _URL https://www.wikidata.org/
+0 @S1DFB498A7BF5@ SOUR
+1 _FTSID 3AA3D21F-D510-53C2-8A4A-DBF949B2566F
+1 TITL The Tragic Story of Lady Katherine Grey
+1 AUTH Historic Royal Palaces
+1 PUBL Historic Royal Palaces blog, 8 November 2022
+1 REPO Historic Royal Palaces
+1 NOTE institutional historical article; 2026-08-09; Institutional account stating that Katherine died in January 1568 aged twenty-seven.
+1 _URL https://www.hrp.org.uk/blog/the-tragic-story-of-lady-katherine-grey/
+0 @SBB7CF4EBDBA0@ SOUR
+1 _FTSID 37A188E0-3FFB-5DAE-A8DE-A046B870253E
+1 TITL The Elizabethan Court Day by Day: 1578
+1 AUTH Marion E. Colthorpe, compiler; Folger Shakespeare Library
+1 PUBL Folgerpedia
+1 REPO Folger Shakespeare Library
+1 NOTE institutional research chronology; 2026-08-09; Chronology entry for 20 April records Lady Mary Grey's death at her house in St Botolph.
+1 _URL https://folgerpedia.folger.edu/mediawiki/media/images_pedia_folgerpedia_mw/archive/9/94/20170609165556%21ECDbD_1578.pdf
+0 TRLR

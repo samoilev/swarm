@@ -62,6 +62,41 @@ Requires macOS 26 or later on Apple silicon. See [Build and run](#build-and-run)
   duplicated, exact matches are found automatically, and likely matches are only
   suggested. A backup is taken first and any failure rolls back completely.
 
+## Example trees
+
+Six historical families ship with the source, in [Examples/](Examples/), one folder per
+tree. Everyone in them is a public figure documented in published record — no one's
+private family data — so these are the trees to open, screenshot, and attach to a bug
+report.
+
+They are also the layout engine's test corpus. Each was chosen for a shape that is
+awkward to draw:
+
+| Folder | Tree | People | Families | Years | Shape it covers |
+| --- | --- | --- | --- | --- | --- |
+| [curie-joliot](Examples/curie-joliot/) | The Curie–Joliot Family | 18 | 6 | 1827–2007 | Small and quick to read — start here |
+| [darwin-wedgwood](Examples/darwin-wedgwood/) | The Darwin–Wedgwood Family | 40 | 17 | 1730–1986 | First-cousin marriage: two lines that split and rejoin |
+| [kennedy](Examples/kennedy/) | The Kennedy Family | 54 | 11 | 1857–2020 | Very wide sibling rows — eleven children under one union |
+| [romanov](Examples/romanov/) | Романовы | 52 | 22 | 1796–1960 | Cyrillic names, patronymics, large half-sibling sets |
+| [roosevelt](Examples/roosevelt/) | The Roosevelt Family | 68 | 37 | 1658–2022 | The deep one: nine generations across two branches |
+| [tudor](Examples/tudor/) | The Tudors | 39 | 20 | 1430–1625 | Serial remarriage and children by several partners |
+
+Every person carries a source citation, and most carry dated birth, marriage and death
+events with mapped places — so the map, timeline and sources workspaces all have
+something to show on first open.
+
+### Import one
+
+1. Click **Import GEDCOM** in the tree library — in the toolbar, or in the middle of the
+   screen while the library is still empty.
+2. Choose the `.ged` file inside the folder you want, say `Examples/tudor/tudor.ged`.
+3. **Import Preview** reports people, unions, sources and anything that failed
+   validation. Click **Import Verified Copy**.
+
+Swarm copies the file into its own library and keeps a verbatim copy beside it as
+`original-import.ged`. The file in `Examples/` is read, never written, so import the same
+tree as often as you like.
+
 ## Privacy
 
 Genealogy data is other people's personal data, much of it about people who are still

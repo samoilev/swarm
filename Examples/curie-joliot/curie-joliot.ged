@@ -1,0 +1,1803 @@
+0 HEAD
+1 SOUR SwarmFamilyTreePacks
+2 NAME Swarm public-release family-tree pack builder
+2 VERS 2.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 _TREEID 851126E1-4D23-5F7C-98B4-12D6BC1B8AC3
+1 _FTSVER 2
+1 _NAME The Curie–Joliot Family
+1 _SUBTITLE Four generations of science and public service
+1 _HOME @I006061186402@
+1 _ROOT @F0E3455A2043B@
+0 @I481D2DC4A2E8@ INDI
+1 _FTSID 314FB50C-54D8-58FD-8FAC-E920DE9678AA
+1 NAME Władysław /Skłodowski/
+2 GIVN Władysław
+2 SURN Skłodowski
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Władysław Skłodowski
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 20 OCT 1832
+2 PLAC Kielce
+3 MAP
+4 LATI N50.872500
+4 LONG E20.631944
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Władysław Skłodowski
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q4021169
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q102317
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 14 MAY 1902
+2 PLAC Poland
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Władysław Skłodowski
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q4021169
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q36
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Powązki Cemetery
+3 MAP
+4 LATI N52.251944
+4 LONG E20.972778
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Władysław Skłodowski
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q4021169
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q168886
+3 NOTE Locality coordinates, not a street address.
+1 OCCU biologist; educator
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Władysław Skłodowski
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q4021169
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Władysław Skłodowski appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 20 OCT 1
+2 CONC 832 at Kielce. The recorded death date is 14 MAY 1902 at Poland. Documented unions in this tree connect this person with Bronisława Skłodowska. Public biographical sources identify the following occ
+2 CONC upation or public role: biologist; educator. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the c
+2 CONC ommissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-wladyslaw-portrait.jpg
+2 FORM JPEG
+1 FAMS @FABDDA87DA041@
+0 @I6E1565AB42CD@ INDI
+1 _FTSID D9DC1FB8-7879-5E8B-B268-96F57D615D63
+1 NAME Bronisława /Skłodowska/
+2 TYPE married
+2 GIVN Bronisława
+2 SURN Skłodowska
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Bronisława Skłodowska
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1835
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Bronisława Skłodowska
+3 QUAY high
+1 DEAT
+2 DATE 1878
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Bronisława Skłodowska
+3 QUAY high
+1 NOTE Bronisława Skłodowska appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1835. T
+2 CONC he recorded death date is 1878. Documented unions in this tree connect this person with Władysław Skłodowski. This summary is confined to cited genealogical facts and selected public activities nee
+2 CONC ded to interpret the graph; it does not extend the family beyond the commissioned cast or infermissing details from names, portraits, households, or succession.
+1 FAMS @FABDDA87DA041@
+0 @I90C3CD7206FB@ INDI
+1 _FTSID 37E2147F-2BD2-55B1-BC1A-251483C49AAD
+1 NAME Zofia /Skłodowska/
+2 GIVN Zofia
+2 SURN Skłodowska
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Zofia Skłodowska
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1862
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Zofia Skłodowska
+3 QUAY high
+1 DEAT
+2 DATE 1876
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Zofia Skłodowska
+3 QUAY high
+1 NOTE Zofia Skłodowska appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1862. The rec
+2 CONC orded death date is 1876. Within the defined scope, the recorded parents are Władysław Skłodowski and Bronisława Skłodowska. This summary is confined to cited genealogical facts and selected publ
+2 CONC ic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FABDDA87DA041@
+2 PEDI birth
+2 _PLINK @I481D2DC4A2E8@
+3 _FTSID 4F5B3162-D212-5D21-AF6C-4DEFAAD66D9E
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Władysław Skłodowski is recorded as biological parent of Zofia Skłodowska
+4 QUAY high
+2 _PLINK @I6E1565AB42CD@
+3 _FTSID 11E87269-4850-597E-B298-1BD01D8279D7
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Bronisława Skłodowska is recorded as biological parent of Zofia Skłodowska
+4 QUAY high
+0 @ICB3AC0924AA3@ INDI
+1 _FTSID DB991907-7B15-59E4-BA50-C11E9D96F79E
+1 NAME Józef /Skłodowski/
+2 GIVN Józef
+2 SURN Skłodowski
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Józef Skłodowski
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 26 APR 1863
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.230000
+4 LONG E21.011111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Józef Skłodowski
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q11731365
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 19 OCT 1937
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.230000
+4 LONG E21.011111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Józef Skłodowski
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q11731365
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Powązki Cemetery
+3 MAP
+4 LATI N52.251944
+4 LONG E20.972778
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Józef Skłodowski
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q11731365
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q168886
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physician
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Józef Skłodowski
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q11731365
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC University of Warsaw
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Józef Skłodowski
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q11731365
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Józef Skłodowski appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 26 APR 1863 a
+2 CONC t Warsaw. The recorded death date is 19 OCT 1937 at Warsaw. Within the defined scope, the recorded parents are Władysław Skłodowski and Bronisława Skłodowska. Public biographical sources identify t
+2 CONC he following occupation or public role: physician. Recorded education includes University ofWarsaw. This summary is confined to cited genealogical facts and selected public activities needed to interp
+2 CONC ret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FABDDA87DA041@
+2 PEDI birth
+2 _PLINK @I481D2DC4A2E8@
+3 _FTSID A7D11EDE-1EBD-50AF-9487-DB1050F4A740
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Władysław Skłodowski is recorded as biological parent of Józef Skłodowski
+4 QUAY high
+2 _PLINK @I6E1565AB42CD@
+3 _FTSID CA845FCB-C8A5-5EBA-8DC5-73DE38CDCB39
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Bronisława Skłodowska is recorded as biological parent of Józef Skłodowski
+4 QUAY high
+0 @I1937232CC279@ INDI
+1 _FTSID 555F678C-9B24-5502-B3C0-CBC41B84118D
+1 NAME Bronisława /Dłuska/
+2 TYPE married
+2 GIVN Bronisława
+2 SURN Dłuska
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Bronisława Dłuska
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1865
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Bronisława Dłuska
+3 QUAY high
+1 DEAT
+2 DATE 1939
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Bronisława Dłuska
+3 QUAY high
+1 NOTE Bronisława Dłuska appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1865. The r
+2 CONC ecorded death date is 1939. Within the defined scope, the recorded parents are Władysław Skłodowski and Bronisława Skłodowska. This summary is confined to cited genealogical facts and selected pu
+2 CONC blic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-bronislawa-portrait.jpg
+2 FORM JPEG
+1 FAMC @FABDDA87DA041@
+2 PEDI birth
+2 _PLINK @I481D2DC4A2E8@
+3 _FTSID 4E99F704-3B7E-5F23-B5AE-9E9C3D95DD60
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Władysław Skłodowski is recorded as biological parent of Bronisława Dłuska
+4 QUAY high
+2 _PLINK @I6E1565AB42CD@
+3 _FTSID 1CD8A73E-88AD-5F93-90BD-50209C33C697
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Bronisława Skłodowska is recorded as biological parent of Bronisława Dłuska
+4 QUAY high
+0 @IE807F43B1183@ INDI
+1 _FTSID 1B25FAF6-02F9-5950-9D82-ADA69FEAF004
+1 NAME Helena /Szalay/
+2 TYPE married
+2 GIVN Helena
+2 SURN Szalay
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Helena Szalay
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1866
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.230000
+4 LONG E21.011111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Helena Szalay
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q8861668
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 1961
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.230000
+4 LONG E21.011111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Helena Szalay
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q8861668
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Powązki Cemetery
+3 MAP
+4 LATI N52.251944
+4 LONG E20.972778
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Helena Szalay
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q8861668
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q168886
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Helena Szalay appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1866 at Warsaw. T
+2 CONC he recorded death date is 1961 at Warsaw. Withinthe defined scope, the recorded parents are Władysław Skłodowski and Bronisława Skłodowska. This summary is confined to cited genealogical facts an
+2 CONC d selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-helena-portrait.jpg
+2 FORM JPEG
+1 FAMC @FABDDA87DA041@
+2 PEDI birth
+2 _PLINK @I481D2DC4A2E8@
+3 _FTSID D1DF28B9-93B5-5A55-B7A5-52077A3EA374
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Władysław Skłodowski is recorded as biological parent of Helena Szalay
+4 QUAY high
+2 _PLINK @I6E1565AB42CD@
+3 _FTSID 87AA189C-8B5C-5894-9732-235FF2D218D9
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Bronisława Skłodowska is recorded as biological parent of Helena Szalay
+4 QUAY high
+0 @I006061186402@ INDI
+1 _FTSID 84FA2E7D-8B0B-5DD0-B316-FFAE013BCBF8
+1 NAME Maria Salomea /Skłodowska-Curie/
+2 TYPE married
+2 GIVN Maria Salomea
+2 SURN Skłodowska-Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Marie Skłodowska-Curie
+3 QUAY high
+1 NAME Maria Salomea Skłodowska //
+2 TYPE birth
+2 GIVN Maria Salomea Skłodowska
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Maria Salomea Skłodowska
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 7 NOV 1867
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.230000
+4 LONG E21.011111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Marie Skłodowska-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 4 JUL 1934
+2 PLAC Sancellemoz
+3 MAP
+4 LATI N45.939224
+4 LONG E6.715230
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Marie Skłodowska-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q2364887
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Panthéon
+3 MAP
+4 LATI N48.846198
+4 LONG E2.346105
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Marie Skłodowska-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q188856
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physicist; chemist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Marie Skłodowska-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Science Faculty of Paris; Flying University
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Marie Skłodowska-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 IMMI
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Move to Paris for study
+3 QUAY high
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Marie Skłodowska-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Marie Skłodowska-Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 NOV 1
+2 CONC 867 at Warsaw. The recorded death date is 4 JUL1934 at Sancellemoz. Within the defined scope, the recorded parents are Władysław Skłodowski and Bronisława Skłodowska. Documented unions in this tr
+2 CONC ee connect this person with Pierre Curie. Public biographical sources identify the following occupation or public role: physicist; chemist. Recorded education includes Science Faculty of Paris; Flying U
+2 CONC niversity. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missin
+2 CONC g details from names, portraits,
+1 OBJE
+2 FILE curie-marie-portrait.jpg
+2 FORM JPEG
+1 _ATTC
+2 FILE Attachments/curie-joliot-attachment-1.jpg
+2 TITL Marie, Pierre, Irene Curie 1903
+2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
+2 SOUR @S9CB6724E079D@
+3 PAGE file description page
+3 EVEN Marie, Pierre, Irene Curie 1903
+3 QUAY high
+3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
+1 _ATTC
+2 FILE Attachments/curie-joliot-attachment-2.jpg
+2 TITL Portrait of Marie Curie, and her two daughters, Eve and Irene, in 1908 General Collections Keywords: Marie Curie
+2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
+2 SOUR @S24972E88A13E@
+3 PAGE file description page
+3 EVEN Portrait of Marie Curie, and her two daughters, Eve and Irene, in 1908 General Collections Keywords: Marie Curie
+3 QUAY high
+3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
+1 FAMS @F0E3455A2043B@
+1 FAMC @FABDDA87DA041@
+2 PEDI birth
+2 _PLINK @I481D2DC4A2E8@
+3 _FTSID 7727E72E-B1F7-557D-846E-C74AC8211F47
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Władysław Skłodowski is recorded as biological parent of Marie Skłodowska-Curie
+4 QUAY high
+2 _PLINK @I6E1565AB42CD@
+3 _FTSID BBB33EF8-3309-5B4D-B6BD-C5690AD9EC5E
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Bronisława Skłodowska is recorded as biological parent of Marie Skłodowska-Curie
+4 QUAY high
+1 RESI
+2 PLAC Warsaw
+3 MAP
+4 LATI N52.23000000
+4 LONG E21.01111111
+3 _PID curie-joliot-place-q270
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Marie Skłodowska-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7186
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 IMMI Moved from Warsaw to Paris
+2 DATE 1891
+2 PLAC Paris
+3 MAP
+4 LATI N48.85666667
+4 LONG E2.35222222
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Move to Paris for study
+3 QUAY high
+1 EVEN Awarded jointly with Pierre Curie and Henri Becquerel
+2 TYPE Nobel Prize in Physics
+2 DATE 1903
+2 SOUR @SD406B509E732@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN 1903 Nobel Prize in Physics
+3 QUAY high
+1 EVEN Awarded for work on radium and polonium
+2 TYPE Nobel Prize in Chemistry
+2 DATE 1911
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN 1911 Nobel Prize in Chemistry
+3 QUAY high
+1 _MILT Organised mobile radiography services during the First World War
+2 DATE FROM 1914 TO 1918
+2 SOUR @S731534532C53@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN First World War radiography service
+3 QUAY high
+0 @I90B95C423432@ INDI
+1 _FTSID D670E4E1-8B57-598E-9208-99D8897D4D88
+1 NAME Eugène /Curie/
+2 GIVN Eugène
+2 SURN Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Eugène Curie
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 AUG 1827
+2 PLAC Mulhouse
+3 MAP
+4 LATI N47.748611
+4 LONG E7.339167
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Eugène Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q20968820
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q79815
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 25 FEB 1910
+2 PLAC Sceaux
+3 MAP
+4 LATI N48.778611
+4 LONG E2.290556
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Eugène Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q20968820
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q370498
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Cemetery Sceaux
+3 MAP
+4 LATI N48.779730
+4 LONG E2.283800
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Eugène Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q20968820
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q2972561
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physician
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Eugène Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q20968820
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Eugène Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 AUG 1827 at Mu
+2 CONC lhouse. The recorded death date is 25 FEB 1910 at Sceaux. Documented unions in this tree connect this person with Sophie-Claire Curie. Public biographical sources identify the following occupation or p
+2 CONC ublic role: physician. This summary is confined to cited genealogical facts and selected publicactivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or i
+2 CONC nfer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-eugene-portrait.jpg
+2 FORM JPEG
+1 FAMS @F837C88EA1C94@
+0 @I40EC4A1EE95F@ INDI
+1 _FTSID 543EE933-4D24-5837-840F-F5EF90722E5B
+1 NAME Sophie-Claire /Curie/
+2 TYPE married
+2 GIVN Sophie-Claire
+2 SURN Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Sophie-Claire Curie
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1832
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Sophie-Claire Curie
+3 QUAY high
+1 DEAT
+2 DATE 1897
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Sophie-Claire Curie
+3 QUAY high
+1 NOTE Sophie-Claire Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1832. The r
+2 CONC ecorded death date is 1897. Documented unions inthis tree connect this person with Eugène Curie. This summary is confined to cited genealogical facts and selected public activities needed to interpre
+2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-sophie-portrait.jpg
+2 FORM JPEG
+1 FAMS @F837C88EA1C94@
+0 @IA9C2741D551B@ INDI
+1 _FTSID 778A52EC-3800-5730-B1C4-8F60DF9F1365
+1 NAME Jacques /Curie/
+2 GIVN Jacques
+2 SURN Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Jacques Curie
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1856
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Jacques Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q105779632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 DEAT
+2 DATE 1941
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Jacques Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q105779632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 OCCU sport cyclist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Jacques Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q105779632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Jacques Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1856. The recorde
+2 CONC d death date is 1941. Within the defined scope,the recorded parents are Eugène Curie and Sophie-Claire Curie. Public biographical sources identify the following occupation or public role: sport cycli
+2 CONC st. This summary is confined to cited genealogical facts and selected public activities neededto interpret the graph; it does not extend the family beyond the commissioned cast or infer missing detail
+2 CONC s from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-jacques-portrait.jpg
+2 FORM JPEG
+1 FAMC @F837C88EA1C94@
+2 PEDI birth
+2 _PLINK @I90B95C423432@
+3 _FTSID 63971E34-18AF-5781-BA76-883F148D5C2C
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Eugène Curie is recorded as biological parent of Jacques Curie
+4 QUAY high
+2 _PLINK @I40EC4A1EE95F@
+3 _FTSID 93EE97A3-EA6C-5432-85F7-9E1D384AE93C
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Sophie-Claire Curie is recorded as biological parent of Jacques Curie
+4 QUAY high
+0 @IE5CC7D517749@ INDI
+1 _FTSID 6C69EB4D-FDBE-5C79-933E-D615CD49C370
+1 NAME Pierre /Curie/
+2 GIVN Pierre
+2 SURN Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Pierre Curie
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 15 MAY 1859
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Pierre Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 19 APR 1906
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Pierre Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Panthéon
+3 MAP
+4 LATI N48.846198
+4 LONG E2.346105
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Pierre Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q188856
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physicist; chemist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Pierre Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Science Faculty of Paris; Sorbonne
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Pierre Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Pierre Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Pierre Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 15 MAY 1859 at Par
+2 CONC is. The recorded death date is 19 APR 1906 at Paris. Within the defined scope, the recorded parents are Eugène Curie and Sophie-Claire Curie. Documented unions in this tree connect this person with M
+2 CONC arie Skłodowska-Curie. Public biographical sources identify the following occupation or publicrole: physicist; chemist. Recorded education includes Science Faculty of Paris; Sorbonne. This summary is c
+2 CONC onfined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portra
+2 CONC its, households,
+1 OBJE
+2 FILE curie-pierre-portrait.jpg
+2 FORM JPEG
+1 FAMS @F0E3455A2043B@
+1 FAMC @F837C88EA1C94@
+2 PEDI birth
+2 _PLINK @I90B95C423432@
+3 _FTSID EE041BDD-5CD7-535A-B5F2-B38B5835C155
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Eugène Curie is recorded as biological parent of Pierre Curie
+4 QUAY high
+2 _PLINK @I40EC4A1EE95F@
+3 _FTSID 785ED771-7DB0-5092-BE31-708B13E6A26A
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Sophie-Claire Curie is recorded as biological parent of Pierre Curie
+4 QUAY high
+1 RESI
+2 PLAC rue de la Glacière
+3 MAP
+4 LATI N48.83160000
+4 LONG E2.34434000
+3 _PID curie-joliot-place-q3451440
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Pierre Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q37463
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EVEN Awarded jointly with Marie Curie and Henri Becquerel
+2 TYPE Nobel Prize in Physics
+2 DATE 1903
+2 SOUR @SD406B509E732@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN 1903 Nobel Prize in Physics
+3 QUAY high
+0 @I258F124CF017@ INDI
+1 _FTSID 9D377A2B-D702-593A-AFE1-DC7612F9A99F
+1 NAME Irène /Joliot-Curie/
+2 TYPE married
+2 GIVN Irène
+2 SURN Joliot-Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Irène Joliot-Curie
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 12 SEP 1897
+2 PLAC 13th arrondissement of Paris
+3 MAP
+4 LATI N48.832222
+4 LONG E2.355556
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Irène Joliot-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q175129
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 17 MAR 1956
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Irène Joliot-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Cemetery Sceaux
+3 MAP
+4 LATI N48.779730
+4 LONG E2.283800
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Irène Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q2972561
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physicist; chemist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Irène Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Science Faculty of Paris; Collège Sévigné
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Irène Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Irène Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Irène Joliot-Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 SEP 1897 a
+2 CONC t 13th arrondissement of Paris. The recorded death date is 17 MAR 1956 at Paris. Within the defined scope, the recorded parents are Marie Skłodowska-Curie and Pierre Curie. Documented unions in this t
+2 CONC ree connect this person with Frédéric Joliot-Curie. Public biographical sources identify the following occupation or public role: physicist; chemist. Recorded education includes Science Faculty of P
+2 CONC aris; Collège Sévigné. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph;it does not extend the family beyond the commissioned cast o
+2 CONC r infer missing details
+1 OBJE
+2 FILE curie-irene-portrait.jpg
+2 FORM JPEG
+1 FAMS @F280540F3CAA8@
+1 FAMC @F0E3455A2043B@
+2 PEDI birth
+2 _PLINK @IE5CC7D517749@
+3 _FTSID F27FEC9C-FAFB-5E44-901F-723654C23362
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Pierre Curie is recorded as biological parent of Irène Joliot-Curie
+4 QUAY high
+2 _PLINK @I006061186402@
+3 _FTSID B9D221F2-7D95-5B8D-9FA6-D37F65954605
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Marie Skłodowska-Curie is recorded as biological parent of Irène Joliot-Curie
+4 QUAY high
+1 RESI
+2 PLAC Paris
+3 MAP
+4 LATI N48.85666667
+4 LONG E2.35222222
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Irène Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q7504
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EVEN Awarded jointly with Frédéric Joliot-Curie
+2 TYPE Nobel Prize in Chemistry
+2 DATE 1935
+2 SOUR @SD406B509E732@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN 1935 Nobel Prize in Chemistry
+3 QUAY high
+0 @IF5D5D53842A7@ INDI
+1 _FTSID 417A5F4C-95E0-59ED-93AF-521411EF8348
+1 NAME Ève /Labouisse/
+2 TYPE married
+2 GIVN Ève
+2 SURN Labouisse
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ève Curie Labouisse
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 6 DEC 1904
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ève Curie Labouisse
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 22 OCT 2007
+2 PLAC New York City
+3 MAP
+4 LATI N40.712778
+4 LONG W74.006111
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ève Curie Labouisse
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q60
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Metairie Cemetery
+3 MAP
+4 LATI N29.985833
+4 LONG W90.117778
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ève Curie Labouisse
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q6822541
+3 NOTE Locality coordinates, not a street address.
+1 OCCU journalist; pianist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ève Curie Labouisse
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Collège Sévigné
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Ève Curie Labouisse
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ève Curie Labouisse
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Ève Curie Labouisse appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 DEC 1904 a
+2 CONC t Paris. The recorded death date is 22 OCT 2007 at New York City. Within the defined scope, the recorded parents are Marie Skłodowska-Curie and Pierre Curie. Documented unions in this tree connect th
+2 CONC is person with Henry Richardson Labouisse Jr.. Public biographical sources identify the following occupation or public role: journalist; pianist. Recorded education includes Collège Sévigné. This s
+2 CONC ummary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from na
+2 CONC mes,
+1 OBJE
+2 FILE curie-eve-portrait.jpg
+2 FORM JPEG
+1 FAMS @F555EC00B6BD7@
+1 FAMC @F0E3455A2043B@
+2 PEDI birth
+2 _PLINK @IE5CC7D517749@
+3 _FTSID 77AB6B8C-EC1A-5474-932E-0D0A1B53C739
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Pierre Curie is recorded as biological parent of Ève Curie Labouisse
+4 QUAY high
+2 _PLINK @I006061186402@
+3 _FTSID 04E82119-B7C5-5F5F-8262-D5117D36055D
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Marie Skłodowska-Curie is recorded as biological parent of Ève Curie Labouisse
+4 QUAY high
+1 RESI
+2 PLAC France
+3 _PID curie-joliot-place-q142
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ève Curie Labouisse
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q230068
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @I9AEA494A9B3C@ INDI
+1 _FTSID 8522C8DF-E0E5-5318-B0C1-953E4E5969B4
+1 NAME Frédéric /Joliot-Curie/
+2 GIVN Frédéric
+2 SURN Joliot-Curie
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Frédéric Joliot-Curie
+3 QUAY high
+1 NAME Jean Frédéric Joliot //
+2 TYPE birth
+2 GIVN Jean Frédéric Joliot
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Jean Frédéric Joliot
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 19 MAR 1900
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Frédéric Joliot-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 14 AUG 1958
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Frédéric Joliot-Curie
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Cemetery Sceaux
+3 MAP
+4 LATI N48.779730
+4 LONG E2.283800
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Frédéric Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q2972561
+3 NOTE Locality coordinates, not a street address.
+1 OCCU nuclear physicist; chemist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Frédéric Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Lycée Lakanal; ESPCI Paris, PSL University
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Frédéric Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Frédéric Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Frédéric Joliot-Curie appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 19 MAR 1
+2 CONC 900 at Paris. The recorded death date is 14 AUG1958 at Paris. Documented unions in this tree connect this person with Irène Joliot-Curie. Public biographical sources identify the following occupation o
+2 CONC r public role: nuclear physicist; chemist. Recorded education includes Lycée Lakanal; ESPCIParis, PSL University. This summary is confined to cited genealogical facts and selected public activities n
+2 CONC eeded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-frederic-portrait.jpg
+2 FORM JPEG
+1 FAMS @F280540F3CAA8@
+1 RESI
+2 PLAC Antony
+3 MAP
+4 LATI N48.75333333
+4 LONG E2.29666667
+3 _PID curie-joliot-place-q205592
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Frédéric Joliot-Curie
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q150989
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EVEN Awarded jointly with Irène Joliot-Curie
+2 TYPE Nobel Prize in Chemistry
+2 DATE 1935
+2 SOUR @SD406B509E732@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN 1935 Nobel Prize in Chemistry
+3 QUAY high
+0 @I2F7A91C8B363@ INDI
+1 _FTSID A3BA9CBF-56E0-5D93-90B8-2E13B68FFED2
+1 NAME Hélène /Langevin-Joliot/
+2 TYPE married
+2 GIVN Hélène
+2 SURN Langevin-Joliot
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Hélène Langevin-Joliot
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 19 SEP 1927
+2 PLAC 6th arrondissement of Paris
+3 MAP
+4 LATI N48.850531
+4 LONG E2.332233
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Hélène Langevin-Joliot
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q581536
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q245546
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physicist; nuclear physicist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Hélène Langevin-Joliot
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q581536
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC ESPCI Paris, PSL University; Science Faculty of Paris
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Hélène Langevin-Joliot
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q581536
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Hélène Langevin-Joliot appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 19 SEP 1
+2 CONC 927 at 6th arrondissement of Paris. Within thedefined scope, the recorded parents are Irène Joliot-Curie and Frédéric Joliot-Curie. Documented unions in this tree connect this person with Michel La
+2 CONC ngevin. Public biographical sources identify the following occupation or public role: physicist; nuclear physicist. Recorded education includes ESPCI Paris, PSL University; Science Faculty of Paris. T
+2 CONC his summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fr
+2 CONC om names, portraits, households, or succession.
+1 FAMS @F99BB7183FC2D@
+1 FAMC @F280540F3CAA8@
+2 PEDI birth
+2 _PLINK @I9AEA494A9B3C@
+3 _FTSID B9BB53EF-9D6E-542E-9955-97CD9E046FC6
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Frédéric Joliot-Curie is recorded as biological parent of Hélène Langevin-Joliot
+4 QUAY high
+2 _PLINK @I258F124CF017@
+3 _FTSID AFDD96E3-3A23-5177-83C9-4B4723B57A1A
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Irène Joliot-Curie is recorded as biological parent of Hélène Langevin-Joliot
+4 QUAY high
+0 @I227FE58B16A6@ INDI
+1 _FTSID FF49F5FC-90F3-5566-AD59-AAF5A86E6E32
+1 NAME Pierre /Joliot/
+2 GIVN Pierre
+2 SURN Joliot
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Pierre Joliot
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 12 MAR 1932
+2 PLAC Paris
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Pierre Joliot
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q899355
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q90
+3 NOTE Locality coordinates, not a street address.
+1 OCCU biologist; professor
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Pierre Joliot
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q899355
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Pierre Joliot appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 MAR 1932 at Pa
+2 CONC ris. Within the defined scope, the recorded parents are Irène Joliot-Curie and Frédéric Joliot-Curie. Public biographical sources identify the following occupation or public role: biologist; profes
+2 CONC sor. This summary is confined to cited genealogical facts and selected public activities neededto interpret the graph; it does not extend the family beyond the commissioned cast or infer missing detai
+2 CONC ls from names, portraits, households, or succession.
+1 FAMC @F280540F3CAA8@
+2 PEDI birth
+2 _PLINK @I9AEA494A9B3C@
+3 _FTSID 0B018B23-5034-57D2-9975-710919C4088D
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Frédéric Joliot-Curie is recorded as biological parent of Pierre Joliot
+4 QUAY high
+2 _PLINK @I258F124CF017@
+3 _FTSID BB589DDE-96C0-5E96-A7CA-6BBD61B9D56F
+3 PEDI birth
+3 SOUR @S3FF806E2ED36@
+4 PAGE page title / relevant entry
+4 EVEN Irène Joliot-Curie is recorded as biological parent of Pierre Joliot
+4 QUAY high
+0 @I1115A74B9782@ INDI
+1 _FTSID D673036E-4B81-59E0-A2CA-C2DCD3B2C050
+1 NAME Henry Richardson /Labouisse/
+2 GIVN Henry Richardson
+2 SURN Labouisse
+2 NSFX Jr.
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Henry Richardson Labouisse Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 11 FEB 1904
+2 PLAC New Orleans
+3 MAP
+4 LATI N29.976111
+4 LONG W90.078333
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Henry Richardson Labouisse Jr.
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q598954
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q34404
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 25 MAR 1987
+2 PLAC Manhattan
+3 MAP
+4 LATI N40.728333
+4 LONG W73.994167
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Henry Richardson Labouisse Jr.
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q598954
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q11299
+3 NOTE Locality coordinates, not a street address.
+1 OCCU diplomat; jurist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Henry Richardson Labouisse Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q598954
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Princeton University; Harvard Law School
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Henry Richardson Labouisse Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q598954
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Henry Richardson Labouisse Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1
+2 CONC 1 FEB 1904 at New Orleans. The recorded death date is 25 MAR 1987 at Manhattan. Documented unions in this tree connect this person with Ève Curie Labouisse. Public biographical sources identify the f
+2 CONC ollowing occupation or public role: diplomat; jurist. Recorded education includes Princeton University; Harvard Law School. This summary is confined to cited genealogical facts and selected public act
+2 CONC ivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @F555EC00B6BD7@
+1 EVEN Executive Director of UNICEF
+2 TYPE Public service
+2 DATE FROM 1965 TO 1979
+2 SOUR @SD406B509E732@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN UNICEF public service
+3 QUAY high
+0 @IB2AE46447EB5@ INDI
+1 _FTSID 32ACDA39-3010-56F4-9203-0ADB80D152ED
+1 NAME Michel /Langevin/
+2 GIVN Michel
+2 SURN Langevin
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Michel Langevin
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 17 AUG 1926
+2 PLAC Warluis
+3 MAP
+4 LATI N49.388056
+4 LONG E2.140833
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Michel Langevin
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q28355941
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q750697
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 11 APR 1985
+2 PLAC 5th arrondissement of Paris
+3 MAP
+4 LATI N48.847222
+4 LONG E2.344444
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Michel Langevin
+3 QUAY high
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q28355941
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q238723
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Cemetery Sceaux
+3 MAP
+4 LATI N48.779730
+4 LONG E2.283800
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Michel Langevin
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q28355941
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID curie-joliot-place-q2972561
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physicist; activist
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Michel Langevin
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q28355941
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC ESPCI Paris, PSL University
+2 SOUR @S3FF806E2ED36@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Michel Langevin
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S53DEFC55B8BA@
+3 PAGE Q28355941
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Michel Langevin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 17 AUG 1926 at W
+2 CONC arluis. The recorded death date is 11 APR 1985at 5th arrondissement of Paris. Documented unions in this tree connect this person with Hélène Langevin-Joliot. Public biographical sources identify the f
+2 CONC ollowing occupation or public role: physicist; activist. Recorded education includes ESPCI Paris, PSL University. This summary is confined to cited genealogical facts and selected public activities ne
+2 CONC eded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE curie-michel-langevin-portrait.jpg
+2 FORM JPEG
+1 FAMS @F99BB7183FC2D@
+0 @FABDDA87DA041@ FAM
+1 _FTSID 88A5019E-1157-57F5-BA33-FADD2EFCBC93
+1 HUSB @I481D2DC4A2E8@
+1 WIFE @I6E1565AB42CD@
+1 CHIL @I90C3CD7206FB@
+1 CHIL @ICB3AC0924AA3@
+1 CHIL @I1937232CC279@
+1 CHIL @IE807F43B1183@
+1 CHIL @I006061186402@
+1 MARR
+2 DATE 1860
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Władysław Skłodowski and Bronisława Skłodowska
+2 QUAY high
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Władysław Skłodowski and Bronisława Skłodowska
+2 QUAY high
+0 @F837C88EA1C94@ FAM
+1 _FTSID 5F3B343E-2B95-5990-B0B0-CCB32D99A22A
+1 HUSB @I90B95C423432@
+1 WIFE @I40EC4A1EE95F@
+1 CHIL @IA9C2741D551B@
+1 CHIL @IE5CC7D517749@
+1 MARR
+2 DATE 1855
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Eugène Curie and Sophie-Claire Curie
+2 QUAY high
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Eugène Curie and Sophie-Claire Curie
+2 QUAY high
+0 @F0E3455A2043B@ FAM
+1 _FTSID EE226DB6-623B-5372-A264-683896A5EB57
+1 HUSB @IE5CC7D517749@
+1 WIFE @I006061186402@
+1 CHIL @I258F124CF017@
+1 CHIL @IF5D5D53842A7@
+1 MARR
+2 DATE 1895
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Marie Skłodowska-Curie and Pierre Curie
+2 QUAY high
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Marie Skłodowska-Curie and Pierre Curie
+2 QUAY high
+0 @F280540F3CAA8@ FAM
+1 _FTSID 38ECAE58-3AA1-5319-ABA0-4A6499FD7140
+1 HUSB @I9AEA494A9B3C@
+1 WIFE @I258F124CF017@
+1 CHIL @I2F7A91C8B363@
+1 CHIL @I227FE58B16A6@
+1 MARR
+2 DATE 1926
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Irène Joliot-Curie and Frédéric Joliot-Curie
+2 QUAY high
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Irène Joliot-Curie and Frédéric Joliot-Curie
+2 QUAY high
+0 @F555EC00B6BD7@ FAM
+1 _FTSID 1B0176D0-CEA6-5F96-A55E-7582A66381E3
+1 HUSB @I1115A74B9782@
+1 WIFE @IF5D5D53842A7@
+1 MARR
+2 DATE 1954
+2 NOTE No children are recorded in the authoritative biographical sources used for this curated pack.
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ève Curie Labouisse and Henry Richardson Labouisse Jr.
+2 QUAY high
+1 NOTE No children are recorded in the authoritative biographical sources used for this curated pack.
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ève Curie Labouisse and Henry Richardson Labouisse Jr.
+2 QUAY high
+0 @F99BB7183FC2D@ FAM
+1 _FTSID 3D8AD1FD-5790-5485-91E6-F8EC04BFBD5E
+1 HUSB @IB2AE46447EB5@
+1 WIFE @I2F7A91C8B363@
+1 MARR
+2 DATE 1948
+2 SOUR @S3FF806E2ED36@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Hélène Langevin-Joliot and Michel Langevin
+2 QUAY high
+1 SOUR @S3FF806E2ED36@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Hélène Langevin-Joliot and Michel Langevin
+2 QUAY high
+0 @S3FF806E2ED36@ SOUR
+1 _FTSID 99DA50C1-9654-5F29-B0DE-405304E9A986
+1 TITL Marie Curie – Biographical
+1 AUTH Nobel Prize Outreach
+1 REPO Nobel Prize Outreach
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.nobelprize.org/prizes/chemistry/1911/marie-curie/biographical/
+0 @SD406B509E732@ SOUR
+1 _FTSID 94801172-F652-59D4-BD30-EB14E5875876
+1 TITL Family matters: Meet the families with Nobel Prizes
+1 AUTH Nobel Prize Outreach
+1 REPO Nobel Prize Outreach
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.nobelprize.org/family-matters-meet-the-families-with-nobel-prizes/
+0 @S731534532C53@ SOUR
+1 _FTSID A5B94172-FA3E-5BD0-B1A9-4D1B4D28734F
+1 TITL The Curie family
+1 AUTH Musée Curie
+1 REPO Musée Curie
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://musee.curie.fr/decouvrir/la-famille-curie
+0 @S9CB6724E079D@ SOUR
+1 _FTSID C0955465-D55A-5B2D-BCBB-3E7147C1BE9A
+1 TITL Marie, Pierre, Irene Curie 1903.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Wikimedia Commons
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
+1 _URL https://commons.wikimedia.org/wiki/File:Marie%2C_Pierre%2C_Irene_Curie_1903.jpg
+0 @S24972E88A13E@ SOUR
+1 _FTSID 698EA39D-51B9-5331-8149-BA1E7A4C1A37
+1 TITL Portrait of Marie Curie and her daughters, 1908 Wellcome L0001758.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Wikimedia Commons
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
+1 _URL https://commons.wikimedia.org/wiki/File:Portrait_of_Marie_Curie_and_her_daughters%2C_1908_Wellcome_L0001758.jpg
+0 @S53DEFC55B8BA@ SOUR
+1 _FTSID 1B33229B-A5F5-5DC3-9964-2EDC00C71CBD
+1 TITL Wikidata structured statements (supplementary discovery)
+1 AUTH Wikimedia Foundation contributors
+1 PUBL Wikidata
+1 REPO Wikidata
+1 NOTE structured discovery index; 2026-08-09; Supplementary discovery only; never the sole evidence for a relationship or vital event.
+1 _URL https://www.wikidata.org/
+0 TRLR

@@ -1,0 +1,4851 @@
+0 HEAD
+1 SOUR SwarmFamilyTreePacks
+2 NAME Swarm public-release family-tree pack builder
+2 VERS 2.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 _TREEID 05F404A2-70A2-5F26-919A-B98E524B866A
+1 _FTSVER 2
+1 _NAME Романовы: четыре поколения императорской семьи
+1 _SUBTITLE От Николая I до семьи Николая II
+1 _HOME @IEF1B77538804@
+1 _ROOT @F6A80110DE4CF@
+0 @I70C65A2F29C9@ INDI
+1 _FTSID 84281B1D-A994-5EE7-AE68-34C87982DF3E
+1 NAME Николай /Романов/
+2 GIVN Николай
+2 SURN Романов
+2 _PATR Павлович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Николай I Павлович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1796
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Николай I Павлович Романов
+3 QUAY high
+1 DEAT
+2 DATE 1855
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Николай I Павлович Романов
+3 QUAY high
+1 NOTE Николай I Павлович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1796. Дата смерти указана как 1855. Документированные союзы в пределах дерева связывают эту п
+2 CONC ерсону с Александра Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактами и общественно значим
+2 CONC ыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, п
+2 CONC ортретов или порядка престолонаследия.
+1 FAMS @F89E26CF015A5@
+1 EVEN Император Всероссийский
+2 TYPE Вступление на престол
+2 DATE 26 DEC 1825
+2 NOTE Старый стиль: 14 декабря 1825.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Вступление Николая I на престол
+3 QUAY high
+0 @IBED94604BCC4@ INDI
+1 _FTSID 650344E4-AF11-5108-B523-BE60E0A6E7DD
+1 NAME Александра /Романова/
+2 TYPE religious
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Фёдоровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Фёдоровна
+3 QUAY high
+1 NAME Фридерика Луиза Шарлотта Вильгельмина /Прусская/
+2 TYPE birth
+2 GIVN Фридерика Луиза Шарлотта Вильгельмина
+2 SURN Прусская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Фридерика Луиза Шарлотта Вильгельмина Прусская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 13 JUL 1798
+2 PLAC Шарлоттенбург
+3 MAP
+4 LATI N52.521111
+4 LONG E13.295833
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57207
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q154996
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 1 NOV 1860
+2 PLAC Царское Село
+3 MAP
+4 LATI N59.723333
+4 LONG E30.415833
+2 NOTE Старый стиль: 20 октября 1860.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57207
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1621200
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57207
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ; консорт
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57207
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александра Фёдоровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданно
+2 CONC го состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожде
+2 CONC ния указана как 13 JUL 1798, место — Шарлоттенбург. Датасмерти указана как 1 NOV 1860, место — Царское Село. Документир
+2 CONC ованные союзы в пределах дерева связывают эту персону с Николай I Павлович Романов. Публичные биографические и
+2 CONC сточники указывают следующие занятия или общественные роли: аристократ; консорт. Сводка ограничена цитируем
+2 CONC ыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дере
+2 CONC ва; отсутствующиеданные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexandra-i-portrait.jpg
+2 FORM JPEG
+1 FAMS @F89E26CF015A5@
+0 @I2FE56CB956DF@ INDI
+1 _FTSID 25FE0CFD-3560-533A-A795-A39452FBC3ED
+1 NAME Александр /Романов/
+2 GIVN Александр
+2 SURN Романов
+2 _PATR Николаевич
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александр II Николаевич Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1818
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александр II Николаевич Романов
+3 QUAY high
+1 DEAT
+2 DATE 1881
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александр II Николаевич Романов
+3 QUAY high
+1 NOTE Александр II Николаевич Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 1818. Дата смерти указана как1881. В пределах заданного состава родителями показаны Ник
+2 CONC олай I Павлович Романов и Александра Фёдоровна. Документированные союзы в пределах дерева связывают эту перс
+2 CONC ону с Мария Александровна, Екатерина Михайловна Долгорукова. Сводка ограничена цитируемыми генеалогическим
+2 CONC и фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие да
+2 CONC нные не выводятся изтитулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexander-ii-portrait.jpg
+2 FORM JPEG
+1 FAMS @F4F47ED76A1C7@
+1 FAMS @F9EDAF92918B5@
+1 FAMS @F592330D083A3@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID FCA6BE46-627F-5E17-ABBB-53FEF95D1F82
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Александр II Николаевич Романов
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID 55F58848-0731-5430-8D0F-22733134B6B9
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Александр II Николаевич Романов
+4 QUAY high
+1 EVEN Император Всероссийский
+2 TYPE Вступление на престол
+2 DATE 2 MAR 1855
+2 NOTE Старый стиль: 18 февраля 1855.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Вступление Александра II на престол
+3 QUAY high
+0 @ICE53D3A0443A@ INDI
+1 _FTSID F7F46E19-4DC6-59E0-8EEE-79301076B98A
+1 NAME Мария /Романова/
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1819
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Николаевна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1876
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Николаевна Романова
+3 QUAY high
+1 NOTE Мария Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1819. Дата смерти указана как 1876. Впределах заданного состава родителями показаны Николай I П
+2 CONC авлович Романов и Александра Фёдоровна. Документированные союзы в пределахдерева связывают эту персону с Ма
+2 CONC ксимилиан Лейхтенбергский, Григорий Александрович Строганов. Сводка ограничена цитируемыми генеалогически
+2 CONC ми фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие д
+2 CONC анные не выводятсяиз титулов, портретов или порядка престолонаследия.
+1 FAMS @F51EE70A3F1DF@
+1 FAMS @FF89CFFE78CD2@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID 362FC841-01A7-5D08-8978-DE175F4C4C6E
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Мария Николаевна Романова
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID ED09A576-92FC-54F3-9D93-5ECEE2F6E226
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Мария Николаевна Романова
+4 QUAY high
+0 @I757BE4AAB844@ INDI
+1 _FTSID A63F4A05-E6B7-5453-B4A2-05DF4DBFBC40
+1 NAME Ольга /Романова/
+2 GIVN Ольга
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1822
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q406708
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 DEAT
+2 DATE 1892
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q406708
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1822. Дата смерти указана как 1892. Впределах заданного состава родителями показаны Николай I П
+2 CONC авлович Романов и Александра Фёдоровна. Документированные союзы в пределахдерева связывают эту персону с Ка
+2 CONC рл I Вюртембергский. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимымисведени
+2 CONC ями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портретов ил
+2 CONC и порядка престолонаследия.
+1 FAMS @FE070C26273FE@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID B2370BB4-5463-53BB-97E0-3B0A90765ED9
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Ольга Николаевна Романова
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID B2275B03-FEA4-5EC9-9447-47CCA9AF4BE6
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Ольга Николаевна Романова
+4 QUAY high
+0 @I825F3B2B87C3@ INDI
+1 _FTSID 6AC4F1D8-CA87-50E9-AC20-C3A96EE412A8
+1 NAME Александра /Романова/
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1825
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Николаевна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1844
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Николаевна Романова
+3 QUAY high
+1 NOTE Александра Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 1825. Дата смерти указана как 1844. В пределах заданного состава родителями показаны Ник
+2 CONC олай I Павлович Романов и Александра Фёдоровна. Документированные союзы в пределах дерева связывают эту перс
+2 CONC ону с Фридрих Вильгельм Гессен-Кассельский. Сводка ограничена цитируемыми генеалогическими фактами иобщест
+2 CONC венно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся и
+2 CONC з титулов, портретов или порядка престолонаследия.
+1 FAMS @FF05619095FCF@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID 56B3F081-93D8-5A13-A7AB-21DC6D9700C7
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Александра Николаевна Романова
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID 443A2C57-48B9-5DFF-866B-8808E73A603D
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Александра Николаевна Романова
+4 QUAY high
+0 @IE98B72A6FCC2@ INDI
+1 _FTSID 9AC2406A-C2D1-543B-97C7-26B1D04396E8
+1 NAME Константин /Романов/
+2 GIVN Константин
+2 SURN Романов
+2 _PATR Николаевич
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Константин Николаевич Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 21 SEP 1827
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 9 сентября 1827.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Константин Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q446724
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 25 JAN 1892
+2 PLAC Павловск
+3 MAP
+4 LATI N59.683333
+4 LONG E30.433333
+2 NOTE Старый стиль: 13 января 1892.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Константин Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q446724
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q177888
+1 BURI
+2 PLAC Великокняжеская усыпальница
+3 MAP
+4 LATI N59.950621
+4 LONG E30.317357
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Константин Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q446724
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3301865
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU военнослужащий; монарх
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Константин Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q446724
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Константин Николаевич Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 21 SEP 1827, место — Санкт-Петербург. Дата смерти указана как 25 JAN 1892, место — Павловск. В п
+2 CONC ределах заданного состава родителями показаны Николай I Павлович Романов и Александра Фёдоровна. Документир
+2 CONC ованные союзы в пределах дерева связывают эту персону с Александра Иосифовна. Публичные биографическиеисто
+2 CONC чники указывают следующие занятия или общественные роли: военнослужащий; монарх. Сводка ограничена цитируем
+2 CONC ыми генеалогическимифактами и общественно значимыми сведениями, необходимыми для понимания структуры дере
+2 CONC ва; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-konstantin-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3511665C5003@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID 746CC851-FC96-51E0-8EBE-A4660193F79F
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Константин Николаевич Романов
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID A4159167-DF13-5951-B215-6A3ACBC42EA2
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Константин Николаевич Романов
+4 QUAY high
+0 @IEECB1BF4FBA7@ INDI
+1 _FTSID 055F4604-583C-5A1B-8BA1-9B7DAA0962F5
+1 NAME Николай /Романов/
+2 GIVN Николай
+2 SURN Романов
+2 _PATR Николаевич
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Николай Николаевич Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1831
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Николай Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q110832887
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 DEAT
+2 DATE 1891
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Николай Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q110832887
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Николай Николаевич Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 1831. Дата смерти указана как 1891.В пределах заданного состава родителями показаны Никол
+2 CONC ай I Павлович Романов и Александра Фёдоровна. Документированные союзы в пределах дерева связывают эту персон
+2 CONC у с Александра Петровна. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимымисве
+2 CONC дениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портрет
+2 CONC ов или порядка престолонаследия.
+1 FAMS @FD90F6FB69D3A@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID 08017F2E-C821-544F-BECF-7CB6B6680434
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Николай Николаевич Романов
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID 74FD7E00-235E-5BA4-B182-987E419023AB
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Николай Николаевич Романов
+4 QUAY high
+0 @I93DEA5880386@ INDI
+1 _FTSID 59A4B381-71F8-5FE9-8270-47D9546583E4
+1 NAME Михаил /Романов/
+2 GIVN Михаил
+2 SURN Романов
+2 _PATR Николаевич
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Михаил Николаевич Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 13 OCT 1832
+2 PLAC Петергоф
+3 MAP
+4 LATI N59.883330
+4 LONG E29.900000
+2 NOTE Старый стиль: 1 октября 1832.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Михаил Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q161199
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q178310
+1 DEAT
+2 DATE 18 DEC 1909
+2 PLAC Канны
+3 MAP
+4 LATI N43.552500
+4 LONG E7.021389
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Михаил Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q161199
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q39984
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Михаил Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q161199
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU военнослужащий; политик
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Михаил Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q161199
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Михаил Николаевич Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 13 OCT 1832, место — Петергоф. Дата смерти указана как 18 DEC 1909, место — Канны. В пределах заданн
+2 CONC ого состава родителями показаны Николай I Павлович Романов и Александра Фёдоровна. Документированные союзы в п
+2 CONC ределах дерева связывают эту персону с Ольга Фёдоровна. Публичные биографические источники указывают следу
+2 CONC ющие занятия или общественные роли: военнослужащий; политик. Сводка ограничена цитируемыми генеалогическим
+2 CONC и фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие да
+2 CONC нные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-mikhail-portrait.jpg
+2 FORM JPEG
+1 FAMS @F59FD6E640AFA@
+1 FAMC @F89E26CF015A5@
+2 PEDI birth
+2 _PLINK @I70C65A2F29C9@
+3 _FTSID 9670C6B0-FB0D-542F-B801-65B9963AF001
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай I Павлович Романов is recorded as biological parent of Михаил Николаевич Романов
+4 QUAY high
+2 _PLINK @IBED94604BCC4@
+3 _FTSID D3116E0F-CD04-5E5B-BC5C-C06D241DD62A
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Михаил Николаевич Романов
+4 QUAY high
+0 @I345001341D0F@ INDI
+1 _FTSID CB479324-3EDD-585F-80BF-D113AC0870BE
+1 NAME Мария /Романова/
+2 TYPE religious
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Александровна
+3 QUAY high
+1 NAME Максимилиана Вильгельмина Августа София Мария /Гессенская/
+2 TYPE birth
+2 GIVN Максимилиана Вильгельмина Августа София Мария
+2 SURN Гессенская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Максимилиана Вильгельмина Августа София Мария Гессенская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 8 AUG 1824
+2 PLAC Дармштадт
+3 MAP
+4 LATI N49.866667
+4 LONG E8.650000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Александровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q155585
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2973
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 3 JUN 1880
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 22 мая 1880.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Александровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q155585
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Мария Александровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q155585
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU консорт
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Мария Александровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q155585
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Мария Александровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданног
+2 CONC о состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожден
+2 CONC ия указана как 8 AUG 1824, место — Дармштадт. Дата смертиуказана как 3 JUN 1880, место — Санкт-Петербург. Документиров
+2 CONC анные союзы в пределах дерева связывают эту персону с Александр II НиколаевичРоманов. Публичные биографическ
+2 CONC ие источники указывают следующие занятия или общественные роли: консорт. Сводка ограничена цитируемыми гене
+2 CONC алогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсу
+2 CONC тствующие данные невыводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-maria-alexandrovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F4F47ED76A1C7@
+0 @I37D83A07D394@ INDI
+1 _FTSID 207B71E0-0695-5891-8BD6-EA30DEF22E00
+1 NAME Екатерина /Долгорукова/
+2 GIVN Екатерина
+2 SURN Долгорукова
+2 _PATR Михайловна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Екатерина Михайловна Долгорукова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 NOV 1847
+2 PLAC Москва
+3 MAP
+4 LATI N55.750556
+4 LONG E37.617500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Екатерина Михайловна Долгорукова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q242892
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q649
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 15 FEB 1922
+2 PLAC Ницца
+3 MAP
+4 LATI N43.701944
+4 LONG E7.268333
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Екатерина Михайловна Долгорукова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q242892
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q33959
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Русское кладбище Кокад
+3 MAP
+4 LATI N43.678333
+4 LONG E7.216111
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Екатерина Михайловна Долгорукова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q242892
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2464410
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU фрейлина
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Екатерина Михайловна Долгорукова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q242892
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC Смольный институт благородных девиц
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Екатерина Михайловна Долгорукова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q242892
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Екатерина Михайловна Долгорукова представлен(а) в этом тщательно ограниченном родословном пакете как персо
+2 CONC на из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках паке
+2 CONC та дата рождения указана как 2 NOV 1847, место — Москва. Дата смерти указана как 15 FEB 1922, место — Ницца. Документиро
+2 CONC ванные союзы в пределах дерева связывают эту персону с Александр II НиколаевичРоманов. Публичные биографичес
+2 CONC кие источники указывают следующие занятия или общественные роли: фрейлина. Отмеченное образование: Смольный и
+2 CONC нститут благородных девиц. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимыми с
+2 CONC ведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портр
+2 CONC етов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-dolgorukova-portrait.jpg
+2 FORM JPEG
+1 FAMS @F9EDAF92918B5@
+1 FAMS @F592330D083A3@
+0 @I4C83CE194C38@ INDI
+1 _FTSID 10FF813A-0A36-564C-B81B-00C2836F6803
+1 NAME Максимилиан /Богарне/
+2 GIVN Максимилиан
+2 SURN Богарне
+2 _PATR Иосифович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Максимилиан Лейхтенбергский
+3 QUAY high
+1 NAME Максимилиан Жозеф Эжен Огюст Наполеон /де Богарне/
+2 TYPE birth
+2 GIVN Максимилиан Жозеф Эжен Огюст Наполеон
+2 SURN де Богарне
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Максимилиан Жозеф Эжен Огюст Наполеон де Богарне
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 2 OCT 1817
+2 PLAC Мюнхен
+3 MAP
+4 LATI N48.137500
+4 LONG E11.575000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Максимилиан Лейхтенбергский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q442284
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1726
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 1 NOV 1852
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 20 октября 1852.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Максимилиан Лейхтенбергский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q442284
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 BURI
+2 PLAC Мальтийская капелла (Санкт-Петербург)
+3 MAP
+4 LATI N59.931100
+4 LONG E30.332100
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Максимилиан Лейхтенбергский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q442284
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2957294
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU ботаник; коллекционер произведений искусства
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Максимилиан Лейхтенбергский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q442284
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Максимилиан Лейхтенбергский представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёхпоколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 2 OCT 1817, место — Мюнхен. Дата смерти указана как 1 NOV 1852, место — Санкт-Петербург. Документир
+2 CONC ованные союзы в пределах дерева связывают эту персону с Мария Николаевна Романова. Публичные биографические и
+2 CONC сточники указывают следующие занятия или общественные роли: ботаник; коллекционер произведений искусства. С
+2 CONC водка ограничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми дл
+2 CONC я понимания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолон
+2 CONC аследия.
+1 OBJE
+2 FILE romanov-maximilian-portrait.jpg
+2 FORM JPEG
+1 FAMS @F51EE70A3F1DF@
+0 @IB3CF8ED204B5@ INDI
+1 _FTSID 8A671595-A48F-5C59-87FF-7ADAF73650CA
+1 NAME Григорий /Строганов/
+2 GIVN Григорий
+2 SURN Строганов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Григорий Александрович Строганов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 16 JUN 1824
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 4 июня 1824.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Григорий Александрович Строганов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3116663
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 6 FEB 1878
+2 PLAC Москва
+3 MAP
+4 LATI N55.750556
+4 LONG E37.617500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Григорий Александрович Строганов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3116663
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q649
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Сергиева Приморская пустынь
+3 MAP
+4 LATI N59.853333
+4 LONG E30.090000
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Григорий Александрович Строганов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3116663
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q4417045
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU шталмейстер
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Григорий Александрович Строганов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3116663
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Григорий Александрович Строганов представлен(а) в этом тщательно ограниченном родословном пакете как персо
+2 CONC на из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках паке
+2 CONC та дата рождения указана как 16 JUN 1824, место — Санкт-Петербург. Дата смерти указана как 6 FEB 1878, место — Москва. Д
+2 CONC окументированные союзы в пределах дерева связывают эту персону с Мария Николаевна Романова. Публичные биогр
+2 CONC афические источники указывают следующие занятия или общественные роли: шталмейстер. Сводка ограниченацитир
+2 CONC уемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры д
+2 CONC ерева; отсутствующиеданные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-grigori-stroganov-portrait.jpg
+2 FORM JPEG
+1 FAMS @FF89CFFE78CD2@
+0 @I5F73E1E01D0D@ INDI
+1 _FTSID 79AAA87F-6384-5212-A8A7-30154390A419
+1 NAME Карл /Вюртембергский/
+2 GIVN Карл
+2 SURN Вюртембергский
+2 _PATR Фридрихович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Карл I Вюртембергский
+3 QUAY high
+1 NAME Карл Фридрих Александр /Вюртембергский/
+2 TYPE birth
+2 GIVN Карл Фридрих Александр
+2 SURN Вюртембергский
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Карл Фридрих Александр Вюртембергский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 6 MAR 1823
+2 PLAC Штутгарт
+3 MAP
+4 LATI N48.777500
+4 LONG E9.180000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Карл I Вюртембергский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57440
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1022
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 6 OCT 1891
+2 PLAC Штутгарт
+3 MAP
+4 LATI N48.777500
+4 LONG E9.180000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Карл I Вюртембергский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57440
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1022
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Старый замок
+3 MAP
+4 LATI N48.777200
+4 LONG E9.179170
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Карл I Вюртембергский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57440
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q384841
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU политик
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Карл I Вюртембергский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57440
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC Тюбингенский университет; Берлинский университет
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Карл I Вюртембергский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57440
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Карл I Вюртембергский представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданно
+2 CONC го состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожде
+2 CONC ния указана как 6 MAR 1823, место — Штутгарт. Дата смертиуказана как 6 OCT 1891, место — Штутгарт. Документированные с
+2 CONC оюзы в пределах дерева связывают эту персону с Ольга Николаевна Романова. Публичные биографические источник
+2 CONC и указывают следующие занятия или общественные роли: политик. Отмеченное образование: Тюбингенский универси
+2 CONC тет; Берлинский университет. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимым
+2 CONC и сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, пор
+2 CONC третов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-karl-wurttemberg-portrait.jpg
+2 FORM JPEG
+1 FAMS @FE070C26273FE@
+0 @I9D8A6BC63EEB@ INDI
+1 _FTSID 1D30909A-EA18-545A-994B-709AA82988E7
+1 NAME Фридрих Вильгельм /Гессен-Кассельский/
+2 GIVN Фридрих Вильгельм
+2 SURN Гессен-Кассельский
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Фридрих Вильгельм Гессен-Кассельский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 26 NOV 1820
+2 PLAC Копенгаген
+3 MAP
+4 LATI N55.676111
+4 LONG E12.568889
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Фридрих Вильгельм Гессен-Кассельский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q60744
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1748
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 14 OCT 1884
+2 PLAC Франкфурт-на-Майне
+3 MAP
+4 LATI N50.110556
+4 LONG E8.682222
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Фридрих Вильгельм Гессен-Кассельский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q60744
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1794
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU офицер
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Фридрих Вильгельм Гессен-Кассельский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q60744
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Фридрих Вильгельм Гессен-Кассельский представлен(а) в этом тщательно ограниченном родословном пакете как пе
+2 CONC рсона из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках п
+2 CONC акета дата рождения указана как 26 NOV 1820, место — Копенгаген. Дата смерти указана как 14 OCT 1884, место — Франкфурт-
+2 CONC на-Майне. Документированные союзы в пределах дерева связывают эту персону с Александра Николаевна Романова. П
+2 CONC убличные биографические источники указывают следующие занятия или общественные роли: офицер. Сводкаогранич
+2 CONC ена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания ст
+2 CONC руктуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-friedrich-hesse-portrait.jpg
+2 FORM JPEG
+1 FAMS @FF05619095FCF@
+0 @ID5159EAC3194@ INDI
+1 _FTSID 3AD39625-47C6-5DCD-88F1-B5BCABD02FDD
+1 NAME Александра /Романова/
+2 TYPE religious
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Иосифовна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Иосифовна
+3 QUAY high
+1 NAME Александра Фридерика Генриетта Паулина Марианна Елизавета /Саксен-Альтенбургская/
+2 TYPE birth
+2 GIVN Александра Фридерика Генриетта Паулина Марианна Елизавета
+2 SURN Саксен-Альтенбургская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Александра Фридерика Генриетта Паулина Марианна Елизавета Саксен-Альтенбургская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 8 JUL 1830
+2 PLAC Альтенбург
+3 MAP
+4 LATI N50.985000
+4 LONG E12.433333
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Иосифовна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57950
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q15976
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 6 JUL 1911
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 23 июня 1911.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Иосифовна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57950
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 BURI
+2 PLAC Великокняжеская усыпальница
+3 MAP
+4 LATI N59.950621
+4 LONG E30.317357
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александра Иосифовна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57950
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3301865
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ; великий князь
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александра Иосифовна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q57950
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александра Иосифовна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданно
+2 CONC го состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожде
+2 CONC ния указана как 8 JUL 1830, место — Альтенбург. Дата смерти указана как 6 JUL 1911, место — Санкт-Петербург. Документир
+2 CONC ованные союзы в пределах дерева связывают эту персону с Константин Николаевич Романов. Публичные биографиче
+2 CONC ские источники указывают следующие занятия или общественные роли: аристократ; великий князь. Сводка огранич
+2 CONC ена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания ст
+2 CONC руктуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexandra-iosifovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3511665C5003@
+0 @I4FA2D0E1EAC8@ INDI
+1 _FTSID A7C92C73-EBED-5521-8A6C-D2FFFE4244B2
+1 NAME Александра /Романова/
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Петровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Петровна
+3 QUAY high
+1 NAME Александра Фридерика Вильгельмина /Ольденбургская/
+2 TYPE birth
+2 GIVN Александра Фридерика Вильгельмина
+2 SURN Ольденбургская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Александра Фридерика Вильгельмина Ольденбургская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 MAY 1838
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 20 апреля 1838.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Петровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58001
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 13 APR 1900
+2 PLAC Покровский монастырь
+3 MAP
+4 LATI N50.458300
+4 LONG E30.493600
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Петровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58001
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3406810
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Лукьяновское кладбище
+3 MAP
+4 LATI N50.467778
+4 LONG E30.453333
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александра Петровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58001
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2328791
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU монахиня
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александра Петровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58001
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александра Петровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданног
+2 CONC о состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожден
+2 CONC ия указана как 2 MAY 1838, место — Санкт-Петербург. Датасмерти указана как 13 APR 1900, место — Покровский монастырь. Д
+2 CONC окументированные союзы в пределах дерева связывают эту персону с Николай Николаевич Романов. Публичные биог
+2 CONC рафические источники указывают следующие занятия или общественные роли: монахиня. Сводка ограничена цитиру
+2 CONC емыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры де
+2 CONC рева; отсутствующиеданные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexandra-petrovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD90F6FB69D3A@
+0 @I58748D5C652A@ INDI
+1 _FTSID F8F428C7-FA34-54B8-A2CE-6E46D94C1D36
+1 NAME Ольга /Романова/
+2 TYPE religious
+2 GIVN Ольга
+2 SURN Романова
+2 _PATR Фёдоровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Фёдоровна
+3 QUAY high
+1 NAME Цецилия Августа /Баденская/
+2 TYPE birth
+2 GIVN Цецилия Августа
+2 SURN Баденская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Цецилия Августа Баденская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 20 SEP 1839
+2 PLAC Карлсруэ
+3 MAP
+4 LATI N49.016667
+4 LONG E8.400000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q234055
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1040
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 12 APR 1891
+2 PLAC Харьков
+3 MAP
+4 LATI N49.992500
+4 LONG E36.231111
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q234055
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q42308
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ольга Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q234055
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ольга Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q234055
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Фёдоровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданного со
+2 CONC става четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рождения у
+2 CONC казана как 20 SEP 1839, место — Карлсруэ. Дата смерти указана как 12 APR 1891, место — Харьков. Документированные союзы в п
+2 CONC ределах дерева связывают эту персону с Михаил Николаевич Романов. Публичные биографические источники указы
+2 CONC вают следующие занятия или общественные роли: аристократ. Сводка ограничена цитируемыми генеалогическими ф
+2 CONC актами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данн
+2 CONC ые не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-olga-feodorovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F59FD6E640AFA@
+0 @IB0D9B44A2095@ INDI
+1 _FTSID B6B5C8F2-A31E-5A43-9259-46A8E85FEF16
+1 NAME Александра /Романова/
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Александровна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1842
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Александровна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1849
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Александровна Романова
+3 QUAY high
+1 NOTE Александра Александровна Романова представлен(а) в этом тщательно ограниченном родословном пакете как перс
+2 CONC она из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пак
+2 CONC ета дата рождения указана как 1842. Дата смерти указана как 1849. В пределах заданного состава родителями показан
+2 CONC ы Александр II Николаевич Романов и Мария Александровна. Сводка ограничена цитируемыми генеалогическими фак
+2 CONC тами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные н
+2 CONC е выводятся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID EE8569A3-06BF-5AF8-A353-F3F85C6BCAB2
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Александра Александровна Романова
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID F4BFA178-B46F-517F-8F7D-A73D1D5549A4
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Александра Александровна Романова
+4 QUAY high
+0 @I06A720091FA6@ INDI
+1 _FTSID AAD61426-5461-5AFA-9A87-BFA6E6EDA701
+1 NAME Николай /Романов/
+2 GIVN Николай
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Николай Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1843
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Николай Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q1990701
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 DEAT
+2 DATE 1865
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Николай Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q1990701
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Николай Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 1843. Дата смерти указана как1865. В пределах заданного состава родителями показаны Але
+2 CONC ксандр II Николаевич Романов и Мария Александровна. Сводка ограничена цитируемыми генеалогическими фактами и о
+2 CONC бщественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данныене вывод
+2 CONC ятся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 5AD60AC7-A7EB-5909-9661-9B337A7F153C
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Николай Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID 1232CF75-E2F7-5375-8BF1-E4E8AAD5F489
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Николай Александрович Романов
+4 QUAY high
+0 @I703E50247D71@ INDI
+1 _FTSID E8696575-A60D-54B6-866A-DB8B6030F204
+1 NAME Александр /Романов/
+2 GIVN Александр
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александр III Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1845
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александр III Александрович Романов
+3 QUAY high
+1 DEAT
+2 DATE 1894
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александр III Александрович Романов
+3 QUAY high
+1 NOTE Александр III Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как перс
+2 CONC она из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пак
+2 CONC ета дата рождения указана как 1845. Дата смерти указана как 1894. В пределах заданного состава родителями показан
+2 CONC ы Александр II Николаевич Романов и Мария Александровна. Документированные союзы в пределах дерева связывают э
+2 CONC ту персону с Мария Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимы
+2 CONC ми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, по
+2 CONC ртретов или порядкапрестолонаследия.
+1 FAMS @F901CD6776113@
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 423D3AA9-36B7-575C-B2B8-BAA96CAC3944
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Александр III Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID 7DC724BA-21C4-5577-AE49-62AB26DC71C4
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Александр III Александрович Романов
+4 QUAY high
+1 EVEN Император Всероссийский
+2 TYPE Вступление на престол
+2 DATE 13 MAR 1881
+2 NOTE Старый стиль: 1 марта 1881.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Вступление Александра III на престол
+3 QUAY high
+0 @I34B2FBF96995@ INDI
+1 _FTSID A8180E8D-BB3F-5440-BD01-7281F286296D
+1 NAME Владимир /Романов/
+2 GIVN Владимир
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Владимир Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 22 APR 1847
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 10 апреля 1847.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Владимир Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q312819
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 17 FEB 1909
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 4 февраля 1909.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Владимир Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q312819
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 BURI
+2 PLAC Великокняжеская усыпальница
+3 MAP
+4 LATI N59.950621
+4 LONG E30.317357
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Владимир Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q312819
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3301865
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU государственный деятель; военнослужащий
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Владимир Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q312819
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Владимир Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 22 APR 1847, место — Санкт-Петербург. Дата смерти указана как 17 FEB 1909, место — Санкт-Петерб
+2 CONC ург. В пределах заданного состава родителями показаны Александр II Николаевич Романов и Мария Александровна. Д
+2 CONC окументированные союзы в пределах дерева связывают эту персону с Мария Павловна. Публичные биографические и
+2 CONC сточники указывают следующие занятия или общественные роли: государственный деятель; военнослужащий. Сводк
+2 CONC а ограничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для пон
+2 CONC имания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаслед
+2 CONC ия.
+1 OBJE
+2 FILE romanov-vladimir-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA71B00663AF8@
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 9106CDDF-BA99-5D52-BF43-E014906B47DD
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Владимир Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID B192A3BA-8843-5904-A668-023FC75519A0
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Владимир Александрович Романов
+4 QUAY high
+0 @I1B665507C48F@ INDI
+1 _FTSID E794E706-0109-5943-8482-BAB0F83C99F6
+1 NAME Алексей /Романов/
+2 GIVN Алексей
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Алексей Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 2 JAN 1850
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 21 декабря 1849.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Алексей Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q315726
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 1 NOV 1908
+2 PLAC Париж
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Алексей Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q315726
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q90
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Великокняжеская усыпальница
+3 MAP
+4 LATI N59.950621
+4 LONG E30.317357
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Алексей Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q315726
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3301865
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU военно-морской офицер; аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Алексей Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q315726
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Алексей Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 2 JAN 1850, место — Санкт-Петербург. Дата смерти указана как 1 NOV 1908, место — Париж. В преде
+2 CONC лах заданного состава родителями показаны Александр II Николаевич Романов и Мария Александровна. Публичные б
+2 CONC иографические источники указывают следующие занятия или общественные роли: военно-морской офицер; аристокр
+2 CONC ат. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимым
+2 CONC и для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престо
+2 CONC лонаследия.
+1 OBJE
+2 FILE romanov-alexei-portrait.jpg
+2 FORM JPEG
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID AE675B91-9744-58C7-85C2-2BCC938DCB70
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Алексей Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID 7E85070F-D9DE-51C7-BF7D-50B6D7CA6A4B
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Алексей Александрович Романов
+4 QUAY high
+0 @I9E9C9564A476@ INDI
+1 _FTSID B23FC1E3-9CE3-5530-9B8F-9274C0FFC807
+1 NAME Мария /Романова/
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Александровна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1853
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Александровна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1920
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Александровна Романова
+3 QUAY high
+1 NOTE Мария Александровна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 1853. Дата смерти указана как 1920. В пределах заданного состава родителями показаны Алекс
+2 CONC андр II Николаевич Романов и Мария Александровна. Документированные союзы в пределах дерева связывают эту пе
+2 CONC рсону с Альфред Саксен-Кобург-Готский. Сводка ограничена цитируемыми генеалогическими фактами и общественн
+2 CONC о значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из т
+2 CONC итулов, портретов илипорядка престолонаследия.
+1 FAMS @FD864447C812E@
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 0125731C-6EC1-5BA3-9797-E1E5A527FCAF
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Мария Александровна Романова
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID A85B0CA6-1123-503B-A0EF-9310A51D1688
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Мария Александровна Романова
+4 QUAY high
+0 @I75A9D958048A@ INDI
+1 _FTSID 258DA978-CD78-5E36-B59B-FC00CC151DB5
+1 NAME Сергей /Романов/
+2 GIVN Сергей
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Сергей Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 29 APR 1857
+2 PLAC Царское Село
+3 MAP
+4 LATI N59.723333
+4 LONG E30.415833
+2 NOTE Старый стиль: 17 апреля 1857.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Сергей Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q248900
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1621200
+1 DEAT
+2 DATE 4 FEB 1905
+2 PLAC Москва
+3 MAP
+4 LATI N55.750556
+4 LONG E37.617500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Сергей Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q248900
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q649
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Новоспасский монастырь
+3 MAP
+4 LATI N55.732200
+4 LONG E37.656200
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Сергей Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q248900
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2534058
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU политик; военнослужащий
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Сергей Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q248900
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Сергей Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 29 APR 1857, место — Царское Село. Дата смерти указана как 4 FEB 1905, место — Москва. В пределах з
+2 CONC аданного состава родителями показаны Александр II Николаевич Романов и Мария Александровна. Документированн
+2 CONC ые союзы в пределах дерева связывают эту персону с Елизавета Фёдоровна. Публичные биографические источники у
+2 CONC казывают следующие занятия или общественные роли: политик; военнослужащий. Сводка ограничена цитируемыми ге
+2 CONC неалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; от
+2 CONC сутствующие данные не выводятся из титулов,портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-sergei-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC3702234DD12@
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 3876FDC6-67A1-50CA-9CA2-FE394D7B6D37
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Сергей Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID CC2C43AE-452B-5F7E-B710-B6770B172835
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Сергей Александрович Романов
+4 QUAY high
+0 @IECB8F314660E@ INDI
+1 _FTSID 36C475B8-D08E-5C08-B202-94737AA4C02C
+1 NAME Павел /Романов/
+2 GIVN Павел
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Павел Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1860
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Павел Александрович Романов
+3 QUAY high
+1 DEAT
+2 DATE 1919
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Павел Александрович Романов
+3 QUAY high
+1 NOTE Павел Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёхпоколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1860. Дата смерти указана как 1919. В пределах заданного состава родителями показаны Алексан
+2 CONC др II Николаевич Романов и Мария Александровна. Документированные союзы в пределах дерева связывают эту перс
+2 CONC ону с Александра Георгиевна, Ольга Валериановна Палей. Сводка ограничена цитируемыми генеалогическими факт
+2 CONC ами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные н
+2 CONC е выводятся из титулов, портретов или порядка престолонаследия.
+1 FAMS @FA157657F9E3C@
+1 FAMS @F2FC666440931@
+1 FAMC @F4F47ED76A1C7@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 3E8EABC3-4A8C-5F98-B9E4-D5CA1A0404FF
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Павел Александрович Романов
+4 QUAY high
+2 _PLINK @I345001341D0F@
+3 _FTSID 3469E2B8-CD13-56E8-85FA-ED5CF5C4EC4D
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Александровна is recorded as biological parent of Павел Александрович Романов
+4 QUAY high
+0 @I4BDE2CB9D6D9@ INDI
+1 _FTSID BD19DC6A-A931-5F8B-AEFD-1EF33B3A1B9C
+1 NAME Мария /Романова/
+2 TYPE religious
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Павловна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Павловна
+3 QUAY high
+1 NAME Мария Александрина Элизабета Элеонора /Мекленбург-Шверинская/
+2 TYPE birth
+2 GIVN Мария Александрина Элизабета Элеонора
+2 SURN Мекленбург-Шверинская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Мария Александрина Элизабета Элеонора Мекленбург-Шверинская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 MAY 1854
+2 PLAC Людвигслюст
+3 MAP
+4 LATI N53.333250
+4 LONG E11.502350
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Павловна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q231463
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q156119
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 6 SEP 1920
+2 PLAC Контрексевиль
+3 MAP
+4 LATI N48.184444
+4 LONG E5.895556
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Павловна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q231463
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q633628
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Вогезы
+3 MAP
+4 LATI N48.166667
+4 LONG E6.416667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Мария Павловна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q231463
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3105
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Мария Павловна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q231463
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Мария Павловна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданного сос
+2 CONC тава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рождения ук
+2 CONC азана как 2 MAY 1854, место — Людвигслюст. Дата смерти указана как 6 SEP 1920, место — Контрексевиль. Документированны
+2 CONC е союзы в пределах дерева связывают эту персону с Владимир Александрович Романов. Публичные биографические и
+2 CONC сточники указывают следующие занятия или общественные роли: аристократ. Сводка ограничена цитируемымигенеа
+2 CONC логическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсут
+2 CONC ствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-maria-pavlovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA71B00663AF8@
+0 @IC904AE1B1F0F@ INDI
+1 _FTSID E673F13F-1ECF-50B7-B6E0-D07376980246
+1 NAME Альфред /Саксен-Кобург-Готский/
+2 GIVN Альфред
+2 SURN Саксен-Кобург-Готский
+2 _PATR Эрнестович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Альфред Саксен-Кобург-Готский
+3 QUAY high
+1 NAME Альфред Эрнест Альберт Великобританский //
+2 TYPE birth
+2 GIVN Альфред Эрнест Альберт Великобританский
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Альфред Эрнест Альберт Великобританский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 6 AUG 1844
+2 PLAC Виндзорский замок
+3 MAP
+4 LATI N51.483889
+4 LONG W0.604444
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Альфред Саксен-Кобург-Готский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q158143
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q42646
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 30 JUL 1900
+2 PLAC дворец Розенау
+3 MAP
+4 LATI N50.298100
+4 LONG E11.022500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Альфред Саксен-Кобург-Готский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q158143
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q449510
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Кобург
+3 MAP
+4 LATI N50.258469
+4 LONG E10.957869
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Альфред Саксен-Кобург-Готский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q158143
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q14821
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU филателист; политик
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Альфред Саксен-Кобург-Готский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q158143
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Альфред Саксен-Кобург-Готский представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 6 AUG 1844, место — Виндзорскийзамок. Дата смерти указана как 30 JUL 1900, место — дворец Розе
+2 CONC нау. Документированные союзы в пределах дерева связывают эту персону с МарияАлександровна Романова. Публичн
+2 CONC ые биографические источники указывают следующие занятия или общественные роли: филателист; политик. Сводка о
+2 CONC граничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для поним
+2 CONC ания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия
+2 CONC .
+1 OBJE
+2 FILE romanov-alfred-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD864447C812E@
+0 @I2A151BE84760@ INDI
+1 _FTSID 40BA66C1-33DF-5987-8E3C-0D20C3C3B527
+1 NAME Елизавета /Романова/
+2 TYPE religious
+2 GIVN Елизавета
+2 SURN Романова
+2 _PATR Фёдоровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Елизавета Фёдоровна
+3 QUAY high
+1 NAME Елизавета Александра Луиза Алиса /Гессен-Дармштадтская/
+2 TYPE birth
+2 GIVN Елизавета Александра Луиза Алиса
+2 SURN Гессен-Дармштадтская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Елизавета Александра Луиза Алиса Гессен-Дармштадтская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1 NOV 1864
+2 PLAC Дармштадт
+3 MAP
+4 LATI N49.866667
+4 LONG E8.650000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Елизавета Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58063
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2973
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 18 JUL 1918
+2 PLAC Алапаевск
+3 MAP
+4 LATI N57.850000
+4 LONG E61.700000
+2 NOTE Старый стиль: 5 июля 1918.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Елизавета Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58063
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q103212
+1 BURI
+2 PLAC Церковь Святой Марии Магдалины
+3 MAP
+4 LATI N31.778890
+4 LONG E35.240745
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Елизавета Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58063
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q333594
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU монахиня; аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Елизавета Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q58063
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Елизавета Фёдоровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданног
+2 CONC о состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожден
+2 CONC ия указана как 1 NOV 1864, место — Дармштадт. Дата смертиуказана как 18 JUL 1918, место — Алапаевск. Документированные с
+2 CONC оюзы в пределах дерева связывают эту персону с Сергей Александрович Романов. Публичные биографические источ
+2 CONC ники указывают следующие занятия или общественные роли: монахиня; аристократ. Сводка ограничена цитируемыми г
+2 CONC енеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; о
+2 CONC тсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-elizabeth-feodorovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC3702234DD12@
+0 @I87AEF3298612@ INDI
+1 _FTSID DB6A5890-3FEC-56CF-9EB8-9BA2ADC864B9
+1 NAME Александра /Романова/
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Георгиевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Георгиевна
+3 QUAY high
+1 NAME Александра /Греческая и Датская/
+2 TYPE birth
+2 GIVN Александра
+2 SURN Греческая и Датская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Александра Греческая и Датская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 30 AUG 1870
+2 PLAC Керкира
+3 MAP
+4 LATI N39.600000
+4 LONG E19.870000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Георгиевна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q232728
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q121378
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 24 SEP 1891
+2 PLAC Москва
+3 MAP
+4 LATI N55.750556
+4 LONG E37.617500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Георгиевна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q232728
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q649
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александра Георгиевна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q232728
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александра Георгиевна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q232728
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александра Георгиевна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданн
+2 CONC ого состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожд
+2 CONC ения указана как 30 AUG 1870, место — Керкира. Дата смерти указана как 24 SEP 1891, место — Москва. Документированные со
+2 CONC юзы в пределах дерева связывают эту персону с Павел Александрович Романов. Публичные биографические источни
+2 CONC ки указывают следующие занятия или общественные роли: аристократ. Сводка ограничена цитируемыми генеалогич
+2 CONC ескими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствую
+2 CONC щие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexandra-georgievna-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA157657F9E3C@
+0 @I6C74041C0012@ INDI
+1 _FTSID ED6C542F-E241-5CEA-A97F-01E63CD41089
+1 NAME Ольга /Палей/
+2 GIVN Ольга
+2 SURN Палей
+2 _PATR Валериановна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Валериановна Палей
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 DEC 1865
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 20 ноября 1865.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Валериановна Палей
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q265478
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 2 NOV 1929
+2 PLAC Париж
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Валериановна Палей
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q265478
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q90
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC cemetery of Colombes
+3 MAP
+4 LATI N48.921890
+4 LONG E2.244340
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ольга Валериановна Палей
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q265478
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q66714709
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU автор дневника
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ольга Валериановна Палей
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q265478
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Валериановна Палей представлен(а) в этом тщательно ограниченном родословном пакете как персона из зад
+2 CONC анного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 2 DEC 1865, место — Санкт-Петербург. Дата смерти указана как 2 NOV 1929, место — Париж. Документиро
+2 CONC ванные союзы в пределах дерева связывают эту персону с Павел Александрович Романов. Публичные биографически
+2 CONC е источники указывают следующие занятия или общественные роли: автор дневника. Сводка ограничена цитируемым
+2 CONC и генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева
+2 CONC ; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-olga-paley-portrait.jpg
+2 FORM JPEG
+1 FAMS @F2FC666440931@
+0 @I4BDFBC524697@ INDI
+1 _FTSID 87CBEDCD-D709-5E10-A18C-393C67E1944F
+1 NAME Георгий /Юрьевский/
+2 GIVN Георгий
+2 SURN Юрьевский
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Георгий Александрович Юрьевский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 30 APR 1872
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 18 апреля 1872.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Георгий Александрович Юрьевский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3102183
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 31 AUG 1913
+2 PLAC Марбург
+3 MAP
+4 LATI N50.816667
+4 LONG E8.766667
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Георгий Александрович Юрьевский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3102183
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3869
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Русское кладбище в Висбадене
+3 MAP
+4 LATI N50.098546
+4 LONG E8.236253
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Георгий Александрович Юрьевский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3102183
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2972680
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Георгий Александрович Юрьевский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3102183
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC лицей Кондорсе
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Георгий Александрович Юрьевский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3102183
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Георгий Александрович Юрьевский представлен(а) в этом тщательно ограниченном родословном пакете как персон
+2 CONC а из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакет
+2 CONC а дата рождения указана как 30 APR 1872, место — Санкт-Петербург. Дата смерти указана как 31 AUG 1913, место — Марбург. В п
+2 CONC ределах заданного состава родителями показаны Александр II Николаевич Романов и Екатерина Михайловна Долгор
+2 CONC укова. Публичные биографические источники указывают следующие занятия или общественные роли: аристократ. От
+2 CONC меченное образование: лицей Кондорсе. Сводка ограничена цитируемыми генеалогическими фактами и общественно з
+2 CONC начимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титу
+2 CONC лов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-georgy-dolgorukov-portrait.jpg
+2 FORM JPEG
+1 FAMC @F9EDAF92918B5@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID CBBF9E4E-D449-5BA6-806C-3EF40630A416
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Георгий Александрович Юрьевский
+4 QUAY high
+2 _PLINK @I37D83A07D394@
+3 _FTSID C15B7273-9C42-5A9B-BD65-23A73D6F17A2
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Екатерина Михайловна Долгорукова is recorded as biological parent of Георгий Александрович Юрьевский
+4 QUAY high
+0 @I21E18825BBB7@ INDI
+1 _FTSID 9685388B-0459-5EAA-9397-3DF986CA1456
+1 NAME Ольга /Юрьевская/
+2 GIVN Ольга
+2 SURN Юрьевская
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Александровна Юрьевская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 7 NOV 1873
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 26 октября 1873.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Александровна Юрьевская
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3350398
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 10 AUG 1925
+2 PLAC Висбаден
+3 MAP
+4 LATI N50.082500
+4 LONG E8.240000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Александровна Юрьевская
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3350398
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1721
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Русское кладбище в Висбадене
+3 MAP
+4 LATI N50.098546
+4 LONG E8.236253
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ольга Александровна Юрьевская
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3350398
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2972680
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ольга Александровна Юрьевская
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q3350398
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Александровна Юрьевская представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 7 NOV 1873, место — Санкт-Петербург. Дата смерти указана как 10 AUG 1925, место — Висбаден. В п
+2 CONC ределах заданного состава родителями показаны Александр II Николаевич Романов и Екатерина Михайловна Долгор
+2 CONC укова. Публичные биографические источники указывают следующие занятия или общественные роли: аристократ. Св
+2 CONC одка ограничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для п
+2 CONC онимания структурыдерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонасл
+2 CONC едия.
+1 OBJE
+2 FILE romanov-olga-dolgorukova-portrait.jpg
+2 FORM JPEG
+1 FAMC @F9EDAF92918B5@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID E0FA45CB-53D6-599F-90E2-D8286F0189EB
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Ольга Александровна Юрьевская
+4 QUAY high
+2 _PLINK @I37D83A07D394@
+3 _FTSID BFCCBEB6-0F3F-541E-838F-C16D26057BCF
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Екатерина Михайловна Долгорукова is recorded as biological parent of Ольга Александровна Юрьевская
+4 QUAY high
+0 @IAB08822D3C33@ INDI
+1 _FTSID CE2D3E66-64E6-57CA-A7D3-A6C2707328C5
+1 NAME Борис /Юрьевский/
+2 GIVN Борис
+2 SURN Юрьевский
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Борис Александрович Юрьевский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 23 FEB 1876
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Борис Александрович Юрьевский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q75261332
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 DEAT
+2 DATE 11 APR 1876
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Борис Александрович Юрьевский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q75261332
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Борис Александрович Юрьевский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q75261332
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Борис Александрович Юрьевский представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 23 FEB 1876. Дата смерти указанакак 11 APR 1876. В пределах заданного состава родителями показ
+2 CONC аны Александр II Николаевич Романов и Екатерина Михайловна Долгорукова. Публичные биографические источники у
+2 CONC казывают следующие занятия или общественные роли: аристократ. Сводка ограничена цитируемыми генеалогически
+2 CONC ми фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие д
+2 CONC анные не выводятсяиз титулов, портретов или порядка престолонаследия.
+1 FAMC @F9EDAF92918B5@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 824D6905-ADD9-547F-BBF3-32A45A079963
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Борис Александрович Юрьевский
+4 QUAY high
+2 _PLINK @I37D83A07D394@
+3 _FTSID BC391708-7C61-50B6-A1C5-AFAE74A2387A
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Екатерина Михайловна Долгорукова is recorded as biological parent of Борис Александрович Юрьевский
+4 QUAY high
+0 @I9C35C0626153@ INDI
+1 _FTSID FB53D6C3-40C6-5991-B4A8-79AA595A3A04
+1 NAME Екатерина /Юрьевская/
+2 GIVN Екатерина
+2 SURN Юрьевская
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Екатерина Александровна Юрьевская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 9 SEP 1878
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 28 августа 1878.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Екатерина Александровна Юрьевская
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q2941803
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 22 DEC 1959
+2 PLAC Hayling Island
+3 MAP
+4 LATI N50.783333
+4 LONG W0.966667
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Екатерина Александровна Юрьевская
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q2941803
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1541751
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU певец
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Екатерина Александровна Юрьевская
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q2941803
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Екатерина Александровна Юрьевская представлен(а) в этом тщательно ограниченном родословном пакете как перс
+2 CONC она из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пак
+2 CONC ета дата рождения указана как 9 SEP 1878, место — Санкт-Петербург. Дата смерти указана как 22 DEC 1959, место — Hayling Island. В п
+2 CONC ределах заданного состава родителями показаны Александр II Николаевич Романов и Екатерина Михайловна Долгор
+2 CONC укова. Публичные биографические источники указывают следующие занятия или общественные роли: певец. Сводка о
+2 CONC граничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для поним
+2 CONC ания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия
+2 CONC .
+1 OBJE
+2 FILE romanov-ekaterina-dolgorukova-portrait.jpg
+2 FORM JPEG
+1 FAMC @F9EDAF92918B5@
+2 PEDI birth
+2 _PLINK @I2FE56CB956DF@
+3 _FTSID 423F26D6-8BED-5E21-8C0A-4D1393B813DE
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр II Николаевич Романов is recorded as biological parent of Екатерина Александровна Юрьевская
+4 QUAY high
+2 _PLINK @I37D83A07D394@
+3 _FTSID 36F8792A-5C4C-5245-AAFB-288EAA516F4E
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Екатерина Михайловна Долгорукова is recorded as biological parent of Екатерина Александровна Юрьевская
+4 QUAY high
+0 @IA1704B4279CF@ INDI
+1 _FTSID 44A4D86A-D910-5FAF-BCCB-FE1BAF8FF725
+1 NAME Мария /Романова/
+2 TYPE religious
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Фёдоровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Фёдоровна
+3 QUAY high
+1 NAME Мария София Фредерика Дагмар /Датская/
+2 TYPE birth
+2 GIVN Мария София Фредерика Дагмар
+2 SURN Датская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Мария София Фредерика Дагмар Датская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 26 NOV 1847
+2 PLAC Жёлтый дворец
+3 MAP
+4 LATI N55.683010
+4 LONG E12.592720
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q153601
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2504988
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 13 OCT 1928
+2 PLAC Видёре
+3 MAP
+4 LATI N55.771600
+4 LONG E12.594400
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q153601
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q3787754
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Мария Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q153601
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU консорт; художник
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Мария Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q153601
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Мария Фёдоровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданного со
+2 CONC става четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рождения у
+2 CONC казана как 26 NOV 1847, место — Жёлтый дворец. Дата смертиуказана как 13 OCT 1928, место — Видёре. Документированные со
+2 CONC юзы в пределах дерева связывают эту персону с Александр III Александрович Романов. Публичные биографические и
+2 CONC сточники указывают следующие занятия или общественные роли: консорт; художник. Сводка ограничена цитируемым
+2 CONC и генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева
+2 CONC ; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-maria-feodorovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F901CD6776113@
+0 @IEF1B77538804@ INDI
+1 _FTSID 67C73AFF-6F87-5B55-A62F-52EDC1154312
+1 NAME Николай /Романов/
+2 GIVN Николай
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Николай II Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1868
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Николай II Александрович Романов
+3 QUAY high
+1 DEAT
+2 DATE 1918
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Николай II Александрович Романов
+3 QUAY high
+1 NOTE Николай II Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 1868. Дата смерти указана как 1918. В пределах заданного состава родителями показаны Але
+2 CONC ксандр III Александрович Романов и Мария Фёдоровна. Документированные союзы впределах дерева связывают эту п
+2 CONC ерсону с Александра Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактами и общественнозначим
+2 CONC ыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, п
+2 CONC ортретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-nicholas-ii-portrait.jpg
+2 FORM JPEG
+1 _ATTC
+2 FILE Attachments/romanovy-attachment-1.jpg
+2 TITL Family Nicholas II of Russia ca. 1914.jpg
+2 NOTE Документальная семейная фотография, выбранная для демонстрации вложений Swarm. Исходный файл сохранён без изм
+3 CONC енений; импортная копия уменьшена без генеративной обработки.
+2 SOUR @S2A8A9614F312@
+3 PAGE страница файла
+3 EVEN Family Nicholas II of Russia ca. 1914.jpg
+3 QUAY high
+3 NOTE Цитата подтверждает идентификацию и происхождение вложения, но не родственные связи.
+1 _ATTC
+2 FILE Attachments/romanovy-attachment-2.jpg
+2 TITL Nicholas II and family outside the Governor's House during their internment at Tobolsk.jpg
+2 NOTE Документальная семейная фотография, выбранная для демонстрации вложений Swarm. Исходный файл сохранён без изм
+3 CONC енений; импортная копия уменьшена без генеративной обработки.
+2 SOUR @SB506FBDB142C@
+3 PAGE страница файла
+3 EVEN Nicholas II and family outside the Governor's House during their internment at Tobolsk.jpg
+3 QUAY high
+3 NOTE Цитата подтверждает идентификацию и происхождение вложения, но не родственные связи.
+1 FAMS @F6A80110DE4CF@
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID 0A264EA0-6F76-5439-B555-49EF4FAF147B
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Николай II Александрович Романов
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID DC124DDC-EE87-59BB-B800-8E845BC7CA8C
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Николай II Александрович Романов
+4 QUAY high
+1 EVEN Император Всероссийский
+2 TYPE Вступление на престол
+2 DATE 1 NOV 1894
+2 NOTE Старый стиль: 20 октября 1894.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Вступление Николая II на престол
+3 QUAY high
+1 EVEN Коронация Николая II и Александры Фёдоровны
+2 TYPE Коронация
+2 DATE 26 MAY 1896
+2 NOTE Старый стиль: 14 мая 1896.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Коронация Николая II
+3 QUAY high
+1 EVEN Отречение от престола
+2 TYPE Отречение
+2 DATE 15 MAR 1917
+2 NOTE Старый стиль: 2 марта 1917.
+2 SOUR @SB770F25ECC49@
+3 PAGE соответствующая биографическая или коллекционная запись
+3 EVEN Отречение Николая II
+3 QUAY high
+0 @ID45126233878@ INDI
+1 _FTSID 5E8BE234-1447-54A9-81F3-165670D5111B
+1 NAME Александр /Романов/
+2 GIVN Александр
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александр Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1869
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александр Александрович Романов
+3 QUAY high
+1 DEAT
+2 DATE 1870
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александр Александрович Романов
+3 QUAY high
+1 NOTE Александр Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персон
+2 CONC а из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакет
+2 CONC а дата рождения указана как 1869. Дата смерти указана как 1870. В пределах заданного состава родителями показаны А
+2 CONC лександр III Александрович Романов и Мария Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактам
+2 CONC и и общественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не в
+2 CONC ыводятся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID B63CCA4A-45CF-5A06-AFE7-EE1BFC5EDFA2
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Александр Александрович Романов
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID 64C92904-4570-5C67-80D7-E2F136CE7EC9
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Александр Александрович Романов
+4 QUAY high
+0 @I373B402BB2E2@ INDI
+1 _FTSID 85481199-83F1-577A-B390-497A94CD7088
+1 NAME Георгий /Романов/
+2 GIVN Георгий
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Георгий Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 9 MAY 1871
+2 PLAC Пушкин
+3 MAP
+4 LATI N59.716667
+4 LONG E30.416667
+2 NOTE Старый стиль: 27 апреля 1871.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Георгий Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q170293
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q7947
+1 DEAT
+2 DATE 10 JUL 1899
+2 PLAC Абастумани
+3 MAP
+4 LATI N41.752194
+4 LONG E42.833083
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Георгий Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q170293
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q305677
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Георгий Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q170293
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Георгий Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q170293
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Георгий Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 9 MAY 1871, место — Пушкин. Датасмерти указана как 10 JUL 1899, место — Абастумани. В пределах з
+2 CONC аданного состава родителями показаны Александр III Александрович Романов и Мария Фёдоровна. Публичные биогра
+2 CONC фические источники указывают следующие занятия или общественные роли: аристократ. Сводка ограниченацитируе
+2 CONC мыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дер
+2 CONC ева; отсутствующиеданные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-george-portrait.jpg
+2 FORM JPEG
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID B74F81B8-4FA3-5F11-8D23-612E7EB8D757
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Георгий Александрович Романов
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID CA40C6F6-A4FF-580A-AF38-B1AE104312B0
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Георгий Александрович Романов
+4 QUAY high
+0 @ID94759D545F3@ INDI
+1 _FTSID 9FCB6661-5768-52EF-982D-0DE756DE3237
+1 NAME Ксения /Романова/
+2 GIVN Ксения
+2 SURN Романова
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ксения Александровна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 25 MAR 1875
+2 PLAC Аничков дворец
+3 MAP
+4 LATI N59.932778
+4 LONG E30.339722
+2 NOTE Старый стиль: 13 марта 1875.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ксения Александровна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q165113
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q187333
+1 DEAT
+2 DATE 20 APR 1960
+2 PLAC Хэмптон-корт
+3 MAP
+4 LATI N51.403400
+4 LONG W0.337499
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ксения Александровна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q165113
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q205666
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Рокебрюн — Кап-Мартен
+3 MAP
+4 LATI N43.757222
+4 LONG E7.474167
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ксения Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q165113
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q220668
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ксения Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q165113
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ксения Александровна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 25 MAR 1875, место — Аничков дворец. Дата смерти указана как 20 APR 1960, место — Хэмптон-корт. В п
+2 CONC ределах заданного состава родителями показаны Александр III АлександровичРоманов и Мария Фёдоровна. Докумен
+2 CONC тированные союзы в пределах дерева связывают эту персону с Александр Михайлович Романов. Публичныебиографи
+2 CONC ческие источники указывают следующие занятия или общественные роли: аристократ. Сводка ограничена цитируем
+2 CONC ыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дере
+2 CONC ва; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-xenia-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC9E5802F1165@
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID 095B13C5-9AFA-5A18-87E2-732AD4E17D5C
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Ксения Александровна Романова
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID D8BA9621-4CDC-5695-A27F-575BC859AEF8
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Ксения Александровна Романова
+4 QUAY high
+0 @I3B09C06CC23F@ INDI
+1 _FTSID 83553F04-7AD3-56C0-A823-A1A29E8C10F8
+1 NAME Михаил /Романов/
+2 GIVN Михаил
+2 SURN Романов
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Михаил Александрович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 22 NOV 1878
+2 PLAC Пушкин
+3 MAP
+4 LATI N59.716667
+4 LONG E30.416667
+2 NOTE Старый стиль: 10 ноября 1878.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Михаил Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q154444
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q7947
+1 DEAT
+2 DATE 13 JUN 1918
+2 PLAC Пермь
+3 MAP
+4 LATI N58.013889
+4 LONG E56.248889
+2 NOTE Старый стиль: 31 мая 1918.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Михаил Александрович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q154444
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q915
+1 OCCU политик; военнослужащий
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Михаил Александрович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q154444
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Михаил Александрович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 22 NOV 1878, место — Пушкин. Датасмерти указана как 13 JUN 1918, место — Пермь. В пределах заданн
+2 CONC ого состава родителями показаны Александр III Александрович Романов и Мария Фёдоровна. Документированные сою
+2 CONC зы в пределах дерева связывают эту персону с Наталья Сергеевна Брасова. Публичные биографические источники у
+2 CONC казывают следующие занятия или общественные роли: политик; военнослужащий. Сводка ограничена цитируемыми ге
+2 CONC неалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; от
+2 CONC сутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-mikhail-ii-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3BA361908E14@
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID DF9B2F7D-BCCC-57F0-BC70-FC42E092708B
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Михаил Александрович Романов
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID BF92F18D-22F4-5A1A-B840-422EC6812471
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Михаил Александрович Романов
+4 QUAY high
+0 @I1B188D62681E@ INDI
+1 _FTSID 26C0168D-79C9-5AEA-B985-46000E5EEF15
+1 NAME Ольга /Романова/
+2 GIVN Ольга
+2 SURN Романова
+2 _PATR Александровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Александровна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1 JUN 1882
+2 PLAC Петергоф
+3 MAP
+4 LATI N59.883330
+4 LONG E29.900000
+2 NOTE Старый стиль: 20 мая 1882.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Александровна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q178310
+1 DEAT
+2 DATE 24 NOV 1960
+2 PLAC Торонто
+3 MAP
+4 LATI N43.670278
+4 LONG W79.386667
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Александровна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q172
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Йоркское кладбище, Торонто
+3 MAP
+4 LATI N43.766100
+4 LONG W79.416700
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ольга Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q8055381
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU художник; филантроп
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ольга Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 RESI
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ольга Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Александровна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 1 JUN 1882, место — Петергоф. Дата смерти указана как 24 NOV 1960, место — Торонто. В пределах за
+2 CONC данного состава родителями показаны Александр III Александрович Романов и Мария Фёдоровна. Документированны
+2 CONC е союзы в пределах дерева связывают эту персону с Пётр Александрович Ольденбургский, Николай Александрович К
+2 CONC уликовский. Публичные биографические источники указывают следующие занятия или общественные роли: художник
+2 CONC ; филантроп. Сводка ограничена цитируемыми генеалогическими фактами и общественно значимыми сведениями, нео
+2 CONC бходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портретов или поряд
+2 CONC ка престолонаследия.
+1 OBJE
+2 FILE romanov-olga-alexandrovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F7641B8940F76@
+1 FAMS @F712C8119BB88@
+1 FAMC @F901CD6776113@
+2 PEDI birth
+2 _PLINK @I703E50247D71@
+3 _FTSID 04883AF6-42C6-5AFA-B8F9-F5B9ED7F8FF0
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александр III Александрович Романов is recorded as biological parent of Ольга Александровна Романова
+4 QUAY high
+2 _PLINK @IA1704B4279CF@
+3 _FTSID B4FA092A-7935-5B28-B6ED-2FA93D4C41BE
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Мария Фёдоровна is recorded as biological parent of Ольга Александровна Романова
+4 QUAY high
+1 RESI
+2 PLAC Большой Гатчинский дворец
+3 MAP
+4 LATI N59.56390400
+4 LONG E30.10797900
+3 _PID romanovy-place-q7461
+3 NOTE Координаты населённого пункта; не адрес.
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ольга Александровна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q163176
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+0 @I79976C971E39@ INDI
+1 _FTSID 64E755F2-9004-5789-9395-BB0546AD5F6C
+1 NAME Александра /Романова/
+2 TYPE religious
+2 GIVN Александра
+2 SURN Романова
+2 _PATR Фёдоровна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александра Фёдоровна
+3 QUAY high
+1 NAME Алиса Виктория Елена Луиза Беатриса /Гессен-Дармштадтская/
+2 TYPE birth
+2 GIVN Алиса Виктория Елена Луиза Беатриса
+2 SURN Гессен-Дармштадтская
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Recorded alternate or birth name: Алиса Виктория Елена Луиза Беатриса Гессен-Дармштадтская
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 6 JUN 1872
+2 PLAC Дармштадт
+3 MAP
+4 LATI N49.866667
+4 LONG E8.650000
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александра Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q2973
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 17 JUL 1918
+2 PLAC Екатеринбург
+3 MAP
+4 LATI N56.835556
+4 LONG E60.612778
+2 NOTE Старый стиль: 4 июля 1918.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александра Фёдоровна
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q887
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU консорт; регент
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 RESI
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александра Фёдоровна представлен(а) в этом тщательно ограниченном родословном пакете как персона из заданно
+2 CONC го состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата рожде
+2 CONC ния указана как 6 JUN 1872, место — Дармштадт. Дата смерти указана как 17 JUL 1918, место — Екатеринбург. Документирова
+2 CONC нные союзы в пределах дерева связывают эту персону с Николай II АлександровичРоманов. Публичные биографическ
+2 CONC ие источники указывают следующие занятия или общественные роли: консорт; регент. Сводка ограничена цитируем
+2 CONC ыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дере
+2 CONC ва; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexandra-feodorovna-portrait.jpg
+2 FORM JPEG
+1 FAMS @F6A80110DE4CF@
+1 RESI
+2 PLAC Александровский дворец
+3 MAP
+4 LATI N59.72111111
+4 LONG E30.39277778
+3 _PID romanovy-place-q1519034
+3 NOTE Координаты населённого пункта; не адрес.
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Александра Фёдоровна
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q152094
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+0 @I8EF97920C5DE@ INDI
+1 _FTSID 920422EE-E053-5DB3-A009-0B8B4FDA1B1B
+1 NAME Александр /Романов/
+2 GIVN Александр
+2 SURN Романов
+2 _PATR Михайлович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Александр Михайлович Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 13 APR 1866
+2 PLAC Тбилиси
+3 MAP
+4 LATI N41.722500
+4 LONG E44.792500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Александр Михайлович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q464626
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q994
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 26 FEB 1933
+2 PLAC Рокебрюн — Кап-Мартен
+3 MAP
+4 LATI N43.757222
+4 LONG E7.474167
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Александр Михайлович Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q464626
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q220668
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Рокебрюн — Кап-Мартен
+3 MAP
+4 LATI N43.757222
+4 LONG E7.474167
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Александр Михайлович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q464626
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q220668
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU военнослужащий; мемуарист
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Александр Михайлович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q464626
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC Морской кадетский корпус
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Александр Михайлович Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q464626
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Александр Михайлович Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 13 APR 1866, место — Тбилиси. Дата смерти указана как 26 FEB 1933, место — Рокебрюн — Кап-Мартен. Д
+2 CONC окументированные союзы в пределах дерева связывают эту персону с Ксения Александровна Романова. Публичные б
+2 CONC иографические источники указывают следующие занятия или общественные роли: военнослужащий; мемуарист. Отме
+2 CONC ченное образование: Морской кадетский корпус. Сводка ограничена цитируемыми генеалогическими фактами и общ
+2 CONC ественно значимымисведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводят
+2 CONC ся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-alexander-mikhailovich-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC9E5802F1165@
+0 @I89E3A8B2301E@ INDI
+1 _FTSID FA5E7952-4CCE-5534-B6EA-F80846E022CB
+1 NAME Наталья /Брасова/
+2 GIVN Наталья
+2 SURN Брасова
+2 _PATR Сергеевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Наталья Сергеевна Брасова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 27 JUN 1880
+2 PLAC Москва
+3 MAP
+4 LATI N55.750556
+4 LONG E37.617500
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Наталья Сергеевна Брасова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q273971
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q649
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 23 JAN 1952
+2 PLAC Париж
+3 MAP
+4 LATI N48.856667
+4 LONG E2.352222
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Наталья Сергеевна Брасова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q273971
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q90
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC кладбище Пасси
+3 MAP
+4 LATI N48.862500
+4 LONG E2.285278
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Наталья Сергеевна Брасова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q273971
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1092107
+3 NOTE Координаты населённого пункта; не адрес.
+1 NOTE Наталья Сергеевна Брасова представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 27 JUN 1880, место — Москва. Дата смерти указана как 23 JAN 1952, место — Париж. Документированные с
+2 CONC оюзы в пределах дерева связывают эту персону с Михаил Александрович Романов.Сводка ограничена цитируемыми г
+2 CONC енеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры дерева; о
+2 CONC тсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-natalia-brasova-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3BA361908E14@
+0 @I10FCABC836AD@ INDI
+1 _FTSID 1F60413B-534F-5F7E-9C59-8BD5B86EE788
+1 NAME Пётр /Ольденбургский/
+2 GIVN Пётр
+2 SURN Ольденбургский
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Пётр Александрович Ольденбургский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 21 NOV 1868
+2 PLAC Санкт-Петербург
+3 MAP
+4 LATI N59.950000
+4 LONG E30.316667
+2 NOTE Старый стиль: 9 ноября 1868.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Пётр Александрович Ольденбургский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q682770
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q656
+1 DEAT
+2 DATE 11 MAR 1924
+2 PLAC Биарриц
+3 MAP
+4 LATI N43.480556
+4 LONG W1.557222
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Пётр Александрович Ольденбургский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q682770
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q132790
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Михаило-Архангельская церковь (Канн)
+3 MAP
+4 LATI N43.546194
+4 LONG E7.039658
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Пётр Александрович Ольденбургский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q682770
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q4070555
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU офицер
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Пётр Александрович Ольденбургский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q682770
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Пётр Александрович Ольденбургский представлен(а) в этом тщательно ограниченном родословном пакете как перс
+2 CONC она из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пак
+2 CONC ета дата рождения указана как 21 NOV 1868, место — Санкт-Петербург. Дата смерти указана как 11 MAR 1924, место — Биарриц
+2 CONC . Документированные союзы в пределах дерева связывают эту персону с Ольга Александровна Романова. Публичные б
+2 CONC иографические источники указывают следующие занятия или общественные роли: офицер. Сводка ограниченацитиру
+2 CONC емыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания структуры де
+2 CONC рева; отсутствующиеданные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-peter-oldenburg-portrait.jpg
+2 FORM JPEG
+1 FAMS @F7641B8940F76@
+0 @IC261BED8E77D@ INDI
+1 _FTSID CFD529DF-EA16-570B-8169-8B4C5B81D853
+1 NAME Николай /Куликовский/
+2 GIVN Николай
+2 SURN Куликовский
+2 _PATR Александрович
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Николай Александрович Куликовский
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 5 NOV 1881
+2 PLAC Украина
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Николай Александрович Куликовский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q829235
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q212
+3 NOTE Координаты населённого пункта; не адрес.
+1 DEAT
+2 DATE 11 AUG 1958
+2 PLAC Cooksville
+3 MAP
+4 LATI N43.580300
+4 LONG W79.615800
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Николай Александрович Куликовский
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q829235
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q5167214
+3 NOTE Координаты населённого пункта; не адрес.
+1 BURI
+2 PLAC Йоркское кладбище, Торонто
+3 MAP
+4 LATI N43.766100
+4 LONG W79.416700
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Николай Александрович Куликовский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q829235
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q8055381
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU полковник
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Николай Александрович Куликовский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q829235
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC Николаевское кавалерийское училище
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Николай Александрович Куликовский
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q829235
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Николай Александрович Куликовский представлен(а) в этом тщательно ограниченном родословном пакете как перс
+2 CONC она из заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пак
+2 CONC ета дата рождения указана как 5 NOV 1881, место — Украина. Дата смерти указана как 11 AUG 1958, место — Cooksville. Документи
+2 CONC рованные союзы в пределах дерева связывают эту персону с Ольга АлександровнаРоманова. Публичные биографиче
+2 CONC ские источники указывают следующие занятия или общественные роли: полковник. Отмеченное образование: Никола
+2 CONC евское кавалерийское училище. Сводка ограничена цитируемыми генеалогическими фактами и общественно значим
+2 CONC ыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, п
+2 CONC ортретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-nikolai-kulikovsky-portrait.jpg
+2 FORM JPEG
+1 FAMS @F712C8119BB88@
+0 @I13C856B56501@ INDI
+1 _FTSID ED7403CB-126E-553C-93A1-6ED0FD775B6A
+1 NAME Ольга /Романова/
+2 GIVN Ольга
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ольга Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 15 NOV 1895
+2 PLAC Пушкин
+3 MAP
+4 LATI N59.716667
+4 LONG E30.416667
+2 NOTE Старый стиль: 3 ноября 1895.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ольга Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q7947
+1 DEAT
+2 DATE 17 JUL 1918
+2 PLAC дом Ипатьева
+3 MAP
+4 LATI N56.844390
+4 LONG E60.608970
+2 NOTE Старый стиль: 4 июля 1918.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Ольга Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1381934
+1 BURI
+2 PLAC Екатерининский придел Петропавловского собора
+3 MAP
+4 LATI N59.950060
+4 LONG E30.315950
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Ольга Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q30888843
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ; медсестра
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ольга Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 RESI
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ольга Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Ольга Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 15 NOV 1895, место — Пушкин. Дата смерти указана как 17 JUL 1918, место — дом Ипатьева. В пределах за
+2 CONC данного состава родителями показаны Николай II Александрович Романов и Александра Фёдоровна. Публичные биог
+2 CONC рафические источники указывают следующие занятия или общественные роли: аристократ; медсестра. Сводкаогран
+2 CONC ичена цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания с
+2 CONC труктуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 OBJE
+2 FILE romanov-olga-portrait.jpg
+2 FORM JPEG
+1 FAMC @F6A80110DE4CF@
+2 PEDI birth
+2 _PLINK @IEF1B77538804@
+3 _FTSID 4A1AED3D-395F-5F4B-A66E-FE57A38168D0
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай II Александрович Романов is recorded as biological parent of Ольга Николаевна Романова
+4 QUAY high
+2 _PLINK @I79976C971E39@
+3 _FTSID CB7F42B7-F9B5-5427-9316-CA2E49F34D9F
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Ольга Николаевна Романова
+4 QUAY high
+1 RESI
+2 PLAC Александровский дворец
+3 MAP
+4 LATI N59.72111111
+4 LONG E30.39277778
+3 _PID romanovy-place-q1519034
+3 NOTE Координаты населённого пункта; не адрес.
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Ольга Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q113584
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+0 @I146A0F57675E@ INDI
+1 _FTSID 4C88D846-863C-58DD-AF13-050104F4F5FD
+1 NAME Татьяна /Романова/
+2 GIVN Татьяна
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Татьяна Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1897
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Татьяна Николаевна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1918
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Татьяна Николаевна Романова
+3 QUAY high
+1 NOTE Татьяна Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёхпоколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1897. Дата смерти указана как 1918. В пределах заданного состава родителями показаны Николай I
+2 CONC I Александрович Романов и Александра Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактами и об
+2 CONC щественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные не вывод
+2 CONC ятся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F6A80110DE4CF@
+2 PEDI birth
+2 _PLINK @IEF1B77538804@
+3 _FTSID F2B02FB6-A30B-5BDB-B989-E646BF9927BB
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай II Александрович Романов is recorded as biological parent of Татьяна Николаевна Романова
+4 QUAY high
+2 _PLINK @I79976C971E39@
+3 _FTSID 7E838E61-1DAC-58BE-AA31-CB7DD76AA3FF
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Татьяна Николаевна Романова
+4 QUAY high
+0 @I9A68C29F8812@ INDI
+1 _FTSID AE5F3347-354C-565E-AD0C-0CB895A0855C
+1 NAME Мария /Романова/
+2 GIVN Мария
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Мария Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1899
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Мария Николаевна Романова
+3 QUAY high
+1 DEAT
+2 DATE 1918
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Мария Николаевна Романова
+3 QUAY high
+1 NOTE Мария Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона из за
+2 CONC данного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дата р
+2 CONC ождения указана как 1899. Дата смерти указана как 1918. Впределах заданного состава родителями показаны Николай I
+2 CONC I Александрович Романов и Александра Фёдоровна. Сводка ограничена цитируемыми генеалогическими фактами и об
+2 CONC щественно значимыми сведениями, необходимыми для понимания структуры дерева; отсутствующие данные невыводя
+2 CONC тся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F6A80110DE4CF@
+2 PEDI birth
+2 _PLINK @IEF1B77538804@
+3 _FTSID 29889667-9EAB-53FD-BA3F-DCD6BD3D96F8
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай II Александрович Романов is recorded as biological parent of Мария Николаевна Романова
+4 QUAY high
+2 _PLINK @I79976C971E39@
+3 _FTSID 2BCDBEE6-A3B3-5A22-BC5D-AB0113294CB0
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Мария Николаевна Романова
+4 QUAY high
+0 @I33002C7EDBA8@ INDI
+1 _FTSID 1DB3EF2F-B435-5625-A614-C234BD0AAFA2
+1 NAME Анастасия /Романова/
+2 GIVN Анастасия
+2 SURN Романова
+2 _PATR Николаевна
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Анастасия Николаевна Романова
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 18 JUN 1901
+2 PLAC Петергоф
+3 MAP
+4 LATI N59.883330
+4 LONG E29.900000
+2 NOTE Старый стиль: 5 июня 1901.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Анастасия Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q178310
+1 DEAT
+2 DATE 17 JUL 1918
+2 PLAC дом Ипатьева
+3 MAP
+4 LATI N56.844390
+4 LONG E60.608970
+2 NOTE Старый стиль: 4 июля 1918.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Анастасия Николаевна Романова
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q1381934
+1 BURI
+2 PLAC Петропавловский собор
+3 MAP
+4 LATI N59.950278
+4 LONG E30.316667
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Анастасия Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+3 _PID romanovy-place-q736587
+3 NOTE Координаты населённого пункта; не адрес.
+1 OCCU аристократ
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Анастасия Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 RESI
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Анастасия Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Анастасия Николаевна Романова представлен(а) в этом тщательно ограниченном родословном пакете как персона и
+2 CONC з заданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета д
+2 CONC ата рождения указана как 18 JUN 1901, место — Петергоф. Дата смерти указана как 17 JUL 1918, место — дом Ипатьева. В пред
+2 CONC елах заданного состава родителями показаны Николай II Александрович Романови Александра Фёдоровна. Публичны
+2 CONC е биографические источники указывают следующие занятия или общественные роли: аристократ. Сводка ограничен
+2 CONC а цитируемыми генеалогическими фактами и общественно значимыми сведениями, необходимыми для понимания стру
+2 CONC ктуры дерева; отсутствующие данные не выводятся из титулов, портретов или порядка престолонаследия.
+1 FAMC @F6A80110DE4CF@
+2 PEDI birth
+2 _PLINK @IEF1B77538804@
+3 _FTSID 8C1D5B6A-F777-5FA3-87B8-5AA9B9584585
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай II Александрович Романов is recorded as biological parent of Анастасия Николаевна Романова
+4 QUAY high
+2 _PLINK @I79976C971E39@
+3 _FTSID A537E478-1B2F-52C9-B6D4-0C14FCAD561C
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Анастасия Николаевна Романова
+4 QUAY high
+1 RESI
+2 PLAC Александровский дворец
+3 MAP
+4 LATI N59.72111111
+4 LONG E30.39277778
+3 _PID romanovy-place-q1519034
+3 NOTE Координаты населённого пункта; не адрес.
+2 NOTE Только исторически известный населённый пункт.
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Анастасия Николаевна Романова
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q151130
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+0 @I06C735183B3D@ INDI
+1 _FTSID 0C61CF8B-EFE5-5F0F-879A-80DCEF6D6E04
+1 NAME Алексей /Романов/
+2 GIVN Алексей
+2 SURN Романов
+2 _PATR Николаевич
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Алексей Николаевич Романов
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1904
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Алексей Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q59678194
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 DEAT
+2 DATE 1918
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Алексей Николаевич Романов
+3 QUAY high
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q59678194
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 OCCU исследователь
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Алексей Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q59678194
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 EDUC Национальный исследовательский ядерный университет «МИФИ»
+2 SOUR @SB770F25ECC49@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Алексей Николаевич Романов
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S8EA2CD81BC5B@
+3 PAGE Q59678194
+3 EVEN Дополнительное структурированное утверждение для уточнения и поиска.
+3 QUAY medium
+3 NOTE К событию также прикреплена ссылка на институциональный источник.
+1 NOTE Алексей Николаевич Романов представлен(а) в этом тщательно ограниченном родословном пакете как персона из з
+2 CONC аданного состава четырёх поколений императорской семьи и документированных союзов. В источниках пакета дат
+2 CONC а рождения указана как 1904. Дата смерти указана как 1918.В пределах заданного состава родителями показаны Никол
+2 CONC ай II Александрович Романов и Александра Фёдоровна. Публичные биографические источники указывают следующие з
+2 CONC анятия или общественные роли: исследователь. Отмеченное образование: Национальный исследовательский ядерны
+2 CONC й университет «МИФИ». Сводка ограничена цитируемыми генеалогическими фактами и общественно значимыми сведе
+2 CONC ниями, необходимыми для понимания структуры дерева; отсутствующие данные не выводятся из титулов, портретов и
+2 CONC ли порядка престолонаследия.
+1 FAMC @F6A80110DE4CF@
+2 PEDI birth
+2 _PLINK @IEF1B77538804@
+3 _FTSID 467BD225-5C53-530A-9A74-27A6CFB13A04
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Николай II Александрович Романов is recorded as biological parent of Алексей Николаевич Романов
+4 QUAY high
+2 _PLINK @I79976C971E39@
+3 _FTSID 67B6AFDB-84B7-52F5-B207-65AA8ABAE004
+3 PEDI birth
+3 SOUR @SB770F25ECC49@
+4 PAGE page title / relevant entry
+4 EVEN Александра Фёдоровна is recorded as biological parent of Алексей Николаевич Романов
+4 QUAY high
+0 @F89E26CF015A5@ FAM
+1 _FTSID 3054ED18-BE15-5602-918E-20D075A7FAA9
+1 HUSB @I70C65A2F29C9@
+1 WIFE @IBED94604BCC4@
+1 CHIL @I2FE56CB956DF@
+1 CHIL @ICE53D3A0443A@
+1 CHIL @I757BE4AAB844@
+1 CHIL @I825F3B2B87C3@
+1 CHIL @IE98B72A6FCC2@
+1 CHIL @IEECB1BF4FBA7@
+1 CHIL @I93DEA5880386@
+1 MARR
+2 DATE 1817
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай I Павлович Романов and Александра Фёдоровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай I Павлович Романов and Александра Фёдоровна
+2 QUAY high
+0 @F51EE70A3F1DF@ FAM
+1 _FTSID B6183A30-19DA-5225-8D65-947698A376FF
+1 HUSB @I4C83CE194C38@
+1 WIFE @ICE53D3A0443A@
+1 MARR
+2 DATE 1839
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Николаевна Романова and Максимилиан Лейхтенбергский
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Николаевна Романова and Максимилиан Лейхтенбергский
+2 QUAY high
+0 @FF89CFFE78CD2@ FAM
+1 _FTSID 7717275C-E980-5D6E-9497-B177376FB09B
+1 HUSB @IB3CF8ED204B5@
+1 WIFE @ICE53D3A0443A@
+1 MARR
+2 DATE 1856
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Николаевна Романова and Григорий Александрович Строганов
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Николаевна Романова and Григорий Александрович Строганов
+2 QUAY high
+0 @FE070C26273FE@ FAM
+1 _FTSID 32737453-5A59-56DF-9A35-3E8A579C6519
+1 HUSB @I5F73E1E01D0D@
+1 WIFE @I757BE4AAB844@
+1 MARR
+2 DATE 1846
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Николаевна Романова and Карл I Вюртембергский
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Николаевна Романова and Карл I Вюртембергский
+2 QUAY high
+0 @FF05619095FCF@ FAM
+1 _FTSID DFCAE86A-4053-577F-B1AE-919CD2E80DE6
+1 HUSB @I9D8A6BC63EEB@
+1 WIFE @I825F3B2B87C3@
+1 MARR
+2 DATE 1844
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александра Николаевна Романова and Фридрих Вильгельм Гессен-Кассельский
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александра Николаевна Романова and Фридрих Вильгельм Гессен-Кассельский
+2 QUAY high
+0 @F3511665C5003@ FAM
+1 _FTSID 4FBA6DC9-FD96-59A2-A611-FFEFCC8CBC66
+1 HUSB @IE98B72A6FCC2@
+1 WIFE @ID5159EAC3194@
+1 MARR
+2 DATE 1848
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Константин Николаевич Романов and Александра Иосифовна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Константин Николаевич Романов and Александра Иосифовна
+2 QUAY high
+0 @FD90F6FB69D3A@ FAM
+1 _FTSID A3810A4A-7318-5FB4-AF99-6C09156769E8
+1 HUSB @IEECB1BF4FBA7@
+1 WIFE @I4FA2D0E1EAC8@
+1 MARR
+2 DATE 1856
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай Николаевич Романов and Александра Петровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай Николаевич Романов and Александра Петровна
+2 QUAY high
+0 @F59FD6E640AFA@ FAM
+1 _FTSID 4A94F7C0-B923-5F26-BCC4-076B80E434E9
+1 HUSB @I93DEA5880386@
+1 WIFE @I58748D5C652A@
+1 MARR
+2 DATE 1857
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Михаил Николаевич Романов and Ольга Фёдоровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Михаил Николаевич Романов and Ольга Фёдоровна
+2 QUAY high
+0 @F4F47ED76A1C7@ FAM
+1 _FTSID 84A280A8-CC59-5C69-A827-89BD61010671
+1 HUSB @I2FE56CB956DF@
+1 WIFE @I345001341D0F@
+1 CHIL @IB0D9B44A2095@
+1 CHIL @I06A720091FA6@
+1 CHIL @I703E50247D71@
+1 CHIL @I34B2FBF96995@
+1 CHIL @I1B665507C48F@
+1 CHIL @I9E9C9564A476@
+1 CHIL @I75A9D958048A@
+1 CHIL @IECB8F314660E@
+1 MARR
+2 DATE 1841
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр II Николаевич Романов and Мария Александровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр II Николаевич Романов and Мария Александровна
+2 QUAY high
+0 @F9EDAF92918B5@ FAM
+1 _FTSID B4CC9F74-E60A-59A3-9979-101B74BD2011
+1 HUSB @I2FE56CB956DF@
+1 WIFE @I37D83A07D394@
+1 CHIL @I4BDFBC524697@
+1 CHIL @I21E18825BBB7@
+1 CHIL @IAB08822D3C33@
+1 CHIL @I9C35C0626153@
+1 _PART
+2 DATE 1866
+2 NOTE Документированное партнёрство предшествовало морганатическому браку 1880 года; весь период не представлен ка
+3 CONC к брак.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the partnership
+3 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented partnership between Александр II Николаевич Романов and Екатерина Михайловна Долгорукова
+2 QUAY high
+1 NOTE Документированное партнёрство предшествовало морганатическому браку 1880 года; весь период не представлен как брак.
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented partnership between Александр II Николаевич Романов and Екатерина Михайловна Долгорукова
+2 QUAY high
+0 @F592330D083A3@ FAM
+1 _FTSID A994227E-7284-56DB-9610-434D2F133EF1
+1 HUSB @I2FE56CB956DF@
+1 WIFE @I37D83A07D394@
+1 MARR
+2 DATE 1880
+2 NOTE Морганатический брак.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр II Николаевич Романов and Екатерина Михайловна Долгорукова
+2 QUAY high
+1 NOTE Морганатический брак.
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр II Николаевич Романов and Екатерина Михайловна Долгорукова
+2 QUAY high
+0 @F901CD6776113@ FAM
+1 _FTSID 63DC9FBA-4574-5EB6-B843-9BC6B25E9A90
+1 HUSB @I703E50247D71@
+1 WIFE @IA1704B4279CF@
+1 CHIL @IEF1B77538804@
+1 CHIL @ID45126233878@
+1 CHIL @I373B402BB2E2@
+1 CHIL @ID94759D545F3@
+1 CHIL @I3B09C06CC23F@
+1 CHIL @I1B188D62681E@
+1 MARR
+2 DATE 1866
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр III Александрович Романов and Мария Фёдоровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Александр III Александрович Романов and Мария Фёдоровна
+2 QUAY high
+0 @FA71B00663AF8@ FAM
+1 _FTSID 81A9DCA1-8AD1-5FE8-8096-D8E5F2371E91
+1 HUSB @I34B2FBF96995@
+1 WIFE @I4BDE2CB9D6D9@
+1 MARR
+2 DATE 1874
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Владимир Александрович Романов and Мария Павловна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Владимир Александрович Романов and Мария Павловна
+2 QUAY high
+0 @FD864447C812E@ FAM
+1 _FTSID C73A1E40-FD6C-55EF-B012-ACDB92CA6BA7
+1 HUSB @IC904AE1B1F0F@
+1 WIFE @I9E9C9564A476@
+1 MARR
+2 DATE 1874
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Александровна Романова and Альфред Саксен-Кобург-Готский
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Мария Александровна Романова and Альфред Саксен-Кобург-Готский
+2 QUAY high
+0 @FC3702234DD12@ FAM
+1 _FTSID 3877A3D6-C295-5F77-B5CD-C12D0A17F4E1
+1 HUSB @I75A9D958048A@
+1 WIFE @I2A151BE84760@
+1 MARR
+2 DATE 1884
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Сергей Александрович Романов and Елизавета Фёдоровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Сергей Александрович Романов and Елизавета Фёдоровна
+2 QUAY high
+0 @FA157657F9E3C@ FAM
+1 _FTSID C36731F2-2634-504F-8169-ACC843741675
+1 HUSB @IECB8F314660E@
+1 WIFE @I87AEF3298612@
+1 MARR
+2 DATE 1889
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Павел Александрович Романов and Александра Георгиевна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Павел Александрович Романов and Александра Георгиевна
+2 QUAY high
+0 @F2FC666440931@ FAM
+1 _FTSID 08E15B63-3860-5486-934B-FB7C270802EF
+1 HUSB @IECB8F314660E@
+1 WIFE @I6C74041C0012@
+1 MARR
+2 DATE 1902
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Павел Александрович Романов and Ольга Валериановна Палей
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Павел Александрович Романов and Ольга Валериановна Палей
+2 QUAY high
+0 @F6A80110DE4CF@ FAM
+1 _FTSID 52932A23-5B39-58B1-AEBB-811BBB00B755
+1 HUSB @IEF1B77538804@
+1 WIFE @I79976C971E39@
+1 CHIL @I13C856B56501@
+1 CHIL @I146A0F57675E@
+1 CHIL @I9A68C29F8812@
+1 CHIL @I33002C7EDBA8@
+1 CHIL @I06C735183B3D@
+1 MARR
+2 DATE 1894
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай II Александрович Романов and Александра Фёдоровна
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Николай II Александрович Романов and Александра Фёдоровна
+2 QUAY high
+0 @FC9E5802F1165@ FAM
+1 _FTSID C39EBB37-EED1-5D79-89D2-597056F2579E
+1 HUSB @I8EF97920C5DE@
+1 WIFE @ID94759D545F3@
+1 MARR
+2 DATE 1894
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ксения Александровна Романова and Александр Михайлович Романов
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ксения Александровна Романова and Александр Михайлович Романов
+2 QUAY high
+0 @F3BA361908E14@ FAM
+1 _FTSID F1CAEC43-4AAE-5140-88FF-FD71C1FEFCFD
+1 HUSB @I3B09C06CC23F@
+1 WIFE @I89E3A8B2301E@
+1 MARR
+2 DATE 1912
+2 NOTE Морганатический брак.
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Михаил Александрович Романов and Наталья Сергеевна Брасова
+2 QUAY high
+1 NOTE Морганатический брак.
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Михаил Александрович Романов and Наталья Сергеевна Брасова
+2 QUAY high
+0 @F7641B8940F76@ FAM
+1 _FTSID ADDB1CDA-92BE-5EF8-8A46-80FC8549ECC8
+1 HUSB @I10FCABC836AD@
+1 WIFE @I1B188D62681E@
+1 MARR
+2 DATE 1901
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Александровна Романова and Пётр Александрович Ольденбургский
+2 QUAY high
+1 EVEN
+2 TYPE Annulment
+2 DATE 1916
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Александровна Романова and Пётр Александрович Ольденбургский
+2 QUAY high
+0 @F712C8119BB88@ FAM
+1 _FTSID 0A81A4DB-496C-5C44-9120-380638436893
+1 HUSB @IC261BED8E77D@
+1 WIFE @I1B188D62681E@
+1 MARR
+2 DATE 1916
+2 SOUR @SB770F25ECC49@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Александровна Романова and Николай Александрович Куликовский
+2 QUAY high
+1 SOUR @SB770F25ECC49@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Ольга Александровна Романова and Николай Александрович Куликовский
+2 QUAY high
+0 @SB770F25ECC49@ SOUR
+1 _FTSID BA89F6D1-4BF7-5CAF-8FDF-916BD7465A48
+1 TITL Династия Романовых
+1 AUTH Президентская библиотека имени Б. Н. Ельцина
+1 REPO Президентская библиотека имени Б. Н. Ельцина
+1 NOTE веб-страница учреждения; 2026-08-09; Авторитетный исходный источник; локатор конкретного утверждения записан в т
+2 CONC аблице цитат.
+1 _URL https://www.prlib.ru/collections/467038
+0 @S1EA98F575E88@ SOUR
+1 _FTSID 8A5C33DF-BB2F-592A-8B24-05E3BE59C118
+1 TITL Романовы
+1 AUTH Государственный Эрмитаж
+1 REPO Государственный Эрмитаж
+1 NOTE веб-страница учреждения; 2026-08-09; Авторитетный исходный источник; локатор конкретного утверждения записан в т
+2 CONC аблице цитат.
+1 _URL https://www.hermitagemuseum.org/wps/portal/hermitage/explore/history/articles/?lng=ru
+0 @S52CBCC23291A@ SOUR
+1 _FTSID CF55CB90-F6AC-542A-A7E0-1C83C92DBA05
+1 TITL Портреты членов императорской семьи
+1 AUTH Государственный Русский музей
+1 REPO Государственный Русский музей
+1 NOTE веб-страница учреждения; 2026-08-09; Авторитетный исходный источник; локатор конкретного утверждения записан в т
+2 CONC аблице цитат.
+1 _URL https://rusmuseum.ru/collections/painting/
+0 @S2A8A9614F312@ SOUR
+1 _FTSID B60D8849-177C-5FE2-AAAA-E0C35D021AD3
+1 TITL Family Nicholas II of Russia ca. 1914.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Library of Congress
+1 NOTE digital image; 2026-08-09; Права проверены на странице отдельного файла; сведения не используются как источник родства.
+1 _URL https://commons.wikimedia.org/wiki/File:Family_Nicholas_II_of_Russia_ca._1914.jpg
+0 @SB506FBDB142C@ SOUR
+1 _FTSID 7873009D-0BF2-5843-88BD-B371BA162C32
+1 TITL Nicholas II and family outside the Governor's House during their internment at Tobolsk.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Library of Congress
+1 NOTE digital image; 2026-08-09; Права проверены на странице отдельного файла; сведения не используются как источник родства.
+1 _URL https://commons.wikimedia.org/wiki/File:Nicholas_II_and_family_outside_the_Governor%27s_House_during_their_internment_at_Tobolsk.jpg
+0 @S8EA2CD81BC5B@ SOUR
+1 _FTSID 90498381-7C6A-5232-9944-0F96A660DFE7
+1 TITL Структурированные утверждения Wikidata (дополнительный поиск)
+1 AUTH Wikimedia Foundation contributors
+1 PUBL Wikidata
+1 REPO Wikidata
+1 NOTE структурированный поисковый индекс; 2026-08-09; Только дополнительный поиск; не является единственным доказател
+2 CONC ьством родства или событиягражданского состояния.
+1 _URL https://www.wikidata.org/
+0 TRLR
