@@ -72,30 +72,35 @@ report.
 They are also the layout engine's test corpus. Each was chosen for a shape that is
 awkward to draw:
 
-| Folder | Tree | People | Families | Years | Shape it covers |
-| --- | --- | --- | --- | --- | --- |
-| [curie-joliot](Examples/curie-joliot/) | The Curie–Joliot Family | 18 | 6 | 1827–2007 | Small and quick to read — start here |
-| [darwin-wedgwood](Examples/darwin-wedgwood/) | The Darwin–Wedgwood Family | 40 | 17 | 1730–1986 | First-cousin marriage: two lines that split and rejoin |
-| [kennedy](Examples/kennedy/) | The Kennedy Family | 54 | 11 | 1857–2020 | Very wide sibling rows — eleven children under one union |
-| [romanov](Examples/romanov/) | Романовы | 52 | 22 | 1796–1960 | Cyrillic names, patronymics, large half-sibling sets |
-| [roosevelt](Examples/roosevelt/) | The Roosevelt Family | 68 | 37 | 1658–2022 | The deep one: nine generations across two branches |
-| [tudor](Examples/tudor/) | The Tudors | 39 | 20 | 1430–1625 | Serial remarriage and children by several partners |
+| Folder | Tree | People | Families | Portraits | Years | Shape it covers |
+| --- | --- | --- | --- | --- | --- | --- |
+| [curie-joliot](Examples/curie-joliot/) | The Curie–Joliot Family | 18 | 6 | 12 | 1827–2007 | Small and quick to read — start here |
+| [darwin-wedgwood](Examples/darwin-wedgwood/) | The Darwin–Wedgwood Family | 40 | 17 | 28 | 1730–1986 | First-cousin marriage: two lines that split and rejoin |
+| [kennedy](Examples/kennedy/) | The Kennedy Family | 54 | 11 | 19 | 1857–2020 | Very wide sibling rows — eleven children under one union |
+| [romanovy](Examples/romanovy/) | Романовы | 52 | 22 | 36 | 1796–1960 | Cyrillic names, patronymics, large half-sibling sets |
+| [roosevelt](Examples/roosevelt/) | The Roosevelt Family | 68 | 37 | 47 | 1658–2022 | The deep one: nine generations across two branches |
+| [tudor-succession](Examples/tudor-succession/) | The Tudors | 39 | 20 | 30 | 1430–1625 | Serial remarriage and children by several partners |
 
 Every person carries a source citation, and most carry dated birth, marriage and death
-events with mapped places — so the map, timeline and sources workspaces all have
-something to show on first open.
+events with mapped places. Each folder also ships portraits in `Media/` and two
+documentary attachments in `Attachments/`, so the map, timeline, sources and portrait
+views all have something to show on first open. The images are public domain apart from
+eleven Creative Commons files; title, license and attribution for all 184 are in
+[Examples/CREDITS.csv](Examples/CREDITS.csv).
 
 ### Import one
 
 1. Click **Import GEDCOM** in the tree library — in the toolbar, or in the middle of the
    screen while the library is still empty.
-2. Choose the `.ged` file inside the folder you want, say `Examples/tudor/tudor.ged`.
+2. Select the tree's **folder** — `Examples/tudor-succession/`, not the `.ged` inside it.
+   Selecting the folder is what lets Swarm read the `Media/` and `Attachments/` beside
+   the GEDCOM; pick the file alone and the tree still imports, without its photos.
 3. **Import Preview** reports people, unions, sources and anything that failed
    validation. Click **Import Verified Copy**.
 
-Swarm copies the file into its own library and keeps a verbatim copy beside it as
-`original-import.ged`. The file in `Examples/` is read, never written, so import the same
-tree as often as you like.
+Swarm copies everything into its own library and keeps a verbatim copy of the GEDCOM
+beside it as `original-import.ged`. The folder in `Examples/` is read, never written, so
+import the same tree as often as you like.
 
 ## Privacy
 

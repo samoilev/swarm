@@ -12,6 +12,17 @@ covers Swarm's own source code only — it does not relicense the datasets.
 | `Swarm/Core/Resources/ne_110m_land.geojson` | [Natural Earth](https://www.naturalearthdata.com/) 1:110m, via the [`nvkelso/natural-earth-vector`](https://github.com/nvkelso/natural-earth-vector) mirror | Public domain | Used only by the offline `Canvas` map renderer. See [`MAP_DATA.md`](Swarm/Core/Resources/MAP_DATA.md). |
 | `Swarm/Core/Resources/ne_110m_admin_0_boundary_lines_land.geojson` | [Natural Earth](https://www.naturalearthdata.com/downloads/110m-cultural-vectors/) 1:110m, same mirror | Public domain | As above. |
 
+## Example tree media
+
+The six example trees in [`Examples/`](Examples/) ship 172 portraits and 12 documentary
+attachments, sourced from Wikimedia Commons and comparable archives. 171 of the 184 files
+are public domain and 2 are CC0; the remaining 11 are Creative Commons Attribution or
+Attribution-ShareAlike (2.0, 3.0 and 4.0).
+
+Per-file title, license, attribution line and source page are recorded in
+[`Examples/CREDITS.csv`](Examples/CREDITS.csv). Redistribute the CC BY and CC BY-SA files
+with that attribution intact.
+
 ### GeoNames attribution
 
 > Contains GeoNames data, available from https://www.geonames.org/.

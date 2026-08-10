@@ -6,931 +6,864 @@
 2 VERS 5.5.1
 2 FORM LINEAGE-LINKED
 1 CHAR UTF-8
-1 _TREEID A12D2A87-575E-5D04-B809-F25810DB4053
+1 _TREEID a12d2a87-575e-5d04-b809-f25810db4053
 1 _FTSVER 2
 1 _NAME The Darwin–Wedgwood Family
 1 _SUBTITLE Science, industry, and a first-cousin marriage
 1 _HOME @IAF7906F1736F@
 1 _ROOT @F8935D3525A28@
 0 @IA8EC4C5F97DE@ INDI
-1 _FTSID 839AD5A5-3EB8-5C65-8AE3-C3365CA5052B
+1 _FTSID 839ad5a5-3eb8-5c65-8ae3-c3365ca5052b
 1 NAME Erasmus /Darwin/
 2 GIVN Erasmus
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 12 DEC 1731
-2 PLAC Elston
+2 PLAC Elston, Newark and Sherwood, United Kingdom
 3 MAP
-4 LATI N53.025000
-4 LONG W0.868611
+4 LATI N53.02500000
+4 LONG W0.86861100
+3 _PID darwin-wedgwood-place-q5367753
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q234050
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q5367753
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 18 APR 1802
-2 PLAC Breadsall
+2 PLAC Breadsall, Derbyshire, United Kingdom
 3 MAP
-4 LATI N52.954000
-4 LONG W1.450000
+4 LATI N52.95400000
+4 LONG W1.45000000
+3 _PID darwin-wedgwood-place-q4339605
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q234050
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q4339605
-3 NOTE Locality coordinates, not a street address.
 1 OCCU physician; botanist
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q234050
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC University of Edinburgh; St John's College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q234050
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Erasmus Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 DEC 1731 at E
-2 CONC lston. The recorded death date is 18 APR 1802 atBreadsall. Documented unions in this tree connect this person with Mary Howard. Public biographical sources identify the following occupation or public r
-2 CONC ole: physician; botanist. Recorded education includes University of Edinburgh; St John's College. This summary is confined to cited genealogical facts and selected public activities needed to interpre
-2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Erasmus Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 DEC 1731 at Elston. The recorded death date is 18 APR 1802 at
+2 CONC  Breadsall. Documented unions in this tree connect this person with Mary Howard. Public biographical sources identify the following occupation or public role: physician; botanist. Recorded education includes University of Edinburgh; St John's Colle
+2 CONC ge. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or success
+2 CONC ion.
 1 OBJE
 2 FILE darwin-erasmus-portrait.jpg
 2 FORM JPEG
+2 TITL Erasmus Darwin portrait
 1 FAMS @FAF80660A22A6@
 0 @I619BD0AC02C8@ INDI
-1 _FTSID 8CD875A4-D725-5A42-AF48-F76E82778B73
+1 _FTSID 8cd875a4-d725-5a42-af48-f76e82778b73
 1 NAME Mary /Howard/
 2 GIVN Mary
 2 SURN Howard
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Mary Howard
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1740
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Mary Howard
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q124607323
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1770
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Mary Howard
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q124607323
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 OCCU politician
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Mary Howard
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q124607323
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Mary Howard appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1740. The recorded d
-2 CONC eath date is 1770. Documented unions in this tree connect this person with Erasmus Darwin. Public biographical sources identify the following occupation or public role: politician. This summary is con
-2 CONC fined to cited genealogical facts and selected public activities needed to interpret the graph;it does not extend the family beyond the commissioned cast or infer missing details from names, portraits
-2 CONC , households, or succession.
+1 NOTE Mary Howard appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1740. The recorded death date is 1770. Documented unions in this tr
+2 CONC ee connect this person with Erasmus Darwin. Public biographical sources identify the following occupation or public role: politician. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph;
+2 CONC  it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 FAMS @FAF80660A22A6@
 0 @I9C25BB1FDF7A@ INDI
-1 _FTSID F0FB4D8C-880C-59D7-A5BC-F1941B493970
+1 _FTSID f0fb4d8c-880c-59d7-a5bc-f1941b493970
 1 NAME Josiah /Wedgwood/
 2 GIVN Josiah
 2 SURN Wedgwood
 2 NSFX I
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Josiah Wedgwood I
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 1730
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Josiah Wedgwood I
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q119794940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1795
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Josiah Wedgwood I
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q119794940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Josiah Wedgwood I appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1730. The rec
-2 CONC orded death date is 1795. Documented unions in this tree connect this person with Sarah Wedgwood. This summary is confined to cited genealogical facts and selected public activities needed to interpre
-2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing detailsfrom names, portraits, households, or succession.
+1 NOTE Josiah Wedgwood I appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1730. The recorded death date is 1795. Documented unions in t
+2 CONC his tree connect this person with Sarah Wedgwood. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details
+2 CONC  from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-josiah-i-portrait.jpg
 2 FORM JPEG
+2 TITL Josiah Wedgwood I
 1 FAMS @F5F83880E245B@
 0 @I38767D7C513E@ INDI
-1 _FTSID 0209FD81-B117-5C40-A23C-6C8978460E02
+1 _FTSID 0209fd81-b117-5c40-a23c-6c8978460e02
 1 NAME Sarah /Wedgwood/
 2 TYPE married
 2 GIVN Sarah
 2 SURN Wedgwood
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1734
-2 PLAC Astbury
+2 PLAC Astbury, Cheshire, United Kingdom
 3 MAP
-4 LATI N53.151000
-4 LONG W2.232000
+4 LATI N53.15100000
+4 LONG W2.23200000
+3 _PID darwin-wedgwood-place-q4810587
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q47905425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q4810587
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 15 JUL 1815
-2 PLAC Barlaston
+2 PLAC Barlaston, Staffordshire, United Kingdom
 3 MAP
-4 LATI N52.945700
-4 LONG W2.158300
+4 LATI N52.94570000
+4 LONG W2.15830000
+3 _PID darwin-wedgwood-place-q2353329
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q47905425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q2353329
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Sarah Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1734 at Astbury. T
-2 CONC he recorded death date is 15 JUL 1815 at Barlaston. Documented unions in this tree connect this person with Josiah Wedgwood I. This summary is confined to cited genealogical facts and selected public a
-2 CONC ctivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Sarah Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1734 at Astbury. The recorded death date is 15 JUL 1815 at Barla
+2 CONC ston. Documented unions in this tree connect this person with Josiah Wedgwood I. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissione
+2 CONC d cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-sarah-wedgwood-portrait.jpg
 2 FORM JPEG
+2 TITL Sarah Wedgwood portrait
 1 FAMS @F5F83880E245B@
 0 @I7955F1BBEA07@ INDI
-1 _FTSID BE6A764C-E6C0-57DA-86F1-70C61D6EB764
+1 _FTSID be6a764c-e6c0-57da-86f1-70c61d6eb764
 1 NAME Robert Waring /Darwin/
 2 GIVN Robert Waring
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 30 MAY 1766
-2 PLAC Lichfield
+2 PLAC Lichfield, United Kingdom
 3 MAP
-4 LATI N52.683500
-4 LONG W1.826530
+4 LATI N52.68350000
+4 LONG W1.82653000
+3 _PID darwin-wedgwood-place-q207371
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q204473
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q207371
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 13 NOV 1848
-2 PLAC Shrewsbury
+2 PLAC Shrewsbury, Shropshire, United Kingdom
 3 MAP
-4 LATI N52.708056
-4 LONG W2.754444
+4 LATI N52.70805556
+4 LONG W2.75444444
+3 _PID darwin-wedgwood-place-q201970
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q204473
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q201970
-3 NOTE Locality coordinates, not a street address.
 1 OCCU physician
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q204473
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC University of Edinburgh
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q204473
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 RESI
 2 NOTE Public historical locality only.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public historical residence of Robert Waring Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q204473
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Robert Waring Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 30 MAY 176
-2 CONC 6 at Lichfield. The recorded death date is 13 NOV 1848 at Shrewsbury. Within the defined scope, the recorded parents are Erasmus Darwin and Mary Howard. Documented unions in this tree connect this per
-2 CONC son with Susannah Darwin. Public biographical sources identify the following occupation or public role: physician. Recorded education includes University of Edinburgh. This summary is confined to cite
-2 CONC d genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast orinfer missing details from names, portraits, households, o
-2 CONC r succession.
+1 NOTE Robert Waring Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 30 MAY 1766 at Lichfield. The recorded death date is 13 NO
+2 CONC V 1848 at Shrewsbury. Within the defined scope, the recorded parents are Erasmus Darwin and Mary Howard. Documented unions in this tree connect this person with Susannah Darwin. Public biographical sources identify the following occupation or publi
+2 CONC c role: physician. Recorded education includes University of Edinburgh. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or
+2 CONC  infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-robert-waring-portrait.jpg
 2 FORM JPEG
+2 TITL Robert Waring Darwin portrait
 1 FAMS @FC3067E1BD6AB@
 1 FAMC @FAF80660A22A6@
 2 PEDI birth
 2 _PLINK @IA8EC4C5F97DE@
-3 _FTSID C6A27481-8A81-54DA-A934-C8DC19344C2F
+3 _FTSID c6a27481-8a81-54da-a934-c8dc19344c2f
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Erasmus Darwin is recorded as biological parent of Robert Waring Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I619BD0AC02C8@
-3 _FTSID 8FCE6D0A-F113-59ED-B005-10433AAB02B6
+3 _FTSID 8fce6d0a-f113-59ed-b005-10433aab02b6
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Mary Howard is recorded as biological parent of Robert Waring Darwin
-4 QUAY high
-1 RESI
-2 NOTE Public historical locality only.
-2 SOUR @S960EB9E452AF@
-3 PAGE relevant institutional family entry
-3 EVEN Public historical residence of Robert Waring Darwin
-3 QUAY high
-3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
-2 SOUR @S9A0DD18ACE00@
-3 PAGE Q204473
-3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
-3 NOTE An institutional citation remains attached to the event.
+4 QUAY 3
 0 @ICF82177FE7DE@ INDI
-1 _FTSID E716B6C9-E9F2-590D-AFE2-556D5C1E8795
-1 NAME Susannah /Darwin/
+1 _FTSID e716b6c9-e9f2-590d-afe2-556d5c1e8795
+1 NAME Susannah /Wedgwood/
 2 TYPE married
 2 GIVN Susannah
 2 SURN Darwin
+2 _MARNM Susannah /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Susannah Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1765
-2 PLAC Stoke-on-Trent
+2 PLAC Stoke-on-Trent, Staffordshire, United Kingdom
 3 MAP
-4 LATI N53.000000
-4 LONG W2.183333
+4 LATI N53.00000000
+4 LONG W2.18333333
+3 _PID darwin-wedgwood-place-q134902
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Susannah Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7648718
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q134902
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 15 JUL 1817
-2 PLAC Shrewsbury
+2 PLAC Shrewsbury, Shropshire, United Kingdom
 3 MAP
-4 LATI N52.708056
-4 LONG W2.754444
+4 LATI N52.70805556
+4 LONG W2.75444444
+3 _PID darwin-wedgwood-place-q201970
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Susannah Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7648718
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q201970
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Susannah Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1765 at Stoke-o
-2 CONC n-Trent. The recorded death date is 15 JUL 1817at Shrewsbury. Within the defined scope, the recorded parents are Josiah Wedgwood I and Sarah Wedgwood. Documented unions in this tree connect this perso
-2 CONC n with Robert Waring Darwin. This summary is confined to cited genealogical facts and selectedpublic activities needed to interpret the graph; it does not extend the family beyond the commissioned cas
-2 CONC t or infer missing details from names, portraits, households, or succession.
+1 NOTE Susannah Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1765 at Stoke-on-Trent. The recorded death date is 15 JUL 1817 
+2 CONC at Shrewsbury. Within the defined scope, the recorded parents are Josiah Wedgwood I and Sarah Wedgwood. Documented unions in this tree connect this person with Robert Waring Darwin. This summary is confined to cited genealogical facts and selected 
+2 CONC public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-susannah-portrait.jpg
 2 FORM JPEG
+2 TITL Susannah Darwin portrait
 1 FAMS @FC3067E1BD6AB@
 1 FAMC @F5F83880E245B@
 2 PEDI birth
 2 _PLINK @I9C25BB1FDF7A@
-3 _FTSID C4978C16-6CD6-5ECF-8989-7F19EDFCC1DA
+3 _FTSID c4978c16-6cd6-5ecf-8989-7f19edfcc1da
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Josiah Wedgwood I is recorded as biological parent of Susannah Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I38767D7C513E@
-3 _FTSID 0CA5F246-A9C6-5540-B706-C58126F248E3
+3 _FTSID 0ca5f246-a9c6-5540-b706-c58126f248e3
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Sarah Wedgwood is recorded as biological parent of Susannah Darwin
-4 QUAY high
+4 QUAY 3
 0 @I9B02526BD3DA@ INDI
-1 _FTSID 4DEC91D4-02DD-50AE-85C0-B521F41C5F08
+1 _FTSID 4dec91d4-02dd-50ae-85c0-b521f41c5f08
 1 NAME Josiah /Wedgwood/
 2 GIVN Josiah
 2 SURN Wedgwood
 2 NSFX II
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Josiah Wedgwood II
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 3 APR 1769
-2 PLAC Stoke-on-Trent
+2 PLAC Stoke-on-Trent, Staffordshire, United Kingdom
 3 MAP
-4 LATI N53.000000
-4 LONG W2.183333
+4 LATI N53.00000000
+4 LONG W2.18333333
+3 _PID darwin-wedgwood-place-q134902
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Josiah Wedgwood II
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q3186048
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q134902
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 12 JUL 1843
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Josiah Wedgwood II
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q3186048
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 OCCU politician; businessperson
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Josiah Wedgwood II
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q3186048
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Josiah Wedgwood II appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 3 APR 1769 a
-2 CONC t Stoke-on-Trent. The recorded death date is 12JUL 1843. Within the defined scope, the recorded parents are Josiah Wedgwood I and Sarah Wedgwood. Documented unions in this tree connect this person wit
-2 CONC h Elizabeth “Bessy” Wedgwood. Public biographical sources identify the following occupationor public role: politician; businessperson. This summary is confined to cited genealogical facts and sele
-2 CONC cted public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fromnames, portraits, households, or succession.
+1 NOTE Josiah Wedgwood II appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 3 APR 1769 at Stoke-on-Trent. The recorded death date is 12 
+2 CONC JUL 1843. Within the defined scope, the recorded parents are Josiah Wedgwood I and Sarah Wedgwood. Documented unions in this tree connect this person with Elizabeth “Bessy” Wedgwood. Public biographical sources identify the following occupation
+2 CONC  or public role: politician; businessperson. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from
+2 CONC  names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-josiah-ii-portrait.jpg
 2 FORM JPEG
+2 TITL Josiah Wedgwood II portrait
 1 FAMS @FDBC2C15CDDE8@
 1 FAMC @F5F83880E245B@
 2 PEDI birth
 2 _PLINK @I9C25BB1FDF7A@
-3 _FTSID 6D6D3A29-F999-52EF-8D44-A4F2A4AB8A1C
+3 _FTSID 6d6d3a29-f999-52ef-8d44-a4f2a4ab8a1c
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Josiah Wedgwood I is recorded as biological parent of Josiah Wedgwood II
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I38767D7C513E@
-3 _FTSID 7171CA93-50D0-513E-9914-011533230DD6
+3 _FTSID 7171ca93-50d0-513e-9914-011533230dd6
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Sarah Wedgwood is recorded as biological parent of Josiah Wedgwood II
-4 QUAY high
+4 QUAY 3
 0 @I174B191F2663@ INDI
-1 _FTSID E256BA26-DB5F-5A2D-A707-B8F8894864F3
-1 NAME Elizabeth /Wedgwood/
+1 _FTSID e256ba26-db5f-5a2d-a707-b8f8894864f3
+1 NAME Elizabeth /Allen/
 2 TYPE married
 2 GIVN Elizabeth
 2 SURN Wedgwood
 2 NICK Bessy
+2 _MARNM Elizabeth /Wedgwood/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Elizabeth “Bessy” Wedgwood
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1764
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Elizabeth “Bessy” Wedgwood
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1846
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Elizabeth “Bessy” Wedgwood
-3 QUAY high
-1 NOTE Elizabeth “Bessy” Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1
-2 CONC 764. The recorded death date is 1846. Documented unions in this tree connect this person with Josiah Wedgwood II. This summary is confined to cited genealogical facts and selected public activities ne
-2 CONC eded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Elizabeth “Bessy” Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1764. The recorded death date is 1846. Documente
+2 CONC d unions in this tree connect this person with Josiah Wedgwood II. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infe
+2 CONC r missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-elizabeth-allen-portrait.jpg
 2 FORM JPEG
+2 TITL Elizabeth Allen (Mrs Josiah Wedgwood II)
 1 FAMS @FDBC2C15CDDE8@
 0 @I22BD797EFA3A@ INDI
-1 _FTSID DB451DD6-24CB-540E-BD86-1892290A6137
-1 NAME Marianne /Parker/
+1 _FTSID db451dd6-24cb-540e-bd86-1892290a6137
+1 NAME Marianne /Darwin/
 2 TYPE married
 2 GIVN Marianne
 2 SURN Parker
+2 _MARNM Marianne /Parker/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Marianne Parker
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1798
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Marianne Parker
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76053073
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1858
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Marianne Parker
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76053073
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Marianne Parker appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1798. The recor
-2 CONC ded death date is 1858. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public activities n
-2 CONC eeded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Marianne Parker appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1798. The recorded death date is 1858. Within the defined scope
+2 CONC , the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or in
+2 CONC fer missing details from names, portraits, households, or succession.
 1 FAMC @FC3067E1BD6AB@
 2 PEDI birth
 2 _PLINK @I7955F1BBEA07@
-3 _FTSID CF93DB52-37C4-5C6E-810A-01A3D7597632
+3 _FTSID cf93db52-37c4-5c6e-810a-01a3d7597632
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Robert Waring Darwin is recorded as biological parent of Marianne Parker
-4 QUAY high
+4 QUAY 3
 2 _PLINK @ICF82177FE7DE@
-3 _FTSID 497AF235-BE75-5BEA-ABAC-75869BD6B01A
+3 _FTSID 497af235-be75-5bea-abac-75869bd6b01a
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Susannah Darwin is recorded as biological parent of Marianne Parker
-4 QUAY high
+4 QUAY 3
 0 @ID960A08122E7@ INDI
-1 _FTSID 073D91C1-F4C2-5F50-A6A3-BC1D4D54ACA9
-1 NAME Caroline Sarah /Wedgwood/
+1 _FTSID 073d91c1-f4c2-5f50-a6a3-bc1d4d54aca9
+1 NAME Caroline Sarah /Darwin/
 2 TYPE married
 2 GIVN Caroline Sarah
 2 SURN Wedgwood
+2 _MARNM Caroline Sarah /Wedgwood/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Caroline Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1800
-2 PLAC Shrewsbury
+2 PLAC Shrewsbury, Shropshire, United Kingdom
 3 MAP
-4 LATI N52.708056
-4 LONG W2.754444
+4 LATI N52.70805556
+4 LONG W2.75444444
+3 _PID darwin-wedgwood-place-q201970
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Caroline Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q55363478
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q201970
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 5 JAN 1888
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Caroline Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q55363478
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC Christ Church, Coldharbour
+2 PLAC Christ Church, Coldharbour, Capel, Mole Valley, United Kingdom
 3 MAP
-4 LATI N51.180712
-4 LONG W0.357597
+4 LATI N51.18071232
+4 LONG W0.35759722
+3 _PID darwin-wedgwood-place-q26279888
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Caroline Sarah Wedgwood
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q55363478
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q26279888
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Caroline Sarah Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1800 at S
-2 CONC hrewsbury. The recorded death date is 5 JAN 1888. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and s
-2 CONC elected public activities needed to interpret the graph; it does not extend the family beyondthe commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Caroline Sarah Wedgwood appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1800 at Shrewsbury. The recorded death date is 5 JAN 18
+2 CONC 88. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond
+2 CONC  the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-caroline-portrait.jpg
 2 FORM JPEG
+2 TITL Caroline Sarah Wedgwood portrait
 1 FAMC @FC3067E1BD6AB@
 2 PEDI birth
 2 _PLINK @I7955F1BBEA07@
-3 _FTSID D4A4EEF4-636F-51D8-A4F5-64346FCEBC1A
+3 _FTSID d4a4eef4-636f-51d8-a4f5-64346fcebc1a
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Robert Waring Darwin is recorded as biological parent of Caroline Sarah Wedgwood
-4 QUAY high
+4 QUAY 3
 2 _PLINK @ICF82177FE7DE@
-3 _FTSID 857CFA01-912F-5E85-9C66-B55E7FB8D8E8
+3 _FTSID 857cfa01-912f-5e85-9c66-b55e7fb8d8e8
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Susannah Darwin is recorded as biological parent of Caroline Sarah Wedgwood
-4 QUAY high
+4 QUAY 3
 0 @I01C2FAB0C5BB@ INDI
-1 _FTSID 73A97C31-B7DA-54AD-9A04-FD003504586D
+1 _FTSID 73a97c31-b7da-54ad-9a04-fd003504586d
 1 NAME Susan Elizabeth /Darwin/
 2 GIVN Susan Elizabeth
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Susan Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1803
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Susan Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76053112
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1866
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Susan Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76053112
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Susan Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1803. Th
-2 CONC e recorded death date is 1866. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public act
-2 CONC ivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Susan Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1803. The recorded death date is 1866. Within the define
+2 CONC d scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cas
+2 CONC t or infer missing details from names, portraits, households, or succession.
 1 FAMC @FC3067E1BD6AB@
 2 PEDI birth
 2 _PLINK @I7955F1BBEA07@
-3 _FTSID 322FA2BA-7686-5CCA-8EFE-5697B54FFE94
+3 _FTSID 322fa2ba-7686-5cca-8efe-5697b54ffe94
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Robert Waring Darwin is recorded as biological parent of Susan Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @ICF82177FE7DE@
-3 _FTSID C99B7A12-9A9C-5A18-A25A-913C0B63BCD3
+3 _FTSID c99b7a12-9a9c-5a18-a25a-913c0b63bcd3
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Susannah Darwin is recorded as biological parent of Susan Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 0 @I2B7C4FC37463@ INDI
-1 _FTSID 40946058-022A-5297-AA66-38175888E06F
+1 _FTSID 40946058-022a-5297-aa66-38175888e06f
 1 NAME Erasmus Alvey /Darwin/
 2 GIVN Erasmus Alvey
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Erasmus Alvey Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 29 DEC 1804
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Erasmus Alvey Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5384940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 26 AUG 1881
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Erasmus Alvey Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5384940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC Saint Mary the Virgin Churchyard
+2 PLAC Saint Mary the Virgin Churchyard, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335888
-4 LONG E0.054384
+4 LATI N51.33588800
+4 LONG E0.05438400
+3 _PID darwin-wedgwood-place-q109835214
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Erasmus Alvey Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5384940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q109835214
-3 NOTE Locality coordinates, not a street address.
 1 EDUC Christ's College; University of Edinburgh
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Erasmus Alvey Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5384940
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Erasmus Alvey Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 29 DEC 180
-2 CONC 4. The recorded death date is 26 AUG 1881. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. Recorded education includes Christ's College; University of Edin
-2 CONC burgh. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing de
-2 CONC tails from names, portraits, households, or succession.
+1 NOTE Erasmus Alvey Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 29 DEC 1804. The recorded death date is 26 AUG 1881. Withi
+2 CONC n the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. Recorded education includes Christ's College; University of Edinburgh. This summary is confined to cited genealogical facts and selected public activities neede
+2 CONC d to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-erasmus-alvey-portrait.jpg
 2 FORM JPEG
+2 TITL Erasmus Alvey Darwin portrait
 1 FAMC @FC3067E1BD6AB@
 2 PEDI birth
 2 _PLINK @I7955F1BBEA07@
-3 _FTSID EFD19B7F-65E6-5B4D-AA3F-F8C26647C47C
+3 _FTSID efd19b7f-65e6-5b4d-aa3f-f8c26647c47c
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Robert Waring Darwin is recorded as biological parent of Erasmus Alvey Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @ICF82177FE7DE@
-3 _FTSID FA02A060-F619-5789-8640-1D7A92B00560
+3 _FTSID fa02a060-f619-5789-8640-1d7a92b00560
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Susannah Darwin is recorded as biological parent of Erasmus Alvey Darwin
-4 QUAY high
+4 QUAY 3
 0 @IAF7906F1736F@ INDI
-1 _FTSID F9FD0582-2392-51F2-8D42-D675543B8BCB
+1 _FTSID f9fd0582-2392-51f2-8d42-d675543b8bcb
 1 NAME Charles Robert /Darwin/
 2 GIVN Charles Robert
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 12 FEB 1809
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 19 APR 1882
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.331389
-4 LONG E0.053333
+4 LATI N51.33138900
+4 LONG E0.05333300
+3 _PID darwin-wedgwood-place-q3038318
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Westminster Abbey
+2 PLAC Westminster Abbey, City of Westminster, Greater London, United Kingdom
 3 MAP
-4 LATI N51.499400
-4 LONG W0.127367
+4 LATI N51.49940000
+4 LONG W0.12736700
+3 _PID darwin-wedgwood-place-q5933
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q5933
-3 NOTE Locality coordinates, not a street address.
 1 OCCU geologist; explorer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Christ's College; University of Edinburgh Medical School
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 RESI
 2 NOTE Public historical locality only.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public historical residence of Charles Robert Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
-3 NOTE An institutional citation remains attached to the event.
-2 SOUR @S20749CD8FE97@
-3 PAGE relevant institutional biography or collection entry
-3 EVEN Darwin family residence at Down House
-3 QUAY high
-2 SOUR @S9A0DD18ACE00@
-3 PAGE Q1035
-3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
-3 NOTE An institutional citation remains attached to the event.
-1 NOTE Charles Robert Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 FEB 18
-2 CONC 09. The recorded death date is 19 APR 1882 at Down House. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. Documented unions in this tree connect this perso
-2 CONC n with Emma Darwin. Public biographical sources identify the following occupation or public role: geologist; explorer. Recorded education includes Christ's College; University of Edinburgh Medical Sch
-2 CONC ool. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing deta
-2 CONC ils from
-1 OBJE
-2 FILE darwin-charles-portrait.jpg
-2 FORM JPEG
-1 _ATTC
-2 FILE Attachments/darwin-wedgwood-attachment-1.jpg
-2 TITL Emma Darwin (wife of naturalist Charles Darwin) with her tenth son Charles Waring Darwin, who died before his second birthday.
-2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
-2 SOUR @SE085F0F464C5@
-3 PAGE file description page
-3 EVEN Emma Darwin (wife of naturalist Charles Darwin) with her tenth son Charles Waring Darwin, who died before his second birthday.
-3 QUAY high
-3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
-1 _ATTC
-2 FILE Attachments/darwin-wedgwood-attachment-2.jpg
-2 TITL The Wedgwood family at Leith Hill Place
-2 NOTE Captioned family group plate reproduced in Emma Darwin: A Century of Family Letters (1915); selected as genealogical context for the shared Wedgwood ancestry.
-2 SOUR @S06234375ED2F@
-3 PAGE scan page 53; captioned plate
-3 EVEN The Wedgwood family at Leith Hill Place
-3 QUAY high
-3 NOTE The full page and source volume are preserved; derivative was rotated, cropped, and resized only.
-1 FAMS @F8935D3525A28@
-1 FAMC @FC3067E1BD6AB@
-2 PEDI birth
-2 _PLINK @I7955F1BBEA07@
-3 _FTSID 7D0F3D16-31CB-51DB-A470-2C6A0B9F8233
-3 PEDI birth
-3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
-4 EVEN Robert Waring Darwin is recorded as biological parent of Charles Robert Darwin
-4 QUAY high
-2 _PLINK @ICF82177FE7DE@
-3 _FTSID 21C65833-6C32-594A-9FC5-7BFCF01CE24C
-3 PEDI birth
-3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
-4 EVEN Susannah Darwin is recorded as biological parent of Charles Robert Darwin
-4 QUAY high
-1 RESI
-2 NOTE Public historical locality only.
-2 SOUR @S960EB9E452AF@
-3 PAGE relevant institutional family entry
-3 EVEN Public historical residence of Charles Robert Darwin
-3 QUAY high
-3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
-2 SOUR @S9A0DD18ACE00@
-3 PAGE Q1035
-3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EVEN Naturalist aboard HMS Beagle
 2 TYPE Voyage
@@ -938,1883 +871,1921 @@
 2 SOUR @S2F1C1AE175E4@
 3 PAGE relevant institutional biography or collection entry
 3 EVEN Voyage of HMS Beagle
-3 QUAY high
+3 QUAY 3
 1 RESI Down House
 2 DATE FROM 1842 TO 1882
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
 4 LATI N51.33138900
 4 LONG E0.05333300
 3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
+3 NOTE Coordinates identify the named site.
 2 SOUR @S20749CD8FE97@
 3 PAGE relevant institutional biography or collection entry
 3 EVEN Darwin family residence at Down House
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1035
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
+1 NOTE Charles Robert Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 12 FEB 1809. The recorded death date is 19 APR 1882 at Do
+2 CONC wn House. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. Documented unions in this tree connect this person with Emma Darwin. Public biographical sources identify the following occupation or public role
+2 CONC : geologist; explorer. Recorded education includes Christ's College; University of Edinburgh Medical School. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the f
+2 CONC amily beyond the commissioned cast or infer missing details from
+1 OBJE
+2 FILE darwin-charles-portrait.jpg
+2 FORM JPEG
+2 TITL Portrait of Charles Darwin by Herbert Rose Barraud (1845 - 1896) taken in 1881, thought to be the last photograph of Darwin before his death.
+1 _ATTC
+2 FILE Attachments/darwin-wedgwood-attachment-2.jpg
+2 TITL The Wedgwood family at Leith Hill Place
+2 NOTE Captioned family group plate reproduced in Emma Darwin: A Century of Family Letters (1915); selected as genealogical context for the shared Wedgwood ancestry.
+2 SOUR @S06234375ED2F@
+3 PAGE scan page 53; captioned plate
+3 EVEN The Wedgwood family at Leith Hill Place
+3 QUAY 3
+3 NOTE The full page and source volume are preserved; derivative was rotated, cropped, and resized only.
+1 FAMS @F8935D3525A28@
+1 FAMC @FC3067E1BD6AB@
+2 PEDI birth
+2 _PLINK @I7955F1BBEA07@
+3 _FTSID 7d0f3d16-31cb-51db-a470-2c6a0b9f8233
+3 PEDI birth
+3 SOUR @S960EB9E452AF@
+4 PAGE Emma Darwin
+4 EVEN Robert Waring Darwin is recorded as biological parent of Charles Robert Darwin
+4 QUAY 3
+2 _PLINK @ICF82177FE7DE@
+3 _FTSID 21c65833-6c32-594a-9fc5-7bfcf01ce24c
+3 PEDI birth
+3 SOUR @S960EB9E452AF@
+4 PAGE Emma Darwin
+4 EVEN Susannah Darwin is recorded as biological parent of Charles Robert Darwin
+4 QUAY 3
 0 @I2EC298B92657@ INDI
-1 _FTSID 7C51B232-8FEC-5C6D-8444-3F41F29F7AB3
-1 NAME Emily Catherine /Langton/
+1 _FTSID 7c51b232-8fec-5c6d-8444-3f41f29f7ab3
+1 NAME Emily Catherine /Darwin/
 2 TYPE married
 2 GIVN Emily Catherine
 2 SURN Langton
+2 _MARNM Emily Catherine /Langton/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Emily Catherine Langton
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1810
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Emily Catherine Langton
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1866
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Emily Catherine Langton
-3 QUAY high
-1 NOTE Emily Catherine Langton appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1810. T
-2 CONC he recorded death date is 1866. Within the defined scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public ac
-2 CONC tivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Emily Catherine Langton appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1810. The recorded death date is 1866. Within the defin
+2 CONC ed scope, the recorded parents are Robert Waring Darwin and Susannah Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned ca
+2 CONC st or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-emily-portrait.jpg
 2 FORM JPEG
+2 TITL Emily Catherine Darwin as a child
 1 FAMC @FC3067E1BD6AB@
 2 PEDI birth
 2 _PLINK @I7955F1BBEA07@
-3 _FTSID 58BC9C8F-A29C-5A26-BA6B-AC5435041279
+3 _FTSID 58bc9c8f-a29c-5a26-ba6b-ac5435041279
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Robert Waring Darwin is recorded as biological parent of Emily Catherine Langton
-4 QUAY high
+4 QUAY 3
 2 _PLINK @ICF82177FE7DE@
-3 _FTSID 0EB22977-65B7-5F11-A63A-A9145481C934
+3 _FTSID 0eb22977-65b7-5f11-a63a-a9145481c934
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Susannah Darwin is recorded as biological parent of Emily Catherine Langton
-4 QUAY high
+4 QUAY 3
 0 @I1533BFB1FF43@ INDI
-1 _FTSID 42386A77-BFB3-5A1E-915D-B6C97699978B
-1 NAME Emma /Darwin/
+1 _FTSID 42386a77-bfb3-5a1e-915d-b6c97699978b
+1 NAME Emma /Wedgwood/
 2 TYPE married
 2 GIVN Emma
 2 SURN Darwin
+2 _MARNM Emma /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Emma Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 2 MAY 1808
-2 PLAC Maer
+2 PLAC Maer, Staffordshire, United Kingdom
 3 MAP
-4 LATI N52.941200
-4 LONG W2.318100
+4 LATI N52.94120000
+4 LONG W2.31810000
+3 _PID darwin-wedgwood-place-q2665120
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Emma Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q242147
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q2665120
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 7 OCT 1896
-2 PLAC London Borough of Bromley
+2 PLAC London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.404444
-4 LONG E0.020000
+4 LATI N51.40444444
+4 LONG E0.02000000
+3 _PID darwin-wedgwood-place-q208201
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Emma Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q242147
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q208201
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Saint Mary the Virgin Churchyard
+2 PLAC Saint Mary the Virgin Churchyard, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335888
-4 LONG E0.054384
+4 LATI N51.33588800
+4 LONG E0.05438400
+3 _PID darwin-wedgwood-place-q109835214
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Emma Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q242147
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q109835214
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Emma Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 MAY 1808 at Maer. T
-2 CONC he recorded death date is 7 OCT 1896 at LondonBorough of Bromley. Within the defined scope, the recorded parents are Josiah Wedgwood II and Elizabeth “Bessy” Wedgwood. Documented unions in this tr
-2 CONC ee connect this person with Charles Robert Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyo
-2 CONC nd the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Emma Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 MAY 1808 at Maer. The recorded death date is 7 OCT 1896 at London
+2 CONC  Borough of Bromley. Within the defined scope, the recorded parents are Josiah Wedgwood II and Elizabeth “Bessy” Wedgwood. Documented unions in this tree connect this person with Charles Robert Darwin. This summary is confined to cited genealog
+2 CONC ical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-emma-portrait.jpg
 2 FORM JPEG
+2 TITL Emma Darwin portrait
 1 FAMS @F8935D3525A28@
 1 FAMC @FDBC2C15CDDE8@
 2 PEDI birth
 2 _PLINK @I9B02526BD3DA@
-3 _FTSID 4B959EF3-240E-574A-87AE-73190BEE5B65
+3 _FTSID 4b959ef3-240e-574a-87ae-73190bee5b65
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Josiah Wedgwood II is recorded as biological parent of Emma Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I174B191F2663@
-3 _FTSID 8DDA13B1-348E-5025-8F66-F2D66324455E
+3 _FTSID 8dda13b1-348e-5025-8f66-f2d66324455e
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Elizabeth “Bessy” Wedgwood is recorded as biological parent of Emma Darwin
-4 QUAY high
+4 QUAY 3
 0 @I5A7A056ECA93@ INDI
-1 _FTSID 59C2521E-BF98-58CA-BA33-3D4DAEC9F578
+1 _FTSID 59c2521e-bf98-58ca-ba33-3d4daec9f578
 1 NAME William Erasmus /Darwin/
 2 GIVN William Erasmus
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 1839
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6125346
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1914
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6125346
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC St Nicolas Churchyard
+2 PLAC St Nicolas Churchyard, Hampshire, United Kingdom
 3 MAP
-4 LATI N50.953516
-4 LONG W1.374176
+4 LATI N50.95351600
+4 LONG W1.37417600
+3 _PID darwin-wedgwood-place-q95412585
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6125346
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q95412585
-3 NOTE Locality coordinates, not a street address.
 1 OCCU businessperson
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6125346
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Christ's College; Rugby School
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of William Erasmus Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6125346
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE William Erasmus Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1839. Th
-2 CONC e recorded death date is 1914. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Sara Ashburner Darwin. P
-2 CONC ublic biographical sources identify the following occupation or public role: businessperson. Recorded education includes Christ's College; Rugby School. This summary is confined to cited genealogical f
-2 CONC acts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missingdetails from names, portraits, households, or succession.
+1 NOTE William Erasmus Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1839. The recorded death date is 1914. Within the define
+2 CONC d scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Sara Ashburner Darwin. Public biographical sources identify the following occupation or public role: businessperson. Re
+2 CONC corded education includes Christ's College; Rugby School. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing
+2 CONC  details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-william-portrait.jpg
 2 FORM JPEG
+2 TITL William Erasmus Darwin portrait
 1 FAMS @FF001E519A136@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 444629A6-AB24-54D0-8096-0A94D933BAF3
+3 _FTSID 444629a6-ab24-54d0-8096-0a94d933baf3
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of William Erasmus Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID 14122D86-D5F3-53AB-B006-C9BD1BF8C522
+3 _FTSID 14122d86-d5f3-53ab-b006-c9bd1bf8c522
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of William Erasmus Darwin
-4 QUAY high
+4 QUAY 3
 0 @ICAB166437006@ INDI
-1 _FTSID 3D68CA01-2DDD-5028-B3C5-DD56FB9C4933
+1 _FTSID 3d68ca01-2ddd-5028-b3c5-dd56fb9c4933
 1 NAME Anne Elizabeth /Darwin/
 2 GIVN Anne Elizabeth
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Anne Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 2 MAR 1841
 2 PLAC United Kingdom
+3 _PID darwin-wedgwood-place-q174193
+3 NOTE Historical name: United Kingdom of Great Britain and Ireland; Country-level location; no locality coordinates are asserted.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Anne Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5251786
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q174193
-3 NOTE Historical name: United Kingdom of Great Britain and Ireland; Locality coordinates, not a street address.
 1 DEAT
 2 DATE 23 APR 1851
-2 PLAC England
+2 PLAC England, United Kingdom
 3 MAP
-4 LATI N53.000000
-4 LONG W1.000000
+4 LATI N53.00000000
+4 LONG W1.00000000
+3 _PID darwin-wedgwood-place-q21
+3 NOTE Coordinates identify the named region.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Anne Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5251786
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q21
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Anne Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 MAR 184
-2 CONC 1 at United Kingdom. The recorded death date is23 APR 1851 at England. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genea
-2 CONC logical facts and selected public activities needed to interpret the graph; it does not extendthe family beyond the commissioned cast or infer missing details from names, portraits, households, or suc
-2 CONC cession.
+1 NOTE Anne Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 MAR 1841 at United Kingdom. The recorded death date is 
+2 CONC 23 APR 1851 at England. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend 
+2 CONC the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID E00D9DA3-3676-5363-A112-5EE720A63DC7
+3 _FTSID e00d9da3-3676-5363-a112-5ee720a63dc7
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Anne Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID C3E99F21-82B9-5D5A-A08C-F0388AA12137
+3 _FTSID c3e99f21-82b9-5d5a-a08c-f0388aa12137
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Anne Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 0 @IE63D60EEF3C9@ INDI
-1 _FTSID 34036A57-3DF0-5B16-B54A-E7DE993BF19E
+1 _FTSID 34036a57-3df0-5b16-b54a-e7de993bf19e
 1 NAME Mary Eleanor /Darwin/
 2 GIVN Mary Eleanor
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Mary Eleanor Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 23 SEP 1842
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Mary Eleanor Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q96077133
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 16 OCT 1842
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Mary Eleanor Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q96077133
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Mary Eleanor Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 23 SEP 1842
-2 CONC . The recorded death date is 16 OCT 1842. Withinthe defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected pub
-2 CONC lic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Mary Eleanor Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 23 SEP 1842. The recorded death date is 16 OCT 1842. Within
+2 CONC  the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissi
+2 CONC oned cast or infer missing details from names, portraits, households, or succession.
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID BD14087C-055B-5F95-A3A3-572F16D89378
+3 _FTSID bd14087c-055b-5f95-a3a3-572f16d89378
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Mary Eleanor Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID AC1070CC-A563-58C9-B93B-6F7DD179E417
+3 _FTSID ac1070cc-a563-58c9-b93b-6f7dd179e417
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Mary Eleanor Darwin
-4 QUAY high
+4 QUAY 3
 0 @IC4DC1810DC9D@ INDI
-1 _FTSID 41AD4AE9-6C9C-5D2C-B853-DF2221125348
-1 NAME Henrietta Emma /Litchfield/
+1 _FTSID 41ad4ae9-6c9c-5d2c-b853-df2221125348
+1 NAME Henrietta Emma /Darwin/
 2 TYPE married
 2 GIVN Henrietta Emma
 2 SURN Litchfield
+2 _MARNM Henrietta Emma /Litchfield/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Henrietta Emma Litchfield
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 25 SEP 1843
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.331389
-4 LONG E0.053333
+4 LATI N51.33138900
+4 LONG E0.05333300
+3 _PID darwin-wedgwood-place-q3038318
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Henrietta Emma Litchfield
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6584933
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 17 DEC 1927
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Henrietta Emma Litchfield
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6584933
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC Saint Mary the Virgin Churchyard
+2 PLAC Saint Mary the Virgin Churchyard, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335888
-4 LONG E0.054384
+4 LATI N51.33588800
+4 LONG E0.05438400
+3 _PID darwin-wedgwood-place-q109835214
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Henrietta Emma Litchfield
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q6584933
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q109835214
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Henrietta Emma Litchfield appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 25 SE
-2 CONC P 1843 at Down House. The recorded death date is17 DEC 1927. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this perso
-2 CONC n with Richard Buckley Litchfield. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissio
-2 CONC ned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Henrietta Emma Litchfield appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 25 SEP 1843 at Down House. The recorded death date is
+2 CONC  17 DEC 1927. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Richard Buckley Litchfield. This summary is confined to cited genealogical facts and sel
+2 CONC ected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-henrietta-portrait.jpg
 2 FORM JPEG
+2 TITL Henrietta Litchfield and William Darwin
 1 FAMS @FE32F2048E943@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 81514B66-41E9-51C0-9CF8-DA6AF7E13A1C
+3 _FTSID 81514b66-41e9-51c0-9cf8-da6af7e13a1c
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Henrietta Emma Litchfield
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID A86494C6-331E-5C1D-8FF1-3A1B47DAEBBB
+3 _FTSID a86494c6-331e-5c1d-8ff1-3a1b47daebbb
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Henrietta Emma Litchfield
-4 QUAY high
+4 QUAY 3
 0 @I519ECBB01372@ INDI
-1 _FTSID 1E891993-3E92-5B4D-8985-C61C36BCB9A0
+1 _FTSID 1e891993-3e92-5b4d-8985-c61c36bcb9a0
 1 NAME George Howard /Darwin/
 2 GIVN George Howard
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for George Howard Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 9 JUL 1845
-2 PLAC Downe
+2 PLAC Downe, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335900
-4 LONG E0.053500
+4 LATI N51.33590000
+4 LONG E0.05350000
+3 _PID darwin-wedgwood-place-q125344
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of George Howard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q325016
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q125344
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 7 DEC 1912
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of George Howard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q325016
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Church of St Mary and St Michael, Trumpington
+2 PLAC Church of St Mary and St Michael, Trumpington, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.174000
-4 LONG E0.108514
+4 LATI N52.17400000
+4 LONG E0.10851400
+3 _PID darwin-wedgwood-place-q17527263
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of George Howard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q325016
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q17527263
-3 NOTE Locality coordinates, not a street address.
 1 OCCU mathematician; astronomer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of George Howard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q325016
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Trinity College; University of Cambridge
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of George Howard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q325016
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE George Howard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 9 JUL 1845 a
-2 CONC t Downe. The recorded death date is 7 DEC 1912at Cambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person w
-2 CONC ith Martha du Puy Darwin. Public biographical sources identify the following occupation orpublic role: mathematician; astronomer. Recorded education includes Trinity College; University of Cambridge. T
-2 CONC his summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend thefamily beyond the commissioned cast or infer missing details
+1 NOTE George Howard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 9 JUL 1845 at Downe. The recorded death date is 7 DEC 1912
+2 CONC  at Cambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Martha du Puy Darwin. Public biographical sources identify the following occupation or 
+2 CONC public role: mathematician; astronomer. Recorded education includes Trinity College; University of Cambridge. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the 
+2 CONC family beyond the commissioned cast or infer missing details
 1 OBJE
 2 FILE darwin-george-portrait.jpg
 2 FORM JPEG
+2 TITL George Howard Darwin portrait
 1 FAMS @F7BB0A6634BE7@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 237896B2-6500-5668-BE17-9FFB4CFBC7D4
+3 _FTSID 237896b2-6500-5668-be17-9ffb4cfbc7d4
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of George Howard Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID EDA42FAF-9D7A-5A7A-8661-2E8FFF0ADA4A
+3 _FTSID eda42faf-9d7a-5a7a-8661-2e8fff0ada4a
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of George Howard Darwin
-4 QUAY high
+4 QUAY 3
 0 @I25D5E04EBCDC@ INDI
-1 _FTSID 04E96B34-F059-51D1-AEE5-B52632AF4730
+1 _FTSID 04e96b34-f059-51d1-aee5-b52632af4730
 1 NAME Elizabeth /Darwin/
 2 GIVN Elizabeth
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 8 JUL 1847
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76611716
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1926
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Elizabeth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76611716
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 8 JUL 1847. Th
-2 CONC e recorded death date is 1926. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected public activi
-2 CONC ties needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Elizabeth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 8 JUL 1847. The recorded death date is 1926. Within the define
+2 CONC d scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast o
+2 CONC r infer missing details from names, portraits, households, or succession.
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 4C60C49B-B08F-5D93-BD6D-E62B0BA67DDE
+3 _FTSID 4c60c49b-b08f-5d93-bd6d-e62b0ba67dde
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID D5450423-074B-563F-B1E8-EBECCB50D676
+3 _FTSID d5450423-074b-563f-b1e8-ebeccb50d676
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Elizabeth Darwin
-4 QUAY high
+4 QUAY 3
 0 @IF53C7B035CD8@ INDI
-1 _FTSID F478BDC3-65B7-5ABB-A849-0F3EC4E79F69
+1 _FTSID f478bdc3-65b7-5abb-a849-0f3ec4e79f69
 1 NAME Francis /Darwin/
 2 GIVN Francis
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Francis Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 16 AUG 1848
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.331389
-4 LONG E0.053333
+4 LATI N51.33138900
+4 LONG E0.05333300
+3 _PID darwin-wedgwood-place-q3038318
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Francis Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1333425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 19 SEP 1925
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Francis Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1333425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Cambridgeshire
+2 PLAC Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.350000
-4 LONG E0.000000
+4 LATI N52.35000000
+4 LONG E0.00000000
+3 _PID darwin-wedgwood-place-q23112
+3 NOTE Coordinates identify the named region.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Francis Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1333425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q23112
-3 NOTE Locality coordinates, not a street address.
 1 OCCU botanist
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Francis Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1333425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Trinity College; St George's, University of London
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Francis Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1333425
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Francis Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 16 AUG 1848 at D
-2 CONC own House. The recorded death date is 19 SEP 1925 at Cambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this pe
-2 CONC rson with Amy Darwin, Ellen Wordsworth Darwin, Florence Henrietta Darwin. Public biographical sources identify the following occupation or public role: botanist. Recorded education includes Trinity Co
-2 CONC llege; St George's, University of London. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the co
-2 CONC mmissioned
+1 NOTE Francis Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 16 AUG 1848 at Down House. The recorded death date is 19 SEP 192
+2 CONC 5 at Cambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Amy Darwin, Ellen Wordsworth Darwin, Florence Henrietta Darwin. Public biographical so
+2 CONC urces identify the following occupation or public role: botanist. Recorded education includes Trinity College; St George's, University of London. This summary is confined to cited genealogical facts and selected public activities needed to interpre
+2 CONC t the graph; it does not extend the family beyond the commissioned
 1 OBJE
 2 FILE darwin-francis-portrait.jpg
 2 FORM JPEG
+2 TITL Francis Darwin portrait
 1 FAMS @FA89F48E27FF5@
 1 FAMS @F7C3D923D42D9@
 1 FAMS @F7E3D84ABB4CB@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID B0955878-DFE3-5797-AF52-53DCCD549853
+3 _FTSID b0955878-dfe3-5797-af52-53dccd549853
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Francis Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID 31A67230-573E-5311-A33C-26ECF2C09464
+3 _FTSID 31a67230-573e-5311-a33c-26ecf2c09464
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Francis Darwin
-4 QUAY high
+4 QUAY 3
 0 @I590FED89F6D1@ INDI
-1 _FTSID C4267A20-1841-51B3-969B-6737748B8962
+1 _FTSID c4267a20-1841-51b3-969b-6737748b8962
 1 NAME Leonard /Darwin/
 2 GIVN Leonard
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Leonard Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 15 JAN 1850
-2 PLAC Downe
+2 PLAC Downe, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335900
-4 LONG E0.053500
+4 LATI N51.33590000
+4 LONG E0.05350000
+3 _PID darwin-wedgwood-place-q125344
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Leonard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q354352
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q125344
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 26 MAR 1943
-2 PLAC London
+2 PLAC London, Greater London, United Kingdom
 3 MAP
-4 LATI N51.507222
-4 LONG W0.127500
+4 LATI N51.50722222
+4 LONG W0.12750000
+3 _PID darwin-wedgwood-place-q84
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Leonard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q354352
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q84
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Forest Row
+2 PLAC Forest Row, Wealden, United Kingdom
 3 MAP
-4 LATI N51.098194
-4 LONG E0.033417
+4 LATI N51.09819444
+4 LONG E0.03341667
+3 _PID darwin-wedgwood-place-q1621168
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Leonard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q354352
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q1621168
-3 NOTE Locality coordinates, not a street address.
 1 OCCU eugenicist; engineer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Leonard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q354352
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Leonard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 15 JAN 1850 at D
-2 CONC owne. The recorded death date is 26 MAR 1943 atLondon. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with E
-2 CONC lizabeth Frances Darwin, Charlotte Mildred Darwin. Public biographical sources identify the following occupation or public role: eugenicist; engineer. This summary is confined to cited genealogical fa
-2 CONC cts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missingdetails from names, portraits, households, or succession.
+1 NOTE Leonard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 15 JAN 1850 at Downe. The recorded death date is 26 MAR 1943 at 
+2 CONC London. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Elizabeth Frances Darwin, Charlotte Mildred Darwin. Public biographical sources identify the f
+2 CONC ollowing occupation or public role: eugenicist; engineer. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing
+2 CONC  details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-leonard-portrait.jpg
 2 FORM JPEG
+2 TITL Leonard Darwin portrait
 1 FAMS @FC8C3F93B8FE3@
 1 FAMS @FACC4E9831789@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 3FE455BF-3F86-5F4C-A737-E646B1BBBA62
+3 _FTSID 3fe455bf-3f86-5f4c-a737-e646b1bbba62
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Leonard Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID D63F95DF-B4A0-58A3-B8F3-2097436C2BA4
+3 _FTSID d63f95df-b4a0-58a3-b8f3-2097436c2ba4
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Leonard Darwin
-4 QUAY high
+4 QUAY 3
 0 @I14B246AEB919@ INDI
-1 _FTSID B8EA5B7D-289D-5314-8314-94ADCB7B765C
+1 _FTSID b8ea5b7d-289d-5314-8314-94adcb7b765c
 1 NAME Horace /Darwin/
 2 GIVN Horace
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Horace Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 13 MAY 1851
-2 PLAC Downe
+2 PLAC Downe, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335900
-4 LONG E0.053500
+4 LATI N51.33590000
+4 LONG E0.05350000
+3 _PID darwin-wedgwood-place-q125344
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Horace Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1374840
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q125344
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 22 SEP 1928
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Horace Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1374840
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Ascension Parish Burial Ground
+2 PLAC Ascension Parish Burial Ground, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.217600
-4 LONG E0.100100
+4 LATI N52.21760000
+4 LONG E0.10010000
+3 _PID darwin-wedgwood-place-q4803837
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Horace Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1374840
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q4803837
-3 NOTE Locality coordinates, not a street address.
 1 OCCU civil engineer; engineer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Horace Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1374840
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Trinity College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Horace Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1374840
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Horace Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 13 MAY 1851 at Do
-2 CONC wne. The recorded death date is 22 SEP 1928 at Cambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person w
-2 CONC ith Emma Cecilia Darwin. Public biographical sources identify the following occupation or publicrole: civil engineer; engineer. Recorded education includes Trinity College. This summary is confined to c
-2 CONC ited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, househo
-2 CONC lds,
+1 NOTE Horace Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 13 MAY 1851 at Downe. The recorded death date is 22 SEP 1928 at C
+2 CONC ambridge. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. Documented unions in this tree connect this person with Emma Cecilia Darwin. Public biographical sources identify the following occupation or public
+2 CONC  role: civil engineer; engineer. Recorded education includes Trinity College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned c
+2 CONC ast or infer missing details from names, portraits, households,
 1 OBJE
 2 FILE darwin-horace-portrait.jpg
 2 FORM JPEG
+2 TITL Horace Darwin portrait
 1 FAMS @F6BA5994C8913@
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 9B298246-F41A-50F1-8C5B-7229A6F0DC41
+3 _FTSID 9b298246-f41a-50f1-8c5b-7229a6f0dc41
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Horace Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID 32C97DB3-0893-5437-9E27-2401269A3F61
+3 _FTSID 32c97db3-0893-5437-9e27-2401269a3f61
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Horace Darwin
-4 QUAY high
+4 QUAY 3
 0 @I300AFA8F33A7@ INDI
-1 _FTSID 0A9DAD89-D479-5FB9-96F3-ED3B54C93DCA
+1 _FTSID 0a9dad89-d479-5fb9-96f3-ed3b54c93dca
 1 NAME Charles Waring /Darwin/
 2 GIVN Charles Waring
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Charles Waring Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 6 DEC 1856
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.331389
-4 LONG E0.053333
+4 LATI N51.33138900
+4 LONG E0.05333300
+3 _PID darwin-wedgwood-place-q3038318
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Charles Waring Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q4575814
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 28 JUN 1858
-2 PLAC Down House
+2 PLAC Down House, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.331389
-4 LONG E0.053333
+4 LATI N51.33138900
+4 LONG E0.05333300
+3 _PID darwin-wedgwood-place-q3038318
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Charles Waring Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q4575814
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q3038318
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Westminster Abbey
+2 PLAC Westminster Abbey, City of Westminster, Greater London, United Kingdom
 3 MAP
-4 LATI N51.499400
-4 LONG W0.127367
+4 LATI N51.49940000
+4 LONG W0.12736700
+3 _PID darwin-wedgwood-place-q5933
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Charles Waring Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q4575814
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q5933
-3 NOTE Locality coordinates, not a street address.
-1 NOTE Charles Waring Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 DEC 185
-2 CONC 6 at Down House. The recorded death date is 28 JUN 1858 at Down House. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genea
-2 CONC logical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or su
-2 CONC ccession.
+1 NOTE Charles Waring Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 DEC 1856 at Down House. The recorded death date is 28 J
+2 CONC UN 1858 at Down House. Within the defined scope, the recorded parents are Charles Robert Darwin and Emma Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend t
+2 CONC he family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 FAMC @F8935D3525A28@
 2 PEDI birth
 2 _PLINK @IAF7906F1736F@
-3 _FTSID 08221BAB-CB44-5DC5-89A9-5F95B92053AB
+3 _FTSID 08221bab-cb44-5dc5-89a9-5f95b92053ab
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Charles Robert Darwin is recorded as biological parent of Charles Waring Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I1533BFB1FF43@
-3 _FTSID CAA35817-0DA1-551B-99F3-798ED9146962
+3 _FTSID caa35817-0da1-551b-99f3-798ed9146962
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Emma Darwin is recorded as biological parent of Charles Waring Darwin
-4 QUAY high
+4 QUAY 3
 0 @I84416AF0250A@ INDI
-1 _FTSID 9D57514B-E047-57EA-9A71-13BCCE443571
-1 NAME Sara Ashburner /Darwin/
+1 _FTSID 9d57514b-e047-57ea-9a71-13bcce443571
+1 NAME Sara Ashburner /Sedgwick/
 2 TYPE married
 2 GIVN Sara Ashburner
 2 SURN Darwin
+2 _MARNM Sara Ashburner /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Sara Ashburner Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1839
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Sara Ashburner Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1902
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Sara Ashburner Darwin
-3 QUAY high
-1 NOTE Sara Ashburner Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1839. The r
-2 CONC ecorded death date is 1902. Documented unionsin this tree connect this person with William Erasmus Darwin. This summary is confined to cited genealogical facts and selected public activities needed to i
-2 CONC nterpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Sara Ashburner Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1839. The recorded death date is 1902. Documented unions 
+2 CONC in this tree connect this person with William Erasmus Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer mis
+2 CONC sing details from names, portraits, households, or succession.
 1 FAMS @FF001E519A136@
 0 @IAC51CD7E71A9@ INDI
-1 _FTSID 9E911199-4838-5E9D-B686-B31F9285958F
+1 _FTSID 9e911199-4838-5e9d-b686-b31f9285958f
 1 NAME Richard Buckley /Litchfield/
 2 GIVN Richard Buckley
 2 SURN Litchfield
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 6 JAN 1832
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7324427
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 11 JAN 1903
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7324427
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC Cannes (Grand Jas) Cemetery
+2 PLAC Cannes (Grand Jas) Cemetery, Cannes, Alpes-Maritimes, France
 3 MAP
-4 LATI N43.559388
-4 LONG E7.005195
+4 LATI N43.55938800
+4 LONG E7.00519500
+3 _PID darwin-wedgwood-place-q1092108
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7324427
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q1092108
-3 NOTE Locality coordinates, not a street address.
 1 OCCU academic; barrister
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7324427
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Trinity College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Richard Buckley Litchfield
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q7324427
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Richard Buckley Litchfield appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 JA
-2 CONC N 1832. The recorded death date is 11 JAN 1903.Documented unions in this tree connect this person with Henrietta Emma Litchfield. Public biographical sources identify the following occupation or publi
-2 CONC c role: academic; barrister. Recorded education includes Trinity College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not e
-2 CONC xtend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Richard Buckley Litchfield appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 JAN 1832. The recorded death date is 11 JAN 1903. 
+2 CONC Documented unions in this tree connect this person with Henrietta Emma Litchfield. Public biographical sources identify the following occupation or public role: academic; barrister. Recorded education includes Trinity College. This summary is confi
+2 CONC ned to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-richard-litchfield-portrait.jpg
 2 FORM JPEG
+2 TITL Richard Buckley Litchfield
 1 FAMS @FE32F2048E943@
 0 @I64F16F87773C@ INDI
-1 _FTSID 145E1DBD-D1FD-53C9-A3AE-0D23E5F1139E
-1 NAME Martha /Darwin/
+1 _FTSID 145e1dbd-d1fd-53c9-a3ae-0d23e5f1139e
+1 NAME Martha /du Puy/
 2 TYPE married
 2 GIVN Martha
 2 SURN Darwin
 2 NICK Maud
+2 _MARNM Martha /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Martha du Puy Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1861
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Martha du Puy Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1947
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Martha du Puy Darwin
-3 QUAY high
-1 NOTE Martha du Puy Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1861. The r
-2 CONC ecorded death date is 1947. Documented unions in this tree connect this person with George Howard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to i
-2 CONC nterpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Martha du Puy Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1861. The recorded death date is 1947. Documented unions i
+2 CONC n this tree connect this person with George Howard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missin
+2 CONC g details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-maud-dupuy-portrait.jpg
 2 FORM JPEG
+2 TITL Maud Darwin
 1 FAMS @F7BB0A6634BE7@
 0 @I9E5CC764D307@ INDI
-1 _FTSID 49C83CBD-662C-5B68-BF20-79D665DB0A87
-1 NAME Amy /Darwin/
+1 _FTSID 49c83cbd-662c-5b68-bf20-79d665db0a87
+1 NAME Amy /Ruck/
 2 TYPE married
 2 GIVN Amy
 2 SURN Darwin
+2 _MARNM Amy /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Amy Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1850
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Amy Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76102537
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 1876
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Amy Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q76102537
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Amy Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1850. The recorded d
-2 CONC eath date is 1876. Documented unions in this tree connect this person with Francis Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the g
-2 CONC raph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Amy Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1850. The recorded death date is 1876. Documented unions in this tre
+2 CONC e connect this person with Francis Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from n
+2 CONC ames, portraits, households, or succession.
 1 FAMS @FA89F48E27FF5@
 0 @ICFE7506054BD@ INDI
-1 _FTSID 24D98C72-6BD4-5A00-A0AB-89DA16D406D8
-1 NAME Ellen Wordsworth /Darwin/
+1 _FTSID 24d98c72-6bd4-5a00-a0ab-89da16d406d8
+1 NAME Ellen Wordsworth /Crofts/
 2 TYPE married
 2 GIVN Ellen Wordsworth
 2 SURN Darwin
+2 _MARNM Ellen Wordsworth /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Ellen Wordsworth Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1856
-2 PLAC Leeds
+2 PLAC Leeds, West Yorkshire, United Kingdom
 3 MAP
-4 LATI N53.797500
-4 LONG W1.543611
+4 LATI N53.79750000
+4 LONG W1.54361111
+3 _PID darwin-wedgwood-place-q39121
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Ellen Wordsworth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q18528653
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q39121
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 1903
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Ellen Wordsworth Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q18528653
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 OCCU lecturer; botanist
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Ellen Wordsworth Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q18528653
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Newnham College; Newnham College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Ellen Wordsworth Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q18528653
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Ellen Wordsworth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1856 at L
-2 CONC eeds. The recorded death date is 1903 at Cambridge. Documented unions in this tree connect this person with Francis Darwin. Public biographical sources identify the following occupation or public role
-2 CONC : lecturer; botanist. Recorded education includes Newnham College; Newnham College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; i
-2 CONC t does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 NOTE Ellen Wordsworth Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1856 at Leeds. The recorded death date is 1903 at Cambr
+2 CONC idge. Documented unions in this tree connect this person with Francis Darwin. Public biographical sources identify the following occupation or public role: lecturer; botanist. Recorded education includes Newnham College; Newnham College. This summa
+2 CONC ry is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-ellen-crofts-portrait.jpg
 2 FORM JPEG
+2 TITL Ellen Wordsworth Darwin portrait
 1 FAMS @F7C3D923D42D9@
 0 @IA3FCF7673B98@ INDI
-1 _FTSID 4F7FEAB9-CED9-56A7-9358-2586A56DA039
-1 NAME Florence Henrietta /Darwin/
+1 _FTSID 4f7feab9-ced9-56a7-9358-2586a56da039
+1 NAME Florence Henrietta /Fisher/
 2 TYPE married
 2 GIVN Florence Henrietta
 2 SURN Darwin
+2 _MARNM Florence Henrietta /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Florence Henrietta Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1864
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Florence Henrietta Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5460638
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 5 MAR 1920
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Florence Henrietta Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5460638
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 BURI
-2 PLAC Ascension Parish Burial Ground
+2 PLAC Ascension Parish Burial Ground, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.217600
-4 LONG E0.100100
+4 LATI N52.21760000
+4 LONG E0.10010000
+3 _PID darwin-wedgwood-place-q4803837
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Florence Henrietta Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5460638
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q4803837
-3 NOTE Locality coordinates, not a street address.
 1 OCCU playwright; writer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Florence Henrietta Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q5460638
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Florence Henrietta Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1864. T
-2 CONC he recorded death date is 5 MAR 1920. Documented unions in this tree connect this person with Francis Darwin. Public biographical sources identify the following occupation or public role: playwright; w
-2 CONC riter. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing de
-2 CONC tails from names, portraits, households, or succession.
+1 NOTE Florence Henrietta Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1864. The recorded death date is 5 MAR 1920. Document
+2 CONC ed unions in this tree connect this person with Francis Darwin. Public biographical sources identify the following occupation or public role: playwright; writer. This summary is confined to cited genealogical facts and selected public activities ne
+2 CONC eded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-florence-fisher-portrait.jpg
 2 FORM JPEG
+2 TITL Florence Henrietta Darwin portrait
 1 FAMS @F7E3D84ABB4CB@
 0 @ID856EF0BA6CC@ INDI
-1 _FTSID ACA9E6C9-380A-5ECB-A3CA-B8798F1A1A34
-1 NAME Elizabeth Frances /Darwin/
+1 _FTSID aca9e6c9-380a-5ecb-a3ca-b8798f1a1a34
+1 NAME Elizabeth Frances /Fraser/
 2 TYPE married
 2 GIVN Elizabeth Frances
 2 SURN Darwin
+2 _MARNM Elizabeth Frances /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Elizabeth Frances Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1862
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Elizabeth Frances Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1898
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Elizabeth Frances Darwin
-3 QUAY high
-1 NOTE Elizabeth Frances Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1862. T
-2 CONC he recorded death date is 1898. Documented unions in this tree connect this person with Leonard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to in
-2 CONC terpret the graph; it does not extend the family beyond the commissioned cast or infer missingdetails from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Elizabeth Frances Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1862. The recorded death date is 1898. Documented unio
+2 CONC ns in this tree connect this person with Leonard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing 
+2 CONC details from names, portraits, households, or succession.
 1 FAMS @FC8C3F93B8FE3@
 0 @IBF96A6E4D5F6@ INDI
-1 _FTSID C71A0468-77DA-52D3-8DF3-05366DFC7BCB
-1 NAME Charlotte Mildred /Darwin/
+1 _FTSID c71a0468-77da-52d3-8df3-05366dfc7bcb
+1 NAME Charlotte Mildred /Massingberd/
 2 TYPE married
 2 GIVN Charlotte Mildred
 2 SURN Darwin
+2 _MARNM Charlotte Mildred /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Charlotte Mildred Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1868
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Charlotte Mildred Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1940
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Charlotte Mildred Darwin
-3 QUAY high
-1 NOTE Charlotte Mildred Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1868. T
-2 CONC he recorded death date is 1940. Documented unions in this tree connect this person with Leonard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to in
-2 CONC terpret the graph; it does not extend the family beyond the commissioned cast or infer missingdetails from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Charlotte Mildred Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1868. The recorded death date is 1940. Documented unio
+2 CONC ns in this tree connect this person with Leonard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing 
+2 CONC details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-charlotte-massingberd-portrait.jpg
 2 FORM JPEG
+2 TITL Charlotte Mildred Langton, later Mrs Leonard Darwin
 1 FAMS @FACC4E9831789@
 0 @I377BA4803D67@ INDI
-1 _FTSID AA824994-3359-5972-B7BD-B3BBE18C5AAB
-1 NAME Emma Cecilia /Darwin/
+1 _FTSID aa824994-3359-5972-b7bd-b3bbe18c5aab
+1 NAME Emma Cecilia /Farrer/
 2 TYPE married
 2 GIVN Emma Cecilia
 2 SURN Darwin
+2 _MARNM Emma Cecilia /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Emma Cecilia Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1854
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Emma Cecilia Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1920
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Emma Cecilia Darwin
-3 QUAY high
-1 NOTE Emma Cecilia Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1854. The r
-2 CONC ecorded death date is 1920. Documented unions inthis tree connect this person with Horace Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpre
-2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Emma Cecilia Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1854. The recorded death date is 1920. Documented unions in
+2 CONC  this tree connect this person with Horace Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing detail
+2 CONC s from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-emma-farrer-portrait.jpg
 2 FORM JPEG
+2 TITL Emma Cecilia 'Ida' Darwin
 1 FAMS @F6BA5994C8913@
 0 @I27DFE0A2CFA4@ INDI
-1 _FTSID 6EA9D93B-108F-5AB9-86D2-622B50643AA5
+1 _FTSID 6ea9d93b-108f-5ab9-86d2-622b50643aa5
 1 NAME Bernard /Darwin/
 2 GIVN Bernard
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Bernard Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 7 SEP 1876
-2 PLAC Downe
+2 PLAC Downe, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335900
-4 LONG E0.053500
+4 LATI N51.33590000
+4 LONG E0.05350000
+3 _PID darwin-wedgwood-place-q125344
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Bernard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q822372
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q125344
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 18 OCT 1961
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Bernard Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q822372
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Saint Mary the Virgin Churchyard
+2 PLAC Saint Mary the Virgin Churchyard, London Borough of Bromley, Greater London, United Kingdom
 3 MAP
-4 LATI N51.335888
-4 LONG E0.054384
+4 LATI N51.33588800
+4 LONG E0.05438400
+3 _PID darwin-wedgwood-place-q109835214
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Bernard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q822372
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q109835214
-3 NOTE Locality coordinates, not a street address.
 1 OCCU writer; golfer
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Bernard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q822372
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Eton College; Trinity College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Bernard Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q822372
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Bernard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 SEP 1876 at Do
-2 CONC wne. The recorded death date is 18 OCT 1961 at Cambridge. Within the defined scope, the recorded parents are Francis Darwin and Amy Darwin. Documented unions in this tree connect this person with Elin
-2 CONC or Mary Darwin. Public biographical sources identify the following occupation or public role: writer; golfer. Recorded education includes Eton College; Trinity College. This summary is confined to cit
-2 CONC ed genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, household
-2 CONC s,
+1 NOTE Bernard Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 SEP 1876 at Downe. The recorded death date is 18 OCT 1961 at C
+2 CONC ambridge. Within the defined scope, the recorded parents are Francis Darwin and Amy Darwin. Documented unions in this tree connect this person with Elinor Mary Darwin. Public biographical sources identify the following occupation or public role: wr
+2 CONC iter; golfer. Recorded education includes Eton College; Trinity College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast o
+2 CONC r infer missing details from names, portraits, households,
 1 OBJE
 2 FILE darwin-bernard-portrait.jpg
 2 FORM JPEG
+2 TITL Bernard Darwin portrait
 1 FAMS @F391FE8FEAAF0@
 1 FAMC @FA89F48E27FF5@
 2 PEDI birth
 2 _PLINK @IF53C7B035CD8@
-3 _FTSID 3EDCA6C0-675D-53E5-A1F4-FC7634D69D25
+3 _FTSID 3edca6c0-675d-53e5-a1f4-fc7634d69d25
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Francis Darwin is recorded as biological parent of Bernard Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I9E5CC764D307@
-3 _FTSID C24045E0-691C-5BFD-8475-E450AFA03F8C
+3 _FTSID c24045e0-691c-5bfd-8475-e450afa03f8c
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Amy Darwin is recorded as biological parent of Bernard Darwin
-4 QUAY high
+4 QUAY 3
 0 @IE63A1972691D@ INDI
-1 _FTSID 3FABC103-24E5-5E68-99E1-74D960BD0E5E
-1 NAME Elinor Mary /Darwin/
+1 _FTSID 3fabc103-24e5-5e68-99e1-74d960bd0e5e
+1 NAME Elinor Mary /Monsell/
 2 TYPE married
 2 GIVN Elinor Mary
 2 SURN Darwin
+2 _MARNM Elinor Mary /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Elinor Mary Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1879
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Elinor Mary Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1954
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Elinor Mary Darwin
-3 QUAY high
-1 NOTE Elinor Mary Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1879. The re
-2 CONC corded death date is 1954. Documented unions inthis tree connect this person with Bernard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpre
-2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Elinor Mary Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1879. The recorded death date is 1954. Documented unions in 
+2 CONC this tree connect this person with Bernard Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing detail
+2 CONC s from names, portraits, households, or succession.
 1 FAMS @F391FE8FEAAF0@
 0 @I5265C642ECD4@ INDI
-1 _FTSID D0895492-0888-5503-B18D-ED5200214137
-1 NAME Gwendolen Mary /Raverat/
+1 _FTSID d0895492-0888-5503-b18d-ed5200214137
+1 NAME Gwendolen Mary /Darwin/
 2 TYPE married
 2 GIVN Gwendolen Mary
 2 SURN Raverat
 2 NICK Gwen
+2 _MARNM Gwendolen Mary /Raverat/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 26 AUG 1885
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 11 FEB 1957
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Cambridgeshire
+2 PLAC Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.350000
-4 LONG E0.000000
+4 LATI N52.35000000
+4 LONG E0.00000000
+3 _PID darwin-wedgwood-place-q23112
+3 NOTE Coordinates identify the named region.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q23112
-3 NOTE Locality coordinates, not a street address.
 1 OCCU autobiographer; illustrator
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Slade School of Fine Art
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 RESI
-2 NOTE Public historical locality only.
-2 SOUR @S960EB9E452AF@
-3 PAGE relevant institutional family entry
-3 EVEN Public historical residence of Gwendolen Mary Raverat
-3 QUAY high
-3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
-2 SOUR @S9A0DD18ACE00@
-3 PAGE Q532958
-3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
-3 NOTE An institutional citation remains attached to the event.
-1 NOTE Gwendolen Mary Raverat appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 26 AUG 1
-2 CONC 885 at Cambridge. The recorded death date is 11FEB 1957 at Cambridge. Within the defined scope, the recorded parents are George Howard Darwin and Martha du Puy Darwin. Documented unions in this tree c
-2 CONC onnect this person with Jacques Raverat. Public biographical sources identify the following occupation or public role: autobiographer; illustrator. Recorded education includes Slade School of Fine Art
-2 CONC . This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details
-1 OBJE
-2 FILE darwin-gwen-raverat-portrait.jpg
-2 FORM JPEG
-1 FAMS @F88F3D799B1DC@
-1 FAMC @F7BB0A6634BE7@
-2 PEDI birth
-2 _PLINK @I519ECBB01372@
-3 _FTSID 2D07D25B-DBB4-57A5-8121-DE6298133569
-3 PEDI birth
-3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
-4 EVEN George Howard Darwin is recorded as biological parent of Gwendolen Mary Raverat
-4 QUAY high
-2 _PLINK @I64F16F87773C@
-3 _FTSID F3F987CC-F014-5CEC-BE7F-D351EDAD7C57
-3 PEDI birth
-3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
-4 EVEN Martha du Puy Darwin is recorded as biological parent of Gwendolen Mary Raverat
-4 QUAY high
-1 RESI
-2 PLAC Darwin College
+2 PLAC Darwin College, Cambridgeshire, United Kingdom
 3 MAP
 4 LATI N52.20055556
 4 LONG E0.11361111
 3 _PID darwin-wedgwood-place-q675110
-3 NOTE Locality coordinates, not a street address.
+3 NOTE Coordinates identify the named site.
 2 NOTE Public historical locality only.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public historical residence of Gwendolen Mary Raverat
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q532958
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
+1 NOTE Gwendolen Mary Raverat appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 26 AUG 1885 at Cambridge. The recorded death date is 11 
+2 CONC FEB 1957 at Cambridge. Within the defined scope, the recorded parents are George Howard Darwin and Martha du Puy Darwin. Documented unions in this tree connect this person with Jacques Raverat. Public biographical sources identify the following occ
+2 CONC upation or public role: autobiographer; illustrator. Recorded education includes Slade School of Fine Art. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the fam
+2 CONC ily beyond the commissioned cast or infer missing details
+1 OBJE
+2 FILE darwin-gwen-raverat-portrait.jpg
+2 FORM JPEG
+2 TITL Gwendolen Mary Raverat portrait
+1 FAMS @F88F3D799B1DC@
+1 FAMC @F7BB0A6634BE7@
+2 PEDI birth
+2 _PLINK @I519ECBB01372@
+3 _FTSID 2d07d25b-dbb4-57a5-8121-de6298133569
+3 PEDI birth
+3 SOUR @S960EB9E452AF@
+4 PAGE Emma Darwin
+4 EVEN George Howard Darwin is recorded as biological parent of Gwendolen Mary Raverat
+4 QUAY 3
+2 _PLINK @I64F16F87773C@
+3 _FTSID f3f987cc-f014-5cec-be7f-d351edad7c57
+3 PEDI birth
+3 SOUR @S960EB9E452AF@
+4 PAGE Emma Darwin
+4 EVEN Martha du Puy Darwin is recorded as biological parent of Gwendolen Mary Raverat
+4 QUAY 3
 0 @IC311BEFFABBA@ INDI
-1 _FTSID 3811458C-33B5-52B7-B3B9-D921F2D4705D
+1 _FTSID 3811458c-33b5-52b7-b3b9-d921f2d4705d
 1 NAME Jacques /Raverat/
 2 GIVN Jacques
 2 SURN Raverat
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Jacques Raverat
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 1885
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Jacques Raverat
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q2218128
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 DEAT
 2 DATE 7 MAR 1925
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Jacques Raverat
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q2218128
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 OCCU painter
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Jacques Raverat
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q2218128
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Jacques Raverat appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1885. The recor
-2 CONC ded death date is 7 MAR 1925. Documented unionsin this tree connect this person with Gwendolen Mary Raverat. Public biographical sources identify the following occupation or public role: painter. This s
-2 CONC ummary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from na
-2 CONC mes, portraits, households, or succession.
+1 NOTE Jacques Raverat appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1885. The recorded death date is 7 MAR 1925. Documented unions 
+2 CONC in this tree connect this person with Gwendolen Mary Raverat. Public biographical sources identify the following occupation or public role: painter. This summary is confined to cited genealogical facts and selected public activities needed to inter
+2 CONC pret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
 1 OBJE
 2 FILE darwin-jacques-raverat-portrait.jpg
 2 FORM JPEG
+2 TITL Jacques Raverat with friends
 1 FAMS @F88F3D799B1DC@
 0 @I190A47E34D9F@ INDI
-1 _FTSID A0CA5DE7-30B9-521B-90EE-6403A77564D0
+1 _FTSID a0ca5de7-30b9-521b-90ee-6403a77564d0
 1 NAME Charles Galton /Darwin/
 2 GIVN Charles Galton
 2 SURN Darwin
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX M
 1 BIRT
 2 DATE 18 DEC 1887
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1064506
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 DEAT
 2 DATE 31 DEC 1962
-2 PLAC Cambridge
+2 PLAC Cambridge, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.208056
-4 LONG E0.122500
+4 LATI N52.20805556
+4 LONG E0.12250000
+3 _PID darwin-wedgwood-place-q350
+3 NOTE Coordinates identify the named locality, not a street address.
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1064506
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q350
-3 NOTE Locality coordinates, not a street address.
 1 BURI
-2 PLAC Church of St Botolph
+2 PLAC Church of St Botolph, Cambridgeshire, United Kingdom
 3 MAP
-4 LATI N52.202500
-4 LONG E0.118074
+4 LATI N52.20250000
+4 LONG E0.11807400
+3 _PID darwin-wedgwood-place-q17527486
+3 NOTE Coordinates identify the named site.
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Burial place of Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1064506
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-3 _PID darwin-wedgwood-place-q17527486
-3 NOTE Locality coordinates, not a street address.
 1 OCCU physicist; university teacher
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public occupation of Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1064506
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
 1 EDUC Trinity College; Marlborough College
 2 SOUR @S960EB9E452AF@
 3 PAGE relevant institutional family entry
 3 EVEN Public education of Charles Galton Darwin
-3 QUAY high
+3 QUAY 3
 3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
 2 SOUR @S9A0DD18ACE00@
 3 PAGE Q1064506
 3 EVEN Supplementary structured statement used for precision and discovery.
-3 QUAY medium
+3 QUAY 2
 3 NOTE An institutional citation remains attached to the event.
-1 NOTE Charles Galton Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 18 DEC 18
-2 CONC 87 at Cambridge. The recorded death date is 31 DEC 1962 at Cambridge. Within the defined scope, the recorded parents are George Howard Darwin and Martha du Puy Darwin. Documented unions in this tree c
-2 CONC onnect this person with Katharine Pember Darwin. Public biographical sources identify the following occupation or public role: physicist; university teacher. Recorded education includes Trinity Colleg
-2 CONC e; Marlborough College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or i
-2 CONC nfer missing
+1 NOTE Charles Galton Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 18 DEC 1887 at Cambridge. The recorded death date is 31 D
+2 CONC EC 1962 at Cambridge. Within the defined scope, the recorded parents are George Howard Darwin and Martha du Puy Darwin. Documented unions in this tree connect this person with Katharine Pember Darwin. Public biographical sources identify the follow
+2 CONC ing occupation or public role: physicist; university teacher. Recorded education includes Trinity College; Marlborough College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it do
+2 CONC es not extend the family beyond the commissioned cast or infer missing
 1 OBJE
 2 FILE darwin-charles-galton-portrait.jpg
 2 FORM JPEG
+2 TITL Charles Galton Darwin portrait
 1 FAMS @F7FDE93E2B8CD@
 1 FAMC @F7BB0A6634BE7@
 2 PEDI birth
 2 _PLINK @I519ECBB01372@
-3 _FTSID 882C3693-6A7D-5E49-80C2-F8FFADCDB909
+3 _FTSID 882c3693-6a7d-5e49-80c2-f8ffadcdb909
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN George Howard Darwin is recorded as biological parent of Charles Galton Darwin
-4 QUAY high
+4 QUAY 3
 2 _PLINK @I64F16F87773C@
-3 _FTSID 5E41BC65-7EA7-594A-84AD-32208539CE8D
+3 _FTSID 5e41bc65-7ea7-594a-84ad-32208539ce8d
 3 PEDI birth
 3 SOUR @S960EB9E452AF@
-4 PAGE page title / relevant entry
+4 PAGE Emma Darwin
 4 EVEN Martha du Puy Darwin is recorded as biological parent of Charles Galton Darwin
-4 QUAY high
+4 QUAY 3
 0 @I8BB9C1D0DC3E@ INDI
-1 _FTSID 2FED5512-531A-583E-851F-04C00F4F744A
-1 NAME Katharine /Darwin/
+1 _FTSID 2fed5512-531a-583e-851f-04c00f4f744a
+1 NAME Katharine /Pember/
 2 TYPE married
 2 GIVN Katharine
 2 SURN Darwin
+2 _MARNM Katharine /Darwin/
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Primary display name for Katharine Pember Darwin
-3 QUAY high
+3 QUAY 3
 1 SEX F
 1 BIRT
 2 DATE 1901
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Birth year of Katharine Pember Darwin
-3 QUAY high
+3 QUAY 3
 1 DEAT
 2 DATE 1986
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Death year of Katharine Pember Darwin
-3 QUAY high
-1 NOTE Katharine Pember Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1901. T
-2 CONC he recorded death date is 1986. Documented unions in this tree connect this person with Charles Galton Darwin. This summary is confined to cited genealogical facts and selected public activities neede
-2 CONC d to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+3 QUAY 3
+1 NOTE Katharine Pember Darwin appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1901. The recorded death date is 1986. Documented union
+2 CONC s in this tree connect this person with Charles Galton Darwin. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer mi
+2 CONC ssing details from names, portraits, households, or succession.
 1 FAMS @F7FDE93E2B8CD@
 0 @FAF80660A22A6@ FAM
-1 _FTSID 588BAC3E-3EB3-57CF-A98C-8D62CE0E13C6
+1 _FTSID 588bac3e-3eb3-57cf-a98c-8d62ce0e13c6
 1 HUSB @IA8EC4C5F97DE@
 1 WIFE @I619BD0AC02C8@
 1 CHIL @I7955F1BBEA07@
 1 MARR
 2 DATE 1757
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Erasmus Darwin and Mary Howard
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Erasmus Darwin and Mary Howard
-2 QUAY high
+2 QUAY 3
 0 @F5F83880E245B@ FAM
-1 _FTSID 3EA109FF-D33E-508C-97B7-2B8BE3BC0208
+1 _FTSID 3ea109ff-d33e-508c-97b7-2b8be3bc0208
 1 HUSB @I9C25BB1FDF7A@
 1 WIFE @I38767D7C513E@
 1 CHIL @ICF82177FE7DE@
@@ -2822,20 +2793,16 @@
 1 MARR
 2 DATE 1764
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Josiah Wedgwood I and Sarah Wedgwood
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Josiah Wedgwood I and Sarah Wedgwood
-2 QUAY high
+2 QUAY 3
 0 @FC3067E1BD6AB@ FAM
-1 _FTSID 375CD53D-970E-50AA-8AB6-5CA93A9E3B1B
+1 _FTSID 375cd53d-970e-50aa-8ab6-5ca93a9e3b1b
 1 HUSB @I7955F1BBEA07@
 1 WIFE @ICF82177FE7DE@
 1 CHIL @I22BD797EFA3A@
@@ -2847,40 +2814,32 @@
 1 MARR
 2 DATE 1796
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Robert Waring Darwin and Susannah Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Robert Waring Darwin and Susannah Darwin
-2 QUAY high
+2 QUAY 3
 0 @FDBC2C15CDDE8@ FAM
-1 _FTSID 860FBBA9-2A0F-5DB1-88E5-DF3D09A8974B
+1 _FTSID 860fbba9-2a0f-5db1-88e5-df3d09a8974b
 1 HUSB @I9B02526BD3DA@
 1 WIFE @I174B191F2663@
 1 CHIL @I1533BFB1FF43@
 1 MARR
 2 DATE 1792
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Josiah Wedgwood II and Elizabeth “Bessy” Wedgwood
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Josiah Wedgwood II and Elizabeth “Bessy” Wedgwood
-2 QUAY high
+2 QUAY 3
 0 @F8935D3525A28@ FAM
-1 _FTSID AC2800C7-EE95-5E58-91D5-B423B470D33B
+1 _FTSID ac2800c7-ee95-5e58-91d5-b423b470d33b
 1 HUSB @IAF7906F1736F@
 1 WIFE @I1533BFB1FF43@
 1 CHIL @I5A7A056ECA93@
@@ -2896,58 +2855,55 @@
 1 MARR
 2 DATE 1839
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Charles Robert Darwin and Emma Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Charles Robert Darwin and Emma Darwin
-2 QUAY high
+2 QUAY 3
+1 _ATTC
+2 FILE Attachments/darwin-wedgwood-attachment-1.jpg
+2 TITL Emma Darwin with Charles Waring Darwin
+2 NOTE Family photograph of Emma Darwin with her youngest child, Charles Waring Darwin; retained as genealogical context for the Darwin household.
+2 SOUR @SE085F0F464C5@
+3 PAGE file description page
+3 EVEN Emma Darwin (wife of naturalist Charles Darwin) with her tenth son Charles Waring Darwin, who died before his second birthday.
+3 QUAY 3
+3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
 0 @FF001E519A136@ FAM
-1 _FTSID C460BF50-F173-5A77-9599-8A5F94CA0CB3
+1 _FTSID c460bf50-f173-5a77-9599-8a5f94ca0cb3
 1 HUSB @I5A7A056ECA93@
 1 WIFE @I84416AF0250A@
 1 MARR
 2 DATE 1877
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between William Erasmus Darwin and Sara Ashburner Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between William Erasmus Darwin and Sara Ashburner Darwin
-2 QUAY high
+2 QUAY 3
 0 @FE32F2048E943@ FAM
-1 _FTSID 9C09937C-31CA-5125-89AD-27F704DC0B05
+1 _FTSID 9c09937c-31ca-5125-89ad-27f704dc0b05
 1 HUSB @IAC51CD7E71A9@
 1 WIFE @IC4DC1810DC9D@
 1 MARR
 2 DATE 1871
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Henrietta Emma Litchfield and Richard Buckley Litchfield
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Henrietta Emma Litchfield and Richard Buckley Litchfield
-2 QUAY high
+2 QUAY 3
 0 @F7BB0A6634BE7@ FAM
-1 _FTSID 5CA0045A-6E57-5907-8775-DFF1D5A42024
+1 _FTSID 5ca0045a-6e57-5907-8775-dff1d5a42024
 1 HUSB @I519ECBB01372@
 1 WIFE @I64F16F87773C@
 1 CHIL @I5265C642ECD4@
@@ -2955,234 +2911,194 @@
 1 MARR
 2 DATE 1884
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between George Howard Darwin and Martha du Puy Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between George Howard Darwin and Martha du Puy Darwin
-2 QUAY high
+2 QUAY 3
 0 @FA89F48E27FF5@ FAM
-1 _FTSID 08D54247-F58E-5ADB-9761-924D0D964C8E
+1 _FTSID 08d54247-f58e-5adb-9761-924d0d964c8e
 1 HUSB @IF53C7B035CD8@
 1 WIFE @I9E5CC764D307@
 1 CHIL @I27DFE0A2CFA4@
 1 MARR
 2 DATE 1874
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Francis Darwin and Amy Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Francis Darwin and Amy Darwin
-2 QUAY high
+2 QUAY 3
 0 @F7C3D923D42D9@ FAM
-1 _FTSID DB7EA331-311C-531C-AA10-A18CF56CA85F
+1 _FTSID db7ea331-311c-531c-aa10-a18cf56ca85f
 1 HUSB @IF53C7B035CD8@
 1 WIFE @ICFE7506054BD@
 1 MARR
 2 DATE 1883
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Francis Darwin and Ellen Wordsworth Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Francis Darwin and Ellen Wordsworth Darwin
-2 QUAY high
+2 QUAY 3
 0 @F7E3D84ABB4CB@ FAM
-1 _FTSID A1F732FF-DD57-5F52-A071-17E8A570F5B4
+1 _FTSID a1f732ff-dd57-5f52-a071-17e8a570f5b4
 1 HUSB @IF53C7B035CD8@
 1 WIFE @IA3FCF7673B98@
 1 MARR
 2 DATE 1913
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Francis Darwin and Florence Henrietta Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Francis Darwin and Florence Henrietta Darwin
-2 QUAY high
+2 QUAY 3
 0 @FC8C3F93B8FE3@ FAM
-1 _FTSID E5629AD4-DDAE-5CC3-A84E-A82C7356FC27
+1 _FTSID e5629ad4-ddae-5cc3-a84e-a82c7356fc27
 1 HUSB @I590FED89F6D1@
 1 WIFE @ID856EF0BA6CC@
 1 MARR
 2 DATE 1882
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Leonard Darwin and Elizabeth Frances Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Leonard Darwin and Elizabeth Frances Darwin
-2 QUAY high
+2 QUAY 3
 0 @FACC4E9831789@ FAM
-1 _FTSID 4AD02287-6BB3-59FC-9DC6-C74B5C23C6D0
+1 _FTSID 4ad02287-6bb3-59fc-9dc6-c74b5c23c6d0
 1 HUSB @I590FED89F6D1@
 1 WIFE @IBF96A6E4D5F6@
 1 MARR
 2 DATE 1900
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Leonard Darwin and Charlotte Mildred Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Leonard Darwin and Charlotte Mildred Darwin
-2 QUAY high
+2 QUAY 3
 0 @F6BA5994C8913@ FAM
-1 _FTSID BBDDF602-3E02-5803-B0A0-8BD0C92B33D4
+1 _FTSID bbddf602-3e02-5803-b0a0-8bd0c92b33d4
 1 HUSB @I14B246AEB919@
 1 WIFE @I377BA4803D67@
 1 MARR
 2 DATE 1880
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Horace Darwin and Emma Cecilia Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Horace Darwin and Emma Cecilia Darwin
-2 QUAY high
+2 QUAY 3
 0 @F391FE8FEAAF0@ FAM
-1 _FTSID 4172DE98-48E6-5F43-933E-FFE3D666780C
+1 _FTSID 4172de98-48e6-5f43-933e-ffe3d666780c
 1 HUSB @I27DFE0A2CFA4@
 1 WIFE @IE63A1972691D@
 1 MARR
 2 DATE 1906
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Bernard Darwin and Elinor Mary Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Bernard Darwin and Elinor Mary Darwin
-2 QUAY high
+2 QUAY 3
 0 @F88F3D799B1DC@ FAM
-1 _FTSID E7878347-99E2-5BF5-A7A7-2238961DE378
+1 _FTSID e7878347-99e2-5bf5-a7a7-2238961de378
 1 HUSB @IC311BEFFABBA@
 1 WIFE @I5265C642ECD4@
 1 MARR
 2 DATE 1911
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Gwendolen Mary Raverat and Jacques Raverat
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Gwendolen Mary Raverat and Jacques Raverat
-2 QUAY high
+2 QUAY 3
 0 @F7FDE93E2B8CD@ FAM
-1 _FTSID FB6381BC-6F4C-5FCF-BAFC-0BEC8947C56C
+1 _FTSID fb6381bc-6f4c-5fcf-bafc-0bec8947c56c
 1 HUSB @I190A47E34D9F@
 1 WIFE @I8BB9C1D0DC3E@
 1 MARR
 2 DATE 1925
 2 SOUR @S960EB9E452AF@
-3 PAGE page title / relevant entry
+3 PAGE Emma Darwin
 3 EVEN Start year of the marriage
-3 QUAY high
-1 _PART
+3 QUAY 3
+1 _STAT widowed
 1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
+2 PAGE Emma Darwin
 2 EVEN Documented marriage between Charles Galton Darwin and Katharine Pember Darwin
-2 QUAY high
-1 SOUR @S960EB9E452AF@
-2 PAGE page title / relevant entry
-2 EVEN Documented marriage between Charles Galton Darwin and Katharine Pember Darwin
-2 QUAY high
+2 QUAY 3
 0 @S960EB9E452AF@ SOUR
-1 _FTSID 2E6ED0F6-B430-539D-BE0C-258EC4C4142C
+1 _FTSID 2e6ed0f6-b430-539d-be0c-258ec4c4142c
 1 TITL Emma Darwin
 1 AUTH Darwin Correspondence Project, University of Cambridge
 1 REPO Darwin Correspondence Project, University of Cambridge
-1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 1 _URL https://www.darwinproject.ac.uk/emma-darwin
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 0 @S2F1C1AE175E4@ SOUR
-1 _FTSID 8D1D46C5-1E3E-5212-8BFA-F526C8912571
+1 _FTSID 8d1d46c5-1e3e-5212-8bfa-f526c8912571
 1 TITL About Darwin
 1 AUTH Darwin Correspondence Project, University of Cambridge
 1 REPO Darwin Correspondence Project, University of Cambridge
-1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 1 _URL https://www.darwinproject.ac.uk/people/about-darwin
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 0 @S20749CD8FE97@ SOUR
-1 _FTSID C68B3EB8-DBC3-549D-A3F7-92B709DA7609
+1 _FTSID c68b3eb8-dbc3-549d-a3f7-92b709da7609
 1 TITL Charles Darwin and family at Down House
 1 AUTH English Heritage
 1 REPO English Heritage
-1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 1 _URL https://www.english-heritage.org.uk/visit/places/home-of-charles-darwin-down-house/history/
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
 0 @SE085F0F464C5@ SOUR
-1 _FTSID C8B70D2C-7F07-5694-B104-85DB0743428F
+1 _FTSID c8b70d2c-7f07-5694-b104-85db0743428f
 1 TITL Emma Darwin with Charles Waring Darwin.jpg
 1 AUTH Wikimedia Commons contributors
 1 PUBL Wikimedia Commons file description page
 1 REPO Wikimedia Commons
-1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
 1 _URL https://commons.wikimedia.org/wiki/File:Emma_Darwin_with_Charles_Waring_Darwin.jpg
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
 0 @S9A0DD18ACE00@ SOUR
-1 _FTSID 74AC4C34-0875-515E-AE28-D6F7EEA79123
+1 _FTSID 74ac4c34-0875-515e-ae28-d6f7eea79123
 1 TITL Wikidata structured statements (supplementary discovery)
 1 AUTH Wikimedia Foundation contributors
 1 PUBL Wikidata
 1 REPO Wikidata
-1 NOTE structured discovery index; 2026-08-09; Supplementary discovery only; never the sole evidence for a relationship or vital event.
 1 _URL https://www.wikidata.org/
+1 NOTE structured discovery index; 2026-08-09; Supplementary discovery only; never the sole evidence for a relationship or vital event.
 0 @S06234375ED2F@ SOUR
-1 _FTSID B8421CB7-DBBD-51F3-9E7C-486E8B700FD0
+1 _FTSID b8421cb7-dbbd-51f3-9e7c-486e8b700fd0
 1 TITL Emma Darwin: A Century of Family Letters, 1792–1896, volume 1
 1 AUTH Henrietta Emma Litchfield (editor)
 1 PUBL London: John Murray, 1915
 1 REPO Internet Archive / Wikimedia Commons
 1 CALN IA emmadarwincentur01litc
-1 NOTE digitized book; 2026-08-09; Public-domain scan; volume preserved in SourcePack/AttachmentOriginals. Plate reproduced on scan page 53.
 1 _URL https://commons.wikimedia.org/wiki/File:Emma_Darwin,_a_century_of_family_letters,_1792-1896_(IA_emmadarwincentur01litc).pdf
+1 NOTE digitized book; 2026-08-09; Public-domain scan; volume preserved in SourcePack/AttachmentOriginals. Plate reproduced on scan page 53.
 0 TRLR
