@@ -194,11 +194,21 @@ public struct GEDCOMParser {
     /// re-emitted on export. Returns whole unmodeled level-1 branches, plus unmodeled
     /// sub-lines of modeled events keyed by event tag (and by `placeExtrasKey` for the
     /// detail that hangs off the event's place).
-    private static func collectUnknowns(record: [String], modeledTags: Set<String>) -> (branches: [[String]], eventExtras: [String: [String]]) {
+    private static func collectUnknowns(
+        record: [String],
+        modeledTags: Set<String>,
+        citedSourcePointers: Set<String> = []
+    ) -> (branches: [[String]], eventExtras: [String: [String]]) {
         var branches: [[String]] = []
         var eventExtras: [String: [String]] = [:]
         for branch in level1Branches(of: record) {
             guard let head = parseLine(branch[0]) else { continue }
+            // A citation already read out of this branch is written back from the model,
+            // so preserving the branch too would emit it twice — and the next parse would
+            // read two citations, then four.
+            if head.tag == "SOUR", let pointer = head.pointer, citedSourcePointers.contains(pointer) {
+                continue
+            }
             if !modeledTags.contains(head.tag) {
                 branches.append(branch) // whole unmodeled branch, verbatim
             } else if head.pointer != nil, ["NOTE", "OBJE"].contains(head.tag) {
@@ -238,6 +248,15 @@ public struct GEDCOMParser {
         var eventNotes: [GenealogyEvent.Kind: String] = [:]
     }
 
+    /// Level-1 `SOUR` pointers that `parseCitations` turns into record-level citations.
+    private static func citedSourcePointers(record: [String], sourceUUIDs: [String: UUID]) -> Set<String> {
+        Set(level1Branches(of: record).compactMap { branch in
+            guard let head = branch.first.flatMap(parseLine), head.tag == "SOUR",
+                  let pointer = head.pointer, sourceUUIDs[pointer] != nil else { return nil }
+            return pointer
+        })
+    }
+
     private static func parseCitations(record: [String], sourceUUIDs: [String: UUID]) -> ParsedCitations {
         var result = ParsedCitations()
         for branch in level1Branches(of: record) {
@@ -255,6 +274,89 @@ public struct GEDCOMParser {
                     result.eventNotes[eventKind] = joinedText(branch: child)
                 }
             }
+        }
+        return result
+    }
+
+    /// Level-1 event tags the exporter writes back out of the model instead of from a
+    /// preserved branch. Each one has to be parsed completely enough to reproduce it,
+    /// or saving would quietly drop whatever the model didn't capture.
+    private static let scalarEventTags: Set<String> = ["RESI", "IMMI", "_MILT", "EVEN"]
+
+    private struct ScalarEventDetails {
+        var value: String?
+        var date: GenealogyDate?
+        var place: PlaceReference?
+    }
+
+    /// The value, date and place of every `scalarEventTags` branch that appears exactly
+    /// once in the record. A repeated tag is skipped: the model holds one event per kind,
+    /// so those branches have to stay preserved verbatim instead.
+    private static func scalarEventDetails(record: [String]) -> [GenealogyEvent.Kind: ScalarEventDetails] {
+        var branchesByTag: [String: [[String]]] = [:]
+        for branch in level1Branches(of: record) {
+            guard let head = branch.first.flatMap(parseLine), scalarEventTags.contains(head.tag) else { continue }
+            branchesByTag[head.tag, default: []].append(branch)
+        }
+
+        var result: [GenealogyEvent.Kind: ScalarEventDetails] = [:]
+        for (tag, branches) in branchesByTag {
+            guard branches.count == 1,
+                  let kind = eventKind(forGEDCOMTag: tag),
+                  let branch = branches.first,
+                  let head = branch.first.flatMap(parseLine) else { continue }
+            var details = ScalarEventDetails(value: head.value.isEmpty ? nil : head.value)
+            var placeName: String?
+            var datasetID: String?
+            var latitude: Double?
+            var longitude: Double?
+            var tagAtLevel: [Int: String] = [:]
+            for raw in branch.dropFirst() {
+                guard let line = parseLine(raw) else { continue }
+                tagAtLevel[line.level] = line.tag
+                switch (line.level, line.tag) {
+                case (2, "DATE"):
+                    details.date = GenealogyDate(rawGEDCOM: line.value)
+                case (2, "PLAC"):
+                    placeName = line.value
+                case (3, "_PLACID") where tagAtLevel[2] == "PLAC":
+                    datasetID = line.value.isEmpty ? nil : line.value
+                case (4, "LATI") where tagAtLevel[3] == "MAP":
+                    latitude = parseLatLong(line.value)
+                case (4, "LONG") where tagAtLevel[3] == "MAP":
+                    longitude = parseLatLong(line.value)
+                default:
+                    break
+                }
+            }
+            if let placeName, !placeName.isEmpty {
+                details.place = PlaceReference(
+                    datasetID: datasetID,
+                    displayName: placeName,
+                    latitude: latitude,
+                    longitude: longitude,
+                    isCustom: datasetID == nil
+                )
+            }
+            result[kind] = details
+        }
+        return result
+    }
+
+    /// Kinds whose tag appears in the record but wasn't consumed (a repeated tag), so no
+    /// structured event may be built for them — their branches are preserved verbatim and
+    /// a second, modeled copy would be written beside them on every save.
+    private static func unconsumedScalarKinds(
+        record: [String],
+        consumed: Set<GenealogyEvent.Kind>
+    ) -> Set<GenealogyEvent.Kind> {
+        var result: Set<GenealogyEvent.Kind> = []
+        for branch in level1Branches(of: record) {
+            guard let head = branch.first.flatMap(parseLine),
+                  scalarEventTags.contains(head.tag),
+                  let kind = eventKind(forGEDCOMTag: head.tag),
+                  !consumed.contains(kind) else { continue }
+            result.insert(kind)
         }
         return result
     }
@@ -341,16 +443,26 @@ public struct GEDCOMParser {
                     case "immigration": name.kind = .immigration
                     default: name.kind = .other
                     }
-                case "GIVN": name.givenNames = line.value
-                case "SURN": name.surname = line.value
+                // A slash is the GEDCOM surname delimiter; it can't survive inside a name
+                // part. The scalar path has always stripped it — do the same here so both
+                // readings of the record agree.
+                case "GIVN": name.givenNames = sanitizedNamePart(line.value)
+                case "SURN": name.surname = sanitizedNamePart(line.value)
                 case "NPFX": name.prefix = line.value.isEmpty ? nil : line.value
                 case "NSFX": name.suffix = line.value.isEmpty ? nil : line.value
                 case "NICK": name.nickname = line.value.isEmpty ? nil : line.value
                 case "_PATR": name.patronymic = line.value.isEmpty ? nil : line.value
                 case "_MARNM":
                     let married = parseName(line.value)
-                    name.maidenName = name.surname
-                    name.surname = married.surname.isEmpty ? married.given : married.surname
+                    let marriedSurname = married.surname.isEmpty ? married.given : married.surname
+                    // The maiden name is the surname in the `1 NAME` slash form, not
+                    // whatever `name.surname` holds right now: a `2 SURN` earlier in the
+                    // same branch carries the current surname and would otherwise be
+                    // recorded as the maiden one.
+                    if !flat.surname.isEmpty, flat.surname != marriedSurname {
+                        name.maidenName = flat.surname
+                    }
+                    name.surname = marriedSurname
                 case "SOUR":
                     if let pointer = line.pointer, let sourceID = sourceUUIDs[pointer] {
                         name.citations.append(parseCitation(branch: child, sourceID: sourceID))
@@ -803,23 +915,57 @@ public struct GEDCOMParser {
             person.setStructuredPlace(place, for: .burial)
         }
         let parsedNames = parseNames(record: record, sourceUUIDs: sourceUUIDs)
-        if !parsedNames.isEmpty { person.names = parsedNames }
+        if !parsedNames.isEmpty {
+            person.names = parsedNames
+            // Every `1 NAME` line overwrote the scalar fields as the record was read, so a
+            // person whose last NAME is an alternate ended up with scalars describing that
+            // alternate while `names` held the real primary. The editor loads the scalars
+            // and writes them back on save, which flattened the primary name — Marie
+            // Skłodowska-Curie lost her surname that way.
+            if let primary = parsedNames.first(where: \.isPrimary) ?? parsedNames.first {
+                person.maidenName = primary.maidenName ?? person.maidenName
+                person.patronymic = primary.patronymic ?? person.patronymic
+                person.givenNames = primary.givenNames
+                person.surname = primary.surname
+            }
+        }
         let structuredAttachments = parseAttachments(record: record, sourceUUIDs: sourceUUIDs)
         if !structuredAttachments.isEmpty { person.attachments = structuredAttachments }
+        // RESI/IMMI/_MILT/EVEN are re-emitted from the model, so the record's own branch
+        // must not also be preserved verbatim — export would write both, and the next
+        // parse would double it again on every save. A tag repeated within one record is
+        // left alone: the model holds one event per kind, so only the raw branches keep
+        // the second residence.
+        let scalarEvents = scalarEventDetails(record: record)
+        let consumedTags = Set(scalarEvents.keys.map(\.gedcomTag))
+        let rawEventBranches = unmodeledEventBranches(
+            record: record,
+            kinds: Set(scalarEvents.keys).union([.occupation, .education])
+        )
         let parsedCitations = parseCitations(record: record, sourceUUIDs: sourceUUIDs)
-        let rawEventBranches = unmodeledEventBranches(record: record, kinds: [.occupation, .education])
         person.citations = parsedCitations.person
         let detailedEventKinds = Set(parsedCitations.events.keys)
             .union(parsedCitations.eventNotes.keys)
             .union(rawEventBranches.keys)
+            .union(scalarEvents.keys)
+            .subtracting(unconsumedScalarKinds(record: record, consumed: Set(scalarEvents.keys)))
         for kind in detailedEventKinds {
             var event = person.event(ofKind: kind) ?? GenealogyEvent(kind: kind)
             event.citations = parsedCitations.events[kind] ?? []
             if let note = parsedCitations.eventNotes[kind] { event.notes = note }
             event.rawGEDCOMBranches = rawEventBranches[kind] ?? []
+            if let details = scalarEvents[kind] {
+                event.value = details.value
+                event.date = details.date
+                event.place = details.place
+            }
             person.replaceEvent(event)
         }
-        let unknowns = collectUnknowns(record: record, modeledTags: modeledIndiTags)
+        let unknowns = collectUnknowns(
+            record: record,
+            modeledTags: modeledIndiTags.union(consumedTags),
+            citedSourcePointers: citedSourcePointers(record: record, sourceUUIDs: sourceUUIDs)
+        )
         person.unknownBranches = unknowns.branches
         person.eventExtras = unknowns.eventExtras
         return person
@@ -959,13 +1105,23 @@ public struct GEDCOMParser {
             event.rawGEDCOMBranches = rawEventBranches[kind] ?? []
             union.setStructuredEvent(event)
         }
-        let unknowns = collectUnknowns(record: record, modeledTags: modeledFamTags)
+        let unknowns = collectUnknowns(
+            record: record,
+            modeledTags: modeledFamTags,
+            citedSourcePointers: citedSourcePointers(record: record, sourceUUIDs: sourceUUIDs)
+        )
         union.unknownBranches = unknowns.branches
         union.marriageExtras = unknowns.eventExtras["MARR"] ?? []
         return union
     }
 
     // MARK: - Helpers
+
+    /// A name part with the GEDCOM surname delimiter removed, matching what the
+    /// serializer writes into the `1 NAME` line.
+    private static func sanitizedNamePart(_ value: String) -> String {
+        value.replacingOccurrences(of: "/", with: " ").trimmingCharacters(in: .whitespaces)
+    }
 
     private static func parseName(_ nameStr: String) -> (given: String, surname: String) {
         // "John /Smith/" → ("John", "Smith")
