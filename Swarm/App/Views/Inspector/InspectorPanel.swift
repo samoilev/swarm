@@ -21,6 +21,8 @@ struct InspectorPanel: View {
     /// Hover over the resize gutter, which is otherwise invisible: the grabber only
     /// appears once the pointer is close enough to use it.
     @State private var resizeHovering = false
+    /// Portrait opened full size, from the header photo or from its row in Files.
+    @State private var showingPortrait = false
 
     /// The panel floats rather than butting against the window edge, so its corner
     /// radius is a real one. Everything inside it stays concentric at a smaller radius.
@@ -37,6 +39,13 @@ struct InspectorPanel: View {
                 // A change we didn't make (a new canvas selection) starts a fresh
                 // context, so drop the relative-navigation trail.
                 if internalNav { internalNav = false } else { history = [] }
+                showingPortrait = false
+            }
+            .sheet(isPresented: $showingPortrait) {
+                PortraitPreview(
+                    image: person.photoData.flatMap(NSImage.init(data:)),
+                    name: person.displayName(language: .current)
+                )
             }
         }
     }
@@ -244,8 +253,22 @@ struct InspectorPanel: View {
     /// 3:4 like every other portrait in the app, but rounded and inset rather than
     /// bled into the panel's corner — a square-cropped photo jammed against a rounded
     /// glass edge was the single loudest mismatch in the old header. Absent photos get
-    /// the tree node's placeholder instead of collapsing the row.
+    /// the tree node's placeholder instead of collapsing the row. A real photo is a
+    /// button onto the full-size copy; the placeholder stands for nothing to open.
+    @ViewBuilder
     private func portrait(_ person: Person) -> some View {
+        if person.photoData != nil {
+            Button { showingPortrait = true } label: { portraitPlate(person) }
+                .buttonStyle(.plain)
+                .onHover { $0 ? NSCursor.pointingHand.set() : NSCursor.arrow.set() }
+                .help(L10n.tr("Открыть фото"))
+                .accessibilityLabel(L10n.tr("Открыть фото"))
+        } else {
+            portraitPlate(person).accessibilityHidden(true)
+        }
+    }
+
+    private func portraitPlate(_ person: Person) -> some View {
         let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
         return Group {
             if let data = person.photoData, let nsImage = NSImage(data: data) {
@@ -269,7 +292,6 @@ struct InspectorPanel: View {
         .clipShape(shape)
         .overlay { shape.strokeBorder(.white.opacity(0.55), lineWidth: 1) }
         .shadow(color: SepiaTheme.ink.opacity(0.18), radius: 6, y: 3)
-        .accessibilityHidden(true)
     }
 
     /// Deleting a person is the last thing on the card and never on the way to anything
@@ -385,25 +407,33 @@ struct InspectorPanel: View {
 
     @ViewBuilder
     private func attachmentsSection(_ p: Person) -> some View {
-        if !p.attachments.isEmpty {
+        // The portrait is a file of this person like any other, so it is listed with
+        // them. It stays in Media/ — this row is a view of it, not a second copy.
+        let portraitImage = p.photoData.flatMap(NSImage.init(data:))
+        if portraitImage != nil || !p.attachments.isEmpty {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: L10n.tr("Файлы"))
+                if let portraitImage {
+                    Button { showingPortrait = true } label: {
+                        fileRow(title: L10n.tr("Портрет"), format: portraitFormat(p)) {
+                            Image(nsImage: portraitImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                                .overlay(RoundedRectangle(cornerRadius: 5).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .help(L10n.tr("Открыть фото"))
+                    .padding(.bottom, 8)
+                }
                 ForEach(p.attachments) { att in
                     let url = store.attachmentURL(att, in: tree)
                     Button { NSWorkspace.shared.open(url) } label: {
-                        HStack(spacing: 10) {
+                        fileRow(title: att.originalName, format: att.format) {
                             AttachmentThumbnail(url: url, isImage: att.isImage, format: att.format, size: 40)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(att.originalName)
-                                    .font(SepiaTheme.body(size: 13))
-                                    .foregroundColor(SepiaTheme.ink)
-                                    .lineLimit(1).truncationMode(.middle)
-                                Text(att.format.isEmpty ? L10n.tr("Файл") : att.format)
-                                    .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
-                            }
-                            Spacer(minLength: 0)
                         }
-                        .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
                     .help(L10n.tr("Открыть «\(att.originalName)»"))
@@ -411,6 +441,29 @@ struct InspectorPanel: View {
                 }
             }
         }
+    }
+
+    private func fileRow(title: String, format: String, @ViewBuilder thumbnail: () -> some View) -> some View {
+        HStack(spacing: 10) {
+            thumbnail()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(SepiaTheme.body(size: 13))
+                    .foregroundColor(SepiaTheme.ink)
+                    .lineLimit(1).truncationMode(.middle)
+                Text(format.isEmpty ? L10n.tr("Файл") : format)
+                    .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+            }
+            Spacer(minLength: 0)
+        }
+        .contentShape(Rectangle())
+    }
+
+    /// Portraits are stored as JPEG unless they came in from an import that kept its
+    /// own extension.
+    private func portraitFormat(_ p: Person) -> String {
+        let ext = (p.photoFilename as NSString?)?.pathExtension.uppercased() ?? ""
+        return ext.isEmpty ? "JPEG" : ext
     }
 
     @ViewBuilder
@@ -461,6 +514,48 @@ struct InspectorPanel: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.bottom, 12)
+    }
+}
+
+/// The portrait at the size the file actually holds. The card can only ever show a
+/// thumbnail of it, and the photo is usually the one thing on a record worth looking at
+/// closely — a face, a uniform, a date written on the back.
+private struct PortraitPreview: View {
+    let image: NSImage?
+    let name: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 14) {
+            if let image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .shadow(color: SepiaTheme.ink.opacity(0.24), radius: 14, y: 6)
+            } else {
+                Text(L10n.tr("Портрет не найден"))
+                    .font(SepiaTheme.body(size: 14))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+
+            HStack(spacing: 10) {
+                Text(name)
+                    .font(SepiaTheme.body(size: 13))
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .lineLimit(1).truncationMode(.tail)
+                Spacer(minLength: 8)
+                Button(L10n.tr("Закрыть")) { dismiss() }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
+                    .keyboardShortcut(.cancelAction)
+            }
+        }
+        .padding(18)
+        .frame(minWidth: 460, idealWidth: 560, minHeight: 520, idealHeight: 680)
+        .background(SepiaTheme.panelBg)
     }
 }
 

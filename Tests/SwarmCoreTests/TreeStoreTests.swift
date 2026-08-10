@@ -243,6 +243,26 @@ struct TreeStoreTests {
         #expect(try Data(contentsOf: treeMedia) == bytes)
     }
 
+    /// An editor works on `deepCopy()` of the tree, and that copy goes through JSON,
+    /// which cannot carry the transient Media/ folder each person loads its portrait
+    /// from. Unless the copy's folders are refreshed, the draft reads back no portrait
+    /// and saving the draft erases the photo of anyone edited for any other reason.
+    @Test func draftCopyStillResolvesPortraitsAfterRefresh() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        let bytes = Data([0xFF, 0xD8, 0xFF, 0xD9])
+        tree.people[0].photoData = bytes
+        _ = try await store.saveTree(tree)
+
+        let draft = try tree.deepCopy()
+        #expect(draft.people[0].photoFilename != nil)
+        #expect(draft.people[0].photoData == nil) // no Media/ folder survived the copy
+        store.refreshMediaFolders(for: draft)
+        #expect(draft.people[0].photoData == bytes)
+    }
+
     @Test func migratesLegacyFlatLayout() throws {
         let temp = Temp()
         let fm = FileManager.default

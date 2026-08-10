@@ -37,7 +37,15 @@ public final class Person: Identifiable, Codable, Hashable {
     public var photoFilename: String?
     /// The `Media/` folder to lazily load the portrait from. Transient — set by the
     /// parser/store, never persisted; restored after an undo via `TreeStore`.
-    @ObservationIgnored public var mediaFolderURL: URL? = nil
+    /// Pointing at a new folder drops a cached read, since a lookup made before the
+    /// folder was known cached "no portrait" from a place that could never have one.
+    /// Unsaved bytes stay: they are the truth until the next save writes them out.
+    @ObservationIgnored public var mediaFolderURL: URL? = nil {
+        didSet {
+            guard mediaFolderURL != oldValue, !photoIsDirty else { return }
+            loadedPhoto = nil
+        }
+    }
     /// True once the portrait bytes changed this session and must be rewritten on save.
     @ObservationIgnored public var photoIsDirty = false
     /// Lazy portrait backing: `.none` = not loaded yet; `.some(x)` = loaded (x may be nil).

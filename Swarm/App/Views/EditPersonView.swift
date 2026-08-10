@@ -844,7 +844,14 @@ struct EditPersonView: View {
     }
 
     private func loadPerson() {
-        if editSession == nil { editSession = try? tree.deepCopy() }
+        if editSession == nil {
+            editSession = try? tree.deepCopy()
+            // deepCopy goes through JSON, and the Media/ folder each person lazily loads
+            // its portrait from is transient — without this the draft reads back no
+            // portrait, the editor shows an empty photo well, and saving writes that
+            // emptiness onto the live person.
+            if let editSession { store.refreshMediaFolders(for: editSession) }
+        }
         let source = editingPerson
         isHomePerson = tree.homePersonId == person.id
         givenNames = source.givenNames
