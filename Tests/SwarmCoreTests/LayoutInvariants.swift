@@ -155,16 +155,17 @@ enum LayoutInvariants {
             }
         }
 
-        // 8 — a highlight route joins the two cards it claims to. The overlay is drawn from
-        // these segments alone, so a route that relies on a neutral line to bridge its two
-        // halves lights up as two disconnected stubs.
-        for route in layout.highlightRoutes where route.id.hasPrefix("marriage-") {
+        // 8 — every highlight route joins the two cards it claims to, parent-to-child as
+        // well as partner-to-partner. The overlay is drawn from these segments alone, so a
+        // route that leans on a neutral line to bridge a gap lights up broken — and the
+        // further apart the two people are, the more of the path is missing.
+        for route in layout.highlightRoutes {
             guard let connection = route.connections.first,
                   let a = cards.first(where: { $0.id == connection.firstID }),
                   let b = cards.first(where: { $0.id == connection.secondID }) else { continue }
             if !inkConnects(a.rect, b.rect, via: route.segments) {
                 violations.append(Violation(
-                    rule: "marriage highlight does not join the partners",
+                    rule: "highlight route does not join the two people",
                     detail: "\(names[connection.firstID] ?? "?") ↔ \(names[connection.secondID] ?? "?")"
                 ))
             }
@@ -179,6 +180,12 @@ enum LayoutInvariants {
         guard let start = id.firstIndex(of: "-") else { return nil }
         let rest = id[id.index(after: start)...]
         return UUID(uuidString: String(rest.prefix(36)))
+    }
+
+    /// Whether any of these segments starts or ends on the card.
+    static func inkTouches(_ rect: CGRect, _ segments: [LinkSegment]) -> Bool {
+        let probe = rect.insetBy(dx: -1.5, dy: -1.5)
+        return segments.contains { probe.contains($0.from) || probe.contains($0.to) }
     }
 
     /// Flood-fill the drawn segments and check the two cards end up in the same component.

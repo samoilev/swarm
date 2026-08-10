@@ -264,6 +264,50 @@ struct LayoutStructureTests {
         #expect(LayoutInvariants.connectorCrossings(tree: tree) == 0)
     }
 
+    /// A parent-to-child highlight lights that parent's side of the couple only.
+    ///
+    /// Showing how two people are related traces a path, and where the path enters a family
+    /// through the mother it should not also light the father's half of their line — the
+    /// reader is being told which way round the relationship runs.
+    @Test(arguments: LayoutCorpusTests.corpus)
+    func aParentChildHighlightAvoidsTheOtherParent(name: String) throws {
+        let tree = try LayoutCorpusTests.load(name)
+        let layout = TreeLayoutEngine(config: config).layout(tree: tree, direction: .topDown)
+        let placed = Dictionary(
+            layout.nodes.map { ($0.person.id, CGRect(x: $0.x, y: $0.y, width: config.cardW, height: config.cardH)) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        for union in tree.unions {
+            let partners = union.partnerIds.filter { placed[$0] != nil }
+            guard partners.count == 2 else { continue }
+            for child in union.childrenIds where placed[child] != nil {
+                for (index, parent) in partners.enumerated() {
+                    let other = partners[1 - index]
+                    guard let route = layout.highlightRoutes.first(where: {
+                        $0.connections == [FamilyConnection(parent, child)]
+                            && $0.id.contains(child.uuidString)
+                    }) else { continue }
+
+                    // It must reach this parent…
+                    #expect(
+                        try LayoutInvariants.inkTouches(#require(placed[parent]), route.segments),
+                        "\(name): route to \(names(tree, parent)) does not reach them"
+                    )
+                    // …and stop short of the other one.
+                    #expect(
+                        try !LayoutInvariants.inkTouches(#require(placed[other]), route.segments),
+                        "\(name): route via \(names(tree, parent)) also lights \(names(tree, other))"
+                    )
+                }
+            }
+        }
+    }
+
+    private func names(_ tree: FamilyTree, _ id: UUID) -> String {
+        tree.people.first { $0.id == id }?.fullName ?? "?"
+    }
+
     /// The corpus passes the "no connector crosses a card" invariant, which is only
     /// meaningful if the detector behind it actually fires. This is the detector's own test:
     /// the crossing cases it must catch, and the touching cases it must not.

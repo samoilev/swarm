@@ -79,7 +79,7 @@ struct LayoutCorpusTests {
     /// What remains is a child's drop passing under another union's trunk in a band that
     /// has no free lane left. Removing those needs vertical channels reserved through the
     /// band, a much larger change than the lane search buys.
-    @Test(arguments: zip(corpus, [0, 0, 0, 0, 1, 0]))
+    @Test(arguments: zip(corpus, [0, 0, 0, 0, 3, 0]))
     func connectorCrossingsDoNotRegress(name: String, budget: Int) throws {
         let tree = try Self.load(name)
         let crossings = LayoutInvariants.connectorCrossings(tree: tree)

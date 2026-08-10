@@ -401,6 +401,13 @@ struct LayoutRouting {
                 CGPoint(x: anchor, y: marriageLane.map { laneY($0) } ?? rowBottom(union.generation))
             }
 
+            // How a reader's eye gets from *each* partner's card to the point this union's
+            // connectors leave from. Kept per partner, not pooled: a path that reaches a
+            // child through the mother should light her leg of the couple and not the
+            // father's. Every route starting at that point carries the leg it came in on,
+            // or the highlight begins in mid air.
+            var approach: [UUID: [LinkSegment]] = [:]
+
             if adjacent {
                 let y = rowCentre(union.generation)
                 let left = min(positions[0], positions[1]) + metrics.crossExtent / 2
@@ -410,6 +417,10 @@ struct LayoutRouting {
                     segments: [LinkSegment(from: CGPoint(x: left, y: y), to: CGPoint(x: right, y: y))],
                     connections: [FamilyConnection(union.partners[0], union.partners[1])]
                 )
+                for (partner, centre) in zip(union.partners, positions) {
+                    let edge = centre < anchor ? left : right
+                    approach[partner] = [LinkSegment(from: CGPoint(x: edge, y: y), to: source)]
+                }
             } else if let marriageLane {
                 let y = laneY(marriageLane)
                 var drops: [LinkSegment] = []
@@ -437,6 +448,15 @@ struct LayoutRouting {
                 } else if chainLane == nil {
                     links.append(TreeLink(id: "parent-\(union.id)", segments: drops))
                 }
+                for (index, partner) in union.partners.enumerated() where index < drops.count {
+                    approach[partner] = [
+                        drops[index],
+                        LinkSegment(
+                            from: CGPoint(x: positions[index], y: y),
+                            to: CGPoint(x: source.x, y: y)
+                        ),
+                    ]
+                }
             }
 
             // The lane's own horizontal. Drawn for every union that claimed a lane, not
@@ -461,14 +481,15 @@ struct LayoutRouting {
             }
 
             unionAnchors.append(TreeLayout.UnionAnchor(id: union.id, point: source))
-            emitChildren(unionIndex: unionIndex, union: union, source: source)
+            emitChildren(unionIndex: unionIndex, union: union, source: source, approach: approach)
         }
     }
 
     private mutating func emitChildren(
         unionIndex: Int,
         union: LayoutGraph.UnionNode,
-        source: CGPoint
+        source: CGPoint,
+        approach: [UUID: [LinkSegment]]
     ) {
         guard !union.children.isEmpty, let runIndex = unionRun[unionIndex] else { return }
         let busY = laneY(runIndex)
@@ -493,11 +514,15 @@ struct LayoutRouting {
             }
 
             links.append(TreeLink(id: "children-\(union.id)-child-\(child)", segments: segments))
-            highlightRoutes.append(TreeHighlightRoute(
-                id: "children-\(union.id)-route-\(child.uuidString)",
-                segments: routeSegments,
-                connections: Set(union.partners.map { FamilyConnection($0, child) })
-            ))
+            // One route per parent. Sharing a single route between both would light the
+            // whole couple whenever either of them is on the path.
+            for partner in union.partners {
+                highlightRoutes.append(TreeHighlightRoute(
+                    id: "children-\(union.id)-route-\(child.uuidString)-\(partner.uuidString)",
+                    segments: (approach[partner] ?? []) + routeSegments,
+                    connections: [FamilyConnection(partner, child)]
+                ))
+            }
         }
     }
 

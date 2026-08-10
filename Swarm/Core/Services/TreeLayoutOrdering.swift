@@ -550,42 +550,119 @@ struct LayoutOrdering {
 
     private mutating func assignCoordinates() {
         dummyCentre = Array(repeating: 0, count: dummies.count)
-        var centres: [[CGFloat]] = layers.map { Array(repeating: 0, count: $0.count) }
+        guard layers.contains(where: { !$0.isEmpty }) else { return }
 
-        // Pack every layer left to right at minimum separation.
+        // Flatten the layered graph for Brandes–Köpf. Each vertex is a block or a dummy;
+        // each edge is one union's connection to one child, carrying the port offsets that
+        // keep the couple's own line — not the middle of their whole row — over the child.
+        var flat: [CoordinateAssignment.Vertex] = []
+        var identifier: [[Int]] = []
         for (layerIndex, layer) in layers.enumerated() {
-            var cursor: CGFloat = 0
-            for (ordinal, vertex) in layer.enumerated() {
-                let half = extent(of: vertex) / 2
-                if ordinal > 0 {
-                    cursor += separation(layer[ordinal - 1], vertex) + half
-                } else {
-                    cursor = half
+            var ids: [Int] = []
+            for (position, vertex) in layer.enumerated() {
+                ids.append(flat.count)
+                flat.append(CoordinateAssignment.Vertex(
+                    layer: layerIndex,
+                    position: position,
+                    width: extent(of: vertex),
+                    isDummy: { if case .dummy = vertex { true } else { false } }()
+                ))
+            }
+            identifier.append(ids)
+        }
+
+        var vertexOfBlock: [Int: Int] = [:]
+        var vertexOfDummy: [Int: Int] = [:]
+        for (layerIndex, layer) in layers.enumerated() {
+            for (position, vertex) in layer.enumerated() {
+                let id = identifier[layerIndex][position]
+                switch vertex {
+                case let .block(index): vertexOfBlock[index] = id
+                case let .dummy(index): vertexOfDummy[index] = id
                 }
-                centres[layerIndex][ordinal] = cursor
-                cursor += half
             }
         }
 
-        // Alternating refinement. Parents are pulled over their children and children
-        // under their parents; the priority pass keeps every move inside the separation
-        // constraints, so no amount of pulling can make two cards touch.
-        for round in 0 ..< 8 {
-            let downward = round % 2 == 0
-            let range = downward
-                ? Array(1 ..< max(layers.count, 1))
-                : Array((0 ..< max(layers.count - 1, 0)).reversed())
-            for layerIndex in range {
-                publish(centres)
-                let desired = desiredCentres(layerIndex: layerIndex, fromAbove: downward, current: centres)
-                centres[layerIndex] = applyPriority(
-                    layerIndex: layerIndex,
-                    current: centres[layerIndex],
-                    desired: desired
-                )
+        var edges: [(upper: Int, lower: Int, delta: CGFloat)] = []
+        for (unionIndex, union) in graph.unions.enumerated() {
+            guard let parentBlock = blocks.firstIndex(where: { block in
+                union.partners.contains(where: block.members.contains)
+            }), let parentVertex = vertexOfBlock[parentBlock] else { continue }
+            let parentPort = anchorOffset(ofUnion: unionIndex, inBlock: parentBlock)
+
+            for child in union.children {
+                var childVertex: Int?
+                var childPort: CGFloat = 0
+                if let edgeIndex = longEdgeIndex(unionIndex: unionIndex, childId: child),
+                   let dummy = longEdges[edgeIndex].dummyIndices.first {
+                    childVertex = vertexOfDummy[dummy]
+                } else if let block = blocks.firstIndex(where: { $0.members.contains(child) }) {
+                    childVertex = vertexOfBlock[block]
+                    childPort = memberOffset(of: child, inBlock: block)
+                }
+                guard let childVertex, flat[childVertex].layer == flat[parentVertex].layer + 1 else { continue }
+                edges.append((parentVertex, childVertex, parentPort - childPort))
             }
+        }
+        // The stretches of a long connector between two dummies: dead straight is the goal.
+        for edge in longEdges {
+            for (step, dummy) in edge.dummyIndices.enumerated() {
+                guard let from = vertexOfDummy[dummy] else { continue }
+                if step + 1 < edge.dummyIndices.count {
+                    if let to = vertexOfDummy[edge.dummyIndices[step + 1]] {
+                        edges.append((from, to, 0))
+                    }
+                } else if let block = blocks.firstIndex(where: { $0.members.contains(edge.childId) }),
+                          let to = vertexOfBlock[block] {
+                    edges.append((from, to, -memberOffset(of: edge.childId, inBlock: block)))
+                }
+            }
+        }
+
+        // Precompute the minimum stride for every side-by-side pair: the solver runs the
+        // layers mirrored as well as forwards, so it asks in both orders.
+        var strides: [Int: CGFloat] = [:]
+        for (layerIndex, layer) in layers.enumerated() {
+            for position in layer.indices.dropFirst() {
+                let left = identifier[layerIndex][position - 1]
+                let right = identifier[layerIndex][position]
+                let gap = (flat[left].width + flat[right].width) / 2
+                    + separation(layer[position - 1], layer[position])
+                strides[left * flat.count + right] = gap
+                strides[right * flat.count + left] = gap
+            }
+        }
+
+        let count = flat.count
+        let solved = CoordinateAssignment(
+            vertices: flat,
+            layers: identifier,
+            edges: edges
+        ) { lhs, rhs in strides[lhs * count + rhs] ?? 0 }
+            .coordinates()
+        var centres: [[CGFloat]] = layers.map { Array(repeating: 0, count: $0.count) }
+        for (layerIndex, ids) in identifier.enumerated() {
+            for (position, id) in ids.enumerated() { centres[layerIndex][position] = solved[id] }
         }
         publish(centres)
+    }
+
+    /// Where a member sits relative to the centre of its block.
+    private func memberOffset(of person: UUID, inBlock index: Int) -> CGFloat {
+        let members = blocks[index].members
+        guard let offset = members.firstIndex(of: person) else { return 0 }
+        let width = CGFloat(members.count) * metrics.nodeWidth
+            + CGFloat(members.count - 1) * metrics.spouseGap
+        return -width / 2 + metrics.nodeWidth / 2 + CGFloat(offset) * (metrics.nodeWidth + metrics.spouseGap)
+    }
+
+    /// Where a union's connector leaves its block: the midpoint of its partners.
+    private func anchorOffset(ofUnion unionIndex: Int, inBlock index: Int) -> CGFloat {
+        let offsets = graph.unions[unionIndex].partners
+            .filter(blocks[index].members.contains)
+            .map { memberOffset(of: $0, inBlock: index) }
+        guard !offsets.isEmpty else { return 0 }
+        return offsets.reduce(0, +) / CGFloat(offsets.count)
     }
 
     /// Copy layer coordinates out to the person/dummy maps the rest of the engine reads.
@@ -607,134 +684,6 @@ struct LayoutOrdering {
                 }
             }
         }
-    }
-
-    /// Target position for each vertex, expressed as the move that would centre its
-    /// connectors. Using the connector offset rather than a raw barycentre is what makes a
-    /// couple sit above the middle of *their* children even inside a longer spouse chain.
-    private func desiredCentres(layerIndex: Int, fromAbove: Bool, current: [[CGFloat]]) -> [CGFloat] {
-        var result = current[layerIndex]
-        for (ordinal, vertex) in layers[layerIndex].enumerated() {
-            var offsets: [CGFloat] = []
-            switch vertex {
-            case let .block(index):
-                for person in blocks[index].members {
-                    guard let personCentre = centreOf[person] else { continue }
-                    if fromAbove {
-                        for unionIndex in graph.unionIndicesOfChild[person] ?? [] {
-                            guard graph.unions[unionIndex].generation == layerIndex - 1,
-                                  let anchor = unionAnchor(unionIndex) else { continue }
-                            offsets.append(anchor - personCentre)
-                        }
-                    } else {
-                        for unionIndex in graph.unionIndicesOfPartner[person] ?? [] {
-                            guard let anchor = unionAnchor(unionIndex),
-                                  graph.unions[unionIndex].generation == layerIndex else { continue }
-                            let below = descendantCentres(ofUnion: unionIndex)
-                            guard !below.isEmpty else { continue }
-                            offsets.append(below.reduce(0, +) / CGFloat(below.count) - anchor)
-                        }
-                    }
-                }
-            case let .dummy(index):
-                let dummy = dummies[index]
-                let edge = longEdges[dummy.edgeIndex]
-                guard let position = edge.dummyIndices.firstIndex(of: index) else { continue }
-                let neighbour: CGFloat? = if fromAbove {
-                    position == 0
-                        ? unionAnchor(edge.unionIndex)
-                        : dummyCentre[edge.dummyIndices[position - 1]]
-                } else {
-                    position == edge.dummyIndices.count - 1
-                        ? centreOf[edge.childId]
-                        : dummyCentre[edge.dummyIndices[position + 1]]
-                }
-                if let neighbour { offsets.append(neighbour - dummyCentre[index]) }
-            }
-            guard !offsets.isEmpty else { continue }
-            result[ordinal] += offsets.reduce(0, +) / CGFloat(offsets.count)
-        }
-        return result
-    }
-
-    private func descendantCentres(ofUnion unionIndex: Int) -> [CGFloat] {
-        var result: [CGFloat] = []
-        for child in graph.unions[unionIndex].children {
-            if let edge = longEdges.first(where: { $0.unionIndex == unionIndex && $0.childId == child }),
-               let first = edge.dummyIndices.first {
-                result.append(dummyCentre[first])
-            } else if let centre = centreOf[child] {
-                result.append(centre)
-            }
-        }
-        return result
-    }
-
-    /// Priority method: move vertices toward their targets in priority order, pushing
-    /// lower-priority neighbours along but never crossing an already-settled one. Dummies
-    /// go first so long edges stay straight instead of zig-zagging around cards.
-    private func applyPriority(layerIndex: Int, current: [CGFloat], desired: [CGFloat]) -> [CGFloat] {
-        let layer = layers[layerIndex]
-        guard layer.count > 1 else { return desired }
-        var x = current
-        var settled = Set<Int>()
-
-        let order = layer.indices.sorted { lhs, rhs in
-            let pl = priority(of: layer[lhs]), pr = priority(of: layer[rhs])
-            if pl != pr { return pl > pr }
-            return lhs < rhs
-        }
-
-        for index in order {
-            defer { settled.insert(index) }
-            let delta = desired[index] - x[index]
-            guard abs(delta) > 0.01 else { continue }
-
-            if delta > 0 {
-                // Slack available before the nearest settled vertex on the right.
-                var slack: CGFloat = 0
-                var blocked = false
-                for j in (index + 1) ..< layer.count {
-                    slack += x[j] - x[j - 1] - separation(layer[j - 1], layer[j])
-                        - (extent(of: layer[j - 1]) + extent(of: layer[j])) / 2
-                    if settled.contains(j) { blocked = true; break }
-                }
-                let move = blocked ? min(delta, max(0, slack)) : delta
-                x[index] += move
-                for j in (index + 1) ..< layer.count {
-                    x[j] = max(x[j], x[j - 1] + minimumStride(layer[j - 1], layer[j]))
-                }
-            } else {
-                var slack: CGFloat = 0
-                var blocked = false
-                for j in stride(from: index - 1, through: 0, by: -1) {
-                    slack += x[j + 1] - x[j] - separation(layer[j], layer[j + 1])
-                        - (extent(of: layer[j]) + extent(of: layer[j + 1])) / 2
-                    if settled.contains(j) { blocked = true; break }
-                }
-                let move = blocked ? min(-delta, max(0, slack)) : -delta
-                x[index] -= move
-                for j in stride(from: index - 1, through: 0, by: -1) {
-                    x[j] = min(x[j], x[j + 1] - minimumStride(layer[j], layer[j + 1]))
-                }
-            }
-        }
-        return x
-    }
-
-    private func priority(of vertex: Vertex) -> Int {
-        switch vertex {
-        case .dummy: 1_000_000
-        case let .block(index):
-            blocks[index].members.reduce(0) { total, person in
-                total + (graph.unionIndicesOfPartner[person]?.count ?? 0)
-                    + (graph.unionIndicesOfChild[person]?.count ?? 0)
-            }
-        }
-    }
-
-    private func minimumStride(_ left: Vertex, _ right: Vertex) -> CGFloat {
-        (extent(of: left) + extent(of: right)) / 2 + separation(left, right)
     }
 
     private func extent(of vertex: Vertex) -> CGFloat {

@@ -82,27 +82,35 @@ struct LayoutEngineTests {
         let children = Array(people.dropFirst(2))
         let childRoutes = layout.highlightRoutes.filter { $0.id.contains("-route-") }
 
-        #expect(childRoutes.count == children.count)
+        // One route per parent per child, each carrying a single connection. Sharing a
+        // route between both parents would light the father's half of the couple when the
+        // relationship being shown runs through the mother.
+        #expect(childRoutes.count == children.count * parents.count)
         for child in children {
-            let route = try #require(
-                childRoutes.first { $0.id.hasSuffix(child.id.uuidString) }
-            )
-            #expect(route.connections == Set(parents.map {
-                FamilyConnection($0.id, child.id)
-            }))
-            #expect(route.segments.count == 3)
+            for parent in parents {
+                let route = try #require(childRoutes.first {
+                    $0.id.hasSuffix("\(child.id.uuidString)-\(parent.id.uuidString)")
+                })
+                #expect(route.connections == [FamilyConnection(parent.id, child.id)])
 
-            let stem = route.segments[0]
-            let branch = route.segments[1]
-            let drop = route.segments[2]
-            #expect(stem.to == branch.from)
-            #expect(branch.to == drop.from)
-            if direction != .leftRight {
-                #expect(branch.from.y == branch.to.y)
-                #expect(drop.from.x == drop.to.x)
-            } else {
-                #expect(branch.from.x == branch.to.x)
-                #expect(drop.from.y == drop.to.y)
+                // The route runs from that parent's card all the way to the child's, so the
+                // overlay lights the whole relationship rather than the last leg of it. Its
+                // exact length depends on how the couple's line is drawn; what matters is
+                // that it ends with an along-then-down turn and stays orthogonal throughout.
+                #expect(route.segments.count >= 3)
+                let branch = route.segments[route.segments.count - 2]
+                let drop = route.segments[route.segments.count - 1]
+                #expect(branch.to == drop.from)
+                if direction != .leftRight {
+                    #expect(branch.from.y == branch.to.y)
+                    #expect(drop.from.x == drop.to.x)
+                } else {
+                    #expect(branch.from.x == branch.to.x)
+                    #expect(drop.from.y == drop.to.y)
+                }
+                for segment in route.segments {
+                    #expect(segment.from.x == segment.to.x || segment.from.y == segment.to.y)
+                }
             }
         }
 
