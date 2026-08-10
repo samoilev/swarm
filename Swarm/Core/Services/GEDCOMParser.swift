@@ -184,9 +184,14 @@ public struct GEDCOMParser {
         return branches
     }
 
+    /// `eventExtras` key holding unmodeled sub-lines of an event's PLAC, kept apart from
+    /// the event's own extras so export can put them back inside the place.
+    static func placeExtrasKey(_ eventTag: String) -> String { "\(eventTag)/PLAC" }
+
     /// Collect the parts of an INDI/FAM record the modeled parse ignored, so they can be
     /// re-emitted on export. Returns whole unmodeled level-1 branches, plus unmodeled
-    /// sub-lines of modeled events keyed by event tag.
+    /// sub-lines of modeled events keyed by event tag (and by `placeExtrasKey` for the
+    /// detail that hangs off the event's place).
     private static func collectUnknowns(record: [String], modeledTags: Set<String>) -> (branches: [[String]], eventExtras: [String: [String]]) {
         var branches: [[String]] = []
         var eventExtras: [String: [String]] = [:]
@@ -200,12 +205,25 @@ public struct GEDCOMParser {
                 branches.append(branch)
             } else if ["BIRT", "DEAT", "BURI", "MARR"].contains(head.tag) {
                 // A modeled event: keep any sub-line we don't consume (NOTE, SOUR, TYPE,
-                // AGNC, custom tags) so event-level detail isn't lost.
+                // AGNC, custom tags) so event-level detail isn't lost. Which level-2
+                // branch a deeper line belongs to has to be tracked: detail under a
+                // modeled PLAC (a foreign place id, a note about the coordinates) is
+                // kept against that place, so export re-emits it inside PLAC. Left in
+                // the flat event list it would trail some other branch, and dropping
+                // that branch — an already-replaced SOUR — took it down as well.
+                var placeIsOpen = false
+                var parentIsModeled = false
                 for raw in branch.dropFirst() {
                     guard let line = parseLine(raw) else { continue }
-                    if !modeledEventSubTags.contains(line.tag) {
-                        eventExtras[head.tag, default: []].append(raw)
+                    if line.level == 2 {
+                        parentIsModeled = modeledEventSubTags.contains(line.tag)
+                        placeIsOpen = line.tag == "PLAC"
+                        if !parentIsModeled { eventExtras[head.tag, default: []].append(raw) }
+                        continue
                     }
+                    guard !modeledEventSubTags.contains(line.tag) else { continue }
+                    let key = parentIsModeled && placeIsOpen ? placeExtrasKey(head.tag) : head.tag
+                    eventExtras[key, default: []].append(raw)
                 }
             }
         }

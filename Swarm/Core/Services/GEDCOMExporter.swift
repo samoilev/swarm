@@ -111,6 +111,7 @@ public struct GEDCOMSerializer {
                 fallbackLat: p.birthLat,
                 fallbackLon: p.birthLon,
                 extras: p.eventExtras["BIRT"] ?? [],
+                placeExtras: p.eventExtras[GEDCOMParser.placeExtrasKey("BIRT")] ?? [],
                 force: false,
                 sourceXref: sourceXref,
                 to: &lines
@@ -123,6 +124,7 @@ public struct GEDCOMSerializer {
                 fallbackLat: p.isLiving ? nil : p.deathLat,
                 fallbackLon: p.isLiving ? nil : p.deathLon,
                 extras: p.isLiving ? [] : (p.eventExtras["DEAT"] ?? []),
+                placeExtras: p.isLiving ? [] : (p.eventExtras[GEDCOMParser.placeExtrasKey("DEAT")] ?? []),
                 force: !p.isLiving,
                 sourceXref: sourceXref,
                 to: &lines
@@ -135,6 +137,7 @@ public struct GEDCOMSerializer {
                 fallbackLat: p.isLiving ? nil : p.burialLat,
                 fallbackLon: p.isLiving ? nil : p.burialLon,
                 extras: p.isLiving ? [] : (p.eventExtras["BURI"] ?? []),
+                placeExtras: p.isLiving ? [] : (p.eventExtras[GEDCOMParser.placeExtrasKey("BURI")] ?? []),
                 force: false,
                 sourceXref: sourceXref,
                 to: &lines
@@ -351,6 +354,7 @@ public struct GEDCOMSerializer {
         fallbackLat: Double?,
         fallbackLon: Double?,
         extras: [String],
+        placeExtras: [String],
         force: Bool,
         sourceXref: [UUID: String],
         to lines: inout [String]
@@ -371,6 +375,7 @@ public struct GEDCOMSerializer {
             lat: place?.latitude ?? fallbackLat,
             lon: place?.longitude ?? fallbackLon,
             datasetID: place?.datasetID,
+            extras: placeExtras,
             to: &lines
         )
         if let type = event?.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
@@ -451,7 +456,71 @@ public struct GEDCOMSerializer {
             if let notes = citation.notes, !notes.isEmpty {
                 appendMultiline(level: level + 1, tag: "NOTE", value: notes, to: &lines)
             }
+            lines.append(contentsOf: preservedCitationDetail(citation, level: level))
         }
+    }
+
+    /// Sub-lines of an imported SOUR that `Citation` doesn't carry: foreign tags such as
+    /// another program's place id, and any NOTE past the one the model holds. The modeled
+    /// fields above replace the whole imported branch, so without this they disappear the
+    /// first time the record is saved.
+    private static func preservedCitationDetail(_ citation: Citation, level: Int) -> [String] {
+        guard let branch = citation.rawGEDCOMBranches.first,
+              let head = branch.first,
+              let headLevel = gedcomLevel(of: head) else { return [] }
+        let shift = level - headLevel
+        // The model keeps a single NOTE; the branch may hold several. Consume the one
+        // that matches, so the rest are re-emitted rather than silently dropped.
+        var noteToConsume = citation.notes?.components(separatedBy: "\n").first
+        var openBranch: (root: Int, keep: Bool)?
+        var result: [String] = []
+        for raw in branch.dropFirst() {
+            guard let lineLevel = gedcomLevel(of: raw) else { continue }
+            if let open = openBranch, lineLevel > open.root {
+                if open.keep { result.append(shiftingLevel(raw, by: shift)) }
+                continue
+            }
+            let tag = gedcomTag(of: raw) ?? ""
+            let keep: Bool
+            switch tag {
+            case "PAGE", "EVEN", "DATA", "TEXT", "QUAY":
+                keep = false
+            case "NOTE":
+                let value = gedcomValue(of: raw)
+                if let pending = noteToConsume, pending == value {
+                    noteToConsume = nil
+                    keep = false
+                } else {
+                    keep = true
+                }
+            default:
+                keep = true
+            }
+            openBranch = (lineLevel, keep)
+            if keep { result.append(shiftingLevel(raw, by: shift)) }
+        }
+        return result
+    }
+
+    private static func gedcomLevel(of raw: String) -> Int? {
+        Int(raw.prefix(while: \.isNumber))
+    }
+
+    private static func gedcomTag(of raw: String) -> String? {
+        let parts = raw.split(separator: " ", maxSplits: 2).map(String.init)
+        guard parts.count >= 2 else { return nil }
+        return parts[1].hasPrefix("@") ? (parts.count > 2 ? parts[2] : nil) : parts[1]
+    }
+
+    private static func gedcomValue(of raw: String) -> String {
+        let parts = raw.split(separator: " ", maxSplits: 2).map(String.init)
+        return parts.count > 2 ? parts[2] : ""
+    }
+
+    private static func shiftingLevel(_ raw: String, by shift: Int) -> String {
+        guard shift != 0, let level = gedcomLevel(of: raw) else { return raw }
+        let rest = raw.drop(while: \.isNumber)
+        return "\(level + shift)\(rest)"
     }
 
     private static func appendSourceRecord(_ source: SourceRecord, xref: String, to lines: inout [String]) {
@@ -578,11 +647,15 @@ public struct GEDCOMSerializer {
         lat: Double?,
         lon: Double?,
         datasetID: String? = nil,
+        extras: [String] = [],
         to lines: inout [String]
     ) {
         if let place, !place.isEmpty {
             lines.append("2 PLAC \(place)")
             if let datasetID, !datasetID.isEmpty { lines.append("3 _PLACID \(datasetID)") }
+            // Foreign detail this app doesn't model (a place id from another program,
+            // a note about the coordinates) goes back inside the place it came from.
+            lines.append(contentsOf: extras)
             if let lat, let lon {
                 lines.append("3 MAP")
                 lines.append("4 LATI \(gedLat(lat))")

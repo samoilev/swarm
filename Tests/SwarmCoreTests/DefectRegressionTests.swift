@@ -87,6 +87,52 @@ struct DefectRegressionTests {
         #expect(parsed.parentLinks.first?.citations.first?.page == "12")
     }
 
+    /// An imported citation carries detail this app doesn't model — another program's
+    /// place id, a second NOTE. The modeled citation replaces the whole imported branch
+    /// on export, so that detail used to disappear on the first save, taking the place id
+    /// of every event in the file with it.
+    @Test func foreignCitationDetailSurvivesEverySave() throws {
+        let gedcom = """
+        0 HEAD
+        1 _NAME Foreign detail
+        0 @S1@ SOUR
+        1 TITL Register
+        0 @I1@ INDI
+        1 NAME Anna /Petrova/
+        1 BIRT
+        2 DATE 20 OCT 1832
+        2 PLAC Kielce
+        2 SOUR @S1@
+        3 PAGE 12
+        3 QUAY high
+        3 NOTE An institutional citation remains attached to the event.
+        3 _PID place-q102317
+        3 NOTE Locality coordinates, not a street address.
+        0 TRLR
+        """
+        let first = GEDCOMSerializer.serialize(tree: tree(from: GEDCOMParser.parse(gedcom: gedcom))).gedcom
+        #expect(first.contains("3 _PID place-q102317"))
+        #expect(first.contains("An institutional citation remains attached to the event."))
+        #expect(first.contains("Locality coordinates, not a street address."))
+
+        // Saving the saved file must be a fixed point, not a slow leak or a duplicator.
+        let second = GEDCOMSerializer.serialize(tree: tree(from: GEDCOMParser.parse(gedcom: first))).gedcom
+        #expect(second.components(separatedBy: "3 _PID place-q102317").count - 1 == 1)
+        #expect(second.contains("An institutional citation remains attached to the event."))
+    }
+
+    /// Rebuild a tree from a parse result, the way the store does after an import.
+    private func tree(from parsed: GEDCOMParser.ParsedTree) -> FamilyTree {
+        let tree = FamilyTree(name: parsed.name)
+        tree.people = parsed.people
+        tree.unions = parsed.unions
+        tree.sourceRecords = parsed.sourceRecords
+        tree.parentLinks = parsed.parentLinks
+        tree.unknownRecords = parsed.unknownRecords
+        tree.headUnknownBranches = parsed.headUnknownBranches
+        return tree
+    }
+
     @Test func validationSeveritiesMissingNamesAndMalformedLinksAreSafe() {
         let tree = FamilyTree(name: "Validation")
         let nameless = Person()
