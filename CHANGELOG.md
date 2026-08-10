@@ -11,6 +11,78 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.2.0] — 2026-08-10
+
+### Added
+
+- Six historical family trees ship as importable examples, one folder per tree, with
+  GEDCOM, portraits and documentary attachments. Public-record trees to try the app on
+  instead of your own family data, and trees safe to attach to a bug report.
+  `Examples/CREDITS.csv` records per-file license and attribution: 11 of the 184 images
+  are CC BY or CC BY-SA and cannot be redistributed bare.
+- Portraits open full size from the record. The inspector's header photo and a new
+  first row under Files both open the sheet; the portrait stays in `Media/`, so the row
+  is a view of it rather than a second copy in `Attachments/`.
+- Full text on hover for titles, subtitles and library captions, but only when they are
+  actually clipped.
+
+### Changed
+
+- The tree is laid out as a layered DAG, which is what a genealogy is. The old engine
+  ran a tidy-tree over the home couple's ancestors only, and descendants, second spouses
+  and detached branches fell through to a leftover loop that made each its own root.
+  That one fact produced every reported symptom: marriage lines drawn straight across a
+  row to a partner stranded in another band, couples never adjacent, and no
+  representation at all for a person with more than one union. Unions are now nodes in a
+  bipartite graph, generations come from longest paths over union-find classes that
+  merge partners and siblings under an acyclicity guard, ancestors are pulled down to
+  rest directly above their children, orderings are seeded outward from the home couple
+  so a pedigree's two ancestral lines stay separated, and each generation gap carries
+  routed lane bands whose height grows with the number of lanes.
+- Columns are placed with Brandes–Köpf. The previous relaxation only nudged vertices
+  toward their neighbours and gave up whenever separation blocked the move, so a couple
+  with an only child could sit permanently off to one side and its descent kept a kink
+  no amount of iteration removed. Alignments are now chosen first and whole chains
+  compacted together, so an alignment is never bent by a later squeeze.
+- The three tree-control pills moved to the toolbar's centre. Principal is the only
+  placement macOS 26 centres — flexible spacers around an automatic group collapse to
+  nothing — and the title block's cap rose from 160pt to 260pt.
+- Smaller card font and adjusted card transparency.
+
+### Fixed
+
+- Saving a saved file no longer duplicates records. An example tree grew from 1803 to
+  2925 lines over three saves: RESI/IMMI branches and FAM-level source citations were
+  both modelled and preserved verbatim, so export wrote each twice and the next parse
+  read four. Those branches are now parsed completely enough to be reproduced, and a
+  branch whose citation was already read is no longer kept beside it.
+- Editing a person with an alternate name no longer saves the alternate over the primary
+  and drops the surname. The scalar name fields are seeded from the primary structured
+  name instead of holding whatever the last `1 NAME` line wrote. This needed the two
+  name paths to agree first: `_MARNM` takes the maiden name from the NAME slash form,
+  and GIVN/SURN are sanitized on read the way the NAME line always was.
+- Another program's citation detail survives a save. A cited source's unmodelled
+  sub-lines were re-emitted only when the source xref failed to resolve, so in the
+  normal case a save replaced the imported branch and dropped foreign place ids and
+  every note past the first — 58 lines gone from a 12-person tree in one save. Event
+  extras also track which level-2 branch a deeper line came from, so dropping a replaced
+  source cannot swallow detail belonging to the event's place.
+- Portraits no longer vanish after an edit. The editor works on a deep copy that
+  round-trips through JSON and cannot carry the transient `Media/` folder, so the draft
+  read back no portrait and Save wrote that emptiness onto the live person. Repointing
+  the media folder now drops a cached read unless bytes are unsaved, so a lookup made
+  before the folder was known cannot stick as “no portrait”.
+- Tracing a relationship through one parent lights that parent's line only. Each child
+  had a single highlight route carrying both parents' connections and both approach
+  legs, so following the mother lit the father's half as well. Each child now gets one
+  route per parent, drawn three ways because a marriage is: neighbouring partners take
+  their half of the row line, a routed pair its own drop plus the lane run, and a spouse
+  chain the same onto the shared line. Parent-to-child routes also used to begin at the
+  union anchor, leaving the drop from the parents' cards unlit — 32 broken routes in one
+  tree, worst on distant pairs where more of the path is made of these joins.
+- Library card captions show their hover help. A Button takes the hover from its own
+  label, so help attached to the caption never fired.
+
 ## [3.1.0] — 2026-08-09
 
 ### Added
@@ -540,7 +612,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.1.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.2.0...HEAD
+[3.2.0]: https://github.com/samoilev/swarm/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/samoilev/swarm/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/samoilev/swarm/compare/v2.3.0...v3.0.0
 [2.3.0]: https://github.com/samoilev/swarm/compare/v2.2.1...v2.3.0
