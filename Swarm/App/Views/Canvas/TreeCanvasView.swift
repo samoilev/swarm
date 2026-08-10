@@ -24,8 +24,10 @@ struct TreeCanvasView: View {
     /// against the part of it the reader can actually see.
     var trailingInset: CGFloat = 0
 
-    private let cardW: CGFloat = 210
-    private let cardH: CGFloat = 90
+    /// Card geometry comes from the engine's own config so the two cannot drift apart.
+    private static let layoutConfig = LayoutConfig()
+    private let cardW = TreeCanvasView.layoutConfig.cardW
+    private let cardH = TreeCanvasView.layoutConfig.cardH
     private let initialFocusZoom: CGFloat = 0.8
     /// The record can move slightly beyond the viewport edge, but never disappear
     /// into unbounded empty canvas after an accidental drag or momentum fling.

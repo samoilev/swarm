@@ -123,7 +123,7 @@ struct PersonCardsPDFExporter {
             layout.links
         }
 
-        let cardW: CGFloat = 210, cardH: CGFloat = 90
+        let cardW = LayoutConfig().cardW, cardH = LayoutConfig().cardH
         let minX = nodes.map(\.x).min()!
         let minY = nodes.map(\.y).min()!
         let treeW = nodes.map { $0.x + cardW }.max()! - minX
@@ -527,8 +527,8 @@ private struct TreePosterView: View {
     let originX: CGFloat
     let originY: CGFloat
     let showPhotos: Bool
-    private let cardW: CGFloat = 210
-    private let cardH: CGFloat = 90
+    private let cardW = LayoutConfig().cardW
+    private let cardH = LayoutConfig().cardH
 
     var body: some View {
         ZStack(alignment: .topLeading) {

@@ -1,0 +1,4622 @@
+0 HEAD
+1 SOUR SwarmFamilyTreePacks
+2 NAME Swarm public-release family-tree pack builder
+2 VERS 2.0
+1 GEDC
+2 VERS 5.5.1
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+1 _TREEID 71797988-179C-5C2F-A57D-94A94BA6B927
+1 _FTSVER 2
+1 _NAME The Kennedy Family
+1 _SUBTITLE Three generations of public life
+1 _HOME @IC9D6FA5D68D3@
+1 _ROOT @F31BA951D02DE@
+0 @IED949C07BAAF@ INDI
+1 _FTSID 0BFD9174-D010-5B23-B0F2-A98854D921E3
+1 NAME Patrick Joseph /Kennedy/
+2 GIVN Patrick Joseph
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Patrick Joseph Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 14 JAN 1858
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Patrick Joseph Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 18 MAY 1929
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Patrick Joseph Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Massachusetts
+3 MAP
+4 LATI N42.300000
+4 LONG W71.800000
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q771
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; diplomat
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Boston College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Patrick Joseph Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 14 JAN 1
+2 CONC 858 at Boston. The recorded death date is 18 MAY1929 at Boston. Documented unions in this tree connect this person with Mary Augusta Kennedy. Public biographical sources identify the following occupat
+2 CONC ion or public role: politician; diplomat. Recorded education includes Boston College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; i
+2 CONC t does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-patrick-joseph-portrait.jpg
+2 FORM JPEG
+1 FAMS @FEE7EDFD42806@
+1 RESI
+2 PLAC Massachusetts
+3 MAP
+4 LATI N42.30000000
+4 LONG W71.80000000
+3 _PID kennedy-place-q771
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q955405
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @IE1EE189067E6@ INDI
+1 _FTSID CBE29D20-BD3F-5BE8-9B6A-FAD274F568CB
+1 NAME Mary Augusta /Kennedy/
+2 TYPE married
+2 GIVN Mary Augusta
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary Augusta Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1857
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary Augusta Kennedy
+3 QUAY high
+1 DEAT
+2 DATE 1923
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary Augusta Kennedy
+3 QUAY high
+1 NOTE Mary Augusta Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1857. The r
+2 CONC ecorded death date is 1923. Documented unions in this tree connect this person with Patrick Joseph Kennedy. This summary is confined to cited genealogical facts and selected public activities needed t
+2 CONC o interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @FEE7EDFD42806@
+0 @I88E2ED11E9D3@ INDI
+1 _FTSID C534D502-E52A-5600-A9BA-1AF751E68ADA
+1 NAME John Francis /Fitzgerald/
+2 GIVN John Francis
+2 SURN Fitzgerald
+2 NICK Honey Fitz
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for John Francis Fitzgerald
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 11 FEB 1863
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of John Francis Fitzgerald
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 2 OCT 1950
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of John Francis Fitzgerald
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Massachusetts
+3 MAP
+4 LATI N42.300000
+4 LONG W71.800000
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of John Francis Fitzgerald
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q771
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of John Francis Fitzgerald
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Boston College; Harvard Medical School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of John Francis Fitzgerald
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of John Francis Fitzgerald
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE John Francis Fitzgerald appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 11 FEB 1
+2 CONC 863 at Boston. The recorded death date is 2 OCT1950 at Boston. Documented unions in this tree connect this person with Mary Josephine Fitzgerald. Public biographical sources identify the following occ
+2 CONC upation or public role: politician. Recorded education includes Boston College; Harvard Medical School. This summary is confined to cited genealogical facts and selected public activities needed to in
+2 CONC terpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-john-fitzgerald-portrait.jpg
+2 FORM JPEG
+1 FAMS @F760F83482C86@
+1 RESI
+2 PLAC Massachusetts
+3 MAP
+4 LATI N42.30000000
+4 LONG W71.80000000
+3 _PID kennedy-place-q771
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of John Francis Fitzgerald
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q966182
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @IBED4B244674C@ INDI
+1 _FTSID C3B2A078-50C2-5AA5-B944-14D5062F10C5
+1 NAME Mary Josephine /Fitzgerald/
+2 TYPE married
+2 GIVN Mary Josephine
+2 SURN Fitzgerald
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary Josephine Fitzgerald
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1865
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary Josephine Fitzgerald
+3 QUAY high
+1 DEAT
+2 DATE 1964
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Mary Josephine Fitzgerald
+3 QUAY high
+1 NOTE Mary Josephine Fitzgerald appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1865. T
+2 CONC he recorded death date is 1964. Documented unions in this tree connect this person with John Francis Fitzgerald. This summary is confined to cited genealogical facts and selected public activities nee
+2 CONC ded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @F760F83482C86@
+0 @I2281FD34EE33@ INDI
+1 _FTSID 6479F5DB-84B0-574D-BDAA-2F128D8809FA
+1 NAME Joseph Patrick /Kennedy/
+2 GIVN Joseph Patrick
+2 SURN Kennedy
+2 NSFX Sr.
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Joseph Patrick Kennedy Sr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 1888
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Joseph Patrick Kennedy Sr.
+3 QUAY high
+1 DEAT
+2 DATE 1969
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Joseph Patrick Kennedy Sr.
+3 QUAY high
+1 NOTE Joseph Patrick Kennedy Sr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1888
+2 CONC . The recorded death date is 1969. Within the defined scope, the recorded parents are Patrick Joseph Kennedy and Mary Augusta Kennedy. Documented unions in this tree connect this person with Rose Eliz
+2 CONC abeth Fitzgerald Kennedy. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast o
+2 CONC r infer missing details from names, portraits, households, or succession.
+1 FAMS @F31BA951D02DE@
+1 FAMC @FEE7EDFD42806@
+2 PEDI birth
+2 _PLINK @IED949C07BAAF@
+3 _FTSID A8D49B24-97A8-5630-BE68-03ACE25196BA
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Patrick Joseph Kennedy is recorded as biological parent of Joseph Patrick Kennedy Sr.
+4 QUAY high
+2 _PLINK @IE1EE189067E6@
+3 _FTSID 3B511A56-ACF8-5601-BE7B-4EA529349988
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Mary Augusta Kennedy is recorded as biological parent of Joseph Patrick Kennedy Sr.
+4 QUAY high
+0 @I4622FD650DEC@ INDI
+1 _FTSID 8216A020-8FD5-52A2-AB83-B89087C93501
+1 NAME Rose Elizabeth /Kennedy/
+2 TYPE married
+2 GIVN Rose Elizabeth
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 22 JUL 1890
+2 PLAC North End
+3 MAP
+4 LATI N42.364947
+4 LONG W71.055106
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q773538
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 22 JAN 1995
+2 PLAC Hyannis
+3 MAP
+4 LATI N41.652778
+4 LONG W70.283333
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1015021
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyhood Cemetery
+3 MAP
+4 LATI N42.320000
+4 LONG W71.166944
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q5887020
+3 NOTE Locality coordinates, not a street address.
+1 OCCU socialite
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Manhattanville University; New England Conservatory
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Rose Elizabeth Fitzgerald Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date i
+2 CONC s 22 JUL 1890 at North End. The recorded deathdate is 22 JAN 1995 at Hyannis. Within the defined scope, the recorded parents are John Francis Fitzgerald and Mary Josephine Fitzgerald. Documented union
+2 CONC s in this tree connect this person with Joseph Patrick Kennedy Sr.. Public biographical sources identify the following occupation or public role: socialite. Recorded education includes Manhattanville U
+2 CONC niversity; New England Conservatory. This summary is confined to cited genealogical facts and selected public activities needed to interpretthe graph; it does not extend the family beyond the commissi
+2 CONC oned cast or infer
+1 OBJE
+2 FILE kennedy-rose-portrait.jpg
+2 FORM JPEG
+1 FAMS @F31BA951D02DE@
+1 FAMC @F760F83482C86@
+2 PEDI birth
+2 _PLINK @I88E2ED11E9D3@
+3 _FTSID A93FCA57-E257-5C57-BC48-1A4FC29E9F83
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN John Francis Fitzgerald is recorded as biological parent of Rose Elizabeth Fitzgerald Kennedy
+4 QUAY high
+2 _PLINK @IBED4B244674C@
+3 _FTSID E340C228-2141-5C0A-9055-15CC79E7686C
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Mary Josephine Fitzgerald is recorded as biological parent of Rose Elizabeth Fitzgerald Kennedy
+4 QUAY high
+1 RESI
+2 PLAC John Fitzgerald Kennedy National Historic Site
+3 MAP
+4 LATI N42.34580000
+4 LONG W71.12440000
+3 _PID kennedy-place-q3181502
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Rose Elizabeth Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q236540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @IFB8027BCA957@ INDI
+1 _FTSID D5049E11-1163-5AA3-8AE6-48BEDF8A4EA1
+1 NAME Joseph Patrick /Kennedy/
+2 GIVN Joseph Patrick
+2 SURN Kennedy
+2 NSFX Jr.
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Joseph Patrick Kennedy Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 25 JUL 1915
+2 PLAC Hull
+3 MAP
+4 LATI N42.301900
+4 LONG W70.908300
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Joseph Patrick Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q505178
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q2414193
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 12 AUG 1944
+2 PLAC English Channel
+3 MAP
+4 LATI N50.000000
+4 LONG W2.000000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Joseph Patrick Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q505178
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q34640
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Joseph Patrick Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q505178
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 OCCU military officer; aircraft pilot
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Joseph Patrick Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q505178
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Dexter School; Choate Rosemary Hall
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Joseph Patrick Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q505178
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Joseph Patrick Kennedy Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 25 J
+2 CONC UL 1915 at Hull. The recorded death date is 12 AUG 1944 at English Channel. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Public b
+2 CONC iographical sources identify the following occupation or public role: military officer; aircraft pilot. Recorded education includes Dexter School; Choate Rosemary Hall. This summary is confined to cit
+2 CONC ed genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned castor infer missing details from names, portraits, households
+2 CONC , or succession.
+1 OBJE
+2 FILE kennedy-joseph-jr-portrait.jpg
+2 FORM JPEG
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 25CC7E0B-CB73-5291-972D-43B5C05A3CBA
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Joseph Patrick Kennedy Jr.
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID 85D5D645-C232-548F-8494-0A908CADB72A
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Joseph Patrick Kennedy Jr.
+4 QUAY high
+1 _MILT United States Navy aviator
+2 DATE FROM 1941 TO 1944
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Naval service
+3 QUAY high
+0 @IC9D6FA5D68D3@ INDI
+1 _FTSID 2D5A4D7C-6B97-5449-AED0-A15277891233
+1 NAME John Fitzgerald /Kennedy/
+2 GIVN John Fitzgerald
+2 SURN Kennedy
+2 NICK Jack
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for John Fitzgerald Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 29 MAY 1917
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of John Fitzgerald Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 22 NOV 1963
+2 PLAC Parkland Memorial Hospital
+3 MAP
+4 LATI N32.811111
+4 LONG W96.838333
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of John Fitzgerald Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q3896131
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of John Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; journalist
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of John Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard College; Choate Rosemary Hall
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of John Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of John Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE John Fitzgerald Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 29 MAY 1
+2 CONC 917 at Brookline. The recorded death date is 22NOV 1963 at Parkland Memorial Hospital. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kenne
+2 CONC dy. Documented unions in this tree connect this person with Jacqueline Lee Kennedy Onassis. Public biographical sources identify the following occupation or public role: politician; journalist. Record
+2 CONC ed education includes Harvard College; Choate Rosemary Hall. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the f
+2 CONC amily beyond the commissioned
+1 OBJE
+2 FILE kennedy-john-portrait.jpg
+2 FORM JPEG
+1 _ATTC
+2 FILE Attachments/kennedy-attachment-1.jpg
+2 TITL The Kennedy Family at Hyannis Port, 04 September 1931. L-R: Robert F. Kennedy, John F. Kennedy, Eunice Kennedy, Jean Kennedy (on lap of) Joseph P. Kennedy Sr., Rose Fitzgerald Kennedy (who was pregnant with Edward "Ted" Kennedy at time of this photo), Patricia Kennedy, Kathleen Kennedy, Joseph P. Kennedy Jr. (behind) Rosemary Kennedy. The dog in the foreground is Buddy.
+2 NOTE Documentary family-context image selected to demonstrate Swarm attachments.
+2 SOUR @SB138D1E44006@
+3 PAGE file description page
+3 EVEN The Kennedy Family at Hyannis Port, 04 September 1931. L-R: Robert F. Kennedy, John F. Kennedy, Eunice Kennedy, Jean Kennedy (on lap of) Joseph P. Kennedy Sr., Rose Fitzgerald Kennedy (who was pregnan
+4 CONC t with Edward "Ted" Kennedy at time of this phot
+3 QUAY high
+3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
+1 _ATTC
+2 FILE Attachments/kennedy-attachment-2.jpg
+2 TITL Kennedy family portrait photograph (KFC-008-019-p0001).jpg
+2 NOTE Documentary family photograph selected to demonstrate Swarm attachments. The source download is retained unmodified; the import copy is resized without generative alteration.
+2 SOUR @SB51911497B58@
+3 PAGE file description page
+3 EVEN Kennedy family portrait photograph (KFC-008-019-p0001).jpg
+3 QUAY high
+3 NOTE Citation supports attachment identity and provenance, not genealogical relationships.
+1 FAMS @F3F0D76CC4115@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 8E7B02FF-319A-55E4-A9E8-40C929CD10EA
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of John Fitzgerald Kennedy
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID FA767834-8E22-5C25-B003-CD23AB50CD19
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of John Fitzgerald Kennedy
+4 QUAY high
+1 RESI
+2 PLAC John Fitzgerald Kennedy National Historic Site
+3 MAP
+4 LATI N42.34580000
+4 LONG W71.12440000
+3 _PID kennedy-place-q3181502
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of John Fitzgerald Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q9696
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 _MILT United States Navy
+2 DATE FROM 1941 TO 1945
+2 SOUR @SC58C771BF68B@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Naval service during the Second World War
+3 QUAY high
+1 EVEN President of the United States
+2 TYPE Public office
+2 DATE FROM 20 JAN 1961 TO 22 NOV 1963
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.89500000
+4 LONG W77.03666667
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+2 SOUR @SC58C771BF68B@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Presidency
+3 QUAY high
+0 @I4A0809AB20D4@ INDI
+1 _FTSID 5AC01B92-AE28-547F-9760-6653A95EDC2E
+1 NAME Rose Marie /Kennedy/
+2 GIVN Rose Marie
+2 SURN Kennedy
+2 NICK Rosemary
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Rose Marie Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 13 SEP 1918
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Rose Marie Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q265595
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 7 JAN 2005
+2 PLAC Fort Atkinson
+3 MAP
+4 LATI N42.927222
+4 LONG W88.840556
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Rose Marie Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q265595
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1570350
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyhood Cemetery
+3 MAP
+4 LATI N42.320000
+4 LONG W71.166944
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Rose Marie Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q265595
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q5887020
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Rose Marie Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 13 SEP 1918 a
+2 CONC t Brookline. The recorded death date is 7 JAN 2005 at Fort Atkinson. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. This summary i
+2 CONC s confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, por
+2 CONC traits, households, or succession.
+1 OBJE
+2 FILE kennedy-rosemary-portrait.jpg
+2 FORM JPEG
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID B03E3432-D1E1-52A1-AE95-38DA5CFDEE24
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Rose Marie Kennedy
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID AFADA3A9-10CC-5199-B8ED-31A55466F382
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Rose Marie Kennedy
+4 QUAY high
+0 @I31777D3411C5@ INDI
+1 _FTSID 8F24A291-3A6D-5391-8FE3-73CDBE1CE6B0
+1 NAME Kathleen Agnes /Cavendish/
+2 TYPE married
+2 GIVN Kathleen Agnes
+2 SURN Cavendish
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Kathleen Agnes Cavendish
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 20 FEB 1920
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Kathleen Agnes Cavendish
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q268799
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 13 MAY 1948
+2 PLAC Saint-Bauzile
+3 MAP
+4 LATI N44.676389
+4 LONG E4.674167
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Kathleen Agnes Cavendish
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q268799
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q287160
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Edensor
+3 MAP
+4 LATI N53.227000
+4 LONG W1.625000
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Kathleen Agnes Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q268799
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q2578787
+3 NOTE Locality coordinates, not a street address.
+1 OCCU socialite; aristocrat
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Kathleen Agnes Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q268799
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Queen's College London; Finch College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Kathleen Agnes Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q268799
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Kathleen Agnes Cavendish appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 20 FEB 1
+2 CONC 920 at Brookline. The recorded death date is 13 MAY 1948 at Saint-Bauzile. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Document
+2 CONC ed unions in this tree connect this person with William John Robert Cavendish. Public biographical sources identify the following occupation or public role: socialite; aristocrat. Recorded education i
+2 CONC ncludes Queen's College London; Finch College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond t
+2 CONC he commissioned cast or
+1 OBJE
+2 FILE kennedy-kathleen-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC8013A84E62B@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 9170697E-32E8-5AA4-8BEE-146263ACE721
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Kathleen Agnes Cavendish
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID 30AFABB0-6154-5166-9092-4A10DCFBD34E
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Kathleen Agnes Cavendish
+4 QUAY high
+0 @I8F178DF27782@ INDI
+1 _FTSID 69662CD4-A89A-5D6E-A3B6-E886B7CD6C80
+1 NAME Eunice Mary /Shriver/
+2 TYPE married
+2 GIVN Eunice Mary
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Eunice Mary Kennedy Shriver
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 10 JUL 1921
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Eunice Mary Kennedy Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q272908
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 11 AUG 2009
+2 PLAC Hyannis
+3 MAP
+4 LATI N41.652778
+4 LONG W70.283333
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Eunice Mary Kennedy Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q272908
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1015021
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Saint Francis Xavier Cemetery
+3 MAP
+4 LATI N41.651700
+4 LONG W70.333200
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Eunice Mary Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272908
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q117516351
+3 NOTE Locality coordinates, not a street address.
+1 OCCU athletics competitor; politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Eunice Mary Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272908
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Stanford University; Manhattanville University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Eunice Mary Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272908
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Eunice Mary Kennedy Shriver appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 10 J
+2 CONC UL 1921 at Brookline. The recorded death date is 11 AUG 2009 at Hyannis. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Documented u
+2 CONC nions in this tree connect this person with Robert Sargent Shriver Jr.. Public biographical sources identify the following occupation or public role: athletics competitor; politician. Recorded educati
+2 CONC on includes Stanford University; Manhattanville University. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the fa
+2 CONC mily beyond the commissioned cast
+1 OBJE
+2 FILE kennedy-eunice-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD5883A916A94@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 79A323F3-63B5-58DB-B7B5-1460EC076D11
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Eunice Mary Kennedy Shriver
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID 78F2CFF0-B9EE-5D70-85C2-29879A28AADC
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Eunice Mary Kennedy Shriver
+4 QUAY high
+0 @IAF792EB85888@ INDI
+1 _FTSID 88AA0EE9-1EA0-5CD8-8C21-507F182DC239
+1 NAME Patricia Helen /Lawford/
+2 TYPE married
+2 GIVN Patricia Helen
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Patricia Helen Kennedy Lawford
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 6 MAY 1924
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Patricia Helen Kennedy Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 17 SEP 2006
+2 PLAC Manhattan
+3 MAP
+4 LATI N40.728333
+4 LONG W73.994167
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Patricia Helen Kennedy Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q11299
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Southampton Cemetery
+3 MAP
+4 LATI N40.900600
+4 LONG W72.403300
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Patricia Helen Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q7569105
+3 NOTE Locality coordinates, not a street address.
+1 OCCU actor; film producer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Patricia Helen Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Rosemont College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Patricia Helen Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 RESI
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Patricia Helen Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Patricia Helen Kennedy Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 M
+2 CONC AY 1924 at Brookline. The recorded death dateis 17 SEP 2006 at Manhattan. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Documente
+2 CONC d unions in this tree connect this person with Peter Sydney Ernest Lawford. Public biographical sources identify the following occupation or public role: actor; film producer. Recorded education inclu
+2 CONC des Rosemont College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; itdoes not extend the family beyond the commissioned cast or in
+2 CONC fer
+1 OBJE
+2 FILE kennedy-patricia-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA16D2797FEDF@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID CAB69F57-C694-5AA3-945C-5F7727BC4AC2
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Patricia Helen Kennedy Lawford
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID C236FE86-8DDB-5263-9AA5-527338ED4D8C
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Patricia Helen Kennedy Lawford
+4 QUAY high
+1 RESI
+2 PLAC Santa Monica
+3 MAP
+4 LATI N34.02194444
+4 LONG W118.48138889
+3 _PID kennedy-place-q47164
+3 NOTE Locality coordinates, not a street address.
+2 NOTE Public historical locality only.
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public historical residence of Patricia Helen Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q432694
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+0 @I8647F80E8D7A@ INDI
+1 _FTSID 107CBEB3-0B8B-51C6-B9D8-57978FF8BCFD
+1 NAME Robert Francis /Kennedy/
+2 GIVN Robert Francis
+2 SURN Kennedy
+2 NICK Bobby
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Robert Francis Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 20 NOV 1925
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Robert Francis Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q25310
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 6 JUN 1968
+2 PLAC Los Angeles
+3 MAP
+4 LATI N34.052230
+4 LONG W118.243680
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Robert Francis Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q25310
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q65
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Robert Francis Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q25310
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; military officer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Robert Francis Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q25310
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard College; University of Virginia School of Law
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Robert Francis Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q25310
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Robert Francis Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 20 NOV 1
+2 CONC 925 at Brookline. The recorded death date is 6 JUN 1968 at Los Angeles. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Documented u
+2 CONC nions in this tree connect this person with Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public role: politician; military officer. Recorded education include
+2 CONC s Harvard College; University of Virginia School of Law. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the famil
+2 CONC y beyond
+1 OBJE
+2 FILE kennedy-robert-portrait.jpg
+2 FORM JPEG
+1 FAMS @F6AF233DA3D60@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 5B55B4D9-5830-557E-A1BD-D54B4F8E6D07
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Robert Francis Kennedy
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID 0DBD9BCF-8EA4-56A2-9675-7713533168B4
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Robert Francis Kennedy
+4 QUAY high
+1 _MILT United States Naval Reserve
+2 DATE FROM 1944 TO 1946
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Naval service
+3 QUAY high
+1 EVEN Attorney General of the United States
+2 TYPE Public office
+2 DATE FROM 20 JAN 1961 TO 3 SEP 1964
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.89500000
+4 LONG W77.03666667
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Attorney General
+3 QUAY high
+0 @I2A71967CB14E@ INDI
+1 _FTSID 7699C507-9D17-56C5-9790-AD4BDD148717
+1 NAME Jean Ann /Smith/
+2 TYPE married
+2 GIVN Jean Ann
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Jean Ann Kennedy Smith
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 20 FEB 1928
+2 PLAC Brookline
+3 MAP
+4 LATI N42.331667
+4 LONG W71.121667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Jean Ann Kennedy Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q272401
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49142
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 17 JUN 2020
+2 PLAC New York City
+3 MAP
+4 LATI N40.712778
+4 LONG W74.006111
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Jean Ann Kennedy Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q272401
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q60
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Most Holy Trinity Catholic Cemetery
+3 MAP
+4 LATI N40.978900
+4 LONG W72.204400
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Jean Ann Kennedy Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272401
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q14707018
+3 NOTE Locality coordinates, not a street address.
+1 OCCU diplomat
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Jean Ann Kennedy Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272401
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Manhattanville University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Jean Ann Kennedy Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q272401
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Jean Ann Kennedy Smith appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 20 FEB 1
+2 CONC 928 at Brookline. The recorded death date is 17JUN 2020 at New York City. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Documente
+2 CONC d unions in this tree connect this person with Stephen Edward Smith. Public biographical sources identify the following occupation or public role: diplomat. Recorded education includes Manhattanville U
+2 CONC niversity. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missin
+2 CONC g
+1 OBJE
+2 FILE kennedy-jean-portrait.jpg
+2 FORM JPEG
+1 FAMS @F4ACE6E61328C@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID 7E9EBD58-FA0D-5CFC-9A25-7871D2855DE7
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Jean Ann Kennedy Smith
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID 47F4C96F-ED64-5D06-8963-36134594D1AB
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Jean Ann Kennedy Smith
+4 QUAY high
+1 EVEN United States Ambassador to Ireland
+2 TYPE Public office
+2 DATE FROM 1993 TO 1998
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Ambassadorial service
+3 QUAY high
+0 @IE61101BC67BC@ INDI
+1 _FTSID DA55724E-D654-556C-A1D2-66579240180A
+1 NAME Edward Moore /Kennedy/
+2 GIVN Edward Moore
+2 SURN Kennedy
+2 NICK Ted
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Edward Moore Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 22 FEB 1932
+2 PLAC Dorchester
+3 MAP
+4 LATI N42.316667
+4 LONG W71.050000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Edward Moore Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q134549
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1024037
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 25 AUG 2009
+2 PLAC Barnstable
+3 MAP
+4 LATI N41.700000
+4 LONG W70.300000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Edward Moore Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q134549
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q808535
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Edward Moore Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q134549
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; lawyer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Edward Moore Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q134549
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC University of Virginia School of Law; Harvard College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Edward Moore Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q134549
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Edward Moore Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 22 FEB 193
+2 CONC 2 at Dorchester. The recorded death date is 25 AUG 2009 at Barnstable. Within the defined scope, the recorded parents are Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy. Documented u
+2 CONC nions in this tree connect this person with Virginia Joan Kennedy, Victoria Anne Reggie Kennedy.Public biographical sources identify the following occupation or public role: politician; lawyer. Record
+2 CONC ed education includes University of Virginia School of Law; Harvard College. This summary is confined to cited genealogical facts and selectedpublic activities needed to interpret the graph; it does n
+2 CONC ot extend the
+1 OBJE
+2 FILE kennedy-edward-portrait.jpg
+2 FORM JPEG
+1 FAMS @FC1BBE7BA40E9@
+1 FAMS @FE5DA8FBD6CE7@
+1 FAMC @F31BA951D02DE@
+2 PEDI birth
+2 _PLINK @I2281FD34EE33@
+3 _FTSID C5644028-DD6F-5562-A994-1F8896B45069
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Joseph Patrick Kennedy Sr. is recorded as biological parent of Edward Moore Kennedy
+4 QUAY high
+2 _PLINK @I4622FD650DEC@
+3 _FTSID C6BEE7D4-C92D-54B2-8C7B-9B2BC5E49241
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Rose Elizabeth Fitzgerald Kennedy is recorded as biological parent of Edward Moore Kennedy
+4 QUAY high
+1 _MILT United States Army
+2 DATE FROM 1951 TO 1953
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Army service
+3 QUAY high
+1 EVEN United States Senator from Massachusetts
+2 TYPE Public office
+2 DATE FROM 7 NOV 1962 TO 25 AUG 2009
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.89500000
+4 LONG W77.03666667
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+2 SOUR @S0AB277A47B79@
+3 PAGE relevant institutional biography or collection entry
+3 EVEN Senate service
+3 QUAY high
+0 @ICA91D675241A@ INDI
+1 _FTSID 16B3D0B1-30EA-5EAA-AEE6-A0C2489E8D60
+1 NAME Jacqueline Lee /Onassis/
+2 TYPE married
+2 GIVN Jacqueline Lee
+2 SURN Onassis
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Jacqueline Lee Kennedy Onassis
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 28 JUL 1929
+2 PLAC Southampton
+3 MAP
+4 LATI N40.885278
+4 LONG W72.395278
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Jacqueline Lee Kennedy Onassis
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q165421
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q2631643
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 19 MAY 1994
+2 PLAC New York City
+3 MAP
+4 LATI N40.712778
+4 LONG W74.006111
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Jacqueline Lee Kennedy Onassis
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q165421
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q60
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Jacqueline Lee Kennedy Onassis
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q165421
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 OCCU journalist; literary editor
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Jacqueline Lee Kennedy Onassis
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q165421
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Vassar College; University of Paris
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Jacqueline Lee Kennedy Onassis
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q165421
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Jacqueline Lee Kennedy Onassis appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2
+2 CONC 8 JUL 1929 at Southampton. The recorded death date is 19 MAY 1994 at New York City. Documented unions in this tree connect this person with John Fitzgerald Kennedy. Public biographical sources identif
+2 CONC y the following occupation or public role: journalist; literary editor. Recorded education includes Vassar College; University of Paris. This summary is confined to cited genealogical facts and select
+2 CONC ed public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-jacqueline-portrait.jpg
+2 FORM JPEG
+1 FAMS @F3F0D76CC4115@
+0 @I9438A2EE6D19@ INDI
+1 _FTSID 782FBFD6-D563-58F5-A094-98C250481938
+1 NAME William John Robert /Cavendish/
+2 GIVN William John Robert
+2 SURN Cavendish
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for William John Robert Cavendish
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 10 DEC 1917
+2 PLAC London
+3 MAP
+4 LATI N51.507222
+4 LONG W0.127500
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of William John Robert Cavendish
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q717540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q84
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 9 SEP 1944
+2 PLAC Heppen
+3 MAP
+4 LATI N51.108900
+4 LONG E5.228600
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of William John Robert Cavendish
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q717540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1959265
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Leopoldsburg War Cemetery
+3 MAP
+4 LATI N51.112710
+4 LONG E5.268330
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of William John Robert Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q717540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q91365310
+3 NOTE Locality coordinates, not a street address.
+1 OCCU military personnel
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of William John Robert Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q717540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Trinity College; Eton College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of William John Robert Cavendish
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q717540
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE William John Robert Cavendish appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1
+2 CONC 0 DEC 1917 at London. The recorded death date is9 SEP 1944 at Heppen. Documented unions in this tree connect this person with Kathleen Agnes Cavendish. Public biographical sources identify the followi
+2 CONC ng occupation or public role: military personnel. Recorded education includes Trinity College;Eton College. This summary is confined to cited genealogical facts and selected public activities needed t
+2 CONC o interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households,or succession.
+1 FAMS @FC8013A84E62B@
+0 @I12361857F565@ INDI
+1 _FTSID C7E4B15F-6A2A-530B-B4D4-134A2E33F673
+1 NAME Robert Sargent /Shriver/
+2 GIVN Robert Sargent
+2 SURN Shriver
+2 NSFX Jr.
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Robert Sargent Shriver Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 9 NOV 1915
+2 PLAC Westminster
+3 MAP
+4 LATI N39.576667
+4 LONG W77.000000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Robert Sargent Shriver Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q317248
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q755018
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 18 JAN 2011
+2 PLAC Bethesda
+3 MAP
+4 LATI N38.984826
+4 LONG W77.094646
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Robert Sargent Shriver Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q317248
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q584451
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Saint Francis Xavier Cemetery
+3 MAP
+4 LATI N41.651700
+4 LONG W70.333200
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Robert Sargent Shriver Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q317248
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q117516351
+3 NOTE Locality coordinates, not a street address.
+1 OCCU military officer; lawyer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Robert Sargent Shriver Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q317248
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Canterbury School; Browning School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Robert Sargent Shriver Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q317248
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Robert Sargent Shriver Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 9 NO
+2 CONC V 1915 at Westminster. The recorded death date is 18 JAN 2011 at Bethesda. Documented unions in this tree connect this person with Eunice Mary Kennedy Shriver. Public biographical sources identify the f
+2 CONC ollowing occupation or public role: military officer; lawyer. Recorded education includes Canterbury School; Browning School. This summary is confined to cited genealogical facts and selected public a
+2 CONC ctivities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-sargent-shriver-portrait.jpg
+2 FORM JPEG
+1 FAMS @FD5883A916A94@
+0 @I849679B9C2AE@ INDI
+1 _FTSID 2D4BDC3D-7DC3-5EAE-BCAE-56690C3554C3
+1 NAME Peter Sydney Ernest /Lawford/
+2 GIVN Peter Sydney Ernest
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Peter Sydney Ernest Lawford
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 7 SEP 1923
+2 PLAC London
+3 MAP
+4 LATI N51.507222
+4 LONG W0.127500
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Peter Sydney Ernest Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q345517
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q84
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 24 DEC 1984
+2 PLAC Los Angeles
+3 MAP
+4 LATI N34.052230
+4 LONG W118.243680
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Peter Sydney Ernest Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q345517
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q65
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Westwood Village Memorial Park Cemetery
+3 MAP
+4 LATI N34.058346
+4 LONG W118.441134
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Peter Sydney Ernest Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q345517
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1358639
+3 NOTE Locality coordinates, not a street address.
+1 OCCU film producer; film actor
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Peter Sydney Ernest Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q345517
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Peter Sydney Ernest Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 S
+2 CONC EP 1923 at London. The recorded death date is 24DEC 1984 at Los Angeles. Documented unions in this tree connect this person with Patricia Helen Kennedy Lawford. Public biographical sources identify th
+2 CONC e following occupation or public role: film producer; film actor. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend t
+2 CONC he family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-peter-lawford-portrait.jpg
+2 FORM JPEG
+1 FAMS @FA16D2797FEDF@
+0 @IE3C10BBCF039@ INDI
+1 _FTSID 107BDEF9-2A97-5B6E-B84E-4B8A85C41BC2
+1 NAME Ethel /Kennedy/
+2 TYPE married
+2 GIVN Ethel
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Ethel Skakel Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 11 APR 1928
+2 PLAC Chicago
+3 MAP
+4 LATI N41.881944
+4 LONG W87.627778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Ethel Skakel Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q258661
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1297
+3 NOTE Locality coordinates, not a street address.
+1 OCCU socialite
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Ethel Skakel Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q258661
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Manhattanville University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Ethel Skakel Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q258661
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Ethel Skakel Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 11 APR 192
+2 CONC 8 at Chicago. Documented unions in this tree connect this person with Robert Francis Kennedy. Public biographical sources identify the following occupation or public role: socialite. Recorded educatio
+2 CONC n includes Manhattanville University. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commis
+2 CONC sioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @F6AF233DA3D60@
+0 @I6BAAB2AFADF3@ INDI
+1 _FTSID BC988620-57E5-5244-8DBF-513CE45189C1
+1 NAME Stephen Edward /Smith/
+2 GIVN Stephen Edward
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Stephen Edward Smith
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 24 SEP 1927
+2 PLAC New York City
+3 MAP
+4 LATI N40.712778
+4 LONG W74.006111
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Stephen Edward Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3973180
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q60
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 19 AUG 1990
+2 PLAC Manhattan
+3 MAP
+4 LATI N40.728333
+4 LONG W73.994167
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Stephen Edward Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3973180
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q11299
+3 NOTE Locality coordinates, not a street address.
+1 OCCU financial analyst; diplomat
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Stephen Edward Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3973180
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Georgetown University; Poly Prep Country Day School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Stephen Edward Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3973180
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Stephen Edward Smith appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 24 SEP 192
+2 CONC 7 at New York City. The recorded death date is 19 AUG 1990 at Manhattan. Documented unions in this tree connect this person with Jean Ann Kennedy Smith. Public biographical sources identify the follow
+2 CONC ing occupation or public role: financial analyst; diplomat. Recorded education includes Georgetown University; Poly Prep Country Day School. This summary is confined to cited genealogical facts and se
+2 CONC lected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fromnames, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-stephen-smith-portrait.jpg
+2 FORM JPEG
+1 FAMS @F4ACE6E61328C@
+0 @I5257669A1206@ INDI
+1 _FTSID C3997032-4B8A-56E0-B2DF-793CC1BA2C66
+1 NAME Virginia Joan /Kennedy/
+2 TYPE married
+2 GIVN Virginia Joan
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Virginia Joan Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 SEP 1936
+2 PLAC New York
+3 MAP
+4 LATI N43.000000
+4 LONG W75.000000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Virginia Joan Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q441424
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1384
+3 NOTE Locality coordinates, not a street address.
+1 OCCU socialite; pianist
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Virginia Joan Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q441424
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Manhattanville University; Lesley University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Virginia Joan Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q441424
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Virginia Joan Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 SEP 193
+2 CONC 6 at New York. Documented unions in this tree connect this person with Edward Moore Kennedy. Public biographical sources identify the following occupation or public role: socialite; pianist. Recorded e
+2 CONC ducation includes Manhattanville University; Lesley University. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend th
+2 CONC e family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @FC1BBE7BA40E9@
+0 @I637BFCC9D1B7@ INDI
+1 _FTSID D70DA260-9E4A-5444-829F-9316935DBFE1
+1 NAME Victoria Anne /Kennedy/
+2 TYPE married
+2 GIVN Victoria Anne
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Victoria Anne Reggie Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1954
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Victoria Anne Reggie Kennedy
+3 QUAY high
+1 NOTE Victoria Anne Reggie Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 19
+2 CONC 54. Documented unions in this tree connect thisperson with Edward Moore Kennedy. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it d
+2 CONC oes not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMS @FE5DA8FBD6CE7@
+0 @ID0FE140477C1@ INDI
+1 _FTSID 795EAB47-6511-5429-8F2F-23842CE7B67E
+1 NAME Arabella /Kennedy/
+2 GIVN Arabella
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Arabella Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 23 AUG 1956
+2 PLAC Newport
+3 MAP
+4 LATI N41.491667
+4 LONG W71.311944
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Arabella Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326753
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q54264
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 23 AUG 1956
+2 PLAC Newport
+3 MAP
+4 LATI N41.491667
+4 LONG W71.311944
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Arabella Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326753
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q54264
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Arabella Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q75326753
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Arabella Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 23 AUG 1956 at N
+2 CONC ewport. The recorded death date is 23 AUG 1956at Newport. Within the defined scope, the recorded parents are John Fitzgerald Kennedy and Jacqueline Lee Kennedy Onassis. This summary is confined to cit
+2 CONC ed genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, household
+2 CONC s, or succession.
+1 FAMC @F3F0D76CC4115@
+2 PEDI birth
+2 _PLINK @IC9D6FA5D68D3@
+3 _FTSID 080BA5F1-9A53-56AF-B397-06739BAEA19B
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN John Fitzgerald Kennedy is recorded as biological parent of Arabella Kennedy
+4 QUAY high
+2 _PLINK @ICA91D675241A@
+3 _FTSID 537E64EE-EBAC-555D-B95E-807309EBB77B
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jacqueline Lee Kennedy Onassis is recorded as biological parent of Arabella Kennedy
+4 QUAY high
+0 @I90382631009D@ INDI
+1 _FTSID 58305E4C-E083-5BC2-BA69-D3CAC150FE17
+1 NAME Caroline Bouvier /Kennedy/
+2 GIVN Caroline Bouvier
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Caroline Bouvier Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 27 NOV 1957
+2 PLAC Manhattan
+3 MAP
+4 LATI N40.728333
+4 LONG W73.994167
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Caroline Bouvier Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q230303
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q11299
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; diplomat
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Caroline Bouvier Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q230303
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Stone Ridge School of the Sacred Heart; Brearley School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Caroline Bouvier Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q230303
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Caroline Bouvier Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 27 NOV 1
+2 CONC 957 at Manhattan. Within the defined scope, the recorded parents are John Fitzgerald Kennedy and Jacqueline Lee Kennedy Onassis. Public biographical sources identify the following occupation or public r
+2 CONC ole: lawyer; diplomat. Recorded education includes Stone Ridge School of the Sacred Heart; Brearley School. This summary is confined to cited genealogical facts and selected public activities needed t
+2 CONC o interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F3F0D76CC4115@
+2 PEDI birth
+2 _PLINK @IC9D6FA5D68D3@
+3 _FTSID BA6B6765-2D98-50EE-92C1-D583C01D1E46
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN John Fitzgerald Kennedy is recorded as biological parent of Caroline Bouvier Kennedy
+4 QUAY high
+2 _PLINK @ICA91D675241A@
+3 _FTSID 56FEABFE-5F19-5FC8-A658-678330C0E350
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jacqueline Lee Kennedy Onassis is recorded as biological parent of Caroline Bouvier Kennedy
+4 QUAY high
+0 @I958663ED0012@ INDI
+1 _FTSID BB04DB18-08A9-535C-B368-9508EB4641F5
+1 NAME John Fitzgerald /Kennedy/
+2 GIVN John Fitzgerald
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for John Fitzgerald Kennedy Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 25 NOV 1960
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of John Fitzgerald Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q316064
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 16 JUL 1999
+2 PLAC Atlantic Ocean
+3 MAP
+4 LATI N0.000000
+4 LONG W30.000000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of John Fitzgerald Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q316064
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q97
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; publisher
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of John Fitzgerald Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q316064
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Brown University; New York University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of John Fitzgerald Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q316064
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE John Fitzgerald Kennedy Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 25 N
+2 CONC OV 1960 at Washington, D.C.. The recorded deathdate is 16 JUL 1999 at Atlantic Ocean. Within the defined scope, the recorded parents are John Fitzgerald Kennedy and Jacqueline Lee Kennedy Onassis. Pub
+2 CONC lic biographical sources identify the following occupation or public role: lawyer; publisher.Recorded education includes Brown University; New York University. This summary is confined to cited geneal
+2 CONC ogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or suc
+2 CONC cession.
+1 OBJE
+2 FILE kennedy-john-jr-portrait.jpg
+2 FORM JPEG
+1 FAMC @F3F0D76CC4115@
+2 PEDI birth
+2 _PLINK @IC9D6FA5D68D3@
+3 _FTSID 49A10D89-54FE-58E8-8684-4E8D80A13B73
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN John Fitzgerald Kennedy is recorded as biological parent of John Fitzgerald Kennedy Jr.
+4 QUAY high
+2 _PLINK @ICA91D675241A@
+3 _FTSID B0492C85-E7E5-57A6-A52A-3C66369D37AF
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jacqueline Lee Kennedy Onassis is recorded as biological parent of John Fitzgerald Kennedy Jr.
+4 QUAY high
+0 @ID7E51F505CED@ INDI
+1 _FTSID 08EA9CF5-3875-5966-B6E3-676FE6AE8B6A
+1 NAME Patrick Bouvier /Kennedy/
+2 GIVN Patrick Bouvier
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Patrick Bouvier Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 7 AUG 1963
+2 PLAC Otis Air Force Base Hospital
+3 MAP
+4 LATI N41.666400
+4 LONG W70.569300
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Patrick Bouvier Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3290402
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q7108756
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 9 AUG 1963
+2 PLAC Boston Children's Hospital
+3 MAP
+4 LATI N42.337222
+4 LONG W71.106389
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Patrick Bouvier Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3290402
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1000479
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Arlington National Cemetery
+3 MAP
+4 LATI N38.878611
+4 LONG W77.068333
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Patrick Bouvier Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3290402
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q216344
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Patrick Bouvier Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 7 AUG 1
+2 CONC 963 at Otis Air Force Base Hospital. The recorded death date is 9 AUG 1963 at Boston Children's Hospital. Within the defined scope, the recorded parents are John Fitzgerald Kennedy and Jacqueline Lee K
+2 CONC ennedy Onassis. This summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer m
+2 CONC issing details from names, portraits, households, or succession.
+1 FAMC @F3F0D76CC4115@
+2 PEDI birth
+2 _PLINK @IC9D6FA5D68D3@
+3 _FTSID EBDF95DD-90C6-53A4-A532-CA6A5300A0E6
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN John Fitzgerald Kennedy is recorded as biological parent of Patrick Bouvier Kennedy
+4 QUAY high
+2 _PLINK @ICA91D675241A@
+3 _FTSID 0A41F1B8-A64B-5BF4-A7B6-86A26BFCD1BA
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jacqueline Lee Kennedy Onassis is recorded as biological parent of Patrick Bouvier Kennedy
+4 QUAY high
+0 @IFE18832F4DD5@ INDI
+1 _FTSID 77D79DE5-1A22-5AF7-8D3A-FB189DCAF218
+1 NAME Robert Sargent /Shriver/
+2 GIVN Robert Sargent
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Robert Sargent Shriver III
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 APR 1954
+2 PLAC Chicago
+3 MAP
+4 LATI N41.881944
+4 LONG W87.627778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Robert Sargent Shriver III
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3436301
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1297
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; journalist
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Robert Sargent Shriver III
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3436301
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Yale Law School; Phillips Exeter Academy
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Robert Sargent Shriver III
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3436301
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Robert Sargent Shriver III appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 A
+2 CONC PR 1954 at Chicago. Within the defined scope, the recorded parents are Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.. Public biographical sources identify the following occupation or publ
+2 CONC ic role: lawyer; journalist. Recorded education includes Yale Law School; Phillips Exeter Academy. This summary is confined to cited genealogical facts and selected public activities needed to interpr
+2 CONC et the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FD5883A916A94@
+2 PEDI birth
+2 _PLINK @I12361857F565@
+3 _FTSID BF99A363-7D0F-58C9-A092-3B52481FFE8E
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Sargent Shriver Jr. is recorded as biological parent of Robert Sargent Shriver III
+4 QUAY high
+2 _PLINK @I8F178DF27782@
+3 _FTSID E1DFFAA7-8B53-526E-808C-97C473FAFCB1
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Eunice Mary Kennedy Shriver is recorded as biological parent of Robert Sargent Shriver III
+4 QUAY high
+0 @I37520C7AA695@ INDI
+1 _FTSID 22D98636-7E3A-54EB-9956-09546B5E8395
+1 NAME Maria Owings /Shriver/
+2 GIVN Maria Owings
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Maria Owings Shriver
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 6 NOV 1955
+2 PLAC Chicago
+3 MAP
+4 LATI N41.881944
+4 LONG W87.627778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Maria Owings Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q230654
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q1297
+3 NOTE Locality coordinates, not a street address.
+1 OCCU journalist; writer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Maria Owings Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q230654
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Georgetown University; Manhattanville University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Maria Owings Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q230654
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Maria Owings Shriver appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 6 NOV 1955 a
+2 CONC t Chicago. Within the defined scope, the recorded parents are Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.. Public biographical sources identify the following occupation or public role: j
+2 CONC ournalist; writer. Recorded education includes Georgetown University; Manhattanville University. This summary is confined to cited genealogical facts and selected public activities needed to interpret t
+2 CONC he graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FD5883A916A94@
+2 PEDI birth
+2 _PLINK @I12361857F565@
+3 _FTSID BC9010B2-9D49-5FC8-9C9C-ECA24417D774
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Sargent Shriver Jr. is recorded as biological parent of Maria Owings Shriver
+4 QUAY high
+2 _PLINK @I8F178DF27782@
+3 _FTSID 415B5CF9-9B50-537D-826D-11C87746A5C8
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Eunice Mary Kennedy Shriver is recorded as biological parent of Maria Owings Shriver
+4 QUAY high
+0 @I3869B65BFA5F@ INDI
+1 _FTSID A881D168-A8D0-5629-B0ED-65F6CD501661
+1 NAME Timothy Perry /Shriver/
+2 GIVN Timothy Perry
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Timothy Perry Shriver
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 29 AUG 1959
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Timothy Perry Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3529079
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 OCCU teacher; film producer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Timothy Perry Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3529079
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Yale University; The Catholic University of America
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Timothy Perry Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3529079
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Timothy Perry Shriver appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 29 AUG 19
+2 CONC 59 at Boston. Within the defined scope, the recorded parents are Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.. Public biographical sources identify the following occupation or public rol
+2 CONC e: teacher; film producer. Recorded education includes Yale University; The Catholic Universityof America. This summary is confined to cited genealogical facts and selected public activities needed to i
+2 CONC nterpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, orsuccession.
+1 FAMC @FD5883A916A94@
+2 PEDI birth
+2 _PLINK @I12361857F565@
+3 _FTSID F7AD91AA-B7CB-5C01-95D1-112AD5C9F32E
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Sargent Shriver Jr. is recorded as biological parent of Timothy Perry Shriver
+4 QUAY high
+2 _PLINK @I8F178DF27782@
+3 _FTSID F894166B-02BD-5A59-8DC7-69E637CB15B1
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Eunice Mary Kennedy Shriver is recorded as biological parent of Timothy Perry Shriver
+4 QUAY high
+0 @I0752AFDE7A38@ INDI
+1 _FTSID B7B595F7-ADBE-51B0-A8BF-191E1580899A
+1 NAME Mark Kennedy /Shriver/
+2 GIVN Mark Kennedy
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mark Kennedy Shriver
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 17 FEB 1964
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mark Kennedy Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q6769708
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mark Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q6769708
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC College of the Holy Cross; John F. Kennedy School of Government
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Mark Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q6769708
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mark Kennedy Shriver appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 17 FEB 196
+2 CONC 4 at Washington, D.C.. Within the defined scope,the recorded parents are Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.. Public biographical sources identify the following occupation or pu
+2 CONC blic role: politician. Recorded education includes College of the Holy Cross; John F. Kennedy School of Government. This summary is confined to cited genealogical facts and selected public activities n
+2 CONC eeded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FD5883A916A94@
+2 PEDI birth
+2 _PLINK @I12361857F565@
+3 _FTSID DF9B53FD-5F83-584A-87E9-A1FC2820811F
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Sargent Shriver Jr. is recorded as biological parent of Mark Kennedy Shriver
+4 QUAY high
+2 _PLINK @I8F178DF27782@
+3 _FTSID CC657728-6620-54A6-B223-0A6765E6CF44
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Eunice Mary Kennedy Shriver is recorded as biological parent of Mark Kennedy Shriver
+4 QUAY high
+0 @I1E3B104C7DA9@ INDI
+1 _FTSID 274E4076-79B9-5390-9DAC-ABC8EFC56B62
+1 NAME Anthony Paul Kennedy /Shriver/
+2 GIVN Anthony Paul Kennedy
+2 SURN Shriver
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Anthony Paul Kennedy Shriver
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 20 JUL 1965
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Anthony Paul Kennedy Shriver
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q4773467
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 EDUC Brown University; Georgetown University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Anthony Paul Kennedy Shriver
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q4773467
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Anthony Paul Kennedy Shriver appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 20 J
+2 CONC UL 1965 at Boston. Within the defined scope, the recorded parents are Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.. Recorded education includes Brown University; Georgetown University. T
+2 CONC his summary is confined to cited genealogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details fr
+2 CONC om names, portraits, households, or succession.
+1 FAMC @FD5883A916A94@
+2 PEDI birth
+2 _PLINK @I12361857F565@
+3 _FTSID A0C223E1-7FE5-57AD-A177-230045A92F94
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Sargent Shriver Jr. is recorded as biological parent of Anthony Paul Kennedy Shriver
+4 QUAY high
+2 _PLINK @I8F178DF27782@
+3 _FTSID 960246BE-151A-5F27-A6D7-FA83C1A614FA
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Eunice Mary Kennedy Shriver is recorded as biological parent of Anthony Paul Kennedy Shriver
+4 QUAY high
+0 @I36B42DB84884@ INDI
+1 _FTSID 523EC1AE-6C31-544D-BCEC-C8839079A9C1
+1 NAME Christopher Kennedy /Lawford/
+2 GIVN Christopher Kennedy
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Christopher Kennedy Lawford
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 29 MAR 1955
+2 PLAC Santa Monica
+3 MAP
+4 LATI N34.021944
+4 LONG W118.481389
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Christopher Kennedy Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1086823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q47164
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 4 SEP 2018
+2 PLAC Vancouver
+3 MAP
+4 LATI N49.260833
+4 LONG W123.113889
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Christopher Kennedy Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1086823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q24639
+3 NOTE Locality coordinates, not a street address.
+1 OCCU actor; television actor
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Christopher Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1086823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard University; Tufts University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Christopher Kennedy Lawford
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1086823
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Christopher Kennedy Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 29 M
+2 CONC AR 1955 at Santa Monica. The recorded death date is 4 SEP 2018 at Vancouver. Within the defined scope, the recorded parents are Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford. Public b
+2 CONC iographical sources identify the following occupation or public role: actor; television actor.Recorded education includes Harvard University; Tufts University. This summary is confined to cited geneal
+2 CONC ogical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infermissing details from names, portraits, households, or succ
+2 CONC ession.
+1 OBJE
+2 FILE kennedy-christopher-lawford-portrait.jpg
+2 FORM JPEG
+1 FAMC @FA16D2797FEDF@
+2 PEDI birth
+2 _PLINK @I849679B9C2AE@
+3 _FTSID EC816FB1-3B28-5A27-BC75-391E32F1B382
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Peter Sydney Ernest Lawford is recorded as biological parent of Christopher Kennedy Lawford
+4 QUAY high
+2 _PLINK @IAF792EB85888@
+3 _FTSID 805BB920-E64E-5542-A54F-BC0AF1E02C5D
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Patricia Helen Kennedy Lawford is recorded as biological parent of Christopher Kennedy Lawford
+4 QUAY high
+0 @ICF5444871775@ INDI
+1 _FTSID 892EC84D-8163-5F9A-8E61-A0B31A57BE7C
+1 NAME Sydney Maleia /Lawford/
+2 GIVN Sydney Maleia
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Sydney Maleia Lawford
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 25 AUG 1956
+2 PLAC Santa Monica
+3 MAP
+4 LATI N34.021944
+4 LONG W118.481389
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Sydney Maleia Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326779
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q47164
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Sydney Maleia Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 25 AUG 19
+2 CONC 56 at Santa Monica. Within the defined scope, the recorded parents are Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford. This summary is confined to cited genealogical facts and selected p
+2 CONC ublic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FA16D2797FEDF@
+2 PEDI birth
+2 _PLINK @I849679B9C2AE@
+3 _FTSID C26F5A26-54D0-52E6-BCB0-A337BC6FDA16
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Peter Sydney Ernest Lawford is recorded as biological parent of Sydney Maleia Lawford
+4 QUAY high
+2 _PLINK @IAF792EB85888@
+3 _FTSID 6BD310A6-AC7B-537F-8CB6-85706DBEC6A9
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Patricia Helen Kennedy Lawford is recorded as biological parent of Sydney Maleia Lawford
+4 QUAY high
+0 @IBFE7E6E566EC@ INDI
+1 _FTSID 4C7E7FF6-6866-56C1-80A8-8025A9F79A57
+1 NAME Victoria Francis /Lawford/
+2 GIVN Victoria Francis
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Victoria Francis Lawford
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 4 NOV 1958
+2 PLAC Santa Monica
+3 MAP
+4 LATI N34.021944
+4 LONG W118.481389
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Victoria Francis Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326777
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q47164
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Victoria Francis Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 4 NOV 1
+2 CONC 958 at Santa Monica. Within the defined scope,the recorded parents are Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford. This summary is confined to cited genealogical facts and selected p
+2 CONC ublic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FA16D2797FEDF@
+2 PEDI birth
+2 _PLINK @I849679B9C2AE@
+3 _FTSID 63A1A4CB-DDED-5FEB-A29E-A9EC81B3C2B7
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Peter Sydney Ernest Lawford is recorded as biological parent of Victoria Francis Lawford
+4 QUAY high
+2 _PLINK @IAF792EB85888@
+3 _FTSID 614F8FFF-634E-592E-9DDE-241B1772756E
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Patricia Helen Kennedy Lawford is recorded as biological parent of Victoria Francis Lawford
+4 QUAY high
+0 @I593A22EE5D4C@ INDI
+1 _FTSID 70506619-4532-51B9-ADB7-FAAF99649013
+1 NAME Robin Elizabeth /Lawford/
+2 GIVN Robin Elizabeth
+2 SURN Lawford
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Robin Elizabeth Lawford
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 2 JUL 1961
+2 PLAC Santa Monica
+3 MAP
+4 LATI N34.021944
+4 LONG W118.481389
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Robin Elizabeth Lawford
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326780
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q47164
+3 NOTE Locality coordinates, not a street address.
+1 NOTE Robin Elizabeth Lawford appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 2 JUL 1
+2 CONC 961 at Santa Monica. Within the defined scope, the recorded parents are Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford. This summary is confined to cited genealogical facts and selecte
+2 CONC d public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FA16D2797FEDF@
+2 PEDI birth
+2 _PLINK @I849679B9C2AE@
+3 _FTSID 32C3B07F-3ACB-56A9-ACD2-7AF7BBD95C54
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Peter Sydney Ernest Lawford is recorded as biological parent of Robin Elizabeth Lawford
+4 QUAY high
+2 _PLINK @IAF792EB85888@
+3 _FTSID 502CB642-E611-5C3C-BF6B-CD85C1C40CD5
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Patricia Helen Kennedy Lawford is recorded as biological parent of Robin Elizabeth Lawford
+4 QUAY high
+0 @IF5FCC3115001@ INDI
+1 _FTSID 02D7B7AF-BC49-502D-B2C3-D0565009D22F
+1 NAME Kathleen Hartington Kennedy /Townsend/
+2 GIVN Kathleen Hartington Kennedy
+2 SURN Townsend
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Kathleen Hartington Kennedy Townsend
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 4 JUL 1951
+2 PLAC Greenwich
+3 MAP
+4 LATI N41.026490
+4 LONG W73.628460
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Kathleen Hartington Kennedy Townsend
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q467861
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q49202
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Kathleen Hartington Kennedy Townsend
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q467861
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard University; Radcliffe College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Kathleen Hartington Kennedy Townsend
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q467861
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Kathleen Hartington Kennedy Townsend appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth da
+2 CONC te is 4 JUL 1951 at Greenwich. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or publ
+2 CONC ic role: lawyer; politician. Recorded education includes Harvard University; Radcliffe College.This summary is confined to cited genealogical facts and selected public activities needed to interpret t
+2 CONC he graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 64B7EEDB-F041-5976-99FD-8B4EA1206723
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Kathleen Hartington Kennedy Townsend
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID A799211D-8A3D-5FFE-B835-1D0C65CC050F
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Kathleen Hartington Kennedy Townsend
+4 QUAY high
+0 @I36F8D20B6A62@ INDI
+1 _FTSID 6CE78899-F344-554F-93A2-7553FD15E4CA
+1 NAME Joseph Patrick Kennedy /II/
+2 GIVN Joseph Patrick Kennedy
+2 SURN II
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Joseph Patrick Kennedy II
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 24 SEP 1952
+2 PLAC Brighton
+3 MAP
+4 LATI N42.350000
+4 LONG W71.160000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Joseph Patrick Kennedy II
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1386420
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q915760
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician; businessperson
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Joseph Patrick Kennedy II
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1386420
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC University of Massachusetts Boston
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Joseph Patrick Kennedy II
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1386420
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Joseph Patrick Kennedy II appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 24 SE
+2 CONC P 1952 at Brighton. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public role: po
+2 CONC litician; businessperson. Recorded education includes University of Massachusetts Boston. This summary is confined to cited genealogical facts and selected public activities needed to interpret the gr
+2 CONC aph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 27217DCF-6FF9-558B-BE56-386F420A31F3
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Joseph Patrick Kennedy II
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 08480F90-6019-536C-A66B-151881514378
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Joseph Patrick Kennedy II
+4 QUAY high
+0 @I1F996503F02F@ INDI
+1 _FTSID CCC2C370-11D3-5EBD-8345-A86CF66765CC
+1 NAME Robert Francis /Kennedy/
+2 GIVN Robert Francis
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Robert Francis Kennedy Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 17 JAN 1954
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Robert Francis Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1352872
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 OCCU radio personality; lawyer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Robert Francis Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1352872
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC London School of Economics and Political Science; Harvard University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Robert Francis Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1352872
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Robert Francis Kennedy Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 17 J
+2 CONC AN 1954 at Washington, D.C.. Within the definedscope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public r
+2 CONC ole: radio personality; lawyer. Recorded education includes London School of Economics and Political Science; Harvard University. This summary is confined to cited genealogical facts and selected publ
+2 CONC ic activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 79BF5BD5-91FB-5C72-934B-EE46D9849D61
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Robert Francis Kennedy Jr.
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID A72C709F-3979-54AB-9A58-533632D987F9
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Robert Francis Kennedy Jr.
+4 QUAY high
+0 @I0875F196125C@ INDI
+1 _FTSID 07765A29-1476-592A-878F-C708B266D5D9
+1 NAME David Anthony /Kennedy/
+2 GIVN David Anthony
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for David Anthony Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 15 JUN 1955
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of David Anthony Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1975383
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 25 APR 1984
+2 PLAC The Brazilian Court
+3 MAP
+4 LATI N26.703300
+4 LONG W80.038700
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of David Anthony Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1975383
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q7719898
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyhood Cemetery
+3 MAP
+4 LATI N42.320000
+4 LONG W71.166944
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of David Anthony Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1975383
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q5887020
+3 NOTE Locality coordinates, not a street address.
+1 OCCU journalist
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of David Anthony Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1975383
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard University; Harvard College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of David Anthony Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1975383
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE David Anthony Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 15 JUN 19
+2 CONC 55 at Washington, D.C.. The recorded death dateis 25 APR 1984 at The Brazilian Court. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biograp
+2 CONC hical sources identify the following occupation or public role: journalist. Recorded educationincludes Harvard University; Harvard College. This summary is confined to cited genealogical facts and sel
+2 CONC ected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 OBJE
+2 FILE kennedy-david-portrait.jpg
+2 FORM JPEG
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 13F44397-3C19-5A50-8E38-9B3143F8EB53
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of David Anthony Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID ADA882AC-8267-53FB-8E46-B8B396B0E1D1
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of David Anthony Kennedy
+4 QUAY high
+0 @I32ADF3D8FDBB@ INDI
+1 _FTSID F984CBDE-8914-56D7-8D81-FF66FB90BF13
+1 NAME Mary Courtney /Kennedy/
+2 GIVN Mary Courtney
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary Courtney Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 9 SEP 1956
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary Courtney Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q5178632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary Courtney Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5178632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC University of California, Santa Barbara
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Mary Courtney Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5178632
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary Courtney Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 9 SEP 195
+2 CONC 6 at Boston. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public role: politicia
+2 CONC n. Recorded education includes University of California, Santa Barbara. This summary is confinedto cited genealogical facts and selected public activities needed to interpret the graph; it does not ex
+2 CONC tend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 6F550003-E462-5B3A-B2C1-BC505E1E5625
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Mary Courtney Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 7CE4BC90-4D86-548C-A970-0D910BAA617B
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Mary Courtney Kennedy
+4 QUAY high
+0 @I8CDFA3FF5CEB@ INDI
+1 _FTSID 999F2C2F-E263-5C88-A505-371621CE6DD4
+1 NAME Michael LeMoyne /Kennedy/
+2 GIVN Michael LeMoyne
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Michael LeMoyne Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 27 FEB 1958
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Michael LeMoyne Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1804720
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 31 DEC 1997
+2 PLAC Aspen
+3 MAP
+4 LATI N39.192222
+4 LONG W106.824444
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Michael LeMoyne Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q1804720
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q205842
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyhood Cemetery
+3 MAP
+4 LATI N42.320000
+4 LONG W71.166944
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Michael LeMoyne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1804720
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q5887020
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; businessperson
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Michael LeMoyne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1804720
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard College; University of Virginia School of Law
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Michael LeMoyne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q1804720
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Michael LeMoyne Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 27 FEB 1
+2 CONC 958 at Washington, D.C.. The recorded death date is 31 DEC 1997 at Aspen. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical source
+2 CONC s identify the following occupation or public role: lawyer; businessperson. Recorded educationincludes Harvard College; University of Virginia School of Law. This summary is confined to cited genealog
+2 CONC ical facts and selected public activities needed to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succe
+2 CONC ssion.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID C6B7B5E8-7415-50BB-9C24-000CD8FABD67
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Michael LeMoyne Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 3B388386-0385-5A5E-9274-D8FE718B15F3
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Michael LeMoyne Kennedy
+4 QUAY high
+0 @I6624C17B959F@ INDI
+1 _FTSID 93774795-EBD3-532D-A6F6-A43C9A2AAC4E
+1 NAME Mary Kerry /Kennedy/
+2 GIVN Mary Kerry
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Mary Kerry Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 8 SEP 1959
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Mary Kerry Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q467912
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 OCCU human rights defender; writer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Mary Kerry Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q467912
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Brown University; Boston College Law School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Mary Kerry Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q467912
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Mary Kerry Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 8 SEP 1959 a
+2 CONC t Washington, D.C.. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public role: hu
+2 CONC man rights defender; writer. Recorded education includes Brown University; Boston College Law School. This summary is confined to cited genealogical facts and selected public activities needed to inte
+2 CONC rpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 16AED537-8B12-52BD-ACCC-FD68DDE777D3
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Mary Kerry Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 9D49F7CE-3E00-5AB1-97E9-C763D761A37E
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Mary Kerry Kennedy
+4 QUAY high
+0 @I1E20CFCC2A72@ INDI
+1 _FTSID 087662C3-4705-5FD7-AD89-BD74C086495B
+1 NAME Christopher George /Kennedy/
+2 GIVN Christopher George
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Christopher George Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 4 JUL 1963
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Christopher George Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q5112377
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 OCCU businessperson; politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Christopher George Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5112377
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Northwestern University; Kellogg School of Management
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Christopher George Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5112377
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Christopher George Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 4 JU
+2 CONC L 1963 at Boston. Within the defined scope, therecorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public role: busin
+2 CONC essperson; politician. Recorded education includes Northwestern University; Kellogg School of Management. This summary is confined to cited genealogical facts and selected public activities needed to i
+2 CONC nterpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, orsuccession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID E6ED6A47-AE8E-58B6-986F-DEDBE89F4D86
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Christopher George Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 111DFE02-37A2-5115-B6B9-D2D099FCE2DB
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Christopher George Kennedy
+4 QUAY high
+0 @I12E0C54A1571@ INDI
+1 _FTSID 95CF2F96-E16E-5919-8E1B-E53C32C72362
+1 NAME Matthew Maxwell Taylor /Kennedy/
+2 GIVN Matthew Maxwell Taylor
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Matthew Maxwell Taylor Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 11 JAN 1965
+2 PLAC New York City
+3 MAP
+4 LATI N40.712778
+4 LONG W74.006111
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Matthew Maxwell Taylor Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q6794923
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q60
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Matthew Maxwell Taylor Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q6794923
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Harvard University; University of Virginia School of Law
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Matthew Maxwell Taylor Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q6794923
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Matthew Maxwell Taylor Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1
+2 CONC 1 JAN 1965 at New York City. Within the definedscope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public r
+2 CONC ole: lawyer. Recorded education includes Harvard University; University of Virginia School ofLaw. This summary is confined to cited genealogical facts and selected public activities needed to interpre
+2 CONC t the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID 45E7773C-44DD-5525-8694-2B746E379E81
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Matthew Maxwell Taylor Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID FA7F486B-0D49-5A6D-B954-B4060F28D7E8
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Matthew Maxwell Taylor Kennedy
+4 QUAY high
+0 @I735125F6C470@ INDI
+1 _FTSID 298A76DA-9ABA-5D2E-B69E-BA7ACD691482
+1 NAME Douglas Harriman /Kennedy/
+2 GIVN Douglas Harriman
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Douglas Harriman Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 24 MAR 1967
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Douglas Harriman Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q5301573
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 OCCU journalist
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Douglas Harriman Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5301573
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Brown University; Georgetown Preparatory School
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Douglas Harriman Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q5301573
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Douglas Harriman Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 24 MAR 1
+2 CONC 967 at Washington, D.C.. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or public rol
+2 CONC e: journalist. Recorded education includes Brown University; Georgetown Preparatory School. This summary is confined to cited genealogical facts and selected public activities needed to interpret the g
+2 CONC raph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID F9B1B48D-FE9C-5999-BBB5-F2512691629A
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Douglas Harriman Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID B15F386C-45FB-53EB-BFFD-DB9DE2D1E5BB
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Douglas Harriman Kennedy
+4 QUAY high
+0 @ICA2BC983AF6C@ INDI
+1 _FTSID 00B45509-4B6D-56A4-9D6B-2ED5E45D480D
+1 NAME Rory Elizabeth Katherine /Kennedy/
+2 GIVN Rory Elizabeth Katherine
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Rory Elizabeth Katherine Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 12 DEC 1968
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Rory Elizabeth Katherine Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q273833
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 OCCU film director; film producer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Rory Elizabeth Katherine Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q273833
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Brown University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Rory Elizabeth Katherine Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q273833
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Rory Elizabeth Katherine Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date i
+2 CONC s 12 DEC 1968 at Washington, D.C.. Within the defined scope, the recorded parents are Robert Francis Kennedy and Ethel Skakel Kennedy. Public biographical sources identify the following occupation or p
+2 CONC ublic role: film director; film producer. Recorded education includes Brown University. This summary is confined to cited genealogical facts and selected public activities needed to interpret the grap
+2 CONC h; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F6AF233DA3D60@
+2 PEDI birth
+2 _PLINK @I8647F80E8D7A@
+3 _FTSID D142A8F1-4AA1-5EA2-AC0A-D67C3B78F833
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Robert Francis Kennedy is recorded as biological parent of Rory Elizabeth Katherine Kennedy
+4 QUAY high
+2 _PLINK @IE3C10BBCF039@
+3 _FTSID 1C8F0ACE-5AD5-583F-B3D9-1FB2C53E2051
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Ethel Skakel Kennedy is recorded as biological parent of Rory Elizabeth Katherine Kennedy
+4 QUAY high
+0 @IE6BDAE36CB73@ INDI
+1 _FTSID 519193E6-102E-591D-BBD7-6474C0EB6834
+1 NAME Stephen Edward /Smith/
+2 GIVN Stephen Edward
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Stephen Edward Smith Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 28 JUN 1957
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Stephen Edward Smith Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326792
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 OCCU lawyer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Stephen Edward Smith Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q75326792
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Stephen Edward Smith Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 28 JUN 1
+2 CONC 957. Within the defined scope, the recorded parents are Jean Ann Kennedy Smith and Stephen Edward Smith. Public biographical sources identify the following occupation or public role: lawyer. This summ
+2 CONC ary is confined to cited genealogical facts and selected public activities needed to interpretthe graph; it does not extend the family beyond the commissioned cast or infer missing details from names, p
+2 CONC ortraits, households, or succession.
+1 FAMC @F4ACE6E61328C@
+2 PEDI birth
+2 _PLINK @I6BAAB2AFADF3@
+3 _FTSID A4C6A010-5F20-5120-B33E-4C1EF67592C0
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Stephen Edward Smith is recorded as biological parent of Stephen Edward Smith Jr.
+4 QUAY high
+2 _PLINK @I2A71967CB14E@
+3 _FTSID 8B26C50E-65B5-57A7-A2EB-676BC8D1ADD1
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jean Ann Kennedy Smith is recorded as biological parent of Stephen Edward Smith Jr.
+4 QUAY high
+0 @I3DB1CBCA3083@ INDI
+1 _FTSID 6E7D687B-319A-5904-B8EC-56A31FB596D5
+1 NAME William Kennedy /Smith/
+2 GIVN William Kennedy
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for William Kennedy Smith
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 4 SEP 1960
+2 PLAC Brighton
+3 MAP
+4 LATI N42.350000
+4 LONG W71.160000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of William Kennedy Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3568759
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q915760
+3 NOTE Locality coordinates, not a street address.
+1 OCCU physician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of William Kennedy Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3568759
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Georgetown University School of Medicine; Bryn Mawr College
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of William Kennedy Smith
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3568759
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE William Kennedy Smith appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 4 SEP 196
+2 CONC 0 at Brighton. Within the defined scope, the recorded parents are Jean Ann Kennedy Smith and Stephen Edward Smith. Public biographical sources identify the following occupation or public role: physici
+2 CONC an. Recorded education includes Georgetown University School of Medicine; Bryn Mawr College. This summary is confined to cited genealogical facts and selected public activities needed to interpret the g
+2 CONC raph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F4ACE6E61328C@
+2 PEDI birth
+2 _PLINK @I6BAAB2AFADF3@
+3 _FTSID 2ACA58A0-3B5D-5FA2-B11A-39799D0BED6A
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Stephen Edward Smith is recorded as biological parent of William Kennedy Smith
+4 QUAY high
+2 _PLINK @I2A71967CB14E@
+3 _FTSID 9A352D78-F616-56E4-9A6A-956F3D549A91
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jean Ann Kennedy Smith is recorded as biological parent of William Kennedy Smith
+4 QUAY high
+0 @I895C19886C7B@ INDI
+1 _FTSID AB40356E-CB90-587D-B52A-F47C2D7F2540
+1 NAME Amanda Mary /Smith/
+2 GIVN Amanda Mary
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Amanda Mary Smith
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 30 APR 1967
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Amanda Mary Smith
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q75326795
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Amanda Mary Smith appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 30 APR 1967. W
+2 CONC ithin the defined scope, the recorded parents are Jean Ann Kennedy Smith and Stephen Edward Smith. This summary is confined to cited genealogical facts and selected public activities needed to interpr
+2 CONC et the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F4ACE6E61328C@
+2 PEDI adopted
+2 _PLINK @I6BAAB2AFADF3@
+3 _FTSID 1F124197-0DE8-52AB-8715-E330220C498C
+3 PEDI adopted
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Stephen Edward Smith is recorded as adoptive parent of Amanda Mary Smith
+4 QUAY high
+2 _PLINK @I2A71967CB14E@
+3 _FTSID 314036C5-C531-57CF-81CB-BDF201C3FAC1
+3 PEDI adopted
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jean Ann Kennedy Smith is recorded as adoptive parent of Amanda Mary Smith
+4 QUAY high
+0 @I528501C549AC@ INDI
+1 _FTSID CE83DB0F-A566-50BA-8708-987DF6BEB52F
+1 NAME Kym Maria /Smith/
+2 GIVN Kym Maria
+2 SURN Smith
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Kym Maria Smith
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 1972
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Kym Maria Smith
+3 QUAY high
+1 NOTE Kym Maria Smith appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 1972. Within th
+2 CONC e defined scope, the recorded parents are Jean Ann Kennedy Smith and Stephen Edward Smith. This summary is confined to cited genealogical facts and selected public activities needed to interpret the g
+2 CONC raph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @F4ACE6E61328C@
+2 PEDI adopted
+2 _PLINK @I6BAAB2AFADF3@
+3 _FTSID A6F82229-1D8C-57E3-82BA-1E78A05FCB53
+3 PEDI adopted
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Stephen Edward Smith is recorded as adoptive parent of Kym Maria Smith
+4 QUAY high
+2 _PLINK @I2A71967CB14E@
+3 _FTSID AE12891C-44D5-59A3-82FC-B50A9763944F
+3 PEDI adopted
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Jean Ann Kennedy Smith is recorded as adoptive parent of Kym Maria Smith
+4 QUAY high
+0 @I6A06C34D247B@ INDI
+1 _FTSID 837BD218-9AA1-5F01-B70B-323B8AB3D78A
+1 NAME Kara Anne /Kennedy/
+2 GIVN Kara Anne
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Kara Anne Kennedy
+3 QUAY high
+1 SEX F
+1 BIRT
+2 DATE 27 FEB 1960
+2 PLAC Bronxville
+3 MAP
+4 LATI N40.940000
+4 LONG W73.826111
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Kara Anne Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q2383370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q928168
+3 NOTE Locality coordinates, not a street address.
+1 DEAT
+2 DATE 16 SEP 2011
+2 PLAC Washington, D.C.
+3 MAP
+4 LATI N38.895000
+4 LONG W77.036667
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Death year of Kara Anne Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q2383370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q61
+3 NOTE Locality coordinates, not a street address.
+1 BURI
+2 PLAC Holyhood Cemetery
+3 MAP
+4 LATI N42.320000
+4 LONG W71.166944
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Burial place of Kara Anne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q2383370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q5887020
+3 NOTE Locality coordinates, not a street address.
+1 OCCU television producer
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Kara Anne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q2383370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Tufts University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Kara Anne Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q2383370
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Kara Anne Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 27 FEB 1960 a
+2 CONC t Bronxville. The recorded death date is 16 SEP2011 at Washington, D.C.. Within the defined scope, the recorded parents are Edward Moore Kennedy and Virginia Joan Kennedy. Public biographical sources i
+2 CONC dentify the following occupation or public role: television producer. Recorded education includes Tufts University. This summary is confined to cited genealogical facts and selected public activities n
+2 CONC eeded to interpret the graph; it does not extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FC1BBE7BA40E9@
+2 PEDI birth
+2 _PLINK @IE61101BC67BC@
+3 _FTSID 067A8F18-477D-5991-9743-634F9B1FCDA4
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Edward Moore Kennedy is recorded as biological parent of Kara Anne Kennedy
+4 QUAY high
+2 _PLINK @I5257669A1206@
+3 _FTSID 8C0830EF-C056-55DB-AC32-7522E252C926
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Virginia Joan Kennedy is recorded as biological parent of Kara Anne Kennedy
+4 QUAY high
+0 @I421630C68850@ INDI
+1 _FTSID A88F4042-ECFF-5207-AAFC-44913FB654A3
+1 NAME Edward Moore /Kennedy/
+2 GIVN Edward Moore
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Edward Moore Kennedy Jr.
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 26 SEP 1961
+2 PLAC Boston
+3 MAP
+4 LATI N42.360278
+4 LONG W71.057778
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Edward Moore Kennedy Jr.
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q3048622
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q100
+3 NOTE Locality coordinates, not a street address.
+1 OCCU lawyer; politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Edward Moore Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3048622
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Wesleyan University; Yale University
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Edward Moore Kennedy Jr.
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q3048622
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Edward Moore Kennedy Jr. appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 26 SEP 1
+2 CONC 961 at Boston. Within the defined scope, the recorded parents are Edward Moore Kennedy and Virginia Joan Kennedy. Public biographical sources identify the following occupation or public role: lawyer; p
+2 CONC olitician. Recorded education includes Wesleyan University; Yale University. This summary isconfined to cited genealogical facts and selected public activities needed to interpret the graph; it does n
+2 CONC ot extend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FC1BBE7BA40E9@
+2 PEDI birth
+2 _PLINK @IE61101BC67BC@
+3 _FTSID 7A4DC8BB-1644-5450-B96F-42A2CE97D7AB
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Edward Moore Kennedy is recorded as biological parent of Edward Moore Kennedy Jr.
+4 QUAY high
+2 _PLINK @I5257669A1206@
+3 _FTSID 4B4E9152-5C75-59AD-878C-69834E9BD813
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Virginia Joan Kennedy is recorded as biological parent of Edward Moore Kennedy Jr.
+4 QUAY high
+0 @IF14C7D16B1F5@ INDI
+1 _FTSID D47AF790-F069-5D63-8870-AA5A34E36DA0
+1 NAME Patrick Joseph /Kennedy/
+2 GIVN Patrick Joseph
+2 SURN Kennedy
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Primary display name for Patrick Joseph Kennedy
+3 QUAY high
+1 SEX M
+1 BIRT
+2 DATE 14 JUL 1967
+2 PLAC Brighton
+3 MAP
+4 LATI N42.350000
+4 LONG W71.160000
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Birth year of Patrick Joseph Kennedy
+3 QUAY high
+2 SOUR @S87108C37203A@
+3 PAGE Q948920
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+3 _PID kennedy-place-q915760
+3 NOTE Locality coordinates, not a street address.
+1 OCCU politician
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public occupation of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q948920
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 EDUC Providence College; Phillips Academy
+2 SOUR @S23B71B774EDB@
+3 PAGE relevant institutional family entry
+3 EVEN Public education of Patrick Joseph Kennedy
+3 QUAY high
+3 NOTE Wikidata was used to discover structured fields; the cited institutional source remains the genealogical evidence.
+2 SOUR @S87108C37203A@
+3 PAGE Q948920
+3 EVEN Supplementary structured statement used for precision and discovery.
+3 QUAY medium
+3 NOTE An institutional citation remains attached to the event.
+1 NOTE Patrick Joseph Kennedy appears in this deliberately bounded, source-linked genealogy pack as part of the family structure selected for Swarm's public demonstration. The recorded birth date is 14 JUL 1
+2 CONC 967 at Brighton. Within the defined scope, the recorded parents are Edward Moore Kennedy and Virginia Joan Kennedy. Public biographical sources identify the following occupation or public role: politi
+2 CONC cian. Recorded education includes Providence College; Phillips Academy. This summary is confinedto cited genealogical facts and selected public activities needed to interpret the graph; it does not ex
+2 CONC tend the family beyond the commissioned cast or infer missing details from names, portraits, households, or succession.
+1 FAMC @FC1BBE7BA40E9@
+2 PEDI birth
+2 _PLINK @IE61101BC67BC@
+3 _FTSID 17DB5988-DB1C-50CE-9E30-2275EA6BEE5C
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Edward Moore Kennedy is recorded as biological parent of Patrick Joseph Kennedy
+4 QUAY high
+2 _PLINK @I5257669A1206@
+3 _FTSID CB1F5495-14E9-548E-94E2-CC53D92528F3
+3 PEDI birth
+3 SOUR @S23B71B774EDB@
+4 PAGE page title / relevant entry
+4 EVEN Virginia Joan Kennedy is recorded as biological parent of Patrick Joseph Kennedy
+4 QUAY high
+0 @FEE7EDFD42806@ FAM
+1 _FTSID E857DF9C-378B-5678-A753-DD650FDD4113
+1 HUSB @IED949C07BAAF@
+1 WIFE @IE1EE189067E6@
+1 CHIL @I2281FD34EE33@
+1 MARR
+2 DATE 1887
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Patrick Joseph Kennedy and Mary Augusta Kennedy
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Patrick Joseph Kennedy and Mary Augusta Kennedy
+2 QUAY high
+0 @F760F83482C86@ FAM
+1 _FTSID C0855D98-5282-5A2E-AC41-EC954FD3E2F9
+1 HUSB @I88E2ED11E9D3@
+1 WIFE @IBED4B244674C@
+1 CHIL @I4622FD650DEC@
+1 MARR
+2 DATE 1889
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between John Francis Fitzgerald and Mary Josephine Fitzgerald
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between John Francis Fitzgerald and Mary Josephine Fitzgerald
+2 QUAY high
+0 @F31BA951D02DE@ FAM
+1 _FTSID E076FE1B-E775-5325-A6A5-8A8DAFE99F32
+1 HUSB @I2281FD34EE33@
+1 WIFE @I4622FD650DEC@
+1 CHIL @IFB8027BCA957@
+1 CHIL @IC9D6FA5D68D3@
+1 CHIL @I4A0809AB20D4@
+1 CHIL @I31777D3411C5@
+1 CHIL @I8F178DF27782@
+1 CHIL @IAF792EB85888@
+1 CHIL @I8647F80E8D7A@
+1 CHIL @I2A71967CB14E@
+1 CHIL @IE61101BC67BC@
+1 MARR
+2 DATE 1914
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Joseph Patrick Kennedy Sr. and Rose Elizabeth Fitzgerald Kennedy
+2 QUAY high
+0 @F3F0D76CC4115@ FAM
+1 _FTSID 735EA8FF-2CE1-5819-A9AF-5F50A9D1789A
+1 HUSB @IC9D6FA5D68D3@
+1 WIFE @ICA91D675241A@
+1 CHIL @ID0FE140477C1@
+1 CHIL @I90382631009D@
+1 CHIL @I958663ED0012@
+1 CHIL @ID7E51F505CED@
+1 MARR
+2 DATE 1953
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between John Fitzgerald Kennedy and Jacqueline Lee Kennedy Onassis
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between John Fitzgerald Kennedy and Jacqueline Lee Kennedy Onassis
+2 QUAY high
+0 @FC8013A84E62B@ FAM
+1 _FTSID 62095E0B-84BB-5FEC-BE10-C21AC32FD07A
+1 HUSB @I9438A2EE6D19@
+1 WIFE @I31777D3411C5@
+1 MARR
+2 DATE 1944
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Kathleen Agnes Cavendish and William John Robert Cavendish
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Kathleen Agnes Cavendish and William John Robert Cavendish
+2 QUAY high
+0 @FD5883A916A94@ FAM
+1 _FTSID 4BF26457-CC8E-50D6-B766-411231AB1F83
+1 HUSB @I12361857F565@
+1 WIFE @I8F178DF27782@
+1 CHIL @IFE18832F4DD5@
+1 CHIL @I37520C7AA695@
+1 CHIL @I3869B65BFA5F@
+1 CHIL @I0752AFDE7A38@
+1 CHIL @I1E3B104C7DA9@
+1 MARR
+2 DATE 1953
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Eunice Mary Kennedy Shriver and Robert Sargent Shriver Jr.
+2 QUAY high
+0 @FA16D2797FEDF@ FAM
+1 _FTSID 5F43F198-A6ED-5BD8-B327-77BBB05F8997
+1 HUSB @I849679B9C2AE@
+1 WIFE @IAF792EB85888@
+1 CHIL @I36B42DB84884@
+1 CHIL @ICF5444871775@
+1 CHIL @IBFE7E6E566EC@
+1 CHIL @I593A22EE5D4C@
+1 MARR
+2 DATE 1954
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 DIV
+2 DATE 1966
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Patricia Helen Kennedy Lawford and Peter Sydney Ernest Lawford
+2 QUAY high
+0 @F6AF233DA3D60@ FAM
+1 _FTSID 8D0F8BB4-62E9-5C0A-8665-E7FB97377B04
+1 HUSB @I8647F80E8D7A@
+1 WIFE @IE3C10BBCF039@
+1 CHIL @IF5FCC3115001@
+1 CHIL @I36F8D20B6A62@
+1 CHIL @I1F996503F02F@
+1 CHIL @I0875F196125C@
+1 CHIL @I32ADF3D8FDBB@
+1 CHIL @I8CDFA3FF5CEB@
+1 CHIL @I6624C17B959F@
+1 CHIL @I1E20CFCC2A72@
+1 CHIL @I12E0C54A1571@
+1 CHIL @I735125F6C470@
+1 CHIL @ICA2BC983AF6C@
+1 MARR
+2 DATE 1950
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Robert Francis Kennedy and Ethel Skakel Kennedy
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Robert Francis Kennedy and Ethel Skakel Kennedy
+2 QUAY high
+0 @F4ACE6E61328C@ FAM
+1 _FTSID 498A1637-F028-53CF-9C2F-616CE6B8235A
+1 HUSB @I6BAAB2AFADF3@
+1 WIFE @I2A71967CB14E@
+1 CHIL @IE6BDAE36CB73@
+1 CHIL @I3DB1CBCA3083@
+1 CHIL @I895C19886C7B@
+1 CHIL @I528501C549AC@
+1 MARR
+2 DATE 1956
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Jean Ann Kennedy Smith and Stephen Edward Smith
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Jean Ann Kennedy Smith and Stephen Edward Smith
+2 QUAY high
+0 @FC1BBE7BA40E9@ FAM
+1 _FTSID 2D129755-392E-5B59-A48E-7EC06A9B7DAA
+1 HUSB @IE61101BC67BC@
+1 WIFE @I5257669A1206@
+1 CHIL @I6A06C34D247B@
+1 CHIL @I421630C68850@
+1 CHIL @IF14C7D16B1F5@
+1 MARR
+2 DATE 1958
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 DIV
+2 DATE 1982
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN End year/status of the union
+3 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward Moore Kennedy and Virginia Joan Kennedy
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward Moore Kennedy and Virginia Joan Kennedy
+2 QUAY high
+0 @FE5DA8FBD6CE7@ FAM
+1 _FTSID 87BBB255-B4AF-54CB-B763-C45E940C6BD9
+1 HUSB @IE61101BC67BC@
+1 WIFE @I637BFCC9D1B7@
+1 MARR
+2 DATE 1992
+2 SOUR @S23B71B774EDB@
+3 PAGE page title / relevant entry
+3 EVEN Start year of the marriage
+3 QUAY high
+1 _PART
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward Moore Kennedy and Victoria Anne Reggie Kennedy
+2 QUAY high
+1 SOUR @S23B71B774EDB@
+2 PAGE page title / relevant entry
+2 EVEN Documented marriage between Edward Moore Kennedy and Victoria Anne Reggie Kennedy
+2 QUAY high
+0 @S23B71B774EDB@ SOUR
+1 _FTSID FA3A1558-8D3B-578E-B727-60DA9390843A
+1 TITL Fast Facts about Joseph P. Kennedy
+1 AUTH John F. Kennedy Presidential Library and Museum
+1 REPO John F. Kennedy Presidential Library and Museum
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.jfklibrary.org/learn/about-jfk/the-kennedy-family/joseph-p-kennedy/fast-facts-joseph-p-kennedy
+0 @SDDF2E4276241@ SOUR
+1 _FTSID 2E4A383F-E580-5ED4-A5CB-4AD854A0A342
+1 TITL Rose Fitzgerald Kennedy
+1 AUTH John F. Kennedy Presidential Library and Museum
+1 REPO John F. Kennedy Presidential Library and Museum
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.jfklibrary.org/learn/about-jfk/the-kennedy-family/rose-fitzgerald-kennedy
+0 @SC58C771BF68B@ SOUR
+1 _FTSID 05962B6A-7C56-54DF-9E20-0F20461331A2
+1 TITL Life of John F. Kennedy
+1 AUTH John F. Kennedy Presidential Library and Museum
+1 REPO John F. Kennedy Presidential Library and Museum
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.jfklibrary.org/learn/about-jfk/life-of-john-f-kennedy
+0 @S0AB277A47B79@ SOUR
+1 _FTSID AF3B9F46-3E8A-5505-A25D-26226DCEDA34
+1 TITL The Kennedy Family
+1 AUTH United States Senate
+1 REPO United States Senate
+1 NOTE institutional web page; 2026-08-09; Authoritative starting source; claim-level locator is recorded in citations.
+1 _URL https://www.senate.gov/artandhistory/history/common/generic/KennedyFamily.htm
+0 @SB138D1E44006@ SOUR
+1 _FTSID 7E47C781-6CF2-5D9F-B99C-526D04BE3A1B
+1 TITL TheKennedyFamily1.jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO Wikimedia Commons
+1 NOTE digital image; 2026-08-09; Item-level rights metadata recorded in attachments.csv.
+1 _URL https://commons.wikimedia.org/wiki/File:TheKennedyFamily1.jpg
+0 @SB51911497B58@ SOUR
+1 _FTSID E024F16F-F780-596B-A2F1-2C75F4B0494A
+1 TITL Kennedy family portrait photograph (KFC-008-019-p0001).jpg
+1 AUTH Wikimedia Commons contributors
+1 PUBL Wikimedia Commons file description page
+1 REPO John F. Kennedy Presidential Library and Museum
+1 NOTE digital image; 2026-08-09; Rights checked on the individual file page; this source is not genealogical evidence.
+1 _URL https://commons.wikimedia.org/wiki/File:Kennedy_family_portrait_photograph_%28KFC-008-019-p0001%29.jpg
+0 @S87108C37203A@ SOUR
+1 _FTSID DFAB3A03-6ADB-5F01-82E7-2254FAA51DD8
+1 TITL Wikidata structured statements (supplementary discovery)
+1 AUTH Wikimedia Foundation contributors
+1 PUBL Wikidata
+1 REPO Wikidata
+1 NOTE structured discovery index; 2026-08-09; Supplementary discovery only; never the sole evidence for a relationship or vital event.
+1 _URL https://www.wikidata.org/
+0 TRLR
