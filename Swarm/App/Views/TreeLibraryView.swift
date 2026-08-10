@@ -810,6 +810,10 @@ struct TreeCardView: View {
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isHovering = false
+    /// The caption's tooltip is owned by the card, not by the labels: a Button takes the
+    /// hover from its own label, so help attached down there never fires.
+    @State private var nameClipped = false
+    @State private var subtitleClipped = false
 
     static let height: CGFloat = 198
     static let plateHeight: CGFloat = 96
@@ -854,6 +858,7 @@ struct TreeCardView: View {
                 .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             }
             .buttonStyle(.plain)
+            .help(clippedCaption)
             .accessibilityLabel(accessibilityDescription)
             .accessibilityHint(L10n.tr("Открыть дерево"))
 
@@ -917,7 +922,7 @@ struct TreeCardView: View {
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
                     .truncationMode(.tail)
-                    .help(tree.name)
+                    .truncationProbe($nameClipped)
                 // The actions menu is an overlay sibling of this Button, not part of
                 // its label. Reserve its visual footprint here.
                 Spacer(minLength: 34)
@@ -930,7 +935,8 @@ struct TreeCardView: View {
                 .font(SepiaTheme.body(size: 12))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .lineLimit(1)
-                .help(tree.subtitle ?? "")
+                .truncationMode(.tail)
+                .truncationProbe($subtitleClipped)
 
             Spacer(minLength: 6)
 
@@ -969,6 +975,15 @@ struct TreeCardView: View {
         .sepiaControlChrome(height: 24)
         .help(L10n.tr("Действия с деревом"))
         .accessibilityLabel(L10n.tr("Действия с деревом"))
+    }
+
+    /// Only the lines the card had to cut. Empty when everything fits, which clears the
+    /// tooltip instead of repeating a caption the reader can already see.
+    private var clippedCaption: String {
+        var lines: [String] = []
+        if nameClipped { lines.append(tree.name) }
+        if subtitleClipped, let subtitle = tree.subtitle { lines.append(subtitle) }
+        return lines.joined(separator: "\n")
     }
 
     private var subtitleText: String {

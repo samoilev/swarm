@@ -733,9 +733,11 @@ struct MainWorkspace: View {
         }
         .sharedBackgroundVisibility(.hidden)
 
-        ToolbarSpacer(.fixed)
-
-        ToolbarItemGroup(placement: .automatic) {
+        // Principal, not automatic: the tree controls belong to the canvas, not to the
+        // record on the left or the actions on the right, and principal is the only
+        // placement macOS centres in the bar. Flexible spacers around an automatic group
+        // collapse to nothing here.
+        ToolbarItemGroup(placement: .principal) {
             viewModeControls
                 .padding(.horizontal, 3)
         }
@@ -744,16 +746,16 @@ struct MainWorkspace: View {
         // The overflow sits beside the controls it stands in for, not across the bar
         // next to the save clock — it is the tail of this group, not a trailing action.
         if usesCompactToolbar {
-            ToolbarSpacer(.fixed)
-            ToolbarItem(placement: .automatic) {
+            ToolbarSpacer(.fixed, placement: .principal)
+            ToolbarItem(placement: .principal) {
                 compactToolbarOverflow
             }
             .sharedBackgroundVisibility(.hidden)
         }
 
         if !usesCompactToolbar, viewMode == .tree {
-            ToolbarSpacer(.fixed)
-            ToolbarItemGroup(placement: .automatic) {
+            ToolbarSpacer(.fixed, placement: .principal)
+            ToolbarItemGroup(placement: .principal) {
                 HStack(spacing: 4) {
                     directionControls
                     photosControl
@@ -762,8 +764,8 @@ struct MainWorkspace: View {
             }
             .sharedBackgroundVisibility(.visible)
         } else if !usesCompactToolbar, viewMode == .fan {
-            ToolbarSpacer(.fixed)
-            ToolbarItemGroup(placement: .automatic) {
+            ToolbarSpacer(.fixed, placement: .principal)
+            ToolbarItemGroup(placement: .principal) {
                 fanLevelControls
                     .padding(.horizontal, 3)
             }
@@ -771,15 +773,13 @@ struct MainWorkspace: View {
         }
 
         if !usesCompactToolbar, [.tree, .fan, .map].contains(viewMode) {
-            ToolbarSpacer(.fixed)
-            ToolbarItemGroup(placement: .automatic) {
+            ToolbarSpacer(.fixed, placement: .principal)
+            ToolbarItemGroup(placement: .principal) {
                 zoomControls
                     .padding(.horizontal, 3)
             }
             .sharedBackgroundVisibility(.visible)
         }
-
-        ToolbarSpacer(.flexible)
 
         // Save clock rides in the trailing group rather than as its own item: the
         // builder tops out at ten children and the compact overflow now claims one.
@@ -878,20 +878,28 @@ struct MainWorkspace: View {
 
     private var titleBlock: some View {
         VStack(alignment: .leading, spacing: 1) {
-            Text(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name)
+            let name = tree.name.isEmpty ? L10n.tr("Дерево") : tree.name
+            Text(name)
                 .font(SepiaTheme.display(size: 16))
                 .fontWeight(.semibold)
                 .foregroundColor(SepiaTheme.ink)
                 .lineLimit(1)
+                .truncationMode(.tail)
+                .truncationTooltip(name)
             if let sub = tree.subtitle, !sub.isEmpty {
                 Text(sub.uppercased())
                     .font(SepiaTheme.ui(size: 9))
                     .tracking(1.5)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .lineLimit(1)
+                    .truncationMode(.tail)
+                    .truncationTooltip(sub)
             }
         }
-        .frame(maxWidth: 160, alignment: .leading)
+        .frame(maxWidth: 260, alignment: .leading)
+        // Without this the toolbar hands the block far less than its 260 and cuts the
+        // name mid-word while the bar still has room to spare.
+        .fixedSize()
     }
 
     private var viewModeControls: some View {
