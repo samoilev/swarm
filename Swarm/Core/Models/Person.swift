@@ -46,6 +46,7 @@ public final class Person: Identifiable, Codable, Hashable {
             loadedPhoto = nil
         }
     }
+
     /// True once the portrait bytes changed this session and must be rewritten on save.
     @ObservationIgnored public var photoIsDirty = false
     /// Lazy portrait backing: `.none` = not loaded yet; `.some(x)` = loaded (x may be nil).

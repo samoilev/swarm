@@ -186,7 +186,9 @@ public struct GEDCOMParser {
 
     /// `eventExtras` key holding unmodeled sub-lines of an event's PLAC, kept apart from
     /// the event's own extras so export can put them back inside the place.
-    static func placeExtrasKey(_ eventTag: String) -> String { "\(eventTag)/PLAC" }
+    static func placeExtrasKey(_ eventTag: String) -> String {
+        "\(eventTag)/PLAC"
+    }
 
     /// Collect the parts of an INDI/FAM record the modeled parse ignored, so they can be
     /// re-emitted on export. Returns whole unmodeled level-1 branches, plus unmodeled

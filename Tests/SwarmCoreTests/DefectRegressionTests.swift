@@ -91,7 +91,7 @@ struct DefectRegressionTests {
     /// place id, a second NOTE. The modeled citation replaces the whole imported branch
     /// on export, so that detail used to disappear on the first save, taking the place id
     /// of every event in the file with it.
-    @Test func foreignCitationDetailSurvivesEverySave() throws {
+    @Test func foreignCitationDetailSurvivesEverySave() {
         let gedcom = """
         0 HEAD
         1 _NAME Foreign detail
