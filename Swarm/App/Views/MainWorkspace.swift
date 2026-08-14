@@ -27,6 +27,8 @@ struct MainWorkspace: View {
     @State private var showExportModal = false
     @State private var showAddSheet = false
     @State private var editingPerson: Person?
+    /// Person whose portrait is open full size. An overlay, not a sheet — see PortraitPreview.
+    @State private var portraitPerson: Person?
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
     @State private var highlightedConnections: Set<FamilyConnection> = []
@@ -85,7 +87,8 @@ struct MainWorkspace: View {
             onDelete: { person in
                 personToDelete = person
                 showDeleteConfirm = true
-            }
+            },
+            onOpenPortrait: { portraitPerson = $0 }
         )
         .transition(.move(edge: .trailing).combined(with: .opacity))
     }
@@ -169,7 +172,19 @@ struct MainWorkspace: View {
                 }
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+
+            // Above everything the workspace draws, so the dimmer covers the canvas, the
+            // inspector and the hint bar alike — and a click anywhere on it closes.
+            if let portraitPerson {
+                PortraitPreview(
+                    image: portraitPerson.photoData.flatMap(NSImage.init(data:)),
+                    name: portraitPerson.displayName(language: .current),
+                    onClose: { self.portraitPerson = nil }
+                )
+                .transition(.opacity)
+            }
         }
+        .sepiaMotion(SepiaMotion.state, value: portraitPerson?.id)
         .sepiaMotion(SepiaMotion.state, value: toastMessage != nil)
         .toolbar { workspaceToolbar }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
@@ -226,6 +241,9 @@ struct MainWorkspace: View {
             }
             .onChange(of: selectedPerson?.id) { _, newValue in
                 recomputeHighlight()
+                // Arrow keys still walk the tree behind the dimmer; a portrait left open
+                // over a record the reader has already left belongs to nobody.
+                portraitPerson = nil
                 // Auto-collapse the hints to an icon when a card opens; restore when browsing.
                 withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
             }
@@ -1003,7 +1021,7 @@ struct MainWorkspace: View {
     }
 
     /// Step the zoom. On the tree canvas this goes through the same notification the ⌘±
-    /// menu items use, so the step is anchored to the viewport centre and springs — the
+    /// menu items use, so the step is anchored to the viewport centre and eases — the
     /// buttons used to set `zoom` directly, which left `panOffset` untouched and lurched
     /// the whole tree toward the top-left corner. Fan and map use their own bindings.
     private func stepZoom(_ delta: CGFloat) {

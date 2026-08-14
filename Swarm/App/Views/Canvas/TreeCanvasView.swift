@@ -71,40 +71,14 @@ struct TreeCanvasView: View {
 
             ZStack(alignment: .topLeading) {
                 // Dot grid background (Miro-style) — fills the viewport, tap to deselect
-                Canvas { ctx, size in
-                    // Dot count is viewport_area / spacing², so an un-clamped 20·zoom
-                    // spacing explodes when zoomed out (zoom 0.2 → ~4px spacing →
-                    // ~65k dots/frame). Clamp the on-screen spacing to keep the count
-                    // bounded (and the grid from turning into a haze when zoomed out).
-                    let spacing: CGFloat = max(20, 20 * zoom)
-                    let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
-                    let offsetX = panOffset.width.truncatingRemainder(dividingBy: spacing)
-                    let offsetY = panOffset.height.truncatingRemainder(dividingBy: spacing)
-
-                    let cols = Int(size.width / spacing) + 2
-                    let rows = Int(size.height / spacing) + 2
-
-                    // Accumulate every dot into one Path and fill once — a single batched
-                    // draw call instead of thousands of per-dot fills keeps panning smooth.
-                    var dots = Path()
-                    for col in 0 ... cols {
-                        for row in 0 ... rows {
-                            let x = CGFloat(col) * spacing + offsetX
-                            let y = CGFloat(row) * spacing + offsetY
-                            guard x >= -dotRadius, x <= size.width + dotRadius,
-                                  y >= -dotRadius, y <= size.height + dotRadius else { continue }
-                            dots.addEllipse(in: CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2))
-                        }
+                DotGridBackground(zoom: zoom, pan: panOffset)
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedPerson = nil
+                        secondaryPerson = nil
                     }
-                    ctx.fill(dots, with: .color(SepiaTheme.ink.opacity(0.06)))
-                }
-                .frame(width: geo.size.width, height: geo.size.height)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedPerson = nil
-                    secondaryPerson = nil
-                }
-                .accessibilityHidden(true)
+                    .accessibilityHidden(true)
 
                 // Connectors — vector Path strokes at base resolution, not a giant
                 // supersampled Canvas bitmap, which lagged a frame behind the cards and
@@ -205,10 +179,11 @@ struct TreeCanvasView: View {
                         atZoom: newZoom
                     )
                     coastVelocity = .zero
-                    withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.22, dampingFraction: 0.82)) {
-                        zoom = newZoom
-                        panOffset = newPan
-                    }
+                    // No animation: scroll events already arrive at display rate, so each
+                    // one is a frame of a continuous zoom. Animating them stacked a spring
+                    // per event, and the overlapping springs read as the cards jiggling.
+                    zoom = newZoom
+                    panOffset = newPan
                     dragStart = newPan
                 }
             )
@@ -629,7 +604,10 @@ struct TreeCanvasView: View {
             atZoom: newZoom
         )
         coastVelocity = .zero
-        withAnimation(reduceMotion ? nil : .interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
+        // Monotonic ease, not a spring: a spring under 1.0 damping overshoots its target
+        // and settles back, which on a stepped zoom reads as the cards jiggling — and the
+        // 0.08s auto-repeat retargets the spring mid-flight, compounding the wobble.
+        withAnimation(reduceMotion ? nil : SepiaMotion.zoomStep) {
             zoom = newZoom
             panOffset = newPan
         }
@@ -1111,6 +1089,89 @@ struct ScrollWheelZoom: NSViewRepresentable {
     }
 }
 
+/// The paper the tree sits on.
+///
+/// `Animatable`, which a plain `Canvas` reading `zoom`/`panOffset` is not: those are read
+/// once per body evaluation, so under `withAnimation` the grid jumped straight to its final
+/// position while the cards above it glided for the next second — the tree appeared to slide
+/// across a frozen background. Declaring the two values as animatable data makes SwiftUI
+/// interpolate them and redraw per frame, so paper and record move as one.
+private struct DotGridBackground: View, Animatable {
+    var zoom: CGFloat
+    var pan: CGSize
+
+    var animatableData: AnimatablePair<CGFloat, AnimatablePair<CGFloat, CGFloat>> {
+        get { AnimatablePair(zoom, AnimatablePair(pan.width, pan.height)) }
+        set {
+            zoom = newValue.first
+            pan = CGSize(width: newValue.second.first, height: newValue.second.second)
+        }
+    }
+
+    var body: some View {
+        Canvas { ctx, size in
+            // Dot count is viewport_area / spacing², so an un-clamped 20·zoom
+            // spacing explodes when zoomed out (zoom 0.2 → ~4px spacing →
+            // ~65k dots/frame). Clamp the on-screen spacing to keep the count
+            // bounded (and the grid from turning into a haze when zoomed out).
+            let spacing: CGFloat = max(20, 20 * zoom)
+            let dotRadius: CGFloat = max(1.0, 1.5 * zoom)
+            let offsetX = pan.width.truncatingRemainder(dividingBy: spacing)
+            let offsetY = pan.height.truncatingRemainder(dividingBy: spacing)
+
+            let cols = Int(size.width / spacing) + 2
+            let rows = Int(size.height / spacing) + 2
+
+            // Accumulate every dot into one Path and fill once — a single batched
+            // draw call instead of thousands of per-dot fills keeps panning smooth.
+            var dots = Path()
+            for col in 0 ... cols {
+                for row in 0 ... rows {
+                    let x = CGFloat(col) * spacing + offsetX
+                    let y = CGFloat(row) * spacing + offsetY
+                    guard x >= -dotRadius, x <= size.width + dotRadius,
+                          y >= -dotRadius, y <= size.height + dotRadius else { continue }
+                    dots.addEllipse(in: CGRect(x: x - dotRadius, y: y - dotRadius, width: dotRadius * 2, height: dotRadius * 2))
+                }
+            }
+            ctx.fill(dots, with: .color(SepiaTheme.ink.opacity(0.06)))
+        }
+    }
+}
+
+/// Card portraits, downsampled once and kept.
+///
+/// The bytes on disk are a real photograph — around 1000×1400 — and the card shows them
+/// in a 66×88pt slot. Handing SwiftUI the full-size image made every card carry a 1.4MP
+/// texture: for a 47-person tree that measured 273ms of first paint on the main thread and
+/// ~215MB of texture, spent precisely while the opening cascade and the focus glide run.
+/// Downsampled the same tree paints in 27ms and holds ~15MB.
+enum PortraitThumbnail {
+    private static let cache = NSCache<NSString, NSImage>()
+
+    /// 88pt slot × 2 supersample × 2 maximum zoom = 352px, so the thumbnail is still 1:1
+    /// with the screen when the reader has zoomed all the way in on a retina display.
+    private static let maxPixelSize = 352
+
+    /// ponytail: keyed on the byte count, which changes whenever a portrait is replaced.
+    /// If that ever needs to be exact, give Person a photo revision counter and key on it.
+    static func image(for person: Person) -> NSImage? {
+        guard let data = person.photoData else { return nil }
+        let key = "\(person.id.uuidString)-\(data.count)" as NSString
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
+                  kCGImageSourceCreateThumbnailFromImageAlways: true,
+                  kCGImageSourceCreateThumbnailWithTransform: true,
+                  kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+              ] as CFDictionary)
+        else { return nil }
+        let image = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+        cache.setObject(image, forKey: key)
+        return image
+    }
+}
+
 struct PersonCardView: View, Equatable {
     let person: Person
     var language: AppLanguage = .current
@@ -1196,7 +1257,7 @@ struct PersonCardView: View, Equatable {
         HStack(spacing: 0) {
             if showPhoto {
                 Group {
-                    if let data = person.photoData, let nsImage = NSImage(data: data) {
+                    if let nsImage = PortraitThumbnail.image(for: person) {
                         Image(nsImage: nsImage)
                             .resizable()
                             .scaledToFill()

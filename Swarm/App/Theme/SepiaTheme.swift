@@ -119,6 +119,9 @@ enum SepiaMotion {
     static let layout = Animation.spring(response: 0.55, dampingFraction: 0.88)
     /// Swapping one full-canvas view for another.
     static let crossfade = Animation.easeInOut(duration: 0.18)
+    /// One press of zoom in/out. Deliberately not a spring: the canvas scales about a
+    /// fixed anchor, so any overshoot at all is visible as the whole tree jiggling.
+    static let zoomStep = Animation.easeOut(duration: 0.18)
     /// Longest stagger the entrance cascade may span, however tall the tree is.
     static let entranceStagger: Double = 0.30
 

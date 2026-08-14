@@ -9,6 +9,10 @@ struct InspectorPanel: View {
     @Binding var width: CGFloat
     var onEdit: ((Person) -> Void)?
     var onDelete: ((Person) -> Void)?
+    /// Opening the portrait is the workspace's job, not the panel's: a sheet is its own
+    /// window, so a click on the dimmed canvas behind it never reaches us. The full-size
+    /// portrait is presented as an overlay over the whole window instead.
+    var onOpenPortrait: ((Person) -> Void)?
 
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
@@ -21,8 +25,6 @@ struct InspectorPanel: View {
     /// Hover over the resize gutter, which is otherwise invisible: the grabber only
     /// appears once the pointer is close enough to use it.
     @State private var resizeHovering = false
-    /// Portrait opened full size, from the header photo or from its row in Files.
-    @State private var showingPortrait = false
 
     /// The panel floats rather than butting against the window edge, so its corner
     /// radius is a real one. Everything inside it stays concentric at a smaller radius.
@@ -39,13 +41,6 @@ struct InspectorPanel: View {
                 // A change we didn't make (a new canvas selection) starts a fresh
                 // context, so drop the relative-navigation trail.
                 if internalNav { internalNav = false } else { history = [] }
-                showingPortrait = false
-            }
-            .sheet(isPresented: $showingPortrait) {
-                PortraitPreview(
-                    image: person.photoData.flatMap(NSImage.init(data:)),
-                    name: person.displayName(language: .current)
-                )
             }
         }
     }
@@ -258,7 +253,7 @@ struct InspectorPanel: View {
     @ViewBuilder
     private func portrait(_ person: Person) -> some View {
         if person.photoData != nil {
-            Button { showingPortrait = true } label: { portraitPlate(person) }
+            Button { onOpenPortrait?(person) } label: { portraitPlate(person) }
                 .buttonStyle(.plain)
                 .onHover { $0 ? NSCursor.pointingHand.set() : NSCursor.arrow.set() }
                 .help(L10n.tr("Открыть фото"))
@@ -414,7 +409,7 @@ struct InspectorPanel: View {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: L10n.tr("Файлы"))
                 if let portraitImage {
-                    Button { showingPortrait = true } label: {
+                    Button { onOpenPortrait?(p) } label: {
                         fileRow(title: L10n.tr("Портрет"), format: portraitFormat(p)) {
                             Image(nsImage: portraitImage)
                                 .resizable()
@@ -520,20 +515,44 @@ struct InspectorPanel: View {
 /// The portrait at the size the file actually holds. The card can only ever show a
 /// thumbnail of it, and the photo is usually the one thing on a record worth looking at
 /// closely — a face, a uniform, a date written on the back.
-private struct PortraitPreview: View {
+///
+/// An overlay over the workspace rather than a sheet: a sheet is a separate window, and
+/// the dimmed canvas around it belongs to the window underneath, which modality has
+/// already stopped answering the mouse. Owning the dimmer is what lets a click on it close.
+struct PortraitPreview: View {
     let image: NSImage?
     let name: String
-    @Environment(\.dismiss) private var dismiss
+    let onClose: () -> Void
 
     var body: some View {
+        ZStack {
+            // The dimmer, and the whole reason this is not a sheet. A Button rather than
+            // an `onTapGesture`: the canvas underneath carries a DragGesture, and a bare
+            // tap gesture on the scrim never resolves against it.
+            Button(action: onClose) {
+                SepiaTheme.ink.opacity(0.34)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .ignoresSafeArea()
+            .accessibilityLabel(L10n.tr("Закрыть"))
+
+            // Keeps a band of dimmer visible all round, so there is always something to
+            // click even when the window is barely bigger than the card.
+            card.padding(28)
+        }
+    }
+
+    private var card: some View {
         VStack(spacing: 14) {
             if let image {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .shadow(color: SepiaTheme.ink.opacity(0.24), radius: 14, y: 6)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 Text(L10n.tr("Портрет не найден"))
                     .font(SepiaTheme.body(size: 14))
@@ -547,15 +566,25 @@ private struct PortraitPreview: View {
                     .foregroundColor(SepiaTheme.inkSoft)
                     .lineLimit(1).truncationMode(.tail)
                 Spacer(minLength: 8)
-                Button(L10n.tr("Закрыть")) { dismiss() }
+                Button(L10n.tr("Закрыть")) { onClose() }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
             }
         }
         .padding(18)
-        .frame(minWidth: 460, idealWidth: 560, minHeight: 520, idealHeight: 680)
-        .background(SepiaTheme.panelBg)
+        // A ceiling, not a fixed size: in a short window the card shrinks with it instead
+        // of running off both ends.
+        .frame(maxWidth: 560, maxHeight: 680)
+        .background(SepiaTheme.panelBg, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .strokeBorder(.white.opacity(0.55), lineWidth: 1)
+        }
+        .shadow(color: SepiaTheme.ink.opacity(0.34), radius: 30, y: 14)
+        // Stops a click on the card itself from reaching the dimmer behind it.
+        .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .onTapGesture {}
     }
 }
 
