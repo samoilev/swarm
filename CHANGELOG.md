@@ -11,6 +11,13 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Changed
+
+- Relicensed from MIT to GPL-3.0. Releases up to and including 3.2.0 remain MIT.
+- Trimmed the public documentation to the README, the changelog, the security policy and
+  the third-party notices. The contributing guide, code of conduct, support page, product
+  brief and pull request template were removed.
+
 ## [3.2.0] — 2026-08-10
 
 ### Added

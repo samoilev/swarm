@@ -6,8 +6,7 @@ body:
     attributes:
       value: |
         **Never attach a real family GEDCOM.** These files contain living people's
-        names, dates and places. Use a synthetic or fully anonymized file — see
-        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#never-attach-a-real-family-gedcom).
+        names, dates and places. Use a synthetic or fully anonymized file instead.
 
   - type: textarea
     id: what-happened
