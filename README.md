@@ -5,12 +5,9 @@
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.2.0-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.2.0" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
-  <br />
   <img src="https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 26 or later" />
   <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
-  <br />
-  <br />
 </div>
 
 ## Swarm
