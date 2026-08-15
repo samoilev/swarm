@@ -3,7 +3,7 @@
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.2.0-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.2.0" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.2.1-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.2.1" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 26 or later" />
   <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
@@ -43,7 +43,7 @@ The build is not yet signed with an Apple Developer ID, so macOS will warn you o
 open. To check the download against its published checksum:
 
 ```sh
-shasum -a 256 -c Swarm-3.2.0.dmg.sha256
+shasum -a 256 -c Swarm-3.2.1.dmg.sha256
 ```
 
 ## Features

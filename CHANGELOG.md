@@ -11,12 +11,40 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.2.1] — 2026-08-15
+
+Swarm is now free software under the **GNU General Public License v3.0**. MIT let anyone
+ship a closed-source paid fork; the GPL makes derivatives publish their source instead.
+It does not restrict commercial use, which no OSI-approved license can do. Releases up
+to and including 3.2.0 stay MIT and cannot be revoked — only this version and later
+carry the GPL, so forks and redistributors of anything after 3.2.0 must comply with it,
+while code taken from 3.2.0 or earlier remains available under MIT.
+
+### Added
+
+- “About Swarm” links to the public GitHub repository.
+
 ### Changed
 
-- Relicensed from MIT to GPL-3.0. Releases up to and including 3.2.0 remain MIT.
-- Trimmed the public documentation to the README, the changelog, the security policy and
-  the third-party notices. The contributing guide, code of conduct, support page, product
-  brief and pull request template were removed.
+- The opening fit and the focus glide run smoothly. Portraits are around 1000×1400 in a
+  66×88pt slot, and the image was rebuilt from data inside the card's body on every
+  evaluation, discarding its decode each time — 273ms of main-thread first paint and
+  215MB of texture for a 47-person tree, spent while the entrance cascade and the 1.2s
+  glide were running. Downsampling once and caching brings that to 27ms and 15MB; 352px
+  keeps the portrait 1:1 at maximum zoom.
+- The dot grid animates with the tree instead of jumping to its final phase on the first
+  frame and sitting still while the cards glided, which read as the tree sliding over
+  frozen paper.
+- README gains a Quick look screenshot section, puts Build and run ahead of Example
+  trees, folds Privacy into Features, and drops the example-tree table and most of the
+  storage-model detail.
+
+### Removed
+
+- The public documentation is trimmed to the README, this changelog, the security policy
+  and the third-party notices. The contributing guide, code of conduct, support page,
+  product brief and pull request template are gone, along with the issue-template links
+  that pointed at them.
 
 ## [3.2.0] — 2026-08-10
 
@@ -619,7 +647,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.2.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.2.1...HEAD
+[3.2.1]: https://github.com/samoilev/swarm/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/samoilev/swarm/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/samoilev/swarm/compare/v3.0.0...v3.1.0
 [3.0.0]: https://github.com/samoilev/swarm/compare/v2.3.0...v3.0.0
