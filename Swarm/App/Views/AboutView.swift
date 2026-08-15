@@ -43,6 +43,17 @@ struct AboutView: View {
                     .lineSpacing(3)
                     .frame(maxWidth: 300)
 
+                Link(destination: URL(string: "https://github.com/samoilev/swarm")!) {
+                    Label {
+                        Text(verbatim: "View source on GitHub")
+                    } icon: {
+                        Image(systemName: "chevron.left.forwardslash.chevron.right")
+                    }
+                    .font(SepiaTheme.ui(size: 12))
+                }
+                .foregroundStyle(SepiaTheme.accent)
+                .padding(.top, 14)
+
                 GlassEffectContainer(spacing: 10) {
                     HStack(spacing: 10) {
                         Button {
