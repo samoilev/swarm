@@ -197,6 +197,12 @@ public struct GEDCOMSerializer {
                 appendCitations(att.citations, level: 2, sourceXref: sourceXref, to: &lines)
             }
 
+            // Web links — WWW is the standard tag; the label rides along as a sub-TITL.
+            for link in p.links where !link.url.isEmpty {
+                appendValue(1, "WWW", value: link.url, to: &lines)
+                if !link.title.isEmpty { appendValue(2, "TITL", value: link.title, to: &lines) }
+            }
+
             // Family links
             for union in idx.unionsOf[p.id] ?? [] {
                 if let fx = famXref[union.id] { lines.append("1 FAMS @\(fx)@") }

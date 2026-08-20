@@ -89,6 +89,9 @@ struct CoreModelTests {
         #expect(maiden.displaySurname == "Сидорова")
         let living = Person(givenNames: "Пётр", surname: "Сидоров", birthDate: "1990", isLiving: true)
         #expect(living.lifespan.hasPrefix("р. 1990"))
+        // Deceased with unknown death date: never age up to today.
+        let deceasedNoDeathDate = Person(givenNames: "Фома", surname: "Сидоров", birthDate: "1900", isLiving: false)
+        #expect(deceasedNoDeathDate.lifespan == "1900–?")
     }
 
     @Test func familyTreeJSONRoundTrips() throws {
@@ -111,5 +114,23 @@ struct CoreModelTests {
         #expect(pdf.isImage == false)
         let jpg = Attachment(storedName: "y.jpg", originalName: "Фото.JPG")
         #expect(jpg.isImage == true)
+    }
+
+    @Test func webLinkNormalizesAndRefusesUnsafeSchemes() {
+        let bare = WebLink(url: "  archive.org/details/x  ")
+        #expect(WebLink.normalize(bare.url) == "https://archive.org/details/x")
+        #expect(bare.openableURL?.absoluteString == "https://archive.org/details/x")
+        #expect(bare.displayHost == "archive.org")
+        #expect(bare.displayTitle == bare.url)
+
+        let titled = WebLink(url: "https://www.familysearch.org/x", title: "Метрика")
+        #expect(titled.displayTitle == "Метрика")
+        #expect(titled.displayHost == "familysearch.org")
+
+        // An imported GEDCOM is untrusted: local and custom schemes must never open.
+        #expect(WebLink(url: "file:///etc/passwd").openableURL == nil)
+        #expect(WebLink(url: "javascript:alert(1)").openableURL == nil)
+        #expect(WebLink(url: "").openableURL == nil)
+        #expect(WebLink(url: "mailto:archive@example.org").openableURL != nil)
     }
 }

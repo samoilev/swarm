@@ -33,6 +33,7 @@ struct GEDCOMRoundTripTests {
             birthDate: "20.06.1930", birthPlace: "Москва", isLiving: true
         )
         child.attachments = [Attachment(storedName: "abc.pdf", originalName: "Свидетельство.pdf")]
+        child.links = [WebLink(url: "https://www.familysearch.org/ark:/61903/1:1:XXXX", title: "Запись о рождении")]
 
         tree.people = [father, mother, child]
         let union = Union(
@@ -134,6 +135,18 @@ struct GEDCOMRoundTripTests {
         #expect(child.attachments.count == 1)
         #expect(child.attachments.first?.storedName == "abc.pdf")
         #expect(child.attachments.first?.originalName == "Свидетельство.pdf")
+    }
+
+    @Test func preservesLinks() throws {
+        let gedcom = GEDCOMSerializer.serialize(tree: makeTree()).gedcom
+        #expect(gedcom.contains("1 WWW https://www.familysearch.org/ark:/61903/1:1:XXXX"))
+        let parsed = roundTrip(makeTree())
+        let child = try #require(parsed.people.first { $0.givenNames == "Пётр" })
+        #expect(child.links.count == 1)
+        #expect(child.links.first?.url == "https://www.familysearch.org/ark:/61903/1:1:XXXX")
+        #expect(child.links.first?.title == "Запись о рождении")
+        // The WWW branch is modeled, so it must not also be preserved verbatim.
+        #expect(!child.unknownBranches.contains { $0.contains { $0.contains("WWW") } })
     }
 
     // MARK: - Interop & robustness

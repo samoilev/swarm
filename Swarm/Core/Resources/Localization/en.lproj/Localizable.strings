@@ -283,6 +283,12 @@
 "Заметки" = "Notes";
 "Прикрепить файл" = "Attach File";
 "Файлы не прикреплены" = "No files attached";
+"Ссылки" = "Links";
+"Ссылки не добавлены" = "No links added";
+"Добавить ссылку" = "Add Link";
+"Удалить ссылку" = "Delete Link";
+"Открыть ссылку в браузере" = "Open Link in Browser";
+"АДРЕС" = "ADDRESS";
 "Добавьте людей в дерево, чтобы создавать связи" = "Add people to the tree to create relationships";
 "Союзы и дети" = "Unions and Children";
 "Союзы не заданы" = "No unions recorded";

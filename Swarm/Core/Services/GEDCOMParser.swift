@@ -29,7 +29,7 @@ public struct GEDCOMParser {
     /// treated as "handled" (regenerated or ignored), so they aren't re-emitted twice.
     private static let modeledIndiTags: Set<String> = [
         "NAME", "SEX", "BIRT", "DEAT", "BURI", "OCCU", "EDUC", "NOTE", "SOUR",
-        "OBJE", "_ATTC", "_PATR", "_MARNM", "_FTSID", "FAMS", "FAMC"
+        "OBJE", "_ATTC", "WWW", "_PATR", "_MARNM", "_FTSID", "FAMS", "FAMC"
     ]
     /// Level-1 tags the parser fully models inside a FAM record.
     private static let modeledFamTags: Set<String> = [
@@ -736,6 +736,7 @@ public struct GEDCOMParser {
         var attachments: [Attachment] = []
         var pendingAttachFile: String? = nil
         var pendingAttachTitle: String? = nil
+        var links: [WebLink] = []
 
         func flushAttachment() {
             guard let file = pendingAttachFile else { return }
@@ -786,6 +787,7 @@ public struct GEDCOMParser {
                     maidenName = surname.isEmpty ? nil : surname
                     surname = parsed.surname.isEmpty ? parsed.given : parsed.surname
                 case "OBJE": break
+                case "WWW": if !value.isEmpty { links.append(WebLink(url: value)) }
                 default: break
                 }
 
@@ -821,6 +823,10 @@ public struct GEDCOMParser {
                     // (Person.photoData) so importing a library doesn't pull every
                     // portrait into memory at once.
                     photoFilename = (value as NSString).lastPathComponent
+                case ("WWW", "TITL"):
+                    if !links.isEmpty { links[links.count - 1].title = value }
+                case ("WWW", "CONC"):
+                    if !links.isEmpty { links[links.count - 1].url += value }
                 case ("_ATTC", "FILE"): pendingAttachFile = value
                 case ("_ATTC", "TITL"): pendingAttachTitle = value
                 case ("NOTE", "CONT"), ("NOTE", "CONC"):
@@ -835,6 +841,10 @@ public struct GEDCOMParser {
                 }
 
             case 3:
+                if tagAtLevel[1] == "WWW", tagAtLevel[2] == "TITL", tag == "CONC", !links.isEmpty {
+                    links[links.count - 1].title += value
+                    break
+                }
                 guard tagAtLevel[2] == "PLAC", tag == "_PLACID" else { break }
                 switch tagAtLevel[1] ?? "" {
                 case "BIRT": birthDatasetID = value.isEmpty ? nil : value
@@ -896,6 +906,7 @@ public struct GEDCOMParser {
         person.burialLat = burialLat
         person.burialLon = burialLon
         person.attachments = attachments
+        person.links = links
         // Portrait: keep the filename + folder so the bytes load lazily on first use.
         person.photoFilename = photoFilename
         person.mediaFolderURL = mediaFolder

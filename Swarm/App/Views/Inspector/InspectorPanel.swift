@@ -106,6 +106,7 @@ struct InspectorPanel: View {
                     mapSection(person)
                     lifeSection(person)
                     attachmentsSection(person)
+                    linksSection(person)
                     relationshipsSection(person)
                 }
                 .textSelection(.enabled)
@@ -432,6 +433,44 @@ struct InspectorPanel: View {
                     }
                     .buttonStyle(.plain)
                     .help(L10n.tr("Открыть «\(att.originalName)»"))
+                    .padding(.bottom, 8)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func linksSection(_ p: Person) -> some View {
+        if !p.links.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: L10n.tr("Ссылки"))
+                ForEach(p.links) { link in
+                    Button {
+                        if let url = link.openableURL { NSWorkspace.shared.open(url) }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "link")
+                                .font(.system(size: 13))
+                                .foregroundColor(SepiaTheme.inkSoft)
+                                .frame(width: 40, height: 40)
+                                .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(link.displayTitle)
+                                    .font(SepiaTheme.body(size: 13))
+                                    .foregroundColor(SepiaTheme.ink)
+                                    .lineLimit(1).truncationMode(.middle)
+                                Text(link.displayHost)
+                                    .font(SepiaTheme.ui(size: 9.5)).tracking(1)
+                                    .foregroundColor(SepiaTheme.inkSoft)
+                                    .lineLimit(1).truncationMode(.middle)
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(link.openableURL == nil)
+                    .help(L10n.tr("Открыть «\(link.displayTitle)»"))
                     .padding(.bottom, 8)
                 }
             }

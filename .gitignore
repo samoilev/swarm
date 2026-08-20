@@ -20,3 +20,5 @@ outputs/e2e-current-source-2026-08-01/swarm-e2e-current-source.xlsx
 AGENTS.md
 CLAUDE.md
 COWORK_FAMILY_TREE_SOURCE_PACK_BRIEF.md
+.agents/
+skills-lock.json

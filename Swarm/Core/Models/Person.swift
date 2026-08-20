@@ -83,6 +83,9 @@ public final class Person: Identifiable, Codable, Hashable {
     /// `Attachments/` folder; these entries only hold the linking metadata.
     public var attachments: [Attachment] = []
 
+    /// Web links attached to this person (archive records, memorial pages).
+    public var links: [WebLink] = []
+
     // Cached coordinates for map pins
     public var birthLat: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
     public var birthLon: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
@@ -385,9 +388,10 @@ public final class Person: Identifiable, Codable, Hashable {
 
         if birthStr.isEmpty && deathStr.isEmpty { return "" }
 
-        if !isLiving && deathDate != nil {
+        if !isLiving {
             let base = "\(birthStr.isEmpty ? "?" : birthStr)–\(deathStr.isEmpty ? "?" : deathStr)"
-            if let result = FamilyDate.calculateAge(birth: birthDate, death: deathDate) {
+            // Age only when a death date exists; otherwise it would count up to today.
+            if deathDate != nil, let result = FamilyDate.calculateAge(birth: birthDate, death: deathDate) {
                 let approx = result.approximate ? "~" : ""
                 return "\(base) (\(approx)\(result.years))"
             }
@@ -418,7 +422,7 @@ public final class Person: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, givenNames, patronymic, surname, maidenName, sex
         case birthDate, birthPlace, deathDate, deathPlace, isLiving
-        case burialPlace, occupation, education, notes, sources, photoData, photoFilename, attachments
+        case burialPlace, occupation, education, notes, sources, photoData, photoFilename, attachments, links
         case names, events, citations
         case birthLat, birthLon, deathLat, deathLon, burialLat, burialLon
         case gedcomXref, unknownBranches, eventExtras
@@ -467,6 +471,7 @@ public final class Person: Identifiable, Codable, Hashable {
             loadedPhoto = .some(legacy); photoIsDirty = true
         }
         attachments = try c.decodeIfPresent([Attachment].self, forKey: .attachments) ?? []
+        links = try c.decodeIfPresent([WebLink].self, forKey: .links) ?? []
         birthLat = try c.decodeIfPresent(Double.self, forKey: .birthLat)
         birthLon = try c.decodeIfPresent(Double.self, forKey: .birthLon)
         deathLat = try c.decodeIfPresent(Double.self, forKey: .deathLat)
@@ -505,6 +510,7 @@ public final class Person: Identifiable, Codable, Hashable {
         // snapshots (which use Codable) free of megabytes of image data.
         try c.encodeIfPresent(photoFilename, forKey: .photoFilename)
         if !attachments.isEmpty { try c.encode(attachments, forKey: .attachments) }
+        if !links.isEmpty { try c.encode(links, forKey: .links) }
         try c.encodeIfPresent(birthLat, forKey: .birthLat)
         try c.encodeIfPresent(birthLon, forKey: .birthLon)
         try c.encodeIfPresent(deathLat, forKey: .deathLat)

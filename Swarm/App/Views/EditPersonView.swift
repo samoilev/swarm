@@ -207,6 +207,8 @@ struct EditPersonView: View {
 
                         attachmentsEditor
 
+                        linksEditor
+
                         unionsEditor
 
                         relationshipsEditor
@@ -732,6 +734,80 @@ struct EditPersonView: View {
         .padding(.bottom, 8)
     }
 
+    private var linksEditor: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: L10n.tr("Ссылки"))
+
+            if editingPerson.links.isEmpty {
+                Text(L10n.tr("Ссылки не добавлены"))
+                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .padding(.bottom, 8)
+            } else {
+                ForEach(Array(editingPerson.links.enumerated()), id: \.element.id) { index, link in
+                    linkEditRow(index: index, link: link)
+                }
+            }
+
+            Button { editingPerson.links.append(WebLink()) } label: {
+                Label(L10n.tr("Добавить ссылку"), systemImage: "link.badge.plus")
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.capsule)
+            .padding(.top, 4)
+            .padding(.bottom, 12)
+        }
+    }
+
+    private func linkEditRow(index: Int, link: WebLink) -> some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            VStack(alignment: .leading, spacing: 6) {
+                SepiaTextField(label: L10n.tr("НАЗВАНИЕ"), text: linkBinding(index, \.title), placeholder: "—")
+                SepiaTextField(label: L10n.tr("АДРЕС"), text: linkBinding(index, \.url), placeholder: "https://…")
+            }
+
+            Button {
+                if let url = link.openableURL { NSWorkspace.shared.open(url) }
+            } label: {
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(SepiaTheme.ink)
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .disabled(link.openableURL == nil)
+            .help(L10n.tr("Открыть ссылку в браузере"))
+
+            Button { removeLink(at: index) } label: {
+                Image(systemName: "minus")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.red.opacity(0.78))
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .help(L10n.tr("Удалить ссылку"))
+        }
+        .padding(.bottom, 8)
+    }
+
+    /// Edits go straight into the draft person's array; the index is re-checked on every
+    /// access because a row can be removed while its field still holds focus.
+    private func linkBinding(_ index: Int, _ keyPath: WritableKeyPath<WebLink, String>) -> Binding<String> {
+        Binding(
+            get: { editingPerson.links.indices.contains(index) ? editingPerson.links[index][keyPath: keyPath] : "" },
+            set: { newValue in
+                guard editingPerson.links.indices.contains(index) else { return }
+                editingPerson.links[index][keyPath: keyPath] = newValue
+            }
+        )
+    }
+
+    private func removeLink(at index: Int) {
+        guard editingPerson.links.indices.contains(index) else { return }
+        editingPerson.links.remove(at: index)
+    }
+
     private func attachFiles(_ urls: [URL]) {
         Task { @MainActor in
             for url in urls {
@@ -915,6 +991,13 @@ struct EditPersonView: View {
         tree.parentLinks = draft.parentLinks
         tree.sourceRecords = draft.sourceRecords
         person.attachments = draftPerson.attachments
+        // Blank rows the user added but never filled in are dropped rather than saved.
+        person.links = draftPerson.links.compactMap { link in
+            var copy = link
+            copy.url = WebLink.normalize(link.url)
+            copy.title = link.title.trimmingCharacters(in: .whitespacesAndNewlines)
+            return copy.url.isEmpty ? nil : copy
+        }
         person.citations = draftPerson.citations
         person.names = draftPerson.names
         person.events = draftPerson.events
