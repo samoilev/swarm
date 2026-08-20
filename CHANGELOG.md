@@ -11,6 +11,32 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Changed
+
+- The person editor's evidence section is now a list of sources you can read back, edit
+  and delete, replacing a form that could only ever add. Each entry is one source plus
+  one citation, and the archival fields are labelled the way a Russian archive reference
+  reads: **Фонд**, **Опись**, **Дело**, **Лист**. The GEDCOM tags behind them (`PUBL`,
+  `REPO`, `CALN`, `PAGE`) are unchanged, so files written by earlier versions still read
+  back the same.
+- Sources gained a web address, exported as `1 _URL` — the tag the project's own source
+  packs already use. Imported `_URL` lines are now a real field instead of preserved text.
+- Editing a source that several people cite forks it instead of rewriting what everyone
+  else points at. Deleting the last citation of an app-created source removes the record;
+  imported records are always kept.
+- `AUTH` and `QUAY` no longer have editor fields. Both still survive import and export
+  verbatim, and a library saved by an earlier version keeps its author. They now appear
+  after the modelled `NOTE` in exported files rather than before it.
+- A value shaped like `@X@` typed into a text field is escaped on export, so it can no
+  longer leave the file naming a record that does not exist.
+
+### Removed
+
+- The shared source library, the "Для факта" target picker and the reliability field.
+  Citations added in the editor now attach to the person. Citations an imported file
+  attached to a birth, a name, a union, a parent link or an attachment are kept and still
+  export, but the editor no longer lists or creates them.
+
 ## [3.2.1] — 2026-08-15
 
 Swarm is now free software under the **GNU General Public License v3.0**. MIT let anyone

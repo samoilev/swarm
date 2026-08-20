@@ -491,4 +491,129 @@ struct TrustCompletenessTests {
         #expect(tree.people.allSatisfy { !$0.photoIsDirty })
         #expect(Date().timeIntervalSince(started) < 10)
     }
+
+    // MARK: - Shared source records
+
+    /// The editor shows a source as if it belonged to the person being edited. An
+    /// imported file can cite one SOUR from many people, so editing it there must fork
+    /// rather than rewrite what everyone else is pointing at.
+    @Test func editingASharedSourceForksItInsteadOfRewritingIt() {
+        let tree = FamilyTree(name: "Общий источник")
+        let source = SourceRecord(
+            id: UUID(),
+            gedcomXref: "S1",
+            title: "Метрическая книга",
+            rawGEDCOMBranches: [["1 AUTH Приход"]]
+        )
+        let anna = Person(givenNames: "Анна")
+        let boris = Person(givenNames: "Борис")
+        anna.citations = [Citation(sourceID: source.id, page: "л. 4")]
+        boris.citations = [Citation(sourceID: source.id, page: "л. 9")]
+        tree.people = [anna, boris]
+        tree.sourceRecords = [source]
+
+        var edited = source
+        edited.callNumber = "1841"
+        let newID = tree.upsertSourceRecord(edited, replacing: source.id)
+
+        #expect(newID != source.id)
+        #expect(tree.sourceRecords.count == 2)
+        // The original is untouched, xref and preserved branches included.
+        let original = tree.sourceRecords.first { $0.id == source.id }
+        #expect(original?.callNumber == nil)
+        #expect(original?.gedcomXref == "S1")
+        #expect(original?.rawGEDCOMBranches == [["1 AUTH Приход"]])
+        // The fork is app-created, so the exporter gives it its own xref and pruning
+        // can later reclaim it.
+        let fork = tree.sourceRecords.first { $0.id == newID }
+        #expect(fork?.callNumber == "1841")
+        #expect(fork?.gedcomXref == nil)
+        #expect(fork?.rawGEDCOMBranches.isEmpty == true)
+        // Boris still points at the record he always did.
+        #expect(boris.citations.first?.sourceID == source.id)
+    }
+
+    @Test func editingAnExclusivelyOwnedSourceRewritesItInPlace() {
+        let tree = FamilyTree(name: "Личный источник")
+        let source = SourceRecord(id: UUID(), gedcomXref: "S1", title: "Ревизская сказка")
+        let anna = Person(givenNames: "Анна")
+        anna.citations = [Citation(sourceID: source.id)]
+        tree.people = [anna]
+        tree.sourceRecords = [source]
+
+        var edited = source
+        edited.title = "Ревизская сказка 1858 г."
+        let id = tree.upsertSourceRecord(edited, replacing: source.id)
+
+        #expect(id == source.id)
+        #expect(tree.sourceRecords.count == 1)
+        #expect(tree.sourceRecords.first?.title == "Ревизская сказка 1858 г.")
+        #expect(tree.sourceRecords.first?.gedcomXref == "S1")
+    }
+
+    /// Sharing and orphan decisions are wrong if the count misses a host. This pins
+    /// every place a citation can hang so a new one cannot be added silently.
+    @Test func citationReferenceCountSeesEveryHost() {
+        let tree = FamilyTree(name: "Все носители")
+        let source = SourceRecord(title: "Регистр")
+        let citation = { Citation(sourceID: source.id) }
+
+        let person = Person(givenNames: "Анна")
+        person.citations = [citation()]
+        person.names = [PersonName(givenNames: "Анна", citations: [citation()])]
+        person.events = [GenealogyEvent(kind: .birth, citations: [citation()])]
+        person.attachments = [Attachment(storedName: "a.pdf", originalName: "a.pdf", citations: [citation()])]
+
+        let union = Union()
+        union.citations = [citation()]
+        union.events = [GenealogyEvent(kind: .marriage, citations: [citation()])]
+
+        tree.people = [person]
+        tree.unions = [union]
+        tree.parentLinks = [ParentLink(parentID: UUID(), childID: person.id, citations: [citation()])]
+        tree.sourceRecords = [source]
+
+        #expect(tree.citationReferenceCount(sourceID: source.id) == 7)
+    }
+
+    @Test func pruningRemovesOnlyAppCreatedOrphans() {
+        let tree = FamilyTree(name: "Уборка")
+        let appOrphan = SourceRecord(title: "Создан приложением")
+        let importedOrphan = SourceRecord(id: UUID(), gedcomXref: "S9", title: "Из файла")
+        let foreignOrphan = SourceRecord(title: "С чужими ветвями", rawGEDCOMBranches: [["1 _PID q102317"]])
+        let stillCited = SourceRecord(title: "Ещё используется")
+
+        let person = Person(givenNames: "Анна")
+        person.citations = [Citation(sourceID: stillCited.id)]
+        tree.people = [person]
+        tree.sourceRecords = [appOrphan, importedOrphan, foreignOrphan, stillCited]
+
+        tree.pruneUnreferencedSourceRecords()
+
+        #expect(tree.sourceRecords.contains { $0.id == importedOrphan.id })
+        #expect(tree.sourceRecords.contains { $0.id == foreignOrphan.id })
+        #expect(tree.sourceRecords.contains { $0.id == stillCited.id })
+        #expect(!tree.sourceRecords.contains { $0.id == appOrphan.id })
+    }
+
+    /// Cancel relies on the editor's deep copy: nothing the draft does to sources or
+    /// citations may reach the live tree until Save copies it back.
+    @Test func draftSourceAndCitationEditsNeverTouchTheLiveTree() throws {
+        let tree = FamilyTree(name: "Живое дерево")
+        let source = SourceRecord(title: "Исходный")
+        let person = Person(givenNames: "Анна")
+        person.citations = [Citation(sourceID: source.id, page: "л. 1")]
+        tree.people = [person]
+        tree.sourceRecords = [source]
+
+        let draft = try tree.deepCopy()
+        let draftPerson = try #require(draft.person(byId: person.id))
+        draftPerson.citations = [Citation(sourceID: source.id, page: "л. 99")]
+        draft.sourceRecords[0].title = "Переписан в черновике"
+        draft.sourceRecords.append(SourceRecord(title: "Добавлен в черновике"))
+
+        #expect(tree.sourceRecords.count == 1)
+        #expect(tree.sourceRecords.first?.title == "Исходный")
+        #expect(tree.people.first?.citations.first?.page == "л. 1")
+    }
 }

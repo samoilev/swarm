@@ -753,6 +753,10 @@ struct SepiaFieldInput: View {
     var height: CGFloat = 30
     var radius: CGFloat = 6
     var fontSize: CGFloat = 15
+    /// Stable handle for UI tests. Labels repeat across this app's longer editors
+    /// (НАЗВАНИЕ and ЗАМЕТКИ each caption more than one field in the person editor),
+    /// which makes a label-based query ambiguous.
+    var identifier: String?
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -762,6 +766,7 @@ struct SepiaFieldInput: View {
             .foregroundColor(SepiaTheme.ink)
             .focused($isFocused)
             .accessibilityLabel(label)
+            .accessibilityIdentifier(identifier ?? "")
             .sepiaFieldChrome(
                 isFocused: isFocused,
                 placeholder: placeholder,
@@ -780,6 +785,7 @@ struct SepiaTextField: View {
     var height: CGFloat = 30
     var radius: CGFloat = 6
     var fontSize: CGFloat = 15
+    var identifier: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -790,7 +796,8 @@ struct SepiaTextField: View {
                 label: label,
                 height: height,
                 radius: radius,
-                fontSize: fontSize
+                fontSize: fontSize,
+                identifier: identifier
             )
         }
     }

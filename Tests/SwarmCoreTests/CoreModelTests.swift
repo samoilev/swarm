@@ -133,4 +133,52 @@ struct CoreModelTests {
         #expect(WebLink(url: "").openableURL == nil)
         #expect(WebLink(url: "mailto:archive@example.org").openableURL != nil)
     }
+
+    // MARK: - Source records
+
+    @Test func archivalKeyIgnoresCaseSpacingAndYo() {
+        let a = SourceRecord(title: "Метрическая книга", publication: "350", repository: "2", callNumber: "1841")
+        let b = SourceRecord(title: "  метрическая   КНИГА ", publication: "350", repository: "2", callNumber: "1841")
+        #expect(a.archivalKey == b.archivalKey)
+
+        let differentFile = SourceRecord(title: "Метрическая книга", publication: "350", repository: "2", callNumber: "1842")
+        #expect(a.archivalKey != differentFile.archivalKey)
+
+        #expect(SourceRecord.fold("Ёлка") == SourceRecord.fold("елка"))
+    }
+
+    @Test func shelfmarkSummaryOmitsEmptyParts() {
+        let full = SourceRecord(title: "X", publication: "350", repository: "2", callNumber: "1841")
+        #expect(full.shelfmarkSummary == "Ф. 350 · Оп. 2 · Д. 1841")
+
+        let partial = SourceRecord(title: "X", publication: "350")
+        #expect(partial.shelfmarkSummary == "Ф. 350")
+
+        #expect(SourceRecord(title: "X").shelfmarkSummary.isEmpty)
+    }
+
+    /// The editor used to hold a typed author and `parseSource` wrote `AUTH` only there,
+    /// so a library saved before the field was removed would lose it on the next save
+    /// unless decoding folds it into the preserved branches.
+    @Test func decodingALegacySourceKeepsItsAuthorAsAPreservedBranch() throws {
+        let legacy = """
+        {"id":"\(UUID().uuidString)","title":"Метрическая книга","author":"Приход Св. Николая","rawGEDCOMBranches":[]}
+        """
+        let decoded = try JSONDecoder().decode(SourceRecord.self, from: Data(legacy.utf8))
+        #expect(decoded.rawGEDCOMBranches == [["1 AUTH Приход Св. Николая"]])
+
+        // Decoding a record that already carries the branch must not double it.
+        let alreadyPreserved = """
+        {"id":"\(UUID().uuidString)","title":"Метрическая книга","author":"Приход Св. Николая",\
+        "rawGEDCOMBranches":[["1 AUTH Приход Св. Николая"]]}
+        """
+        let second = try JSONDecoder().decode(SourceRecord.self, from: Data(alreadyPreserved.utf8))
+        #expect(second.rawGEDCOMBranches.count == 1)
+
+        // A record saved by this version has no author key at all.
+        let current = """
+        {"id":"\(UUID().uuidString)","title":"X","rawGEDCOMBranches":[]}
+        """
+        #expect(try JSONDecoder().decode(SourceRecord.self, from: Data(current.utf8)).rawGEDCOMBranches.isEmpty)
+    }
 }

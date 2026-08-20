@@ -283,8 +283,10 @@ public struct Citation: Identifiable, Codable, Hashable, Sendable {
     public var page: String?
     public var detail: String?
     public var transcription: String?
-    public var confidence: String?
     public var notes: String?
+    /// Sub-lines of an imported `SOUR` the editor doesn't model — a foreign program's
+    /// place id, a `QUAY` reliability score, a second `NOTE`. Re-emitted verbatim on
+    /// export so dropping a field from the editor never drops it from the file.
     public var rawGEDCOMBranches: [[String]]
 
     public init(
@@ -293,7 +295,6 @@ public struct Citation: Identifiable, Codable, Hashable, Sendable {
         page: String? = nil,
         detail: String? = nil,
         transcription: String? = nil,
-        confidence: String? = nil,
         notes: String? = nil,
         rawGEDCOMBranches: [[String]] = []
     ) {
@@ -302,7 +303,6 @@ public struct Citation: Identifiable, Codable, Hashable, Sendable {
         self.page = page
         self.detail = detail
         self.transcription = transcription
-        self.confidence = confidence
         self.notes = notes
         self.rawGEDCOMBranches = rawGEDCOMBranches
     }
@@ -312,10 +312,16 @@ public struct SourceRecord: Identifiable, Codable, Hashable, Sendable {
     public var id: UUID
     public var gedcomXref: String?
     public var title: String
-    public var author: String?
+    /// Archival collection — «фонд» in the editor. Exported as `PUBL`.
     public var publication: String?
+    /// Archival inventory — «опись» in the editor. Exported as `REPO`.
     public var repository: String?
+    /// Archival file — «дело» in the editor. Exported as `CALN`.
     public var callNumber: String?
+    /// Web address of the digitised original. Exported as `1 _URL`: GEDCOM 5.5.1 has
+    /// no URL substructure under `SOUR`, and `_URL` is the tag this project's own
+    /// source packs already use.
+    public var url: String?
     public var notes: String?
     public var rawGEDCOMBranches: [[String]]
 
@@ -323,22 +329,84 @@ public struct SourceRecord: Identifiable, Codable, Hashable, Sendable {
         id: UUID = UUID(),
         gedcomXref: String? = nil,
         title: String,
-        author: String? = nil,
         publication: String? = nil,
         repository: String? = nil,
         callNumber: String? = nil,
+        url: String? = nil,
         notes: String? = nil,
         rawGEDCOMBranches: [[String]] = []
     ) {
         self.id = id
         self.gedcomXref = gedcomXref
         self.title = title
-        self.author = author
         self.publication = publication
         self.repository = repository
         self.callNumber = callNumber
+        self.url = url
         self.notes = notes
         self.rawGEDCOMBranches = rawGEDCOMBranches
+    }
+
+    /// "Ф. 350 · Оп. 2 · Д. 1841", omitting the parts that are empty.
+    public var shelfmarkSummary: String {
+        [
+            publication.flatMap { $0.isEmpty ? nil : L10n.tr("Ф. \($0)") },
+            repository.flatMap { $0.isEmpty ? nil : L10n.tr("Оп. \($0)") },
+            callNumber.flatMap { $0.isEmpty ? nil : L10n.tr("Д. \($0)") },
+        ].compactMap { $0 }.joined(separator: " · ")
+    }
+
+    /// Identity of the archival unit: title plus фонд/опись/дело, folded. Two records
+    /// sharing this name the same document.
+    public var archivalKey: String {
+        [title, publication ?? "", repository ?? "", callNumber ?? ""]
+            .map(Self.fold)
+            .joined(separator: "|")
+    }
+
+    /// Case-, spacing- and diacritic-insensitive fold. Shared with
+    /// `TreeValidator.addSimilarSources` so the two notions of "the same source"
+    /// cannot drift apart.
+    public static func fold(_ value: String) -> String {
+        value.lowercased()
+            .folding(
+                options: [.diacriticInsensitive, .caseInsensitive],
+                locale: AppLanguage.current.locale
+            )
+            .replacingOccurrences(of: "ё", with: "е")
+            .split(whereSeparator: \.isWhitespace).joined(separator: " ")
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, gedcomXref, title, publication, repository, callNumber, url, notes, rawGEDCOMBranches
+    }
+
+    /// The editor used to carry a typed author, and `parseSource` wrote `AUTH` there
+    /// and nowhere else. Dropping the field outright would erase the author from every
+    /// library saved before this version on its very next save, so decoding folds it
+    /// into the preserved branches, where the exporter re-emits it verbatim.
+    private enum LegacyCodingKeys: String, CodingKey {
+        case author
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(UUID.self, forKey: .id)
+        gedcomXref = try c.decodeIfPresent(String.self, forKey: .gedcomXref)
+        title = try c.decode(String.self, forKey: .title)
+        publication = try c.decodeIfPresent(String.self, forKey: .publication)
+        repository = try c.decodeIfPresent(String.self, forKey: .repository)
+        callNumber = try c.decodeIfPresent(String.self, forKey: .callNumber)
+        url = try c.decodeIfPresent(String.self, forKey: .url)
+        notes = try c.decodeIfPresent(String.self, forKey: .notes)
+        rawGEDCOMBranches = try c.decodeIfPresent([[String]].self, forKey: .rawGEDCOMBranches) ?? []
+
+        let legacy = try decoder.container(keyedBy: LegacyCodingKeys.self)
+        if let author = try legacy.decodeIfPresent(String.self, forKey: .author),
+           !author.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+           !rawGEDCOMBranches.contains(where: { $0.first?.hasPrefix("1 AUTH ") == true }) {
+            rawGEDCOMBranches.append(["1 AUTH \(author)"])
+        }
     }
 }
 

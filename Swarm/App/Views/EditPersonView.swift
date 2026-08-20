@@ -56,30 +56,58 @@ struct EditPersonView: View {
     @State private var saveError: String?
     @State private var isSaving = false
     @State private var didCommit = false
-    @State private var sourceTitle = ""
-    @State private var sourceAuthor = ""
-    @State private var selectedSourceID: UUID?
-    @State private var citationPage = ""
-    @State private var citationDetail = ""
-    @State private var citationTranscription = ""
-    @State private var citationConfidence = ""
-    @State private var citationNotes = ""
-    @State private var evidenceTarget: EvidenceTarget = .person
-    @State private var evidenceObjectID: UUID?
+    @State private var sourceDraft = SourceDraft()
 
-    enum EvidenceTarget: CaseIterable, Identifiable {
-        case person, primaryName, birth, death, relationship, union, attachment
-        var id: Self { self }
-        var displayName: String {
-            switch self {
-            case .person: L10n.tr("Персона")
-            case .primaryName: L10n.tr("Основное имя")
-            case .birth: L10n.tr("Рождение")
-            case .death: L10n.tr("Смерть")
-            case .relationship: L10n.tr("Родительская связь")
-            case .union: L10n.tr("Союз")
-            case .attachment: L10n.tr("Вложение")
-            }
+    /// One row of the sources list flattened into editable text. `citationID == nil`
+    /// means the form is adding a new entry; non-nil means it is editing that row and
+    /// has to write back to that citation and its source record.
+    ///
+    /// One value instead of ten `@State` strings: resetting the form is a single
+    /// assignment, "adding or editing" is a single field, and no stale text can leak
+    /// from one entry into the next.
+    struct SourceDraft {
+        var citationID: UUID?
+        var sourceID: UUID?
+        var title = ""
+        var publication = ""
+        var repository = ""
+        var callNumber = ""
+        var url = ""
+        var page = ""
+        var detail = ""
+        var transcription = ""
+        var notes = ""
+
+        var isEditing: Bool { citationID != nil }
+        var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+        init() {}
+
+        init(citation: Citation, source: SourceRecord?) {
+            citationID = citation.id
+            sourceID = source?.id
+            title = source?.title ?? ""
+            publication = source?.publication ?? ""
+            repository = source?.repository ?? ""
+            callNumber = source?.callNumber ?? ""
+            url = source?.url ?? ""
+            notes = source?.notes ?? ""
+            page = citation.page ?? ""
+            detail = citation.detail ?? ""
+            transcription = citation.transcription ?? ""
+        }
+
+        /// The record this draft describes. Editing copies `base` first so an imported
+        /// record's xref and preserved foreign branches ride along untouched.
+        func record(basedOn base: SourceRecord?) -> SourceRecord {
+            var record = base ?? SourceRecord(title: "")
+            record.title = trimmedTitle
+            record.publication = publication.nilIfEmpty
+            record.repository = repository.nilIfEmpty
+            record.callNumber = callNumber.nilIfEmpty
+            record.url = url.nilIfEmpty
+            record.notes = notes.nilIfEmpty
+            return record
         }
     }
 
@@ -326,152 +354,207 @@ struct EditPersonView: View {
         }
     }
 
+    // MARK: - Sources Editor
+
+    /// One row of the list: a citation on this person joined to the source it points at.
+    /// A citation whose source is missing keeps its row rather than vanishing — the
+    /// validator already flags it as `citation.missing-source`, and an invisible row
+    /// could never be deleted.
+    private var sourceEntries: [(citation: Citation, source: SourceRecord?)] {
+        editingPerson.citations.map { citation in
+            (citation, editingTree.sourceRecords.first { $0.id == citation.sourceID })
+        }
+    }
+
     private var evidenceEditor: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: L10n.tr("Источники и доказательства"))
+        VStack(alignment: .leading, spacing: 0) {
+            SectionHeader(title: L10n.tr("Источники"))
 
-            HStack(spacing: 8) {
-                SepiaTextField(label: L10n.tr("НОВЫЙ ИСТОЧНИК"), text: $sourceTitle, placeholder: L10n.tr("Название"))
-                SepiaTextField(label: L10n.tr("АВТОР"), text: $sourceAuthor, placeholder: "—")
-            }
-            Button { addSource() } label: {
-                Label(L10n.tr("Добавить в библиотеку"), systemImage: "books.vertical")
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.capsule)
-            .disabled(sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-
-            if editingTree.sourceRecords.isEmpty {
-                Text(L10n.tr("Сначала добавьте источник.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
+            if sourceEntries.isEmpty {
+                Text(L10n.tr("Источники не добавлены"))
+                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .padding(.bottom, 8)
             } else {
-                Picker(L10n.tr("Источник"), selection: $selectedSourceID) {
-                    Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
-                    ForEach(editingTree.sourceRecords) { Text($0.title).tag($0.id as UUID?) }
-                }.pickerStyle(.menu)
-
-                if let sourceID = selectedSourceID,
-                   let sourceIndex = editingTree.sourceRecords.firstIndex(where: { $0.id == sourceID }) {
-                    sourceRecordFields(index: sourceIndex)
+                ForEach(sourceEntries, id: \.citation.id) { entry in
+                    sourceEntryRow(citation: entry.citation, source: entry.source)
                 }
+            }
 
-                HStack {
-                    Picker(L10n.tr("Для факта"), selection: $evidenceTarget) {
-                        ForEach(EvidenceTarget.allCases) { Text($0.displayName).tag($0) }
-                    }.pickerStyle(.menu)
-                    if !evidenceObjects.isEmpty {
-                        Picker(L10n.tr("Запись"), selection: $evidenceObjectID) {
-                            Text(L10n.tr("Выбрать…")).tag(nil as UUID?)
-                            ForEach(evidenceObjects, id: \.id) { Text($0.label).tag($0.id as UUID?) }
-                        }.pickerStyle(.menu)
+            Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
+
+            sourceEntryForm
+        }
+        .padding(.bottom, 12)
+    }
+
+    private func sourceEntryRow(citation: Citation, source: SourceRecord?) -> some View {
+        let title = source?.title ?? L10n.tr("Источник не найден")
+        let shelfmark = source?.shelfmarkSummary ?? ""
+        let openable = WebLink(url: source?.url ?? "").openableURL
+        let subtitle = [shelfmark, citation.page.map { L10n.tr("Л. \($0)") } ?? ""]
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+
+        return HStack(spacing: 10) {
+            Button { beginEditingEntry(citation: citation, source: source) } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
+                        .lineLimit(1).truncationMode(.middle)
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                            .lineLimit(1)
                     }
                 }
-                HStack(spacing: 8) {
-                    SepiaTextField(label: L10n.tr("СТРАНИЦА"), text: $citationPage, placeholder: "—")
-                    SepiaTextField(label: L10n.tr("ДЕТАЛЬ"), text: $citationDetail, placeholder: "—")
-                    SepiaTextField(label: L10n.tr("НАДЁЖНОСТЬ"), text: $citationConfidence, placeholder: L10n.tr("0–3 / текст"))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(L10n.tr("Изменить источник"))
+
+            Button {
+                if let openable { NSWorkspace.shared.open(openable) }
+            } label: {
+                Image(systemName: "arrow.up.right")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(SepiaTheme.ink)
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .disabled(openable == nil)
+            .help(L10n.tr("Открыть ссылку в браузере"))
+
+            Button { removeEntry(citation: citation) } label: {
+                Image(systemName: "minus")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.red.opacity(0.78))
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .help(L10n.tr("Удалить источник"))
+        }
+        .padding(.bottom, 8)
+    }
+
+    private var sourceEntryForm: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SepiaTextField(
+                label: L10n.tr("НАЗВАНИЕ"),
+                text: $sourceDraft.title,
+                placeholder: L10n.tr("Название"),
+                identifier: "source.title"
+            )
+
+            HStack(spacing: 8) {
+                SepiaTextField(label: L10n.tr("ФОНД"), text: $sourceDraft.publication, placeholder: "—", identifier: "source.fond")
+                SepiaTextField(label: L10n.tr("ОПИСЬ"), text: $sourceDraft.repository, placeholder: "—", identifier: "source.opis")
+                SepiaTextField(label: L10n.tr("ДЕЛО"), text: $sourceDraft.callNumber, placeholder: "—", identifier: "source.delo")
+            }
+
+            SepiaTextField(label: L10n.tr("АДРЕС"), text: $sourceDraft.url, placeholder: "https://…", identifier: "source.url")
+
+            HStack(spacing: 8) {
+                SepiaTextField(label: L10n.tr("ЛИСТ"), text: $sourceDraft.page, placeholder: "—", identifier: "source.sheet")
+                SepiaTextField(
+                    label: L10n.tr("ВИД ЗАПИСИ"),
+                    text: $sourceDraft.detail,
+                    placeholder: L10n.tr("напр. запись о рождении"),
+                    identifier: "source.kind"
+                )
+            }
+
+            SepiaNotesField(
+                label: L10n.tr("РАСШИФРОВКА"),
+                text: $sourceDraft.transcription,
+                placeholder: L10n.tr("Точная запись из источника…")
+            )
+            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $sourceDraft.notes, placeholder: "—")
+
+            HStack(spacing: 10) {
+                if sourceDraft.isEditing {
+                    Button(L10n.tr("Отмена")) { sourceDraft = SourceDraft() }
+                        .buttonStyle(.glass)
+                        .buttonBorderShape(.capsule)
                 }
-                SepiaNotesField(label: L10n.tr("РАСШИФРОВКА"), text: $citationTranscription, placeholder: L10n.tr("Точная запись из источника…"))
-                SepiaNotesField(label: L10n.tr("ЗАМЕТКА К ССЫЛКЕ"), text: $citationNotes, placeholder: "—")
-                Button { addCitation() } label: {
-                    Label(L10n.tr("Привязать ссылку"), systemImage: "link")
+
+                Button { commitSourceDraft() } label: {
+                    Label(
+                        sourceDraft.isEditing ? L10n.tr("Сохранить источник") : L10n.tr("Добавить источник"),
+                        systemImage: sourceDraft.isEditing ? "checkmark" : "plus"
+                    )
                 }
                 .buttonStyle(.glassProminent)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
-                .disabled(selectedSourceID == nil || (requiresEvidenceObject && evidenceObjectID == nil))
+                .disabled(sourceDraft.trimmedTitle.isEmpty || draftDuplicatesAnEntry)
             }
-        }.padding(.bottom, 12)
-    }
 
-    private func sourceRecordFields(index: Int) -> some View {
-        VStack(spacing: 8) {
-            SepiaTextField(label: L10n.tr("НАЗВАНИЕ"), text: Binding(
-                get: { editingTree.sourceRecords[index].title },
-                set: { editingTree.sourceRecords[index].title = $0 }
-            ), placeholder: "—")
-            HStack(spacing: 8) {
-                SepiaTextField(label: L10n.tr("АВТОР"), text: optionalSourceBinding(index, \.author), placeholder: "—")
-                SepiaTextField(label: L10n.tr("ПУБЛИКАЦИЯ"), text: optionalSourceBinding(index, \.publication), placeholder: "—")
+            if draftDuplicatesAnEntry {
+                Text(L10n.tr("Такой источник уже добавлен"))
+                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
             }
-            HStack(spacing: 8) {
-                SepiaTextField(label: L10n.tr("ХРАНИЛИЩЕ"), text: optionalSourceBinding(index, \.repository), placeholder: "—")
-                SepiaTextField(label: L10n.tr("ШИФР"), text: optionalSourceBinding(index, \.callNumber), placeholder: "—")
-            }
-            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: optionalSourceBinding(index, \.notes), placeholder: "—")
+        }
+        .padding(14)
+        .background(SepiaTheme.cardBg, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(SepiaTheme.cardLine, lineWidth: 1)
         }
     }
 
-    private func optionalSourceBinding(_ index: Int, _ keyPath: WritableKeyPath<SourceRecord, String?>) -> Binding<String> {
-        Binding(
-            get: { editingTree.sourceRecords[index][keyPath: keyPath] ?? "" },
-            set: { editingTree.sourceRecords[index][keyPath: keyPath] = $0.isEmpty ? nil : $0 }
+    /// The same дело cited at two different листы is the ordinary case, so the лист is
+    /// part of the identity — otherwise the guard would block the second citation.
+    private var draftDuplicatesAnEntry: Bool {
+        let key = sourceDraft.record(basedOn: nil).archivalKey
+        let page = SourceRecord.fold(sourceDraft.page)
+        return sourceEntries.contains { entry in
+            entry.citation.id != sourceDraft.citationID
+                && entry.source?.archivalKey == key
+                && SourceRecord.fold(entry.citation.page ?? "") == page
+        }
+    }
+
+    private func beginEditingEntry(citation: Citation, source: SourceRecord?) {
+        sourceDraft = SourceDraft(citation: citation, source: source)
+    }
+
+    private func commitSourceDraft() {
+        guard !sourceDraft.trimmedTitle.isEmpty else { return }
+        let original = sourceDraft.sourceID.flatMap { id in
+            editingTree.sourceRecords.first { $0.id == id }
+        }
+        let sourceID = editingTree.upsertSourceRecord(
+            sourceDraft.record(basedOn: original),
+            replacing: sourceDraft.sourceID
         )
-    }
 
-    private var evidenceObjects: [(id: UUID, label: String)] {
-        switch evidenceTarget {
-        case .relationship:
-            editingTree.parentLinks.filter { $0.parentID == editingPerson.id || $0.childID == editingPerson.id }.map { link in
-                let otherID = link.parentID == editingPerson.id ? link.childID : link.parentID
-                return (
-                    link.id,
-                    editingTree.person(byId: otherID)?.displayName(language: .current) ?? L10n.tr("Связь")
-                )
-            }
-        case .union:
-            editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) || $0.childrenIds.contains(editingPerson.id) }
-                .map { ($0.id, unionLabel($0)) }
-        case .attachment:
-            editingPerson.attachments.map { ($0.id, $0.originalName) }
-        default: []
+        if let citationID = sourceDraft.citationID,
+           let index = editingPerson.citations.firstIndex(where: { $0.id == citationID }) {
+            editingPerson.citations[index].sourceID = sourceID
+            editingPerson.citations[index].page = sourceDraft.page.nilIfEmpty
+            editingPerson.citations[index].detail = sourceDraft.detail.nilIfEmpty
+            editingPerson.citations[index].transcription = sourceDraft.transcription.nilIfEmpty
+        } else {
+            editingPerson.citations.append(Citation(
+                sourceID: sourceID,
+                page: sourceDraft.page.nilIfEmpty,
+                detail: sourceDraft.detail.nilIfEmpty,
+                transcription: sourceDraft.transcription.nilIfEmpty
+            ))
         }
+
+        // A copy-on-write fork can leave the record it forked from with no citations.
+        editingTree.pruneUnreferencedSourceRecords()
+        sourceDraft = SourceDraft()
     }
 
-    private var requiresEvidenceObject: Bool { [.relationship, .union, .attachment].contains(evidenceTarget) }
-
-    private func addSource() {
-        let title = sourceTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !title.isEmpty else { return }
-        let source = SourceRecord(title: title, author: sourceAuthor.isEmpty ? nil : sourceAuthor)
-        editingTree.sourceRecords.append(source)
-        selectedSourceID = source.id
-        sourceTitle = ""; sourceAuthor = ""
-    }
-
-    private func addCitation() {
-        guard let sourceID = selectedSourceID else { return }
-        let citation = Citation(
-            sourceID: sourceID,
-            page: citationPage.nilIfEmpty,
-            detail: citationDetail.nilIfEmpty,
-            transcription: citationTranscription.nilIfEmpty,
-            confidence: citationConfidence.nilIfEmpty,
-            notes: citationNotes.nilIfEmpty
-        )
-        switch evidenceTarget {
-        case .person:
-            editingPerson.citations.append(citation)
-        case .primaryName:
-            if let index = editingPerson.names.firstIndex(where: \.isPrimary) ?? editingPerson.names.indices.first {
-                editingPerson.names[index].citations.append(citation)
-            }
-        case .birth, .death:
-            let kind: GenealogyEvent.Kind = evidenceTarget == .birth ? .birth : .death
-            var event = editingPerson.event(ofKind: kind) ?? GenealogyEvent(kind: kind)
-            event.citations.append(citation)
-            editingPerson.replaceEvent(event)
-        case .relationship:
-            if let id = evidenceObjectID, let index = editingTree.parentLinks.firstIndex(where: { $0.id == id }) {
-                editingTree.parentLinks[index].citations.append(citation)
-            }
-        case .union:
-            if let id = evidenceObjectID, let union = editingTree.unions.first(where: { $0.id == id }) { union.citations.append(citation) }
-        case .attachment:
-            if let id = evidenceObjectID, let index = editingPerson.attachments.firstIndex(where: { $0.id == id }) {
-                editingPerson.attachments[index].citations.append(citation)
-            }
-        }
-        citationPage = ""; citationDetail = ""; citationTranscription = ""; citationConfidence = ""; citationNotes = ""
+    private func removeEntry(citation: Citation) {
+        editingPerson.citations.removeAll { $0.id == citation.id }
+        if sourceDraft.citationID == citation.id { sourceDraft = SourceDraft() }
+        editingTree.pruneUnreferencedSourceRecords()
     }
 
     private var unionsEditor: some View {
@@ -487,13 +570,6 @@ struct EditPersonView: View {
                 }
             }
         }.padding(.bottom, 12)
-    }
-
-    private func unionLabel(_ union: Union) -> String {
-        let names = union.partnerIds.compactMap {
-            editingTree.person(byId: $0)?.displayName(language: .current)
-        }
-        return names.isEmpty ? L10n.tr("Семейная запись") : names.joined(separator: " + ")
     }
 
     private var relationshipsEditor: some View {

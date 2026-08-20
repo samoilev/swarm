@@ -383,7 +383,6 @@ public struct GEDCOMParser {
         var page: String?
         var detail: String?
         var transcription: String?
-        var confidence: String?
         var notes: String?
         for raw in branch.dropFirst() {
             guard let line = parseLine(raw) else { continue }
@@ -391,7 +390,6 @@ public struct GEDCOMParser {
             case "PAGE": page = line.value.isEmpty ? nil : line.value
             case "EVEN": detail = line.value.isEmpty ? nil : line.value
             case "TEXT": transcription = line.value.isEmpty ? nil : line.value
-            case "QUAY": confidence = line.value.isEmpty ? nil : line.value
             case "NOTE": notes = line.value.isEmpty ? nil : line.value
             case "CONT":
                 if notes != nil { notes = (notes ?? "") + "\n" + line.value }
@@ -407,7 +405,6 @@ public struct GEDCOMParser {
             page: page,
             detail: detail,
             transcription: transcription,
-            confidence: confidence,
             notes: notes,
             rawGEDCOMBranches: [branch]
         )
@@ -505,20 +502,25 @@ public struct GEDCOMParser {
 
     private static func parseSource(record: [String], uuid: UUID, xref: String) -> SourceRecord {
         var title = L10n.tr("Источник без названия")
-        var author: String?
         var publication: String?
         var repository: String?
         var callNumber: String?
+        var url: String?
         var notes: String?
         var rawBranches: [[String]] = []
         for branch in level1Branches(of: record) {
             guard let head = branch.first.flatMap(parseLine) else { continue }
             switch head.tag {
             case "TITL": title = head.value.isEmpty ? title : joinedText(branch: branch)
-            case "AUTH": author = joinedText(branch: branch)
             case "PUBL": publication = joinedText(branch: branch)
-            case "REPO": repository = head.pointer.map { "@\($0)@" } ?? head.value
+            // A pointer-form REPO names a real `0 @R@ REPO` record and is meaningless as
+            // «опись» text. Preserving the branch keeps the pointer exact and keeps the
+            // field free for the value the user actually types.
+            case "REPO":
+                if head.pointer != nil { rawBranches.append(branch) }
+                else { repository = head.value.isEmpty ? nil : head.value }
             case "CALN": callNumber = head.value
+            case "_URL": url = joinedText(branch: branch)
             case "NOTE": notes = joinedText(branch: branch)
             case "_FTSID", "CHAN", "RIN":
                 if head.tag != "_FTSID" { rawBranches.append(branch) }
@@ -529,10 +531,10 @@ public struct GEDCOMParser {
             id: uuid,
             gedcomXref: xref,
             title: title,
-            author: author,
             publication: publication,
             repository: repository,
             callNumber: callNumber,
+            url: url,
             notes: notes,
             rawGEDCOMBranches: rawBranches
         )

@@ -98,7 +98,10 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
             value = ""
         } else {
             pointer = nil
-            value = tail
+            // A doubled delimiter is how the serializer escapes text shaped like a
+            // pointer. Undo it so the value reads back exactly as it was typed.
+            let escaped = tail.count >= 4 && tail.hasPrefix("@@") && tail.hasSuffix("@@")
+            value = escaped ? String(tail.dropFirst().dropLast()) : tail
         }
         self.init(level: level, xref: xref, tag: tag, pointer: pointer, value: value, rawLine: raw)
     }

@@ -35,7 +35,11 @@ final class SwarmUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Несохранённое"].exists)
     }
 
-    func testUnionAndCitationCanBeEditedAndSaved() throws {
+    /// The whole point of the sources rebuild: an entry you add is visible in a list,
+    /// survives a save/reopen, and can be changed and removed. Fields are addressed by
+    /// accessibility identifier because labels like НАЗВАНИЕ appear more than once in
+    /// this editor.
+    func testSourceEntryCanBeAddedEditedAndDeleted() throws {
         try importTree("""
         0 HEAD
         1 _NAME Evidence UI
@@ -57,13 +61,57 @@ final class SwarmUITests: XCTestCase {
         app.staticTexts["Иванов Иван"].click()
         app.buttons["Редактировать"].firstMatch.click()
         XCTAssertTrue(app.staticTexts["Иванов Иван + Иванова Анна"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["ИСТОЧНИКИ И ДОКАЗАТЕЛЬСТВА"].waitForExistence(timeout: 3))
-        let sourceTitle = app.textFields["Название"]
-        sourceTitle.click(); sourceTitle.typeText("Метрическая книга")
-        app.buttons["Добавить в библиотеку"].click()
-        app.buttons["Привязать ссылку"].click()
+        XCTAssertTrue(app.staticTexts["ИСТОЧНИКИ"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Источники не добавлены"].exists)
+
+        func field(_ identifier: String) -> XCUIElement {
+            app.textFields[identifier].firstMatch
+        }
+
+        field("source.title").click()
+        field("source.title").typeText("Метрическая книга")
+        field("source.fond").click(); field("source.fond").typeText("350")
+        field("source.opis").click(); field("source.opis").typeText("2")
+        field("source.delo").click(); field("source.delo").typeText("1841")
+        app.buttons["Добавить источник"].click()
+
+        XCTAssertTrue(app.staticTexts["Метрическая книга"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Ф. 350 · Оп. 2 · Д. 1841"].exists)
+        XCTAssertFalse(app.staticTexts["Источники не добавлены"].exists)
+
+        // Save, reopen: the entry reads back. This is the gap the rebuild exists to close.
         app.buttons["Сохранить"].click()
         XCTAssertTrue(app.staticTexts["Иванов Иван"].waitForExistence(timeout: 5))
+        app.buttons["Редактировать"].firstMatch.click()
+        XCTAssertTrue(app.staticTexts["Ф. 350 · Оп. 2 · Д. 1841"].waitForExistence(timeout: 3))
+
+        // Edit it in place.
+        app.staticTexts["Метрическая книга"].click()
+        let delo = field("source.delo")
+        delo.click(); delo.typeKey("a", modifierFlags: .command); delo.typeText("1842")
+        app.buttons["Сохранить источник"].click()
+        XCTAssertTrue(app.staticTexts["Ф. 350 · Оп. 2 · Д. 1842"].waitForExistence(timeout: 3))
+
+        // Delete it.
+        app.buttons["Удалить источник"].firstMatch.click()
+        XCTAssertTrue(app.staticTexts["Источники не добавлены"].waitForExistence(timeout: 3))
+        app.buttons["Сохранить"].click()
+        XCTAssertTrue(app.staticTexts["Иванов Иван"].waitForExistence(timeout: 5))
+    }
+
+    /// Cancel discards the draft, sources included.
+    func testCancellingTheEditorDiscardsANewSourceEntry() {
+        createInitialTree()
+        app.buttons["Редактировать"].firstMatch.click()
+        let title = app.textFields["source.title"].firstMatch
+        XCTAssertTrue(title.waitForExistence(timeout: 3))
+        title.click(); title.typeText("Не сохранится")
+        app.buttons["Добавить источник"].click()
+        XCTAssertTrue(app.staticTexts["Не сохранится"].waitForExistence(timeout: 3))
+
+        app.buttons["Отмена"].firstMatch.click()
+        app.buttons["Редактировать"].firstMatch.click()
+        XCTAssertTrue(app.staticTexts["Источники не добавлены"].waitForExistence(timeout: 3))
     }
 
     func testSwitchingToOfflineMapDoesNotAskForNetworkConsent() {

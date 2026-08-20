@@ -369,6 +369,74 @@ public final class FamilyTree: Identifiable, Codable {
         }
     }
 
+    // MARK: - Source records
+
+    /// Every citation in the tree, wherever it hangs. The editor only surfaces
+    /// `Person.citations`, but sharing and orphan decisions have to see all of them:
+    /// a record still cited from a name, event, attachment, union or parent link must
+    /// not be forked needlessly, and must never be pruned while still in use.
+    public func allCitations() -> [Citation] {
+        var result: [Citation] = []
+        for person in people {
+            result += person.citations
+            result += person.names.flatMap(\.citations)
+            result += person.events.flatMap(\.citations)
+            result += person.attachments.flatMap(\.citations)
+        }
+        for union in unions {
+            result += union.citations
+            result += union.events.flatMap(\.citations)
+        }
+        result += parentLinks.flatMap(\.citations)
+        return result
+    }
+
+    public func citationReferenceCount(sourceID: UUID) -> Int {
+        allCitations().count { $0.sourceID == sourceID }
+    }
+
+    /// Store an edited source and return the id the citation must now point at.
+    ///
+    /// An imported file can cite one `SOUR` from twenty people. The editor presents a
+    /// source as if it belonged to the person being edited, so rewriting a shared
+    /// record in place would silently rewrite it for the other nineteen. When the
+    /// record is shared this forks it instead and leaves the original untouched.
+    @discardableResult
+    public func upsertSourceRecord(_ edited: SourceRecord, replacing originalID: UUID?) -> UUID {
+        guard let originalID, let index = sourceRecords.firstIndex(where: { $0.id == originalID }) else {
+            sourceRecords.append(edited)
+            return edited.id
+        }
+        if citationReferenceCount(sourceID: originalID) <= 1 {
+            var updated = edited
+            updated.id = originalID
+            sourceRecords[index] = updated
+            return originalID
+        }
+        // The fork drops the xref so the export assigns it its own `@S…@`, and drops the
+        // preserved branches so it stays app-created and therefore prunable. The original
+        // keeps both.
+        var fork = edited
+        fork.id = UUID()
+        fork.gedcomXref = nil
+        fork.rawGEDCOMBranches = []
+        sourceRecords.append(fork)
+        return fork.id
+    }
+
+    /// Drop source records nothing cites any more, but only ones this app created.
+    /// A record carrying an xref or preserved branches came from a file, and a foreign
+    /// file has to survive import and re-export unchanged even when the user deletes
+    /// the last citation pointing at it.
+    public func pruneUnreferencedSourceRecords() {
+        let referenced = Set(allCitations().map(\.sourceID))
+        sourceRecords.removeAll { record in
+            !referenced.contains(record.id)
+                && record.gedcomXref == nil
+                && record.rawGEDCOMBranches.isEmpty
+        }
+    }
+
     /// Put `id` into whichever partner slot of `union` is free (partner1 first).
     private func fillFreePartner(_ union: Union, with id: UUID) {
         if union.partner1Id == nil { union.partner1Id = id }

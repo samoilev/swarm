@@ -456,9 +456,6 @@ public struct GEDCOMSerializer {
                 lines.append("\(level + 1) DATA")
                 appendMultiline(level: level + 2, tag: "TEXT", value: text, to: &lines)
             }
-            if let confidence = citation.confidence, !confidence.isEmpty {
-                appendValue(level + 1, "QUAY", value: confidence, to: &lines)
-            }
             if let notes = citation.notes, !notes.isEmpty {
                 appendMultiline(level: level + 1, tag: "NOTE", value: notes, to: &lines)
             }
@@ -489,7 +486,7 @@ public struct GEDCOMSerializer {
             let tag = gedcomTag(of: raw) ?? ""
             let keep: Bool
             switch tag {
-            case "PAGE", "EVEN", "DATA", "TEXT", "QUAY":
+            case "PAGE", "EVEN", "DATA", "TEXT":
                 keep = false
             case "NOTE":
                 let value = gedcomValue(of: raw)
@@ -533,13 +530,12 @@ public struct GEDCOMSerializer {
         lines.append("0 @\(xref)@ SOUR")
         lines.append("1 _FTSID \(source.id.uuidString)")
         appendValue(1, "TITL", value: source.title, to: &lines)
-        if let author = source.author, !author.isEmpty { appendValue(1, "AUTH", value: author, to: &lines) }
         if let publication = source.publication, !publication.isEmpty { appendValue(1, "PUBL", value: publication, to: &lines) }
         if let repository = source.repository, !repository.isEmpty {
-            if repository.first == "@", repository.last == "@" { lines.append("1 REPO \(repository)") }
-            else { appendValue(1, "REPO", value: repository, to: &lines) }
+            appendValue(1, "REPO", value: repository, to: &lines)
         }
         if let callNumber = source.callNumber, !callNumber.isEmpty { appendValue(1, "CALN", value: callNumber, to: &lines) }
+        if let url = source.url, !url.isEmpty { appendValue(1, "_URL", value: url, to: &lines) }
         if let notes = source.notes, !notes.isEmpty { appendMultiline(level: 1, tag: "NOTE", value: notes, to: &lines) }
         for branch in source.rawGEDCOMBranches { lines.append(contentsOf: branch) }
     }
@@ -614,8 +610,22 @@ public struct GEDCOMSerializer {
     /// continuation lines so no physical line exceeds the GEDCOM 5.5.1 limit
     /// (255 bytes incl. the level/tag prefix). Chunking is by UTF-8 byte budget so
     /// multi-byte Cyrillic text stays within bounds.
-    private static func appendValue(_ level: Int, _ tag: String, value: String, to lines: inout [String]) {
-        guard !value.isEmpty else { lines.append("\(level) \(tag)"); return }
+    /// Doubles the delimiting "@" of a value that would otherwise read back as a
+    /// pointer. Only this exact shape is ambiguous: any inner "@" already disqualifies
+    /// the token, so ordinary text containing an address is left alone.
+    private static func escapingPointerShape(_ value: String) -> String {
+        guard value.count >= 2, value.first == "@", value.last == "@",
+              !value.dropFirst().dropLast().contains("@") else { return value }
+        return "@" + value + "@"
+    }
+
+    private static func appendValue(_ level: Int, _ tag: String, value rawValue: String, to lines: inout [String]) {
+        guard !rawValue.isEmpty else { lines.append("\(level) \(tag)"); return }
+        // Text shaped exactly like "@X@" would tokenize as a pointer on re-import, so a
+        // value the user typed into a field could leave the file naming a record that
+        // does not exist. GEDCOM escapes a literal "@" by doubling it, which breaks the
+        // pointer shape; `GEDCOMNode` undoes this on the way back in.
+        let value = escapingPointerShape(rawValue)
         // Break only between two non-space characters. GEDCOM readers (this one
         // included) trim leading/trailing whitespace from each CONC line, so a break
         // adjacent to a space would silently drop that space on re-import. Splitting

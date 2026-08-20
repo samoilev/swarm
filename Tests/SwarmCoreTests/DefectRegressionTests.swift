@@ -331,4 +331,132 @@ struct DefectRegressionTests {
         #expect(output.contains("1 _LIVING Y"))
         #expect(output.contains("1 DEAT"))
     }
+
+    // MARK: - Fields the editor no longer models
+
+    /// `AUTH` lost its typed field when the editor dropped the author. The parser must
+    /// stop claiming it so it rides out in the preserved branches instead, or every
+    /// imported source silently loses its author on the first save.
+    @Test func importedSourceAuthorSurvivesTheFieldBeingRemoved() {
+        let gedcom = """
+        0 HEAD
+        0 @I1@ INDI
+        1 NAME Фёдор /Достоевский/
+        0 @S1@ SOUR
+        1 TITL Метрическая книга
+        1 AUTH Приход Св. Николая
+        0 TRLR
+        """
+        let parsed = GEDCOMParser.parse(gedcom: gedcom)
+        let source = parsed.sourceRecords.first
+        #expect(source?.rawGEDCOMBranches.contains { $0.contains { $0.contains("AUTH Приход Св. Николая") } } == true)
+
+        let first = GEDCOMSerializer.serialize(tree: tree(from: parsed)).gedcom
+        #expect(first.components(separatedBy: "1 AUTH Приход Св. Николая").count - 1 == 1)
+
+        // Saving the saved file is a fixed point, not a duplicator.
+        let second = GEDCOMSerializer.serialize(tree: tree(from: GEDCOMParser.parse(gedcom: first))).gedcom
+        #expect(second.components(separatedBy: "1 AUTH Приход Св. Николая").count - 1 == 1)
+    }
+
+    /// Same story for `QUAY`, which the reliability field used to carry. It is preserved
+    /// through `rawGEDCOMBranches`, which only works while `preservedCitationDetail`
+    /// stops suppressing it.
+    @Test func importedCitationConfidenceSurvivesTheFieldBeingRemoved() {
+        let gedcom = """
+        0 HEAD
+        0 @I1@ INDI
+        1 NAME Анна /Иванова/
+        1 BIRT
+        2 DATE 1 JAN 1900
+        2 SOUR @S1@
+        3 PAGE 12
+        3 QUAY 3
+        0 @S1@ SOUR
+        1 TITL Ревизская сказка
+        0 TRLR
+        """
+        let first = GEDCOMSerializer.serialize(tree: tree(from: GEDCOMParser.parse(gedcom: gedcom))).gedcom
+        #expect(first.contains("QUAY 3"))
+        #expect(first.components(separatedBy: "QUAY 3").count - 1 == 1)
+
+        let second = GEDCOMSerializer.serialize(tree: tree(from: GEDCOMParser.parse(gedcom: first))).gedcom
+        #expect(second.components(separatedBy: "QUAY 3").count - 1 == 1)
+    }
+
+    // MARK: - Source URL
+
+    @Test func sourceURLRoundTripsAsTheUnderscoreURLTag() {
+        let tree = FamilyTree(name: "Ссылки")
+        let person = Person(givenNames: "Пётр", surname: "Петров")
+        let source = SourceRecord(title: "Ревизская сказка", url: "https://rgada.info/opisi/350-opis_2/")
+        person.citations = [Citation(sourceID: source.id, page: "л. 214 об.")]
+        tree.people = [person]
+        tree.sourceRecords = [source]
+
+        let out = GEDCOMSerializer.serialize(tree: tree).gedcom
+        #expect(out.components(separatedBy: "1 _URL https://rgada.info/opisi/350-opis_2/").count - 1 == 1)
+
+        let parsed = GEDCOMParser.parse(gedcom: out)
+        #expect(parsed.sourceRecords.first?.url == "https://rgada.info/opisi/350-opis_2/")
+        #expect(parsed.people.first?.citations.first?.page == "л. 214 об.")
+    }
+
+    /// An imported `_URL` must land in the typed field rather than the preserved
+    /// branches, or the export emits it twice — once modelled, once verbatim.
+    @Test func importedURLTagIsModelledRatherThanDuplicated() {
+        let gedcom = """
+        0 HEAD
+        0 @I1@ INDI
+        1 NAME Мария /Кюри/
+        0 @S1@ SOUR
+        1 TITL Emma Darwin
+        1 _URL https://www.darwinproject.ac.uk/emma-darwin
+        0 TRLR
+        """
+        let parsed = GEDCOMParser.parse(gedcom: gedcom)
+        let source = parsed.sourceRecords.first
+        #expect(source?.url == "https://www.darwinproject.ac.uk/emma-darwin")
+        #expect(source?.rawGEDCOMBranches.contains { $0.contains { $0.contains("_URL") } } == false)
+
+        let out = GEDCOMSerializer.serialize(tree: tree(from: parsed)).gedcom
+        #expect(out.components(separatedBy: "_URL https://www.darwinproject.ac.uk/emma-darwin").count - 1 == 1)
+    }
+
+    // MARK: - REPO
+
+    /// `REPO` now labels «опись» in the editor. A pointer-form REPO is a reference to a
+    /// real repository record and must stay one; text the user typed must never be
+    /// exported as a pointer to a record that does not exist.
+    @Test func repositoryPointersSurviveAndTypedTextNeverBecomesOne() {
+        let gedcom = """
+        0 HEAD
+        0 @I1@ INDI
+        1 NAME Лев /Толстой/
+        0 @S1@ SOUR
+        1 TITL Метрическая книга
+        1 REPO @R1@
+        0 @R1@ REPO
+        1 NAME ГАТО
+        0 TRLR
+        """
+        let parsed = GEDCOMParser.parse(gedcom: gedcom)
+        // The pointer is meaningless as «опись» text, so it stays out of the field.
+        #expect(parsed.sourceRecords.first?.repository == nil)
+        let out = GEDCOMSerializer.serialize(tree: tree(from: parsed)).gedcom
+        #expect(out.contains("1 REPO @R1@"))
+        #expect(out.contains("0 @R1@ REPO"))
+
+        // Text that merely looks like a pointer must not be emitted as one.
+        let typed = FamilyTree(name: "Опись")
+        let person = Person(givenNames: "Лев")
+        let source = SourceRecord(title: "Метрическая книга", repository: "@2@")
+        person.citations = [Citation(sourceID: source.id)]
+        typed.people = [person]
+        typed.sourceRecords = [source]
+        let typedOut = GEDCOMSerializer.serialize(tree: typed).gedcom
+        let repoLine = typedOut.split(separator: "\n").first { $0.hasPrefix("1 REPO") }
+        #expect(repoLine != nil)
+        #expect(GEDCOMNode(rawLine: String(repoLine ?? ""))?.pointer == nil)
+    }
 }

@@ -318,13 +318,7 @@ public enum TreeValidator {
     private static func addSimilarSources(_ sources: [SourceRecord], into issues: inout [TreeIssue]) {
         var groups: [String: [SourceRecord]] = [:]
         for source in sources {
-            let key = source.title.lowercased()
-                .folding(
-                    options: [.diacriticInsensitive, .caseInsensitive],
-                    locale: AppLanguage.current.locale
-                )
-                .replacingOccurrences(of: "ё", with: "е")
-                .split(whereSeparator: \.isWhitespace).joined(separator: " ")
+            let key = SourceRecord.fold(source.title)
             if !key.isEmpty { groups[key, default: []].append(source) }
         }
         for (key, candidates) in groups where candidates.count > 1 && Set(candidates.map(\.title)).count > 1 {
