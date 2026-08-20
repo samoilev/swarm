@@ -105,6 +105,7 @@ struct InspectorPanel: View {
                     deathSection(person)
                     mapSection(person)
                     lifeSection(person)
+                    sourcesSection(person)
                     attachmentsSection(person)
                     linksSection(person)
                     relationshipsSection(person)
@@ -437,6 +438,67 @@ struct InspectorPanel: View {
                 }
             }
         }
+    }
+
+    /// Evidence for this person, read-only. Shows `Person.citations` — an imported
+    /// file can also hang citations on a birth, a name, a union or an attachment, and
+    /// those are kept and exported but not listed here or in the editor.
+    @ViewBuilder
+    private func sourcesSection(_ p: Person) -> some View {
+        if !p.citations.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: L10n.tr("Источники"))
+                ForEach(p.citations) { citation in
+                    let source = tree.sourceRecords.first { $0.id == citation.sourceID }
+                    let openable = WebLink(url: source?.url ?? "").openableURL
+                    Button {
+                        if let openable { NSWorkspace.shared.open(openable) }
+                    } label: {
+                        sourceRow(citation: citation, source: source)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(openable == nil)
+                    .help(L10n.tr("Открыть источник в браузере"))
+                    .padding(.bottom, 8)
+                }
+            }
+        }
+    }
+
+    private func sourceRow(citation: Citation, source: SourceRecord?) -> some View {
+        // Шифр and лист read as one reference: "Ф. 350 · Оп. 2 · Д. 1841 · Л. 214 об."
+        let reference = [source?.shelfmarkSummary ?? "", citation.page.map { L10n.tr("Л. \($0)") } ?? ""]
+            .filter { !$0.isEmpty }
+            .joined(separator: " · ")
+
+        return HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "doc.text")
+                .font(.system(size: 13))
+                .foregroundColor(SepiaTheme.inkSoft)
+                .frame(width: 40, height: 40)
+                .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(source?.title ?? L10n.tr("Источник не найден"))
+                    .font(SepiaTheme.body(size: 13))
+                    .foregroundColor(SepiaTheme.ink)
+                    .lineLimit(1).truncationMode(.middle)
+                if !reference.isEmpty {
+                    Text(reference)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(1)
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1).truncationMode(.middle)
+                }
+                if let transcription = citation.transcription, !transcription.isEmpty {
+                    Text(transcription)
+                        .font(SepiaTheme.body(size: 11.5))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(2)
+                        .padding(.top, 1)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .contentShape(Rectangle())
     }
 
     @ViewBuilder

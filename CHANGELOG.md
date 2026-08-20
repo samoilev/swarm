@@ -11,6 +11,12 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Added
+
+- The person card lists a person's sources, above Файлы and Ссылки: title, the archival
+  reference on one line, and the first two lines of the transcription. A source with an
+  address opens it in the browser.
+
 ### Changed
 
 - The person editor's evidence section is now a list of sources you can read back, edit
