@@ -835,6 +835,9 @@ struct EditPersonView: View {
                     .padding(.bottom, 8)
             } else {
                 ForEach(Array(editingPerson.links.enumerated()), id: \.element.id) { index, link in
+                    // Two stacked fields per row read as one block otherwise — the rule
+                    // marks where one link ends and the next begins.
+                    if index > 0 { Divider().overlay(SepiaTheme.fieldLine).padding(.bottom, 8) }
                     linkEditRow(index: index, link: link)
                 }
             }
