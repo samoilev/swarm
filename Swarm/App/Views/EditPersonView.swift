@@ -56,7 +56,8 @@ struct EditPersonView: View {
     @State private var saveError: String?
     @State private var isSaving = false
     @State private var didCommit = false
-    @State private var sourceDraft = SourceDraft()
+    /// The open add/edit form, or nil while the section is just a list.
+    @State private var sourceDraft: SourceDraft?
 
     /// One row of the sources list flattened into editable text. `citationID == nil`
     /// means the form is adding a new entry; non-nil means it is editing that row and
@@ -78,7 +79,6 @@ struct EditPersonView: View {
         var transcription = ""
         var notes = ""
 
-        var isEditing: Bool { citationID != nil }
         var trimmedTitle: String { title.trimmingCharacters(in: .whitespacesAndNewlines) }
 
         init() {}
@@ -380,11 +380,31 @@ struct EditPersonView: View {
                 }
             }
 
-            Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
-
-            sourceEntryForm
+            if sourceDraft != nil {
+                Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
+                sourceEntryForm
+            } else {
+                Button { sourceDraft = SourceDraft() } label: {
+                    Label(L10n.tr("Добавить источник"), systemImage: "plus")
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
+                .padding(.top, 4)
+            }
         }
         .padding(.bottom, 12)
+    }
+
+    /// Edits go into the open draft; the optional is re-checked on every access because
+    /// the form can be dismissed while one of its fields still holds focus.
+    private func draftBinding(_ keyPath: WritableKeyPath<SourceDraft, String>) -> Binding<String> {
+        Binding(
+            get: { sourceDraft?[keyPath: keyPath] ?? "" },
+            set: { newValue in
+                guard sourceDraft != nil else { return }
+                sourceDraft?[keyPath: keyPath] = newValue
+            }
+        )
     }
 
     private func sourceEntryRow(citation: Citation, source: SourceRecord?) -> some View {
@@ -396,21 +416,26 @@ struct EditPersonView: View {
             .joined(separator: " · ")
 
         return HStack(spacing: 10) {
-            Button { sourceDraft = SourceDraft(citation: citation, source: source) } label: {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
-                        .lineLimit(1).truncationMode(.middle)
-                    if !subtitle.isEmpty {
-                        Text(subtitle)
-                            .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
-                            .lineLimit(1)
-                    }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
+                    .lineLimit(1).truncationMode(.middle)
+                if !subtitle.isEmpty {
+                    Text(subtitle)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button { sourceDraft = SourceDraft(citation: citation, source: source) } label: {
+                Image(systemName: "pencil")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(SepiaTheme.ink)
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
             .help(L10n.tr("Изменить источник"))
 
             Button {
@@ -443,24 +468,24 @@ struct EditPersonView: View {
         VStack(alignment: .leading, spacing: 8) {
             SepiaTextField(
                 label: L10n.tr("НАЗВАНИЕ"),
-                text: $sourceDraft.title,
+                text: draftBinding(\.title),
                 placeholder: L10n.tr("Название"),
                 identifier: "source.title"
             )
 
             HStack(spacing: 8) {
-                SepiaTextField(label: L10n.tr("ФОНД"), text: $sourceDraft.publication, placeholder: "—", identifier: "source.fond")
-                SepiaTextField(label: L10n.tr("ОПИСЬ"), text: $sourceDraft.repository, placeholder: "—", identifier: "source.opis")
-                SepiaTextField(label: L10n.tr("ДЕЛО"), text: $sourceDraft.callNumber, placeholder: "—", identifier: "source.delo")
+                SepiaTextField(label: L10n.tr("ФОНД"), text: draftBinding(\.publication), placeholder: "—", identifier: "source.fond")
+                SepiaTextField(label: L10n.tr("ОПИСЬ"), text: draftBinding(\.repository), placeholder: "—", identifier: "source.opis")
+                SepiaTextField(label: L10n.tr("ДЕЛО"), text: draftBinding(\.callNumber), placeholder: "—", identifier: "source.delo")
             }
 
-            SepiaTextField(label: L10n.tr("АДРЕС"), text: $sourceDraft.url, placeholder: "https://…", identifier: "source.url")
+            SepiaTextField(label: L10n.tr("АДРЕС"), text: draftBinding(\.url), placeholder: "https://…", identifier: "source.url")
 
             HStack(spacing: 8) {
-                SepiaTextField(label: L10n.tr("ЛИСТ"), text: $sourceDraft.page, placeholder: "—", identifier: "source.sheet")
+                SepiaTextField(label: L10n.tr("ЛИСТ"), text: draftBinding(\.page), placeholder: "—", identifier: "source.sheet")
                 SepiaTextField(
                     label: L10n.tr("ВИД ЗАПИСИ"),
-                    text: $sourceDraft.detail,
+                    text: draftBinding(\.detail),
                     placeholder: L10n.tr("напр. запись о рождении"),
                     identifier: "source.kind"
                 )
@@ -468,28 +493,23 @@ struct EditPersonView: View {
 
             SepiaNotesField(
                 label: L10n.tr("РАСШИФРОВКА"),
-                text: $sourceDraft.transcription,
+                text: draftBinding(\.transcription),
                 placeholder: L10n.tr("Точная запись из источника…")
             )
-            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $sourceDraft.notes, placeholder: "—")
+            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: draftBinding(\.notes), placeholder: "—")
 
             HStack(spacing: 10) {
-                if sourceDraft.isEditing {
-                    Button(L10n.tr("Отмена")) { sourceDraft = SourceDraft() }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.capsule)
-                }
+                Button(L10n.tr("Отмена")) { sourceDraft = nil }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.capsule)
 
                 Button { commitSourceDraft() } label: {
-                    Label(
-                        sourceDraft.isEditing ? L10n.tr("Сохранить источник") : L10n.tr("Добавить источник"),
-                        systemImage: sourceDraft.isEditing ? "checkmark" : "plus"
-                    )
+                    Label(L10n.tr("Сохранить источник"), systemImage: "checkmark")
                 }
                 .buttonStyle(.glassProminent)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
-                .disabled(sourceDraft.trimmedTitle.isEmpty || draftDuplicatesAnEntry)
+                .disabled((sourceDraft?.trimmedTitle.isEmpty ?? true) || draftDuplicatesAnEntry)
             }
 
             if draftDuplicatesAnEntry {
@@ -508,6 +528,7 @@ struct EditPersonView: View {
     /// The same дело cited at two different листы is the ordinary case, so the лист is
     /// part of the identity — otherwise the guard would block the second citation.
     private var draftDuplicatesAnEntry: Bool {
+        guard let sourceDraft else { return false }
         let key = sourceDraft.record(basedOn: nil).archivalKey
         let page = SourceRecord.fold(sourceDraft.page)
         return sourceEntries.contains { entry in
@@ -518,7 +539,7 @@ struct EditPersonView: View {
     }
 
     private func commitSourceDraft() {
-        guard !sourceDraft.trimmedTitle.isEmpty else { return }
+        guard let sourceDraft, !sourceDraft.trimmedTitle.isEmpty else { return }
         let original = sourceDraft.sourceID.flatMap { id in
             editingTree.sourceRecords.first { $0.id == id }
         }
@@ -542,12 +563,12 @@ struct EditPersonView: View {
             ))
         }
 
-        sourceDraft = SourceDraft()
+        self.sourceDraft = nil
     }
 
     private func removeEntry(citation: Citation) {
         editingPerson.citations.removeAll { $0.id == citation.id }
-        if sourceDraft.citationID == citation.id { sourceDraft = SourceDraft() }
+        if sourceDraft?.citationID == citation.id { sourceDraft = nil }
         editingTree.pruneUnreferencedSourceRecords()
     }
 

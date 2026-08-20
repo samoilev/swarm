@@ -68,12 +68,15 @@ final class SwarmUITests: XCTestCase {
             app.textFields[identifier].firstMatch
         }
 
+        // The form stays closed until it is asked for.
+        XCTAssertFalse(field("source.title").exists)
+        app.buttons["Добавить источник"].click()
         field("source.title").click()
         field("source.title").typeText("Метрическая книга")
         field("source.fond").click(); field("source.fond").typeText("350")
         field("source.opis").click(); field("source.opis").typeText("2")
         field("source.delo").click(); field("source.delo").typeText("1841")
-        app.buttons["Добавить источник"].click()
+        app.buttons["Сохранить источник"].click()
 
         XCTAssertTrue(app.staticTexts["Метрическая книга"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Ф. 350 · Оп. 2 · Д. 1841"].exists)
@@ -85,8 +88,9 @@ final class SwarmUITests: XCTestCase {
         app.buttons["Редактировать"].firstMatch.click()
         XCTAssertTrue(app.staticTexts["Ф. 350 · Оп. 2 · Д. 1841"].waitForExistence(timeout: 3))
 
-        // Edit it in place.
-        app.staticTexts["Метрическая книга"].click()
+        // Edit it in place, through the row's own edit button.
+        XCTAssertFalse(field("source.delo").exists)
+        app.buttons["Изменить источник"].firstMatch.click()
         let delo = field("source.delo")
         delo.click(); delo.typeKey("a", modifierFlags: .command); delo.typeText("1842")
         app.buttons["Сохранить источник"].click()
@@ -103,10 +107,12 @@ final class SwarmUITests: XCTestCase {
     func testCancellingTheEditorDiscardsANewSourceEntry() {
         createInitialTree()
         app.buttons["Редактировать"].firstMatch.click()
+        XCTAssertTrue(app.staticTexts["ИСТОЧНИКИ"].waitForExistence(timeout: 3))
+        app.buttons["Добавить источник"].click()
         let title = app.textFields["source.title"].firstMatch
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click(); title.typeText("Не сохранится")
-        app.buttons["Добавить источник"].click()
+        app.buttons["Сохранить источник"].click()
         XCTAssertTrue(app.staticTexts["Не сохранится"].waitForExistence(timeout: 3))
 
         app.buttons["Отмена"].firstMatch.click()
