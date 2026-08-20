@@ -396,7 +396,7 @@ struct EditPersonView: View {
             .joined(separator: " · ")
 
         return HStack(spacing: 10) {
-            Button { beginEditingEntry(citation: citation, source: source) } label: {
+            Button { sourceDraft = SourceDraft(citation: citation, source: source) } label: {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
                         .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
@@ -517,10 +517,6 @@ struct EditPersonView: View {
         }
     }
 
-    private func beginEditingEntry(citation: Citation, source: SourceRecord?) {
-        sourceDraft = SourceDraft(citation: citation, source: source)
-    }
-
     private func commitSourceDraft() {
         guard !sourceDraft.trimmedTitle.isEmpty else { return }
         let original = sourceDraft.sourceID.flatMap { id in
@@ -546,8 +542,6 @@ struct EditPersonView: View {
             ))
         }
 
-        // A copy-on-write fork can leave the record it forked from with no citations.
-        editingTree.pruneUnreferencedSourceRecords()
         sourceDraft = SourceDraft()
     }
 

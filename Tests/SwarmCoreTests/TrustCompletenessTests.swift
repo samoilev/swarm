@@ -616,4 +616,39 @@ struct TrustCompletenessTests {
         #expect(tree.sourceRecords.first?.title == "Исходный")
         #expect(tree.people.first?.citations.first?.page == "л. 1")
     }
+
+    /// The editor prunes only on delete, which is safe because no upsert branch can
+    /// strand a record: an in-place edit keeps the id, and a fork only happens when two
+    /// or more citations point at the original, so repointing one still leaves it cited.
+    @Test func upsertingASourceNeverOrphansAnother() {
+        func treeWithSharedSource(citations: Int) -> (FamilyTree, SourceRecord) {
+            let tree = FamilyTree(name: "Инвариант")
+            let source = SourceRecord(title: "Общий")
+            tree.people = (0 ..< citations).map { index in
+                let person = Person(givenNames: "П\(index)")
+                person.citations = [Citation(sourceID: source.id)]
+                return person
+            }
+            tree.sourceRecords = [source]
+            return (tree, source)
+        }
+
+        // Shared: forks, and the original keeps the citations that did not move.
+        let (shared, sharedSource) = treeWithSharedSource(citations: 2)
+        var edited = sharedSource
+        edited.callNumber = "1841"
+        let forkID = shared.upsertSourceRecord(edited, replacing: sharedSource.id)
+        shared.people[0].citations[0].sourceID = forkID
+        let sharedBefore = shared.sourceRecords.count
+        shared.pruneUnreferencedSourceRecords()
+        #expect(shared.sourceRecords.count == sharedBefore)
+
+        // Exclusively owned: rewritten in place, so the id every citation holds is intact.
+        let (owned, ownedSource) = treeWithSharedSource(citations: 1)
+        var renamed = ownedSource
+        renamed.title = "Переименован"
+        _ = owned.upsertSourceRecord(renamed, replacing: ownedSource.id)
+        owned.pruneUnreferencedSourceRecords()
+        #expect(owned.sourceRecords.count == 1)
+    }
 }
