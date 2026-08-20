@@ -67,6 +67,12 @@ struct MainWorkspace: View {
 
     private var usesCompactToolbar: Bool { workspaceWidth < 1080 }
 
+    /// The title keeps its 260 at the design width and spends half of anything wider on
+    /// itself, so a full-screen window stops truncating names it has room for.
+    private var titleBlockWidth: CGFloat {
+        min(560, 260 + max(0, workspaceWidth - 1280) / 2)
+    }
+
     /// Tree and fan are free canvases: they can be drawn edge to edge and centred in
     /// whatever is left uncovered. Map and the four list views cannot, so they keep the
     /// inspector in a column of its own.
@@ -914,8 +920,8 @@ struct MainWorkspace: View {
                     .truncationTooltip(sub)
             }
         }
-        .frame(maxWidth: 260, alignment: .leading)
-        // Without this the toolbar hands the block far less than its 260 and cuts the
+        .frame(maxWidth: titleBlockWidth, alignment: .leading)
+        // Without this the toolbar hands the block far less than its width and cuts the
         // name mid-word while the bar still has room to spare.
         .fixedSize()
     }

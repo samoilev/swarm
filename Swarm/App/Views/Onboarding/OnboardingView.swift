@@ -803,6 +803,8 @@ struct SepiaNotesField: View {
     var placeholder: String = ""
     @State private var height: CGFloat = 90
     @State private var heightAtDragStart: CGFloat = 90
+    @State private var isResizing = false
+    @State private var isHoveringHandle = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -841,25 +843,42 @@ struct SepiaNotesField: View {
             }
             .frame(height: height)
             .overlay(alignment: .bottom) {
-                // Drag handle along the bottom edge
-                ZStack {
-                    Capsule()
-                        .fill(SepiaTheme.inkSoft.opacity(0.35))
-                        .frame(width: 28, height: 3)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 12)
-                .contentShape(Rectangle())
-                .onHover { hovering in
-                    if hovering { NSCursor.resizeUpDown.set() } else { NSCursor.arrow.set() }
-                }
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            height = min(420, max(60, heightAtDragStart + value.translation.height))
+                // Drag handle straddling the bottom edge
+                Capsule()
+                    .fill(SepiaTheme.inkSoft.opacity(isResizing || isHoveringHandle ? 0.7 : 0.35))
+                    .frame(width: 34, height: 3)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 16)
+                    .contentShape(Rectangle())
+                    .offset(y: 5)
+                    .onHover { hovering in
+                        isHoveringHandle = hovering
+                        if hovering {
+                            NSCursor.resizeUpDown.set()
+                        } else if !isResizing {
+                            NSCursor.arrow.set()
                         }
-                        .onEnded { _ in heightAtDragStart = height }
-                )
+                    }
+                    // Global space: the handle moves with the edge it resizes, so a local
+                    // translation would cancel itself out and the drag would stall.
+                    .highPriorityGesture(
+                        DragGesture(minimumDistance: 0, coordinateSpace: .global)
+                            .onChanged { value in
+                                if !isResizing {
+                                    isResizing = true
+                                    heightAtDragStart = height
+                                    NSCursor.resizeUpDown.set()
+                                }
+                                height = min(420, max(60, heightAtDragStart + value.translation.height))
+                            }
+                            .onEnded { _ in
+                                isResizing = false
+                                heightAtDragStart = height
+                                if !isHoveringHandle {
+                                    NSCursor.arrow.set()
+                                }
+                            }
+                    )
             }
         }
     }

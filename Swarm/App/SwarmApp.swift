@@ -38,7 +38,12 @@ struct SwarmApp: App {
                 .preferredColorScheme(.light)
                 .onAppear {
                     NSApplication.shared.activate(ignoringOtherApps: true)
-                    NSApp.keyWindow?.makeKeyAndOrderFront(nil)
+                    let window = NSApp.keyWindow ?? NSApp.windows.first
+                    window?.makeKeyAndOrderFront(nil)
+                    // Full screen exposes the window's own background in the strip the menu
+                    // bar slides into. Left at the system default that strip is white, which
+                    // reads as a torn sheet of paper above the sepia toolbar.
+                    window?.backgroundColor = NSColor(SepiaTheme.toolbarBg)
                 }
         }
         .windowStyle(.titleBar)
