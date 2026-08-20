@@ -11,20 +11,32 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.3.0] — 2026-08-20
+
 ### Added
 
 - The person card lists a person's sources, above Файлы and Ссылки: title, the archival
-  reference on one line, and the first two lines of the transcription. A source with an
-  address opens it in the browser.
+  reference on one line, and the first two lines of the transcription, which is what says
+  *what* a source proves rather than merely that one exists. A source with an address
+  opens it in the browser. Person-level citations only, matching the editor.
+- Web links on a person, as metadata-only siblings of attachments: no bytes on disk,
+  stored as GEDCOM `1 WWW` + `2 TITL` so they survive a round trip and stay readable in
+  other software. Only `http`, `https` and `mailto` ever open, so an imported file cannot
+  make Swarm launch a local `file://` URL.
 
 ### Changed
 
 - The person editor's evidence section is now a list of sources you can read back, edit
-  and delete, replacing a form that could only ever add. Each entry is one source plus
-  one citation, and the archival fields are labelled the way a Russian archive reference
-  reads: **Фонд**, **Опись**, **Дело**, **Лист**. The GEDCOM tags behind them (`PUBL`,
-  `REPO`, `CALN`, `PAGE`) are unchanged, so files written by earlier versions still read
-  back the same.
+  and delete, replacing a form that could only ever add. Nothing in the app had ever
+  listed a citation, so an entry could not be corrected or removed and the only proof one
+  existed was exporting GEDCOM. Each entry is one source plus one citation, and the
+  archival fields are labelled the way a Russian archive reference reads: **Фонд**,
+  **Опись**, **Дело**, **Лист**. The GEDCOM tags behind them (`PUBL`, `REPO`, `CALN`,
+  `PAGE`) are unchanged, so files written by earlier versions still read back the same.
+- The source form opens from “Добавить источник” and closes on Отмена or save, instead of
+  sitting open under the list and making a section of mostly-empty fields the first thing
+  in view. Editing from a row was invisible, so each row now carries a pencil beside its
+  open-link and delete buttons.
 - Sources gained a web address, exported as `1 _URL` — the tag the project's own source
   packs already use. Imported `_URL` lines are now a real field instead of preserved text.
 - Editing a source that several people cite forks it instead of rewriting what everyone
@@ -35,10 +47,24 @@ single English record of what changed and when.
   after the modelled `NOTE` in exported files rather than before it.
 - A value shaped like `@X@` typed into a text field is escaped on export, so it can no
   longer leave the file naming a record that does not exist.
+- Stacked link rows are separated by a rule.
+
+### Fixed
+
+- Dragging the notes resize handle tracks the pointer. The handle sits on the edge it
+  resizes, so a local-space translation cancelled itself out and the drag stalled. It
+  measures in global space now, without the 10pt minimum distance that made the first
+  frame jump, and the handle straddles the edge so it can be grabbed without landing
+  inside the text view.
+- Two places the sepia never reached in full screen: the window background behind the
+  menu-bar strip stayed system white, and the tree title held a fixed 260pt while the bar
+  had room to spare.
+- A deceased person with no death date no longer shows an age counted to today. A lifespan
+  is computed only when a death date exists; otherwise it renders `1900–?`.
 
 ### Removed
 
-- The shared source library, the "Для факта" target picker and the reliability field.
+- The shared source library, the “Для факта” target picker and the reliability field.
   Citations added in the editor now attach to the person. Citations an imported file
   attached to a birth, a name, a union, a parent link or an attachment are kept and still
   export, but the editor no longer lists or creates them.
@@ -679,7 +705,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.2.1...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.3.0...HEAD
+[3.3.0]: https://github.com/samoilev/swarm/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/samoilev/swarm/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/samoilev/swarm/compare/v3.1.0...v3.2.0
 [3.1.0]: https://github.com/samoilev/swarm/compare/v3.0.0...v3.1.0
