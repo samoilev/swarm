@@ -64,6 +64,23 @@ struct FamilyTreeTests {
         #expect(idx.mergedSiblingIds(a.id) == [b.id])
     }
 
+    @Test func newSiblingJoinsExistingParentUnionAndSurvivesOptimize() {
+        let dad = Person(givenNames: "Папа", sex: .male)
+        let mom = Person(givenNames: "Мама", sex: .female)
+        let brother = Person(givenNames: "Брат", sex: .male)
+        let sister = Person(givenNames: "Сестра", sex: .female)
+        let t = tree(dad, mom, brother, sister)
+        t.unions = [Union(partner1Id: dad.id, partner2Id: mom.id, childrenIds: [brother.id])]
+
+        t.addRelation(.sibling, person: sister, target: brother.id)
+        t.optimizeRoot()
+
+        #expect(Set(t.unions[0].childrenIds) == Set([brother.id, sister.id]))
+        let idx = FamilyIndex(tree: t)
+        #expect(idx.mergedParentIds(sister.id).father == dad.id)
+        #expect(idx.mergedSiblingIds(sister.id) == [brother.id])
+    }
+
     @Test func optimizeRootDeduplicatesDuplicatePartnerUnions() {
         let dad = Person(givenNames: "Папа", sex: .male)
         let mom = Person(givenNames: "Мама", sex: .female)

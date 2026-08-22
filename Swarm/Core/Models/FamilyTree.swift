@@ -280,11 +280,18 @@ public final class FamilyTree: Identifiable, Codable {
             }
         case .sibling:
             if unions.contains(where: { $0.childrenIds.contains(person.id) && $0.childrenIds.contains(targetId) }) { return }
-            if let existing = unions.first(where: { $0.childrenIds.contains(person.id) }) {
-                existing.childrenIds.append(targetId)
-            } else {
+            let personUnion = unions.first { $0.childrenIds.contains(person.id) }
+            let targetUnion = unions.first { $0.childrenIds.contains(targetId) }
+            // A child belongs to exactly one union, so join the one with real parents
+            // rather than minting a partner-less stub `deduplicateUnions` will strip.
+            let joinsTarget = (targetUnion?.partnerIds.count ?? -1) >= (personUnion?.partnerIds.count ?? -1)
+            guard let home = joinsTarget ? targetUnion : personUnion else {
                 unions.append(Union(childrenIds: [person.id, targetId]))
+                break
             }
+            let joiner = joinsTarget ? person.id : targetId
+            (joinsTarget ? personUnion : targetUnion)?.childrenIds.removeAll { $0 == joiner }
+            home.childrenIds.append(joiner)
         }
         reconcileParentLinks()
     }
