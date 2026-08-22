@@ -81,6 +81,24 @@ struct FamilyTreeTests {
         #expect(idx.mergedSiblingIds(sister.id) == [brother.id])
     }
 
+    @Test func linkingAParentlessSiblingGroupMovesTheWholeGroup() {
+        let dad = Person(givenNames: "Папа", sex: .male)
+        let known = Person(givenNames: "Знакомый", sex: .male)
+        let a = Person(givenNames: "А", sex: .male)
+        let b = Person(givenNames: "Б", sex: .female)
+        let t = tree(dad, known, a, b)
+        t.unions = [Union(partner1Id: dad.id, childrenIds: [known.id])]
+        t.addRelation(.sibling, person: a, target: b.id)
+
+        t.addRelation(.sibling, person: a, target: known.id)
+        t.optimizeRoot()
+
+        // Б must come along; leaving her behind would silently drop her sibling link.
+        let idx = FamilyIndex(tree: t)
+        #expect(idx.mergedParentIds(b.id).father == dad.id)
+        #expect(Set(idx.mergedSiblingIds(b.id)) == Set([a.id, known.id]))
+    }
+
     @Test func optimizeRootDeduplicatesDuplicatePartnerUnions() {
         let dad = Person(givenNames: "Папа", sex: .male)
         let mom = Person(givenNames: "Мама", sex: .female)

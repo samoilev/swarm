@@ -289,9 +289,13 @@ public final class FamilyTree: Identifiable, Codable {
                 unions.append(Union(childrenIds: [person.id, targetId]))
                 break
             }
+            let stale = joinsTarget ? personUnion : targetUnion
+            // A partner-less union is nothing but a sibling group with unknown parents,
+            // so the whole group moves; from a real family only the linked person does.
             let joiner = joinsTarget ? person.id : targetId
-            (joinsTarget ? personUnion : targetUnion)?.childrenIds.removeAll { $0 == joiner }
-            home.childrenIds.append(joiner)
+            let movers = stale?.partnerIds.isEmpty == true ? (stale?.childrenIds ?? []) : [joiner]
+            stale?.childrenIds.removeAll { movers.contains($0) }
+            home.childrenIds.append(contentsOf: movers.filter { !home.childrenIds.contains($0) })
         }
         reconcileParentLinks()
     }
