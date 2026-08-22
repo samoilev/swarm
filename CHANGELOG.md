@@ -11,6 +11,19 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.3.1] — 2026-08-22
+
+### Fixed
+
+- Adding a sibling links the person into the existing parent union instead of a
+  partner-less stub. Only the subject's own union was checked, so the new sibling landed
+  in a stub that union deduplication promptly emptied: the card saved standalone, and
+  every later attempt to relink it hit the same stub and was stripped again. Both sides
+  are resolved now and joined to whichever union has real parents. A partner-less union
+  is only a sibling group with unknown parents, so the whole group moves with the linked
+  person; leaving the rest behind dropped their sibling links just as silently. Also
+  fixes a single-parent target ending up as a child of two unions.
+
 ## [3.3.0] — 2026-08-20
 
 ### Added
@@ -705,7 +718,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.3.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.3.1...HEAD
+[3.3.1]: https://github.com/samoilev/swarm/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/samoilev/swarm/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/samoilev/swarm/compare/v3.2.0...v3.2.1
 [3.2.0]: https://github.com/samoilev/swarm/compare/v3.1.0...v3.2.0
