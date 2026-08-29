@@ -4,33 +4,17 @@ import Observation
 @Observable
 public final class Person: Identifiable, Codable, Hashable {
     public var id: UUID
-    public var givenNames: String { didSet { synchronizePrimaryNameFromLegacy() } }
-    public var patronymic: String? { didSet { synchronizePrimaryNameFromLegacy() } }
-    public var surname: String { didSet { synchronizePrimaryNameFromLegacy() } }
-    public var maidenName: String? { didSet { synchronizePrimaryNameFromLegacy() } }
     public var sex: Sex
-
-    public var birthDate: String? { didSet { synchronizeDateFromLegacy(.birth, value: birthDate) } }
-    public var birthPlace: String? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
-
-    public var deathDate: String? { didSet { synchronizeDateFromLegacy(.death, value: deathDate) } }
-    public var deathPlace: String? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
     public var isLiving: Bool
-
-    public var burialPlace: String? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
-
-    public var occupation: String? { didSet { synchronizeValueFromLegacy(.occupation, value: occupation) } }
-    public var education: String? { didSet { synchronizeValueFromLegacy(.education, value: education) } }
     public var notes: String?
     public internal(set) var sources: [String]
 
-    /// Canonical structured genealogy records. The legacy scalar properties above are
-    /// compatibility accessors during the staged UI migration and update these arrays
-    /// through their observers.
+    /// Canonical structured genealogy records — the single source of truth. The
+    /// legacy scalar accessors (`givenNames`, `birthDate`, `birthLat`, …) further
+    /// down are computed views over these arrays, not separate storage.
     public var names: [PersonName]
     public var events: [GenealogyEvent]
     public var citations: [Citation]
-    @ObservationIgnored private var isSynchronizingStructured = false
 
     /// The portrait's filename inside the tree's `Media/` folder. The bytes are loaded
     /// lazily (see `photoData`) so opening a library doesn't pull every photo into RAM.
@@ -90,14 +74,96 @@ public final class Person: Identifiable, Codable, Hashable {
     /// Web links attached to this person (archive records, memorial pages).
     public var links: [WebLink] = []
 
-    // Cached coordinates for map pins
-    public var birthLat: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
-    public var birthLon: Double? { didSet { synchronizePlaceFromLegacy(.birth, value: birthPlace, lat: birthLat, lon: birthLon) } }
-    public var deathLat: Double? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
-    public var deathLon: Double? { didSet { synchronizePlaceFromLegacy(.death, value: deathPlace, lat: deathLat, lon: deathLon) } }
+    // MARK: - Legacy accessors (computed views over `names`/`events`)
+
+    // These keep the pre-structured call sites compiling and behave exactly like
+    // the old stored fields did in their steady state; the storage itself is gone.
+
+    public var givenNames: String {
+        get { primaryName?.givenNames ?? "" }
+        set { withPrimaryName { $0.givenNames = newValue } }
+    }
+
+    public var patronymic: String? {
+        get { primaryName?.patronymic }
+        set { withPrimaryName { $0.patronymic = newValue } }
+    }
+
+    public var surname: String {
+        get { primaryName?.surname ?? "" }
+        set { withPrimaryName { $0.surname = newValue } }
+    }
+
+    public var maidenName: String? {
+        get { primaryName?.maidenName }
+        set { withPrimaryName { $0.maidenName = newValue } }
+    }
+
+    public var birthDate: String? {
+        get { legacyDateString(.birth) }
+        set { setLegacyDate(.birth, value: newValue) }
+    }
+
+    public var birthPlace: String? {
+        get { event(ofKind: .birth)?.place?.displayName }
+        set { setLegacyPlaceName(.birth, value: newValue) }
+    }
+
+    public var deathDate: String? {
+        get { legacyDateString(.death) }
+        set { setLegacyDate(.death, value: newValue) }
+    }
+
+    public var deathPlace: String? {
+        get { event(ofKind: .death)?.place?.displayName }
+        set { setLegacyPlaceName(.death, value: newValue) }
+    }
+
+    public var burialPlace: String? {
+        get { event(ofKind: .burial)?.place?.displayName }
+        set { setLegacyPlaceName(.burial, value: newValue) }
+    }
+
+    public var occupation: String? {
+        get { event(ofKind: .occupation)?.value }
+        set { setLegacyValue(.occupation, value: newValue) }
+    }
+
+    public var education: String? {
+        get { event(ofKind: .education)?.value }
+        set { setLegacyValue(.education, value: newValue) }
+    }
+
+    public var birthLat: Double? {
+        get { event(ofKind: .birth)?.place?.latitude }
+        set { setLegacyCoordinate(.birth, lat: newValue, lon: event(ofKind: .birth)?.place?.longitude) }
+    }
+
+    public var birthLon: Double? {
+        get { event(ofKind: .birth)?.place?.longitude }
+        set { setLegacyCoordinate(.birth, lat: event(ofKind: .birth)?.place?.latitude, lon: newValue) }
+    }
+
+    public var deathLat: Double? {
+        get { event(ofKind: .death)?.place?.latitude }
+        set { setLegacyCoordinate(.death, lat: newValue, lon: event(ofKind: .death)?.place?.longitude) }
+    }
+
+    public var deathLon: Double? {
+        get { event(ofKind: .death)?.place?.longitude }
+        set { setLegacyCoordinate(.death, lat: event(ofKind: .death)?.place?.latitude, lon: newValue) }
+    }
+
     // Precise grave/burial coordinates (entered manually, not geocoded)
-    public var burialLat: Double? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
-    public var burialLon: Double? { didSet { synchronizePlaceFromLegacy(.burial, value: burialPlace, lat: burialLat, lon: burialLon) } }
+    public var burialLat: Double? {
+        get { event(ofKind: .burial)?.place?.latitude }
+        set { setLegacyCoordinate(.burial, lat: newValue, lon: event(ofKind: .burial)?.place?.longitude) }
+    }
+
+    public var burialLon: Double? {
+        get { event(ofKind: .burial)?.place?.longitude }
+        set { setLegacyCoordinate(.burial, lat: event(ofKind: .burial)?.place?.latitude, lon: newValue) }
+    }
 
     // MARK: - GEDCOM interop preservation
 
@@ -155,19 +221,8 @@ public final class Person: Identifiable, Codable, Hashable {
         photoData: Data? = nil
     ) {
         self.id = UUID()
-        self.givenNames = givenNames
-        self.patronymic = patronymic
-        self.surname = surname
-        self.maidenName = maidenName
         self.sex = sex
-        self.birthDate = birthDate
-        self.birthPlace = birthPlace
-        self.deathDate = deathDate
-        self.deathPlace = deathPlace
         self.isLiving = isLiving
-        self.burialPlace = burialPlace
-        self.occupation = occupation
-        self.education = education
         self.notes = notes
         self.sources = sources
         self.names = [PersonName(
@@ -242,14 +297,11 @@ public final class Person: Identifiable, Codable, Hashable {
     }
 
     public func replaceEvent(_ event: GenealogyEvent) {
-        isSynchronizingStructured = true
-        defer { isSynchronizingStructured = false }
         if let index = events.firstIndex(where: { $0.id == event.id || $0.kind == event.kind }) {
             events[index] = event
         } else {
             events.append(event)
         }
-        applyStructuredEventToLegacy(event)
     }
 
     /// Copy every content field of `source` onto this live instance, keeping identity
@@ -257,31 +309,12 @@ public final class Person: Identifiable, Codable, Hashable {
     /// the shared `Person` reference other views hold — hand-copied field lists drift
     /// and silently drop new fields (see the applyContent completeness test).
     public func applyContent(of source: Person) {
-        isSynchronizingStructured = true
-        givenNames = source.givenNames
-        patronymic = source.patronymic
-        surname = source.surname
-        maidenName = source.maidenName
         sex = source.sex
-        birthDate = source.birthDate
-        birthPlace = source.birthPlace
-        birthLat = source.birthLat
-        birthLon = source.birthLon
-        deathDate = source.deathDate
-        deathPlace = source.deathPlace
-        deathLat = source.deathLat
-        deathLon = source.deathLon
         isLiving = source.isLiving
-        burialPlace = source.burialPlace
-        burialLat = source.burialLat
-        burialLon = source.burialLon
-        occupation = source.occupation
-        education = source.education
         notes = source.notes
         sources = source.sources
-        isSynchronizingStructured = false
-        // Structured arrays last: they are canonical and override anything the
-        // legacy setters above would have synchronized into `events`.
+        // Names, dates, places, coordinates, occupation and education all live in
+        // the structured arrays; the legacy accessors are computed views over them.
         names = source.names
         events = source.events
         citations = source.citations
@@ -305,44 +338,40 @@ public final class Person: Identifiable, Codable, Hashable {
         updatedAt = source.updatedAt
     }
 
-    /// Called by the GEDCOM parser so qualifiers/ranges remain canonical while the
-    /// old UI can continue displaying its normalized compatibility value.
+    /// Called by the GEDCOM parser so qualifiers/ranges remain canonical.
     public func setStructuredDate(_ date: GenealogyDate?, for kind: GenealogyEvent.Kind) {
-        isSynchronizingStructured = true
-        defer { isSynchronizingStructured = false }
         updateEvent(kind: kind) { $0.date = date }
     }
 
     public func setStructuredPlace(_ place: PlaceReference?, for kind: GenealogyEvent.Kind) {
-        isSynchronizingStructured = true
-        defer { isSynchronizingStructured = false }
         updateEvent(kind: kind) { $0.place = place }
-        switch kind {
-        case .birth:
-            birthPlace = place?.displayName; birthLat = place?.latitude; birthLon = place?.longitude
-        case .death:
-            deathPlace = place?.displayName; deathLat = place?.latitude; deathLon = place?.longitude
-        case .burial:
-            burialPlace = place?.displayName; burialLat = place?.latitude; burialLon = place?.longitude
-        default: break
-        }
     }
 
-    private func synchronizePrimaryNameFromLegacy() {
-        guard !isSynchronizingStructured else { return }
-        if names.isEmpty {
-            names = [PersonName()]
-        }
+    private var primaryName: PersonName? {
+        guard !names.isEmpty else { return nil }
+        return names[names.firstIndex(where: \.isPrimary) ?? 0]
+    }
+
+    private func withPrimaryName(_ mutate: (inout PersonName) -> Void) {
+        if names.isEmpty { names = [PersonName()] }
         let index = names.firstIndex(where: \.isPrimary) ?? 0
         names[index].isPrimary = true
-        names[index].givenNames = givenNames
-        names[index].patronymic = patronymic
-        names[index].surname = surname
-        names[index].maidenName = maidenName
+        mutate(&names[index])
     }
 
-    private func synchronizeDateFromLegacy(_ kind: GenealogyEvent.Kind, value: String?) {
-        guard !isSynchronizingStructured else { return }
+    /// The string the old stored date fields held in steady state: DD.MM.YYYY for a
+    /// plain exact date, canonical GEDCOM for qualified/ranged dates, the imported
+    /// raw text when nothing parsed.
+    private func legacyDateString(_ kind: GenealogyEvent.Kind) -> String? {
+        guard let date = event(ofKind: kind)?.date else { return nil }
+        if date.qualifier == .exact, date.end == nil, let start = date.start {
+            return FamilyDate.Components(day: start.day, month: start.month, year: start.year).formatted
+        }
+        if date.start != nil { return date.canonicalGEDCOMValue }
+        return date.rawValue.isEmpty ? nil : date.rawValue
+    }
+
+    private func setLegacyDate(_ kind: GenealogyEvent.Kind, value: String?) {
         let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines)
         updateEvent(kind: kind) { event in
             event.date = (trimmed?.isEmpty == false) ? GenealogyDate(userInput: trimmed!) : nil
@@ -350,9 +379,17 @@ public final class Person: Identifiable, Codable, Hashable {
         removeEventIfEmpty(kind)
     }
 
-    private func synchronizePlaceFromLegacy(_ kind: GenealogyEvent.Kind, value: String?, lat: Double?, lon: Double?) {
-        guard !isSynchronizingStructured else { return }
-        let trimmed = value?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+    private func setLegacyPlaceName(_ kind: GenealogyEvent.Kind, value: String?) {
+        let existing = event(ofKind: kind)?.place
+        setLegacyPlace(kind, name: value, lat: existing?.latitude, lon: existing?.longitude)
+    }
+
+    private func setLegacyCoordinate(_ kind: GenealogyEvent.Kind, lat: Double?, lon: Double?) {
+        setLegacyPlace(kind, name: event(ofKind: kind)?.place?.displayName, lat: lat, lon: lon)
+    }
+
+    private func setLegacyPlace(_ kind: GenealogyEvent.Kind, name: String?, lat: Double?, lon: Double?) {
+        let trimmed = name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         updateEvent(kind: kind) { event in
             if trimmed.isEmpty, lat == nil, lon == nil {
                 event.place = nil
@@ -368,8 +405,7 @@ public final class Person: Identifiable, Codable, Hashable {
         removeEventIfEmpty(kind)
     }
 
-    private func synchronizeValueFromLegacy(_ kind: GenealogyEvent.Kind, value: String?) {
-        guard !isSynchronizingStructured else { return }
+    private func setLegacyValue(_ kind: GenealogyEvent.Kind, value: String?) {
         updateEvent(kind: kind) { $0.value = value }
         removeEventIfEmpty(kind)
     }
@@ -388,22 +424,6 @@ public final class Person: Identifiable, Codable, Hashable {
         events.removeAll { event in
             event.kind == kind && event.value == nil && event.date == nil && event.place == nil &&
                 event.notes == nil && event.citations.isEmpty && event.mediaIDs.isEmpty && event.rawGEDCOMBranches.isEmpty
-        }
-    }
-
-    private func applyStructuredEventToLegacy(_ event: GenealogyEvent) {
-        switch event.kind {
-        case .birth:
-            birthDate = event.date?.displayValue; birthPlace = event.place?.displayName
-            birthLat = event.place?.latitude; birthLon = event.place?.longitude
-        case .death:
-            deathDate = event.date?.displayValue; deathPlace = event.place?.displayName
-            deathLat = event.place?.latitude; deathLon = event.place?.longitude
-        case .burial:
-            burialPlace = event.place?.displayName; burialLat = event.place?.latitude; burialLon = event.place?.longitude
-        case .occupation: occupation = event.value
-        case .education: education = event.value
-        default: break
         }
     }
 
@@ -489,36 +509,30 @@ public final class Person: Identifiable, Codable, Hashable {
     public required init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decode(UUID.self, forKey: .id)
-        givenNames = try c.decode(String.self, forKey: .givenNames)
-        patronymic = try c.decodeIfPresent(String.self, forKey: .patronymic)
-        surname = try c.decode(String.self, forKey: .surname)
-        maidenName = try c.decodeIfPresent(String.self, forKey: .maidenName)
         sex = try c.decode(Sex.self, forKey: .sex)
-        birthDate = try c.decodeIfPresent(String.self, forKey: .birthDate)
-        birthPlace = try c.decodeIfPresent(String.self, forKey: .birthPlace)
-        deathDate = try c.decodeIfPresent(String.self, forKey: .deathDate)
-        deathPlace = try c.decodeIfPresent(String.self, forKey: .deathPlace)
         isLiving = try c.decode(Bool.self, forKey: .isLiving)
-        burialPlace = try c.decodeIfPresent(String.self, forKey: .burialPlace)
-        occupation = try c.decodeIfPresent(String.self, forKey: .occupation)
-        education = try c.decodeIfPresent(String.self, forKey: .education)
         notes = try c.decodeIfPresent(String.self, forKey: .notes)
         sources = try c.decode([String].self, forKey: .sources)
+        // Legacy JSON predates the structured arrays; rebuild them from its flat keys.
         names = try c.decodeIfPresent([PersonName].self, forKey: .names) ?? [PersonName(
-            givenNames: c.decode(String.self, forKey: .givenNames),
+            givenNames: c.decodeIfPresent(String.self, forKey: .givenNames) ?? "",
             patronymic: c.decodeIfPresent(String.self, forKey: .patronymic),
-            surname: c.decode(String.self, forKey: .surname),
+            surname: c.decodeIfPresent(String.self, forKey: .surname) ?? "",
             maidenName: c.decodeIfPresent(String.self, forKey: .maidenName)
         )]
-        events = try c.decodeIfPresent([GenealogyEvent].self, forKey: .events) ?? Self.initialEvents(
-            birthDate: c.decodeIfPresent(String.self, forKey: .birthDate),
-            birthPlace: c.decodeIfPresent(String.self, forKey: .birthPlace),
-            deathDate: c.decodeIfPresent(String.self, forKey: .deathDate),
-            deathPlace: c.decodeIfPresent(String.self, forKey: .deathPlace),
-            burialPlace: c.decodeIfPresent(String.self, forKey: .burialPlace),
-            occupation: c.decodeIfPresent(String.self, forKey: .occupation),
-            education: c.decodeIfPresent(String.self, forKey: .education)
-        )
+        if let decoded = try c.decodeIfPresent([GenealogyEvent].self, forKey: .events) {
+            events = decoded
+        } else {
+            events = try Self.initialEvents(
+                birthDate: c.decodeIfPresent(String.self, forKey: .birthDate),
+                birthPlace: c.decodeIfPresent(String.self, forKey: .birthPlace),
+                deathDate: c.decodeIfPresent(String.self, forKey: .deathDate),
+                deathPlace: c.decodeIfPresent(String.self, forKey: .deathPlace),
+                burialPlace: c.decodeIfPresent(String.self, forKey: .burialPlace),
+                occupation: c.decodeIfPresent(String.self, forKey: .occupation),
+                education: c.decodeIfPresent(String.self, forKey: .education)
+            )
+        }
         citations = try c.decodeIfPresent([Citation].self, forKey: .citations) ?? []
         photoFilename = try c.decodeIfPresent(String.self, forKey: .photoFilename)
         // Legacy JSON stored the bytes inline; if present, take them (marked dirty so
@@ -529,35 +543,31 @@ public final class Person: Identifiable, Codable, Hashable {
         }
         attachments = try c.decodeIfPresent([Attachment].self, forKey: .attachments) ?? []
         links = try c.decodeIfPresent([WebLink].self, forKey: .links) ?? []
-        birthLat = try c.decodeIfPresent(Double.self, forKey: .birthLat)
-        birthLon = try c.decodeIfPresent(Double.self, forKey: .birthLon)
-        deathLat = try c.decodeIfPresent(Double.self, forKey: .deathLat)
-        deathLon = try c.decodeIfPresent(Double.self, forKey: .deathLon)
-        burialLat = try c.decodeIfPresent(Double.self, forKey: .burialLat)
-        burialLon = try c.decodeIfPresent(Double.self, forKey: .burialLon)
         gedcomXref = try c.decodeIfPresent(String.self, forKey: .gedcomXref)
         unknownBranches = try c.decodeIfPresent([[String]].self, forKey: .unknownBranches) ?? []
         eventExtras = try c.decodeIfPresent([String: [String]].self, forKey: .eventExtras) ?? [:]
         createdAt = try c.decode(Date.self, forKey: .createdAt)
         updatedAt = try c.decode(Date.self, forKey: .updatedAt)
+        // Legacy JSON kept map coordinates outside the events; fold them in.
+        if try c.decodeIfPresent([GenealogyEvent].self, forKey: .events) == nil {
+            let coords: [(GenealogyEvent.Kind, CodingKeys, CodingKeys)] = [
+                (.birth, .birthLat, .birthLon), (.death, .deathLat, .deathLon), (.burial, .burialLat, .burialLon),
+            ]
+            for (kind, latKey, lonKey) in coords {
+                let lat = try c.decodeIfPresent(Double.self, forKey: latKey)
+                let lon = try c.decodeIfPresent(Double.self, forKey: lonKey)
+                if lat != nil || lon != nil { setLegacyCoordinate(kind, lat: lat, lon: lon) }
+            }
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
+        // The legacy flat keys are decode-only compatibility for old snapshots;
+        // everything they carried lives in `names`/`events` now.
         var c = encoder.container(keyedBy: CodingKeys.self)
         try c.encode(id, forKey: .id)
-        try c.encode(givenNames, forKey: .givenNames)
-        try c.encodeIfPresent(patronymic, forKey: .patronymic)
-        try c.encode(surname, forKey: .surname)
-        try c.encodeIfPresent(maidenName, forKey: .maidenName)
         try c.encode(sex, forKey: .sex)
-        try c.encodeIfPresent(birthDate, forKey: .birthDate)
-        try c.encodeIfPresent(birthPlace, forKey: .birthPlace)
-        try c.encodeIfPresent(deathDate, forKey: .deathDate)
-        try c.encodeIfPresent(deathPlace, forKey: .deathPlace)
         try c.encode(isLiving, forKey: .isLiving)
-        try c.encodeIfPresent(burialPlace, forKey: .burialPlace)
-        try c.encodeIfPresent(occupation, forKey: .occupation)
-        try c.encodeIfPresent(education, forKey: .education)
         try c.encodeIfPresent(notes, forKey: .notes)
         try c.encode(sources, forKey: .sources)
         try c.encode(names, forKey: .names)
@@ -568,12 +578,6 @@ public final class Person: Identifiable, Codable, Hashable {
         try c.encodeIfPresent(photoFilename, forKey: .photoFilename)
         if !attachments.isEmpty { try c.encode(attachments, forKey: .attachments) }
         if !links.isEmpty { try c.encode(links, forKey: .links) }
-        try c.encodeIfPresent(birthLat, forKey: .birthLat)
-        try c.encodeIfPresent(birthLon, forKey: .birthLon)
-        try c.encodeIfPresent(deathLat, forKey: .deathLat)
-        try c.encodeIfPresent(deathLon, forKey: .deathLon)
-        try c.encodeIfPresent(burialLat, forKey: .burialLat)
-        try c.encodeIfPresent(burialLon, forKey: .burialLon)
         try c.encodeIfPresent(gedcomXref, forKey: .gedcomXref)
         if !unknownBranches.isEmpty { try c.encode(unknownBranches, forKey: .unknownBranches) }
         if !eventExtras.isEmpty { try c.encode(eventExtras, forKey: .eventExtras) }
