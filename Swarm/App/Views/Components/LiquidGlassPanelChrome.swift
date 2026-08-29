@@ -137,14 +137,14 @@ struct LiquidGlassPanelHeader: View {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(SepiaTheme.display(size: 20))
+                        .font(SepiaType.title)
                         .fontWeight(.semibold)
                         .foregroundStyle(SepiaTheme.ink)
                         .accessibilityAddTraits(.isHeader)
 
                     if let subtitle, !subtitle.isEmpty {
                         Text(subtitle)
-                            .font(SepiaTheme.ui(size: 11))
+                            .font(SepiaType.label)
                             .foregroundStyle(SepiaTheme.inkSoft)
                             .lineLimit(2)
                             .fixedSize(horizontal: false, vertical: true)

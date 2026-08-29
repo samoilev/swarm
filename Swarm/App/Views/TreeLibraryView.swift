@@ -394,7 +394,7 @@ struct TreeLibraryView: View {
                     .font(.system(size: 9, weight: .semibold))
                     .accessibilityHidden(true)
             }
-            .font(SepiaTheme.ui(size: 12))
+            .font(SepiaType.control)
             .fontWeight(.semibold)
             .foregroundColor(SepiaTheme.ink)
             .padding(.horizontal, 10)
@@ -552,7 +552,7 @@ struct TreeLibraryView: View {
                     .font(SepiaTheme.display(size: 30))
                     .foregroundColor(SepiaTheme.ink)
                 Text(L10n.tr("Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac."))
-                    .font(SepiaTheme.body(size: 15))
+                    .font(SepiaType.bodyLarge)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
@@ -592,7 +592,7 @@ struct TreeLibraryView: View {
                 // and nothing in the file dialog says so.
                 Text(L10n.tr("Можно выбрать и папку архива целиком — вместе с фотографиями и вложениями."))
             }
-            .font(SepiaTheme.ui(size: 12))
+            .font(SepiaType.control)
             .foregroundColor(SepiaTheme.inkSoft)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
@@ -612,7 +612,7 @@ struct TreeLibraryView: View {
                 .font(SepiaTheme.body(size: 16))
                 .foregroundColor(SepiaTheme.ink)
             Text(L10n.tr("Ни одно дерево не совпадает с «\(filterText)» по названию или фамилии."))
-                .font(SepiaTheme.body(size: 13))
+                .font(SepiaType.body)
                 .foregroundColor(SepiaTheme.ink)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -641,7 +641,7 @@ struct TreeLibraryView: View {
                         .foregroundColor(SepiaTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(L10n.tr("Открывать и просматривать можно уже сейчас. Обновление нужно, чтобы сохранять изменения — оно делает резервную копию и не удаляет исходные файлы."))
-                        .font(SepiaTheme.ui(size: 11))
+                        .font(SepiaType.label)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -685,7 +685,7 @@ struct TreeLibraryView: View {
                 VStack(alignment: .leading, spacing: 18) {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L10n.tr("Название"))
-                            .font(SepiaTheme.ui(size: 11))
+                            .font(SepiaType.label)
                             .foregroundColor(SepiaTheme.inkSoft)
                         TextField("", text: $renameName)
                             .textFieldStyle(.plain)
@@ -703,7 +703,7 @@ struct TreeLibraryView: View {
 
                     VStack(alignment: .leading, spacing: 6) {
                         Text(L10n.tr("Подзаголовок (необязательно)"))
-                            .font(SepiaTheme.ui(size: 11))
+                            .font(SepiaType.label)
                             .foregroundColor(SepiaTheme.inkSoft)
                         TextField("", text: $renameSubtitle)
                             .textFieldStyle(.plain)
@@ -716,7 +716,7 @@ struct TreeLibraryView: View {
 
                     if let renameValidationMessage {
                         Label(renameValidationMessage, systemImage: "exclamationmark.circle.fill")
-                            .font(SepiaTheme.ui(size: 12))
+                            .font(SepiaType.control)
                             .foregroundColor(SepiaTheme.danger)
                             .accessibilityElement(children: .combine)
                     }
@@ -947,7 +947,7 @@ struct TreeCardView: View {
 
             // Reserved for the same reason as the subtitle row above.
             Text(summary.surnamesLine.isEmpty ? " " : summary.surnamesLine)
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .fontWeight(.bold)
                 .foregroundColor(SepiaTheme.accent2)
                 .lineLimit(1)

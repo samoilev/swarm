@@ -61,11 +61,11 @@ struct PeopleWorkspaceView: View {
                                 Image(systemName: person.sex == .male ? "person.fill" : person.sex == .female ? "person.fill" : "person")
                                     .foregroundStyle(SepiaTheme.accent2).frame(width: 24)
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(entry.displayName).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
-                                    Text(lifeSummary(entry)).font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                                    Text(entry.displayName).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
+                                    Text(lifeSummary(entry)).font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                                 }
                                 Spacer()
-                                if entry.hasMissingData { Label(L10n.tr("Есть пропуски"), systemImage: "exclamationmark.circle").font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent) }
+                                if entry.hasMissingData { Label(L10n.tr("Есть пропуски"), systemImage: "exclamationmark.circle").font(SepiaType.micro).foregroundStyle(SepiaTheme.accent) }
                                 Menu {
                                     Button { onEdit(person) } label: {
                                         Label(L10n.tr("Редактировать"), systemImage: "pencil")
@@ -126,13 +126,13 @@ struct TimelineWorkspaceView: View {
                     Button { selectedPerson = entry.personID.flatMap { tree.person(byId: $0) } } label: {
                         HStack(spacing: 14) {
                             Text(entry.date?.displayValue(language: .current) ?? "—")
-                                .font(SepiaTheme.ui(size: 12))
+                                .font(SepiaType.control)
                                 .foregroundStyle(SepiaTheme.accent2)
                                 .frame(width: 130, alignment: .leading)
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(entry.personName).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                                Text(entry.personName).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
                                 Text([eventName(entry.kind), presentedPlace(entry.place)].compactMap { $0 }.joined(separator: " · "))
-                                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                             }
                             Spacer()
                         }.padding(.horizontal, 18).frame(height: 56).contentShape(Rectangle())
@@ -185,20 +185,20 @@ struct PlacesWorkspaceView: View {
                             .foregroundStyle(entry.place.hasValidCoordinates ? SepiaTheme.pinBirth : SepiaTheme.accent)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(placeName(entry.place))
-                                .font(SepiaTheme.body(size: 15))
+                                .font(SepiaType.bodyLarge)
                                 .foregroundStyle(SepiaTheme.ink)
                             Text(
                                 "\(L10n.count(entry.eventCount, .event)) · "
                                     + "\(L10n.count(entry.personIDs.count, .person))"
                                     + (entry.place.isCustom ? L10n.tr(" · пользовательское") : "")
                             )
-                            .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                            .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                         }
                         Spacer()
                         ForEach(entry.personIDs.prefix(3), id: \.self) { id in
                             if let person = tree.person(byId: id) {
                                 Button(person.displayName(language: .current)) { selectedPerson = person }
-                                    .buttonStyle(.borderless).font(SepiaTheme.ui(size: 11))
+                                    .buttonStyle(.borderless).font(SepiaType.label)
                             }
                         }
                     }.padding(.horizontal, 18).frame(height: 58)
@@ -248,7 +248,7 @@ struct ReviewWorkspaceView: View {
                 Toggle(L10n.tr("Только ошибки"), isOn: $errorsOnly)
                 Spacer()
                 Text(L10n.tr("Ошибки блокируют только новые или ухудшенные изменения."))
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -279,10 +279,10 @@ struct ReviewWorkspaceView: View {
                 Image(systemName: issue.severity == .error ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
                     .foregroundStyle(issue.severity == .error ? SepiaTheme.danger : SepiaTheme.accent2)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack { Text(issue.title).font(SepiaTheme.body(size: 15)); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.danger) } }
-                    Text(issue.message).font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                    HStack { Text(issue.title).font(SepiaType.bodyLarge); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.danger) } }
+                    Text(issue.message).font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     if let field = issue.field {
-                        Text(L10n.tr("Открыть поле: \(field)")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent2)
+                        Text(L10n.tr("Открыть поле: \(field)")).font(SepiaType.micro).foregroundStyle(SepiaTheme.accent2)
                     }
                     Text(issue.code).font(.system(size: 9, design: .monospaced)).foregroundStyle(SepiaTheme.inkSoft)
                 }.foregroundStyle(SepiaTheme.ink)
@@ -297,13 +297,13 @@ struct ReviewWorkspaceView: View {
         return HStack(spacing: 12) {
             Image(systemName: "person.2.badge.questionmark").foregroundStyle(SepiaTheme.accent2)
             VStack(alignment: .leading, spacing: 3) {
-                Text(L10n.tr("Возможный дубликат")).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                Text(L10n.tr("Возможный дубликат")).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
                 Text(
                     "\(first?.displayName(language: .current) ?? "?") · "
                         + "\(second?.displayName(language: .current) ?? "?")"
                 )
-                .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
-                Text(suggestion.reasons.joined(separator: ", ")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
+                .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
+                Text(suggestion.reasons.joined(separator: ", ")).font(SepiaType.micro).foregroundStyle(SepiaTheme.inkSoft)
             }
             Spacer()
             if let first { Button(L10n.tr("Открыть")) { selectedPerson = first }.buttonStyle(.borderless) }
@@ -330,7 +330,7 @@ private func workspaceSurface(
     VStack(spacing: 0) {
         HStack(alignment: .firstTextBaseline) {
             Text(title).font(SepiaTheme.display(size: 24)).foregroundStyle(SepiaTheme.ink)
-            Text("\(count)").font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+            Text("\(count)").font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
             Spacer()
         }.padding(.horizontal, 20).padding(.top, 18).padding(.bottom, 12)
         filters().padding(.horizontal, 20).padding(.bottom, 14)

@@ -57,7 +57,7 @@ struct AddPersonView: View {
             VStack(spacing: 0) {
                 HStack {
                     Text(L10n.tr("Добавить родственника"))
-                        .font(SepiaTheme.display(size: 22))
+                        .font(SepiaType.display)
                         .foregroundColor(SepiaTheme.ink)
                     Spacer()
                     Button { dismiss() } label: {
@@ -124,7 +124,7 @@ struct AddPersonView: View {
 
                         SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
-                            Text(L10n.tr("Жив(а)")).font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
+                            Text(L10n.tr("Жив(а)")).font(SepiaType.body).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
@@ -154,7 +154,7 @@ struct AddPersonView: View {
                         SectionHeader(title: L10n.tr("Родственные связи"))
                         if tree.people.isEmpty {
                             Text(L10n.tr("Добавьте людей в дерево, чтобы создавать связи"))
-                                .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                                .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                         } else {
                             ForEach($pendingRels) { $rel in
                                 HStack(spacing: 8) {
@@ -173,7 +173,7 @@ struct AddPersonView: View {
                                             .frame(width: 24, height: 24).contentShape(Rectangle())
                                     }.buttonStyle(.plain)
                                 }
-                                .font(SepiaTheme.body(size: 13))
+                                .font(SepiaType.body)
                                 .padding(.bottom, 6)
                             }
                             Button { pendingRels.append(PendingRelation()) } label: {

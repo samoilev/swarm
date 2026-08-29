@@ -192,7 +192,7 @@ struct AppleMapChartView: View {
                                 .fill(ann.eventType.pinColor)
                                 .frame(width: 8, height: 8)
                             Text(ann.personName)
-                                .font(SepiaTheme.ui(size: 11))
+                                .font(SepiaType.label)
                                 .foregroundColor(SepiaTheme.ink)
                                 .lineLimit(1)
                             Text(ann.eventType.shortLabel)
@@ -239,19 +239,19 @@ struct AppleMapChartView: View {
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinBirth).frame(width: 8, height: 8)
                 Text(L10n.tr("Рождение"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinDeath).frame(width: 8, height: 8)
                 Text(L10n.tr("Смерть"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             HStack(spacing: 4) {
                 Circle().fill(SepiaTheme.pinBurial).frame(width: 8, height: 8)
                 Text(L10n.tr("Захоронение"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
         }

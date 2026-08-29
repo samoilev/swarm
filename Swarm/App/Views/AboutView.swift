@@ -27,7 +27,7 @@ struct AboutView: View {
                     .padding(.top, 14)
 
                 Text(versionText)
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundStyle(SepiaTheme.inkSoft)
                     .padding(.top, 7)
 
@@ -37,7 +37,7 @@ struct AboutView: View {
                     .padding(.vertical, 20)
 
                 Text(L10n.tr("Создавайте, исследуйте и сохраняйте историю своей семьи."))
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                     .foregroundStyle(SepiaTheme.ink)
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
@@ -49,7 +49,7 @@ struct AboutView: View {
                     } icon: {
                         Image(systemName: "chevron.left.forwardslash.chevron.right")
                     }
-                    .font(SepiaTheme.ui(size: 12))
+                    .font(SepiaType.control)
                 }
                 .foregroundStyle(SepiaTheme.accent)
                 .padding(.top, 14)

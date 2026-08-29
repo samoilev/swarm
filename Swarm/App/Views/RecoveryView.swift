@@ -68,7 +68,7 @@ struct RecoveryView: View {
 
                 if let statusMessage {
                     Label(statusMessage, systemImage: "checkmark.circle.fill")
-                        .font(SepiaTheme.ui(size: 11))
+                        .font(SepiaType.label)
                         .foregroundStyle(SepiaTheme.accent2)
                         .padding(.horizontal, 14)
                         .frame(minHeight: 34)
@@ -109,7 +109,7 @@ struct RecoveryView: View {
     private var treePicker: some View {
         LiquidGlassActionRow {
             Label(L10n.tr("Архив"), systemImage: "tree")
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .foregroundStyle(SepiaTheme.ink)
 
             Picker(L10n.tr("Архив"), selection: $selectedTreeID) {
@@ -134,11 +134,11 @@ struct RecoveryView: View {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
             Text(selectedTree == nil ? L10n.tr("Выберите архив") : L10n.tr("Пока нечего восстанавливать"))
-                .font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                .font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
             Text(selectedTree == nil
                 ? L10n.tr("Выберите дерево выше, чтобы увидеть его версии и удалённые файлы.")
                 : L10n.tr("Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы."))
-                .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -152,7 +152,7 @@ struct RecoveryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 sectionTitle(L10n.tr("Обновление формата"), count: store.pendingMigrations.count)
                 Text(L10n.tr("Эти файлы записаны в старом формате. Они открываются и читаются, но сохранить в них изменения нельзя, пока формат не обновлён."))
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
 
                 ForEach(store.pendingMigrations) { migration in
@@ -204,7 +204,7 @@ struct RecoveryView: View {
             VStack(alignment: .leading, spacing: 10) {
                 sectionTitle(title, count: groupItems.count)
                 Text(explanation)
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                 ForEach(groupItems) { row($0) }
             }

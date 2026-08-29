@@ -205,7 +205,7 @@ struct EditPersonView: View {
 
                         SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
-                            Text(L10n.tr("Жив(а)")).font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.ink)
+                            Text(L10n.tr("Жив(а)")).font(SepiaType.body).foregroundColor(SepiaTheme.ink)
                         }.toggleStyle(.checkbox).padding(.bottom, 8)
 
                         if !isLiving {
@@ -317,7 +317,7 @@ struct EditPersonView: View {
     private var homePersonControl: some View {
         if isHomePerson {
             Label(L10n.tr("Домашняя персона"), systemImage: "house.fill")
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .fontWeight(.semibold)
                 .foregroundStyle(.white)
                 .padding(.horizontal, 12)
@@ -356,7 +356,7 @@ struct EditPersonView: View {
 
             if sourceEntries.isEmpty {
                 Text(L10n.tr("Источники не добавлены"))
-                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             } else {
                 ForEach(sourceEntries, id: \.citation.id) { entry in
@@ -498,7 +498,7 @@ struct EditPersonView: View {
 
             if draftDuplicatesAnEntry {
                 Text(L10n.tr("Такой источник уже добавлен"))
-                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
             }
         }
         .padding(14)
@@ -561,7 +561,7 @@ struct EditPersonView: View {
             SectionHeader(title: L10n.tr("Союзы и дети"))
             let unions = editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) }
             if unions.isEmpty {
-                Text(L10n.tr("Союзы не заданы")).font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.inkSoft)
+                Text(L10n.tr("Союзы не заданы")).font(SepiaType.body).foregroundStyle(SepiaTheme.inkSoft)
             } else {
                 ForEach(unions, id: \.id) { union in
                     UnionDraftEditor(union: union, tree: editingTree, subject: editingPerson)
@@ -593,7 +593,7 @@ struct EditPersonView: View {
 
             if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
                 Text(L10n.tr("Родственные связи не заданы"))
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             }
@@ -609,7 +609,7 @@ struct EditPersonView: View {
                 }
                 .pickerStyle(.menu)
                 .frame(width: 200)
-                .font(SepiaTheme.body(size: 13))
+                .font(SepiaType.body)
 
                 if addRelType != .none {
                     Picker(L10n.tr("Кто:"), selection: $addRelPersonId) {
@@ -619,7 +619,7 @@ struct EditPersonView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                 }
             }
             .padding(.bottom, 4)
@@ -754,7 +754,7 @@ struct EditPersonView: View {
 
             if editingPerson.attachments.isEmpty {
                 Text(L10n.tr("Файлы не прикреплены"))
-                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             } else {
                 ForEach(editingPerson.attachments) { att in
@@ -815,7 +815,7 @@ struct EditPersonView: View {
 
             if editingPerson.links.isEmpty {
                 Text(L10n.tr("Ссылки не добавлены"))
-                    .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                     .padding(.bottom, 8)
             } else {
                 ForEach(Array(editingPerson.links.enumerated()), id: \.element.id) { index, link in
@@ -910,7 +910,7 @@ struct EditPersonView: View {
     private var photoEditor: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(L10n.tr("ФОТО"))
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .tracking(1.5)
                 .foregroundColor(SepiaTheme.inkSoft)
 
@@ -1219,9 +1219,9 @@ private struct UnionDraftEditor: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(partnerNames).font(SepiaTheme.body(size: 15)).foregroundStyle(SepiaTheme.ink)
+                    Text(partnerNames).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
                     Text(L10n.tr("\(union.childrenIds.count) детей · \(union.citations.count) ссылок"))
-                        .font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
+                        .font(SepiaType.micro).foregroundStyle(SepiaTheme.inkSoft)
                 }
                 Spacer()
             }
@@ -1246,7 +1246,7 @@ private struct UnionDraftEditor: View {
                         tree.person(byId: childID)?.displayName(language: .current)
                             ?? L10n.tr("Неизвестная персона")
                     )
-                    .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+                    .font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
                     Spacer()
                     Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
                         ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
@@ -1374,7 +1374,7 @@ private struct UnionEventDraftEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Toggle(eventTitle, isOn: $enabled).toggleStyle(.checkbox)
-                .font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+                .font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
             if enabled {
                 SepiaDateField(label: L10n.tr("ДАТА"), text: $dateText, qualifier: $qualifier, endText: $endText)
                 PlacePickerField(label: L10n.tr("МЕСТО"), text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }

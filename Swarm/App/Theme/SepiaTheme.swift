@@ -331,7 +331,7 @@ struct SepiaButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         SepiaControlSurface(
             label: configuration.label
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .fontWeight(.semibold)
                 .padding(.horizontal, 10)
                 .frame(height: 30),

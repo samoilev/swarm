@@ -166,7 +166,7 @@ struct InspectorPanel: View {
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
-                            Text(L10n.tr("Назад")).font(SepiaTheme.ui(size: 11))
+                            Text(L10n.tr("Назад")).font(SepiaType.label)
                         }
                     }
                     .buttonStyle(.glass)
@@ -225,7 +225,7 @@ struct InspectorPanel: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(person.displayName(language: .current))
-                    .font(SepiaTheme.display(size: 20))
+                    .font(SepiaType.title)
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
                     .fixedSize(horizontal: false, vertical: true)
@@ -238,7 +238,7 @@ struct InspectorPanel: View {
                 }
                 if !person.lifespan.isEmpty {
                     Text(person.lifespan)
-                        .font(SepiaTheme.body(size: 13))
+                        .font(SepiaType.body)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .padding(.top, 1)
                 }
@@ -309,7 +309,7 @@ struct InspectorPanel: View {
                         Image(systemName: "trash")
                             .font(.system(size: 11, weight: .semibold))
                         Text(L10n.tr("Удалить персону"))
-                            .font(SepiaTheme.ui(size: 12))
+                            .font(SepiaType.control)
                             .fontWeight(.semibold)
                     }
                     .foregroundStyle(SepiaTheme.danger)
@@ -479,7 +479,7 @@ struct InspectorPanel: View {
                 .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
             VStack(alignment: .leading, spacing: 2) {
                 Text(source?.title ?? L10n.tr("Источник не найден"))
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1).truncationMode(.middle)
                 if !reference.isEmpty {
@@ -518,7 +518,7 @@ struct InspectorPanel: View {
                                 .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(link.displayTitle)
-                                    .font(SepiaTheme.body(size: 13))
+                                    .font(SepiaType.body)
                                     .foregroundColor(SepiaTheme.ink)
                                     .lineLimit(1).truncationMode(.middle)
                                 Text(link.displayHost)
@@ -544,7 +544,7 @@ struct InspectorPanel: View {
             thumbnail()
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1).truncationMode(.middle)
                 Text(format.isEmpty ? L10n.tr("Файл") : format)
@@ -590,7 +590,7 @@ struct InspectorPanel: View {
     private func relRow(_ tag: String, _ p: Person) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())
-                .font(SepiaTheme.ui(size: 11)).tracking(SepiaType.tracking(11)).foregroundColor(SepiaTheme.inkSoft)
+                .font(SepiaType.label).tracking(SepiaType.tracking(11)).foregroundColor(SepiaTheme.inkSoft)
             Button {
                 if let current = self.person { history.append(current) }
                 internalNav = true
@@ -663,7 +663,7 @@ struct PortraitPreview: View {
 
             HStack(spacing: 10) {
                 Text(name)
-                    .font(SepiaTheme.body(size: 13))
+                    .font(SepiaType.body)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .lineLimit(1).truncationMode(.tail)
                 Spacer(minLength: 8)

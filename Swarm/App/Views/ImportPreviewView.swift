@@ -16,7 +16,7 @@ struct ImportPreviewView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(L10n.tr("Предпросмотр импорта")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
+                    Text(L10n.tr("Предпросмотр импорта")).font(SepiaType.display).foregroundStyle(SepiaTheme.ink)
                     Text(L10n.tr("Исходный файл будет сохранён как original-import.ged"))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                 }
@@ -81,7 +81,7 @@ struct ImportPreviewView: View {
 
     private func metric(_ label: String, _ value: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text("\(value)").font(SepiaTheme.display(size: 20)).foregroundStyle(SepiaTheme.ink)
+            Text("\(value)").font(SepiaType.title).foregroundStyle(SepiaTheme.ink)
             Text(label.uppercased()).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.inkSoft)
         }
     }

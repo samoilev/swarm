@@ -23,7 +23,7 @@ struct SepiaFieldLabel: View {
 
     var body: some View {
         Text(text)
-            .font(SepiaTheme.ui(size: 11))
+            .font(SepiaType.label)
             .tracking(0.6)
             .foregroundColor(SepiaTheme.inkSoft)
             .accessibilityHidden(isDecorative)
@@ -119,7 +119,7 @@ struct SepiaNotesField: View {
 
                 if text.isEmpty, !placeholder.isEmpty {
                     Text(placeholder)
-                        .font(SepiaTheme.body(size: 15))
+                        .font(SepiaType.bodyLarge)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .padding(.horizontal, 9)
                         .padding(.vertical, 9)
@@ -128,7 +128,7 @@ struct SepiaNotesField: View {
                 }
 
                 TextEditor(text: $text)
-                    .font(SepiaTheme.body(size: 15))
+                    .font(SepiaType.bodyLarge)
                     .foregroundColor(SepiaTheme.ink)
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
@@ -230,7 +230,7 @@ struct SepiaDateField: View {
             }
             if !text.isEmpty, !isValidDate {
                 Text(L10n.tr("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)
             }

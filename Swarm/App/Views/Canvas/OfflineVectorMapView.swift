@@ -42,7 +42,7 @@ struct OfflineVectorMapView: View {
                         Text(L10n.tr("Нет мест с координатами"))
                             .font(SepiaTheme.body(size: 14))
                         Text(L10n.tr("Выберите место из справочника или укажите координаты вручную"))
-                            .font(SepiaTheme.ui(size: 11))
+                            .font(SepiaType.label)
                     }
                     .foregroundColor(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
@@ -52,7 +52,7 @@ struct OfflineVectorMapView: View {
             .background(SepiaTheme.mapSea)
             .overlay(alignment: .topLeading) {
                 Label(L10n.tr("Офлайн"), systemImage: "network.slash")
-                    .font(SepiaTheme.ui(size: 10))
+                    .font(SepiaType.micro)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .padding(7)
                     .background(SepiaTheme.paper.opacity(0.92))
@@ -424,7 +424,7 @@ struct OfflineVectorMapView: View {
     private func legendItem(_ text: String, color: Color) -> some View {
         HStack(spacing: 4) {
             Circle().fill(color).frame(width: 8, height: 8)
-            Text(text).font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
+            Text(text).font(SepiaType.label).foregroundColor(SepiaTheme.inkSoft)
         }
     }
 }

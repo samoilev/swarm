@@ -17,7 +17,7 @@ struct RelationshipView: View {
             // Header
             HStack {
                 Text(L10n.tr("СВЯЗЬ МЕЖДУ РОДСТВЕННИКАМИ"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .tracking(1.5)
                     .foregroundColor(SepiaTheme.accent2)
                     .fontWeight(.semibold)
@@ -127,12 +127,12 @@ struct RelationshipView: View {
                                     } label: {
                                         HStack {
                                             Text(person.displayName(language: .current))
-                                                .font(SepiaTheme.body(size: 13))
+                                                .font(SepiaType.body)
                                                 .foregroundColor(SepiaTheme.ink)
                                             Spacer()
                                             if let dates = person.lifespan as String?, !dates.isEmpty {
                                                 Text(dates)
-                                                    .font(SepiaTheme.ui(size: 11))
+                                                    .font(SepiaType.label)
                                                     .foregroundColor(SepiaTheme.inkSoft)
                                             }
                                         }
@@ -172,7 +172,7 @@ struct RelationshipView: View {
             Divider().overlay(SepiaTheme.toolbarLine)
 
             Text(result.name)
-                .font(SepiaTheme.display(size: 22))
+                .font(SepiaType.display)
                 .fontWeight(.semibold)
                 .foregroundColor(SepiaTheme.accent2)
                 .multilineTextAlignment(.center)
@@ -186,7 +186,7 @@ struct RelationshipView: View {
 
             if result.path.count > 1 {
                 Text(L10n.tr("В дереве: \(L10n.count(result.path.count - 1, .step))"))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
         }

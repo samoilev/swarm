@@ -23,7 +23,7 @@ struct PlacePickerField: View {
             ZStack(alignment: .topLeading) {
                 TextField("", text: $text)
                     .textFieldStyle(.plain)
-                    .font(SepiaTheme.body(size: 15))
+                    .font(SepiaType.bodyLarge)
                     .foregroundColor(SepiaTheme.ink)
                     .focused($isFocused)
                     .accessibilityLabel(label)
@@ -80,7 +80,7 @@ struct PlacePickerField: View {
                                 .lineLimit(1)
                             if !place.region.isEmpty || !place.country.isEmpty {
                                 Text([place.region, place.country].filter { !$0.isEmpty }.joined(separator: ", "))
-                                    .font(SepiaTheme.ui(size: 11))
+                                    .font(SepiaType.label)
                                     .foregroundColor(SepiaTheme.inkSoft)
                                     .lineLimit(1)
                             }

@@ -581,7 +581,7 @@ struct MainWorkspace: View {
                                     Text(p.displayName(language: .current)).font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink).lineLimit(1)
                                     Spacer(minLength: 8)
                                     if !p.lifespan.isEmpty {
-                                        Text(p.lifespan).font(SepiaTheme.ui(size: 11)).foregroundColor(SepiaTheme.inkSoft)
+                                        Text(p.lifespan).font(SepiaType.label).foregroundColor(SepiaTheme.inkSoft)
                                     }
                                 }
                                 .padding(.horizontal, 12).padding(.vertical, 6)
@@ -594,7 +594,7 @@ struct MainWorkspace: View {
                 } else if !searchQuery.trimmingCharacters(in: .whitespaces).isEmpty {
                     Divider().overlay(SepiaTheme.cardLine)
                     Text(L10n.tr("Никого не найдено"))
-                        .font(SepiaTheme.body(size: 13)).foregroundColor(SepiaTheme.inkSoft)
+                        .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                         .padding(.horizontal, 12).padding(.vertical, 8)
                 }
             }
@@ -706,7 +706,7 @@ struct MainWorkspace: View {
     private func hint(_ key: String, _ label: String) -> some View {
         hint(label) {
             Text(key)
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.ink)
         }
     }
@@ -1050,7 +1050,7 @@ struct MainWorkspace: View {
                 .help(L10n.tr("Меньше поколений"))
                 .accessibilityLabel(L10n.tr("Меньше поколений"))
             Text("\(fanLevels)")
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.ink)
                 .frame(width: 14)
             RepeatButton(chrome: .toolbar, action: { if fanLevels < 8 { fanLevels += 1 } }) { Image(systemName: "plus") }
@@ -1058,7 +1058,7 @@ struct MainWorkspace: View {
                 .help(L10n.tr("Больше поколений"))
                 .accessibilityLabel(L10n.tr("Больше поколений"))
             Text(L10n.tr("ур."))
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.inkSoft)
         }
         .help(L10n.tr("Количество поколений"))
@@ -1088,7 +1088,7 @@ struct MainWorkspace: View {
                 .help(L10n.tr("Уменьшить масштаб"))
                 .accessibilityLabel(L10n.tr("Уменьшить масштаб"))
             Text("\(Int(activeZoom * 100))%")
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 34)
                 .contentTransition(.numericText())
@@ -1146,7 +1146,7 @@ struct MainWorkspace: View {
             Image(systemName: "checkmark.circle")
                 .font(.system(size: 10))
             Text(L10n.tr("Сохранено в \(savedTime)"))
-                .font(SepiaTheme.ui(size: 10))
+                .font(SepiaType.micro)
                 .contentTransition(.numericText())
                 .sepiaMotion(SepiaMotion.state, value: tree.updatedAt)
         }

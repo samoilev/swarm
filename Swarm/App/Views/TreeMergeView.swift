@@ -19,9 +19,9 @@ struct TreeMergeView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(L10n.tr("Объединение деревьев")).font(SepiaTheme.display(size: 22)).foregroundStyle(SepiaTheme.ink)
+                    Text(L10n.tr("Объединение деревьев")).font(SepiaType.display).foregroundStyle(SepiaTheme.ink)
                     Text(L10n.tr("Добавить людей и факты из другого GEDCOM в «\(localTree.name)», не создавая дубликатов."))
-                        .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                        .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 560, alignment: .leading)
                 }
@@ -83,7 +83,7 @@ struct TreeMergeView: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 460)
                     Text(L10n.tr("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется."))
-                        .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                        .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     Button(L10n.tr("Выбрать файл…")) { showImporter = true }
                         .buttonStyle(.glassProminent)
                         .buttonBorderShape(.capsule)
@@ -147,9 +147,9 @@ struct TreeMergeView: View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("\(title.uppercased()) · \(count)")
-                    .font(SepiaTheme.ui(size: 10)).tracking(SepiaType.tracking(10)).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaType.micro).tracking(SepiaType.tracking(10)).foregroundStyle(SepiaTheme.inkSoft)
                 Text(explanation)
-                    .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
             }
             content()
@@ -164,8 +164,8 @@ struct TreeMergeView: View {
             if let toggle { Toggle("", isOn: Binding(get: { selected }, set: { _ in toggle() })).labelsHidden() }
             else { Image(systemName: "checkmark.seal.fill").foregroundStyle(SepiaTheme.pinBirth) }
             VStack(alignment: .leading, spacing: 2) {
-                Text("\(local)  ←  \(incoming)").font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
-                Text(match.reasons.joined(separator: ", ")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.inkSoft)
+                Text("\(local)  ←  \(incoming)").font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
+                Text(match.reasons.joined(separator: ", ")).font(SepiaType.micro).foregroundStyle(SepiaTheme.inkSoft)
             }
             Spacer()
         }.padding(10).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 7))
@@ -173,7 +173,7 @@ struct TreeMergeView: View {
 
     private func conflictRow(_ index: Int) -> some View {
         HStack {
-            Text(preview?.conflicts[index].field ?? L10n.tr("Факт")).font(SepiaTheme.body(size: 13)).foregroundStyle(SepiaTheme.ink)
+            Text(preview?.conflicts[index].field ?? L10n.tr("Факт")).font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
             Spacer()
             Picker(L10n.tr("Выбор"), selection: Binding(
                 get: { preview?.conflicts[index].choice ?? .both },

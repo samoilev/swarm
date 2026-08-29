@@ -149,7 +149,7 @@ struct OnboardingView: View {
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
                 Text(stepDeck(step))
-                    .font(SepiaTheme.body(size: 15))
+                    .font(SepiaType.bodyLarge)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: 440, alignment: .leading)
@@ -285,7 +285,7 @@ struct OnboardingView: View {
             validationMessage(for: .surname)
 
             Text(L10n.tr("Даты, места и фотографии добавите в карточке человека — там для них есть всё."))
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .foregroundColor(SepiaTheme.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -367,7 +367,7 @@ struct OnboardingView: View {
             previewCard
 
             Text(L10n.tr("Карточка берёт форму у самого дерева — ничей портрет не подменяет собой всю семью."))
-                .font(SepiaTheme.ui(size: 12))
+                .font(SepiaType.control)
                 .foregroundColor(SepiaTheme.inkSoft)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -400,7 +400,7 @@ struct OnboardingView: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(trimmed(treeName).isEmpty ? L10n.tr("Без названия") : trimmed(treeName))
-                    .font(SepiaTheme.display(size: 20))
+                    .font(SepiaType.title)
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
                 Text(trimmed(subtitle).isEmpty ? " " : trimmed(subtitle))
@@ -416,7 +416,7 @@ struct OnboardingView: View {
                     .foregroundColor(SepiaTheme.accent2)
                     .lineLimit(1)
                 Text("\(L10n.tr("пока без дат")) · \(L10n.count(hasRelativeName ? 2 : 1, .person)) · \(L10n.tr("изменено только что"))")
-                    .font(SepiaTheme.ui(size: 12))
+                    .font(SepiaType.control)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .lineLimit(1)
             }
@@ -572,7 +572,7 @@ struct OnboardingView: View {
     private func titledRule(_ title: String) -> some View {
         HStack(spacing: 10) {
             Text(title)
-                .font(SepiaTheme.body(size: 13))
+                .font(SepiaType.body)
                 .foregroundColor(SepiaTheme.ink)
             Rectangle()
                 .fill(SepiaTheme.fieldLine)
@@ -604,12 +604,12 @@ struct OnboardingView: View {
                     .font(SepiaTheme.body(size: 13.5))
                     .foregroundColor(SepiaTheme.ink)
                 Text(message)
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
                 Text(L10n.tr("Введённое сохранено — можно попробовать ещё раз."))
-                    .font(SepiaTheme.ui(size: 11))
+                    .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
             Spacer(minLength: 0)
