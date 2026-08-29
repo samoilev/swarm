@@ -68,6 +68,10 @@ struct SepiaTheme {
     static let fanLine = Color(hex: "c7b389")
 
     // Map view colors
+    /// Sea and land of the offline vector map. Lifted out of `OfflineVectorMapView`,
+    /// which carried its own second paper palette — two sepia schemes drifting apart.
+    static let mapSea = Color(hex: "e8e0c8")
+    static let mapLand = Color(hex: "c9c0a4")
     static let mapLine = Color(hex: "8a6d2f").opacity(0.7)
     static let pinBirth = Color(hex: "4a8c6e")
     static let pinDeath = Color(hex: "9c4a2f")

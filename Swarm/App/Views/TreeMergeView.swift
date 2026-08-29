@@ -147,7 +147,7 @@ struct TreeMergeView: View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("\(title.uppercased()) · \(count)")
-                    .font(SepiaTheme.ui(size: 10)).tracking(1).foregroundStyle(SepiaTheme.inkSoft)
+                    .font(SepiaTheme.ui(size: 10)).tracking(SepiaType.tracking(10)).foregroundStyle(SepiaTheme.inkSoft)
                 Text(explanation)
                     .font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)

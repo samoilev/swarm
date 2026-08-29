@@ -77,7 +77,7 @@ struct SepiaTrackedLabel: View {
         Text(text.uppercased())
             .font(SepiaTheme.ui(size: size))
             .fontWeight(.semibold)
-            .tracking(size * 0.2)
+            .tracking(SepiaType.tracking(size))
             .foregroundStyle(color)
     }
 }

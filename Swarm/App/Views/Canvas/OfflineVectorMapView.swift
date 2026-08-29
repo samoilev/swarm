@@ -49,7 +49,7 @@ struct OfflineVectorMapView: View {
                 }
             }
             .clipped()
-            .background(Color(hex: "e8e0c8"))
+            .background(SepiaTheme.mapSea)
             .overlay(alignment: .topLeading) {
                 Label(L10n.tr("Офлайн"), systemImage: "network.slash")
                     .font(SepiaTheme.ui(size: 10))
@@ -146,7 +146,7 @@ struct OfflineVectorMapView: View {
     }
 
     private func drawBackground(context: inout GraphicsContext, size: CGSize) {
-        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "e8e0c8")))
+        context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SepiaTheme.mapSea))
 
         // Latitude/longitude grid.
         for longitude in stride(from: -180.0, through: 180.0, by: 30.0) {
@@ -172,7 +172,7 @@ struct OfflineVectorMapView: View {
             path.move(to: project(vectorCoordinate(first), size: size))
             for coordinate in polygon.dropFirst() { path.addLine(to: project(vectorCoordinate(coordinate), size: size)) }
             path.closeSubpath()
-            context.fill(path, with: .color(Color(hex: "c9c0a4")))
+            context.fill(path, with: .color(SepiaTheme.mapLand))
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.45)), lineWidth: 0.8)
         }
 
@@ -437,7 +437,7 @@ struct OfflinePersonMiniMap: View {
             let points = miniPoints
             ZStack {
                 Canvas { context, size in
-                    context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(Color(hex: "e8e0c8")))
+                    context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SepiaTheme.mapSea))
                     if points.count == 2 {
                         var path = Path()
                         path.move(to: miniProject(points[0].coordinate, points: points, size: size))

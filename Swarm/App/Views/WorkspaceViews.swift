@@ -254,7 +254,7 @@ struct ReviewWorkspaceView: View {
             LazyVStack(spacing: 0) {
                 ForEach(issueGroups) { group in
                     Text(group.title.uppercased())
-                        .font(SepiaTheme.ui(size: 9.5)).tracking(1.1).foregroundStyle(SepiaTheme.inkSoft)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundStyle(SepiaTheme.inkSoft)
                         .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 16).padding(.top, 14)
                     ForEach(group.issues) { issue in
                         issueRow(issue)

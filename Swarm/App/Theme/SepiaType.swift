@@ -36,10 +36,12 @@ enum SepiaType {
     /// The smallest legible step: legends, timestamps, card metadata.
     static let micro = SepiaTheme.ui(size: 10)
 
-    /// Letter-spacing for small caps labels, as a fraction of the font size. The
-    /// app had eight different tracking values for the same visual role; this is
-    /// the one `SepiaTrackedLabel` already applies.
-    static let trackingRatio: CGFloat = 0.2
+    /// Letter-spacing for small caps labels, as a fraction of the font size.
+    ///
+    /// The app had eight tracking values for one visual role. This is the ratio the
+    /// screens actually use (9.5pt with 1.0, 10pt with 1.0, 11pt with 1.1); the
+    /// 0.2 that `SepiaTrackedLabel` applied was the outlier, not the rule.
+    static let trackingRatio: CGFloat = 0.1
 
     /// Tracking for a tracked-caps label at `size`.
     static func tracking(_ size: CGFloat) -> CGFloat {

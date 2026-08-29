@@ -432,7 +432,7 @@ struct EditPersonView: View {
                     .lineLimit(1).truncationMode(.middle)
                 if !subtitle.isEmpty {
                     Text(subtitle)
-                        .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
                 }
             }
@@ -671,7 +671,7 @@ struct EditPersonView: View {
     private func relEditRow(_ tag: String, _ p: Person, onRemove: @escaping () -> Void) -> some View {
         HStack(spacing: 8) {
             Text(tag.uppercased())
-                .font(SepiaTheme.ui(size: 9.5)).tracking(1.2).foregroundColor(SepiaTheme.inkSoft)
+                .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 80, alignment: .leading)
             Text(p.displayName(language: .current))
                 .font(SepiaTheme.body(size: 13.5))
@@ -812,7 +812,7 @@ struct EditPersonView: View {
                             .font(SepiaTheme.body(size: 13.5)).foregroundColor(SepiaTheme.ink)
                             .lineLimit(1).truncationMode(.middle)
                         Text(att.format.isEmpty ? L10n.tr("Файл") : att.format)
-                            .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                            .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
                 .contentShape(Rectangle())

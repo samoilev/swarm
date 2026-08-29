@@ -484,7 +484,7 @@ struct InspectorPanel: View {
                     .lineLimit(1).truncationMode(.middle)
                 if !reference.isEmpty {
                     Text(reference)
-                        .font(SepiaTheme.ui(size: 9.5)).tracking(1)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1).truncationMode(.middle)
                 }
@@ -522,7 +522,7 @@ struct InspectorPanel: View {
                                     .foregroundColor(SepiaTheme.ink)
                                     .lineLimit(1).truncationMode(.middle)
                                 Text(link.displayHost)
-                                    .font(SepiaTheme.ui(size: 9.5)).tracking(1)
+                                    .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5))
                                     .foregroundColor(SepiaTheme.inkSoft)
                                     .lineLimit(1).truncationMode(.middle)
                             }
@@ -548,7 +548,7 @@ struct InspectorPanel: View {
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1).truncationMode(.middle)
                 Text(format.isEmpty ? L10n.tr("Файл") : format)
-                    .font(SepiaTheme.ui(size: 9.5)).tracking(1).foregroundColor(SepiaTheme.inkSoft)
+                    .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundColor(SepiaTheme.inkSoft)
             }
             Spacer(minLength: 0)
         }
@@ -590,7 +590,7 @@ struct InspectorPanel: View {
     private func relRow(_ tag: String, _ p: Person) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(tag.uppercased())
-                .font(SepiaTheme.ui(size: 11)).tracking(1.0).foregroundColor(SepiaTheme.inkSoft)
+                .font(SepiaTheme.ui(size: 11)).tracking(SepiaType.tracking(11)).foregroundColor(SepiaTheme.inkSoft)
             Button {
                 if let current = self.person { history.append(current) }
                 internalNav = true

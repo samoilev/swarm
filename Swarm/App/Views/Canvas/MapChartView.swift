@@ -104,7 +104,10 @@ struct AppleMapChartView: View {
                 mapPosition = .region(MKCoordinateRegion(center: currentCenter, span: currentSpan))
             }
         }
-        .overlay(alignment: .bottomLeading) {
+        // Top-leading, not bottom: MapKit draws its own attribution and legal link in
+        // the bottom-left corner, and Apple's terms require it to stay visible. The
+        // legend used to sit on top of it.
+        .overlay(alignment: .topLeading) {
             legendView
         }
     }
