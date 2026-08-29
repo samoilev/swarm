@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
 </div>
-
+  <br />
 Swarm builds, visualizes and exports family trees, entirely on your Mac. Trees are
 plain GEDCOM files in a folder you can open in Finder: no accounts, no cloud, no
 telemetry, no AI.
