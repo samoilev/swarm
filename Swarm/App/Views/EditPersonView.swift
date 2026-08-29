@@ -421,6 +421,7 @@ struct EditPersonView: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Изменить источник"))
+            .accessibilityLabel(L10n.tr("Изменить источник"))
 
             Button {
                 if let openable { NSWorkspace.shared.open(openable) }
@@ -434,6 +435,7 @@ struct EditPersonView: View {
             .buttonBorderShape(.circle)
             .disabled(openable == nil)
             .help(L10n.tr("Открыть ссылку в браузере"))
+            .accessibilityLabel(L10n.tr("Открыть ссылку в браузере"))
 
             Button { removeEntry(citation: citation) } label: {
                 Image(systemName: "minus")
@@ -444,6 +446,7 @@ struct EditPersonView: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить источник"))
+            .accessibilityLabel(L10n.tr("Удалить источник"))
         }
         .padding(.bottom, 8)
     }

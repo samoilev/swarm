@@ -980,6 +980,9 @@ struct TreeCardView: View {
         .sepiaControlChrome(height: 24)
         .help(L10n.tr("Действия с деревом"))
         .accessibilityLabel(L10n.tr("Действия с деревом"))
+        // macOS names a Menu after the image it is built from ("More"), whatever
+        // label is set, so tests address this by identifier.
+        .accessibilityIdentifier("library.treeActions")
     }
 
     /// Only the lines the card had to cut. Empty when everything fits, which clears the

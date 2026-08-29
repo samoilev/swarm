@@ -1002,6 +1002,10 @@ struct MainWorkspace: View {
             .toolbarIconChrome(isActive: [.fan, .people, .timeline, .places, .review].contains(viewMode))
             .help(L10n.tr("Варианты отображения"))
             .accessibilityLabel(L10n.tr("Варианты отображения"))
+            // macOS builds this menu's control from its image, so its accessibility
+            // *name* stays the SF Symbol's description whatever label is set. The
+            // identifier is the one handle that does not move or translate.
+            .accessibilityIdentifier("workspace.viewOptions")
         }
     }
 
@@ -1120,6 +1124,7 @@ struct MainWorkspace: View {
         .toolbarIconChrome()
         .help(L10n.tr("Дополнительные функции дерева"))
         .accessibilityLabel(L10n.tr("Дополнительные функции дерева"))
+        .accessibilityIdentifier("workspace.treeFunctions")
     }
 
     @ViewBuilder

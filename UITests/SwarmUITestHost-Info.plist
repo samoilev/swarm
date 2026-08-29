@@ -22,5 +22,24 @@
     <string>26.0</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <!-- Mirrors the shipped app (see build_dmg.sh). Without it macOS refuses to hand
+         this bundle a .ged, so the Finder-open import journey could not be tested. -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>GEDCOM File</string>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>ged</string>
+            </array>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.gedcom</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>
