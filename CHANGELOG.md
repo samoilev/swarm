@@ -11,6 +11,121 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.4.0] — 2026-08-29
+
+### Added
+
+- Chronology is checked across records, not only within one person. Burial before death,
+  a marriage before a partner's birth, a child born before a parent, and a child born
+  more than a year after a parent died are all reported in the Review workspace. They are
+  warnings rather than errors: each has a rare but real explanation, and a research file
+  should not be blocked over one.
+- Type, layout and elevation tokens in the theme. The palette and motion were already
+  tokenized; the screens meanwhile asked for 30 distinct font sizes, 29 padding values off
+  any grid, 13 corner radii for four roles, and around 15 shadow recipes in two
+  conventions. The new tokens distil what the screens already use most, so adopting one is
+  not a restyle. Type is deliberately fixed-point: the canvas, fan chart and PDF share
+  hand-tuned metrics, so Dynamic Type is declined — now stated in the theme rather than
+  claimed by a stale comment.
+- ⌘↩ to save and Esc to cancel in the person editor, which had neither.
+
+### Changed
+
+- Structured events are the single source of truth on a person and a union. Every event
+  was kept twice — flat fields such as `birthDate` and `marriageDate` alongside
+  `events[]` — held together by four hand-maintained sync directions and a re-entrancy
+  flag, which was also the vector for the mini-map data-corruption bug. The flat fields
+  are computed accessors now and the sync machinery is gone. Getters reproduce the old
+  strings exactly, so every consumer reads what it always did.
+- Saving no longer re-parses the whole archive. A 2000-person tree spent 0.53s of a 0.77s
+  save re-reading the previous GEDCOM on the main thread, purely to build a name map used
+  only when an attachment has to be trashed. The map is resolved lazily now, at most once:
+  the same save takes 0.24s.
+- The merge suggestion scan buckets candidates by normalized name and birth year and
+  builds each index once, instead of comparing every incoming person against every local
+  one. A 2000×2000 preview takes 0.4s, where it previously rebuilt two whole-tree indexes
+  on each of four million pairs.
+- The import preview reports what the validator found. It read only parse diagnostics, so
+  a file whose Review page listed nine issues — a self-parent link, an ancestry cycle and
+  six chronology problems — was presented as “0 errors, 0 warnings, проверка пройдена” and
+  imported without acknowledgement. The counts, the list and the “check passed” line are
+  honest now, and importing requires ticking an acknowledgement. The findings do not
+  refuse the file: parse and structure failures still make one unimportable, but a
+  readable file with damaged relationships stays importable and is fixed in Review.
+- `TreeStore` is pinned to the main actor. Its async methods have no suspension points, so
+  callers hopped off the main actor and mutated observed models while SwiftUI was reading
+  them. Strict concurrency checking is on for the core module to keep those paths from
+  returning, and the GEDCOM preview parse moved off the file-importer callback, so
+  importing a large archive no longer freezes the interface.
+- The undo controller lives in the core module, caps its stacks at 50 snapshots, and
+  reports encode and decode failures instead of swallowing them — a failed undo used to
+  pop the entry and lose it.
+- The map legend moved to the top-left, off MapKit's attribution and legal link, which
+  Apple's terms require to stay visible. The offline vector map's second, undeclared sepia
+  palette became theme tokens, so the two palettes cannot drift apart, and letter tracking
+  collapsed from eight values for one visual role to a single token.
+- The stock bordered search fields became one component, and nine raw reds at four
+  opacities became the theme's danger color, which was built for 6.23:1 on paper where
+  system red sits near 3.4:1. The About window is localized and takes the locale and
+  contrast modifiers the other scenes already had.
+- Internal tidying with no behaviour change: the shared form-field and section components
+  moved out of whichever screen happened to declare them first, the editor and export
+  sheets reuse the panel header they had each hand-copied, and 118 call sites that already
+  asked for exactly a token's font size now name the step instead of the number.
+- The native UI suite runs again. It had not moved since 3.3.1 and failed all 14 cases
+  before reaching an assertion; it now passes 13 with 1 skipped, and its assertions check
+  outcomes — a restore is proved by the canvas showing the restored name — rather than
+  status lines. Two of them described things that never existed, and the file-open journey
+  is skipped with its reason recorded: Launch Services routes `.ged` to a registered
+  application, never a test bundle.
+- README rewritten.
+
+### Fixed
+
+- A person who is their own parent no longer crashes the app. A `FAM` listing the same
+  individual as both partner and child reaches the canvas through an accepted import
+  baseline, where routing asked for a connector between a person and themselves and
+  tripped a precondition — a hard crash on opening the tree. Fixed at both sources rather
+  than by loosening the invariant.
+- The Review workspace marked imported problems as blocking while a save let them through,
+  the opposite of the promise in its own hint line. Its validation context now defaults to
+  the tree's accepted baseline, so no call site can forget it.
+- Clearing a portrait kept the filename, so the exporter re-emitted the media record and
+  the next load silently restored the deleted photo.
+- Merging ran outside the undo controller, so ⌘Z after a merge restored and saved the
+  pre-merge tree and discarded the merged data. Optimizing the root from the toolbar
+  likewise mutated structure with no undo entry and no save.
+- “Keep both” in a merge de-duplicates by content rather than by identity. These records
+  carry a UUID, so the same birth arriving from two files never compared equal and the
+  merged person kept two birth events.
+- The person mini-map wrote geocoded coordinates back into the person from a passive
+  preview, which landed on disk with the next unrelated save.
+- Five rollback paths hand-copied field lists and two of them dropped fields, losing a
+  person's links or a tree's import report on cancel. All routes go through one deep copy
+  now, guarded by byte-equality completeness tests.
+- Cancelling a sheet recorded a phantom undo entry: the encoder's hash-seeded key order
+  made the “did anything change” comparison always true.
+- The canvas thumbnailer read the cached full-size photo, pinning megabytes for every card
+  drawn — exactly what downsampling exists to avoid — and its cache could collide between
+  two portraits of equal byte count.
+- Failures that were silently discarded now surface: archiving returned the source folder
+  on failure and the library revealed it as success, and delete, save-warning, PDF and
+  photo-import failures were all dropped. The recovery sheet could also be left
+  permanently disabled by a guard that skipped its reset, and a toast timer cleared newer
+  toasts posted within 2.5 seconds.
+- The editor allowed clearing a person to nameless, which the add sheet already refused.
+- Icon-only controls carry accessible names. The source row's edit, open-link and delete
+  buttons had tooltips but no name, so VoiceOver announced “pencil”, “arrow up right” and
+  “minus”. The two toolbar menus cannot be named this way — macOS builds a menu's control
+  from its image and reads out the symbol's own description — so they keep their labels and
+  help text and gain stable identifiers instead.
+
+### Removed
+
+- Dead code: written-but-never-read attachment delete tracking, a geocoding cache clear
+  with no callers left, an unused PDF export entry point, an unused button style, and a
+  smoke-test suite subsumed by the core tests.
+
 ## [3.3.1] — 2026-08-22
 
 ### Fixed
@@ -718,7 +833,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.3.1...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.4.0...HEAD
+[3.4.0]: https://github.com/samoilev/swarm/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/samoilev/swarm/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/samoilev/swarm/compare/v3.2.1...v3.3.0
 [3.2.1]: https://github.com/samoilev/swarm/compare/v3.2.0...v3.2.1
