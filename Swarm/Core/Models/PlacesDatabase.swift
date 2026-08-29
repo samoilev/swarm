@@ -200,7 +200,7 @@ public final class PlacesDatabase: @unchecked Sendable {
     private var labelCandidates: [PlaceLabelTier: [Int]] = [:]
     private var versions: Set<String> = []
     private var ready = false
-    private var readyCallbacks: [@MainActor () -> Void] = []
+    private var readyCallbacks: [@MainActor @Sendable () -> Void] = []
 
     public var isReady: Bool { lock.withLock { ready } }
     public var count: Int { lock.withLock { entries.count } }
@@ -223,17 +223,17 @@ public final class PlacesDatabase: @unchecked Sendable {
                 defer { self.readyCallbacks = [] }
                 return self.readyCallbacks
             }
-            DispatchQueue.main.async { callbacks.forEach { $0() } }
+            Task { @MainActor in callbacks.forEach { $0() } }
         }
     }
 
-    public func whenReady(_ run: @escaping @MainActor () -> Void) {
+    public func whenReady(_ run: @escaping @MainActor @Sendable () -> Void) {
         let runNow = lock.withLock {
             if ready { return true }
             readyCallbacks.append(run)
             return false
         }
-        if runNow { DispatchQueue.main.async(execute: run) }
+        if runNow { Task { @MainActor in run() } }
     }
 
     public func entry(id: String) -> PlaceEntry? {

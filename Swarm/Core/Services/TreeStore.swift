@@ -17,6 +17,13 @@ private let log = Logger(subsystem: "com.samoilev.swarm", category: "TreeStore")
 ///     └── Attachments/    — arbitrary files attached to people (GEDCOM _ATTC)
 ///
 /// `Archived/` holds tree folders the user removed but chose to keep.
+///
+/// Main-actor isolated: the store mutates `@Observable` models (`FamilyTree`,
+/// `Person`) that SwiftUI reads. Its `async` methods contain no suspension
+/// points, so without isolation a `Task { @MainActor in await store.save… }`
+/// hopped OFF the main actor into a nonisolated context and mutated observed
+/// state while views read it.
+@MainActor
 @Observable
 public final class TreeStore {
     public var trees: [FamilyTree] = []

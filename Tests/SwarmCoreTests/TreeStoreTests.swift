@@ -6,6 +6,7 @@ import Testing
 /// logic. Each test runs against a throwaway temp directory (injected via
 /// `TreeStore(storageFolder:)`), so nothing touches the real Application Support.
 @Suite(.serialized)
+@MainActor
 struct TreeStoreTests {
 
     /// A unique temp directory that is removed when the test's `Temp` goes away.

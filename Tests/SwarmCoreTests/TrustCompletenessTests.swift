@@ -3,6 +3,7 @@ import Foundation
 import Testing
 
 @Suite(.serialized)
+@MainActor
 struct TrustCompletenessTests {
     private final class Temp {
         let url = FileManager.default.temporaryDirectory

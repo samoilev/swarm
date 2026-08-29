@@ -201,17 +201,27 @@ struct ContentView: View {
         // itself: a folder selection is what carries access to Media/ and Attachments/.
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        var stagedURL: URL?
         do {
             let source = try store.resolveImportSource(url)
             let localCopy = try store.prepareImportPreview(from: source)
-            stagedURL = localCopy
-            var result = try GEDCOMCodec.preview(localCopy)
-            result.report.diagnostics.append(contentsOf: store.stagedImportDiagnostics(for: localCopy))
-            pendingImportURL = localCopy
-            importPreview = result
+            let stagedDiagnostics = store.stagedImportDiagnostics(for: localCopy)
+            // The staged copy needs no security scope, so the parse — the slow part
+            // of previewing a large archive — runs off the main thread instead of
+            // freezing the UI inside the file-importer callback.
+            Task { @MainActor in
+                do {
+                    var result = try await Task.detached(priority: .userInitiated) {
+                        try GEDCOMCodec.preview(localCopy)
+                    }.value
+                    result.report.diagnostics.append(contentsOf: stagedDiagnostics)
+                    pendingImportURL = localCopy
+                    importPreview = result
+                } catch {
+                    store.discardImportPreview(at: localCopy)
+                    importError = importFailureMessage(error)
+                }
+            }
         } catch {
-            if let stagedURL { store.discardImportPreview(at: stagedURL) }
             importError = importFailureMessage(error)
         }
     }

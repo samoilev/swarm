@@ -15,7 +15,7 @@ public final class GeocodingService: @unchecked Sendable {
 
     public init() {}
 
-    public func whenReady(_ run: @escaping @MainActor () -> Void) {
+    public func whenReady(_ run: @escaping @MainActor @Sendable () -> Void) {
         places.whenReady(run)
     }
 

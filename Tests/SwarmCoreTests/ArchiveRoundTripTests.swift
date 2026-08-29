@@ -6,6 +6,7 @@ import Testing
 /// export → import round trip and the permission failures that used to be reported as a
 /// damaged file.
 @Suite(.serialized)
+@MainActor
 struct ArchiveRoundTripTests {
     private final class Temp {
         let url = FileManager.default.temporaryDirectory

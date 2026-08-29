@@ -256,6 +256,7 @@ struct TreeDiagramTests {
         #expect(diagram.aspect.isFinite)
     }
 
+    @MainActor
     @Test func storeCachesUntilTheTreeIsWrittenAgain() {
         let store = TreeStore(storageFolder: FileManager.default.temporaryDirectory
             .appendingPathComponent("swarm-diagram-cache-\(UUID().uuidString)", isDirectory: true))

@@ -19,7 +19,11 @@ let package = Package(
                 .copy("Resources/place_index_v2.tsv"),
                 .copy("Resources/ne_110m_land.geojson"),
                 .copy("Resources/ne_110m_admin_0_boundary_lines_land.geojson"),
-            ]
+            ],
+            // Surfaces data races as warnings while the manifest stays on tools 5.9
+            // (Swift 5 language mode). TreeStore is @MainActor; this keeps new
+            // unisolated mutation paths from creeping back in unnoticed.
+            swiftSettings: [.enableExperimentalFeature("StrictConcurrency")]
         ),
         // The SwiftUI app shell. Depends on SwarmCore for all domain types.
         .executableTarget(

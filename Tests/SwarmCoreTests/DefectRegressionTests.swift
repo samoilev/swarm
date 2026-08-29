@@ -3,6 +3,7 @@ import Foundation
 import Testing
 
 @Suite(.serialized)
+@MainActor
 struct DefectRegressionTests {
     private final class Temp {
         let url = FileManager.default.temporaryDirectory

@@ -72,6 +72,9 @@ public enum TreeMergeError: LocalizedError {
 
 /// Local-only merge engine. Heuristic candidates are suggestions until their exact
 /// match IDs are added to `acceptedHeuristicMatchIDs`; they are never applied silently.
+/// Main-actor isolated because it drives the main-actor `TreeStore`; the pure
+/// static duplicate-detection helpers stay nonisolated for `TreeWorkspaceIndexes`.
+@MainActor
 public final class TreeMergeEngine {
     private let store: TreeStore
 
@@ -241,7 +244,7 @@ public final class TreeMergeEngine {
 
     /// Duplicate review uses the same conservative candidate rule as merge preview:
     /// matching normalized name and birth year plus at least one corroborating fact.
-    public static func duplicateSuggestions(in tree: FamilyTree) -> [DuplicateSuggestion] {
+    nonisolated public static func duplicateSuggestions(in tree: FamilyTree) -> [DuplicateSuggestion] {
         var buckets: [String: [Person]] = [:]
         for person in tree.people {
             guard let year = person.event(ofKind: .birth)?.date?.year else { continue }
@@ -269,7 +272,7 @@ public final class TreeMergeEngine {
         return result
     }
 
-    private static func heuristicReasons(
+    nonisolated private static func heuristicReasons(
         _ localPerson: Person,
         _ incomingPerson: Person,
         local: FamilyTree,
@@ -291,7 +294,7 @@ public final class TreeMergeEngine {
         return reasons
     }
 
-    private static func corroboratingRelative(_ left: Person, _ right: Person, local: FamilyTree, incoming: FamilyTree) -> Bool {
+    nonisolated private static func corroboratingRelative(_ left: Person, _ right: Person, local: FamilyTree, incoming: FamilyTree) -> Bool {
         let localIndex = FamilyIndex(tree: local)
         let incomingIndex = FamilyIndex(tree: incoming)
         let leftParents = localIndex.parentsOf(left)
