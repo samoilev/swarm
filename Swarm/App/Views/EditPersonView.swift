@@ -278,38 +278,12 @@ struct EditPersonView: View {
     }
 
     private var editorHeader: some View {
-        GlassEffectContainer(spacing: 10) {
-            HStack(spacing: 10) {
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(L10n.tr("Редактировать"))
-                        .font(SepiaTheme.display(size: 20))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(SepiaTheme.ink)
-                    Text(person.displayName(language: .current))
-                        .font(SepiaTheme.ui(size: 11))
-                        .foregroundStyle(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .frame(height: 52)
-                .glassEffect(
-                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                )
-
-                Button { cancelEditing() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(SepiaTheme.ink)
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .help(L10n.tr("Закрыть без сохранения"))
-                .accessibilityLabel(L10n.tr("Закрыть без сохранения"))
-            }
-        }
+        LiquidGlassPanelHeader(
+            title: L10n.tr("Редактировать"),
+            subtitle: person.displayName(language: .current),
+            closeLabel: L10n.tr("Закрыть без сохранения"),
+            onClose: { cancelEditing() }
+        )
     }
 
     private var editorFooter: some View {

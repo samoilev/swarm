@@ -84,38 +84,11 @@ struct ExportView: View {
     }
 
     private var exportHeader: some View {
-        GlassEffectContainer(spacing: 10) {
-            HStack(spacing: 10) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(L10n.tr("Экспорт"))
-                        .font(SepiaTheme.display(size: 20))
-                        .fontWeight(.semibold)
-                        .foregroundStyle(SepiaTheme.ink)
-                    Text("\(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name) · \(L10n.count(tree.people.count, .person))")
-                        .font(SepiaTheme.ui(size: 11))
-                        .foregroundStyle(SepiaTheme.inkSoft)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .frame(height: 54)
-                .glassEffect(
-                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
-                    in: RoundedRectangle(cornerRadius: 18, style: .continuous)
-                )
-
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(SepiaTheme.ink)
-                        .frame(width: 34, height: 34)
-                }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.circle)
-                .help(L10n.tr("Закрыть"))
-                .accessibilityLabel(L10n.tr("Закрыть"))
-            }
-        }
+        LiquidGlassPanelHeader(
+            title: L10n.tr("Экспорт"),
+            subtitle: "\(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name) · \(L10n.count(tree.people.count, .person))",
+            onClose: { dismiss() }
+        )
     }
 
     private func exportButtonLabel(_ title: String, systemImage: String) -> some View {
