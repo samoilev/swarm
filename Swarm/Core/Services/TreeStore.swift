@@ -668,10 +668,16 @@ public final class TreeStore {
         let stagedMedia = staging.appendingPathComponent(Self.mediaName, isDirectory: true)
         try writePhotos(serialized.photos, to: stagedMedia)
         try applyPendingAttachments(for: tree, to: staging)
-        let previousAttachmentNames: [String: String] = if let current, let previousGEDCOM = gedFile(in: current),
-                                                           let previous = try? GEDCOMCodec.parse(previousGEDCOM) {
-            Dictionary(uniqueKeysWithValues: previous.tree.people.flatMap(\.attachments).map { ($0.storedName, $0.originalName) })
-        } else { [:] }
+        // The previous file is re-parsed only if an attachment actually has to be
+        // trashed, which is rare. Doing it eagerly cost a full parse of the whole
+        // archive on every save — two thirds of the time to save a large tree.
+        let previousAttachmentNames = { [weak self] () -> [String: String] in
+            guard let self, let current, let previousGEDCOM = gedFile(in: current),
+                  let previous = try? GEDCOMCodec.parse(previousGEDCOM) else { return [:] }
+            return Dictionary(
+                uniqueKeysWithValues: previous.tree.people.flatMap(\.attachments).map { ($0.storedName, $0.originalName) }
+            )
+        }
         try moveUnreferencedFilesToTrash(
             tree: tree,
             serializedPhotos: serialized.photos,
@@ -859,7 +865,7 @@ public final class TreeStore {
     private func moveUnreferencedFilesToTrash(
         tree: FamilyTree,
         serializedPhotos: [GEDCOMSerializer.Photo],
-        originalAttachmentNames: [String: String],
+        originalAttachmentNames: @escaping () -> [String: String],
         in staging: URL
     ) throws {
         let attachmentNames = Set(tree.people.flatMap(\.attachments).map(\.storedName))
@@ -871,15 +877,17 @@ public final class TreeStore {
             originalNames: originalAttachmentNames,
             staging: staging
         )
-        try moveUnreferenced(in: Self.mediaName, expected: photoNames, originalNames: [:], staging: staging)
+        try moveUnreferenced(in: Self.mediaName, expected: photoNames, originalNames: { [:] }, staging: staging)
     }
 
     private func moveUnreferenced(
         in category: String,
         expected: Set<String>,
-        originalNames: [String: String],
+        originalNames: @escaping () -> [String: String],
         staging: URL
     ) throws {
+        // Resolved at most once, and only when there is something to trash.
+        var resolvedNames: [String: String]?
         let fm = FileManager.default
         let active = staging.appendingPathComponent(category, isDirectory: true)
         guard fm.fileExists(atPath: active.path) else { return }
@@ -890,7 +898,9 @@ public final class TreeStore {
         for file in files where !expected.contains(file.lastPathComponent) && !file.lastPathComponent.hasPrefix(".") {
             try fm.createDirectory(at: trash, withIntermediateDirectories: true)
             var base = "\(timestamp())--\(category)--\(file.lastPathComponent)"
-            if let original = originalNames[file.lastPathComponent] {
+            let names = resolvedNames ?? originalNames()
+            resolvedNames = names
+            if let original = names[file.lastPathComponent] {
                 base += "--Original--\(Base64Filename.encode(original))"
             }
             let destination = uniqueURL(trash.appendingPathComponent(base))
