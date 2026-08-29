@@ -26,6 +26,11 @@ public final class TreeStore {
     /// view once shown.
     public var lastSaveError: String?
 
+    /// Set when a save committed but left non-fatal debris behind (e.g. an old
+    /// rollback folder that could not be deleted). The data is safe; the user
+    /// should still hear about it. Cleared by the view once shown.
+    public var lastSaveWarning: String?
+
     /// Set when one or more trees on disk could not be parsed during `load()`. A tree
     /// that silently fails to load is indistinguishable from deleted data, so the
     /// library surfaces this to the user. Cleared by the view once shown.
@@ -568,6 +573,7 @@ public final class TreeStore {
             if legacyFileMap[tree.id] != nil { throw TreeStoreError.migrationRequired }
             let receipt = try persistTree(tree)
             lastSaveError = nil
+            lastSaveWarning = receipt.warnings.isEmpty ? nil : receipt.warnings.joined(separator: "\n")
             return receipt
         } catch {
             log.error("Failed to save tree \(tree.name, privacy: .public): \(error.localizedDescription, privacy: .public)")
@@ -1052,9 +1058,9 @@ public final class TreeStore {
 
     /// Remove a tree from the library but keep its files: the whole tree folder is
     /// moved into `Archived/`, which `load()` ignores. Returns the moved folder URL
-    /// to reveal in Finder.
+    /// to reveal in Finder, or nil when the move failed (`lastSaveError` explains).
     @discardableResult
-    public func archiveTree(_ tree: FamilyTree) -> URL {
+    public func archiveTree(_ tree: FamilyTree) -> URL? {
         let fm = FileManager.default
         let archiveFolder = storageFolder.appendingPathComponent(Self.archivedName, isDirectory: true)
         let src = folder(for: tree)
@@ -1066,7 +1072,7 @@ public final class TreeStore {
             trees.removeAll { $0.id == tree.id }
         } catch {
             lastSaveError = L10n.tr("Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)")
-            return src
+            return nil
         }
         return dest
     }

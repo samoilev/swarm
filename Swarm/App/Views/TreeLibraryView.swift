@@ -194,13 +194,18 @@ struct TreeLibraryView: View {
             titleVisibility: .visible
         ) {
             Button(L10n.tr("Удалить вместе с файлами"), role: .destructive) {
-                if let tree = treeToDelete { store.deleteTree(tree) }
+                if let tree = treeToDelete, !store.deleteTree(tree) {
+                    errorMessage = store.lastSaveError
+                }
                 treeToDelete = nil
             }
             Button(L10n.tr("Архивировать (оставить файлы)")) {
                 if let tree = treeToDelete {
-                    let url = store.archiveTree(tree)
-                    NSWorkspace.shared.activateFileViewerSelecting([url])
+                    if let url = store.archiveTree(tree) {
+                        NSWorkspace.shared.activateFileViewerSelecting([url])
+                    } else {
+                        errorMessage = store.lastSaveError
+                    }
                 }
                 treeToDelete = nil
             }

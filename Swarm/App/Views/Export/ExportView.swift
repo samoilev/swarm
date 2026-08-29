@@ -139,7 +139,10 @@ struct ExportView: View {
 
     private func exportPDF(selected: Bool) {
         let ids: Set<UUID>? = selected ? selectedIds : nil
-        guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else { return }
+        guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
+            exportError = L10n.tr("Не удалось создать PDF: нет персон для экспорта.")
+            return
+        }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)
         exportName = selected ? "\(fileSlug)-selection.pdf" : "\(fileSlug)-tree.pdf"
         showExporter = true

@@ -263,6 +263,35 @@ struct TreeStoreTests {
         #expect(draft.people[0].photoData == bytes)
     }
 
+    /// Deleting a portrait must survive a save + reload. Setting `photoData = nil`
+    /// clears `photoFilename` too; without that the exporter re-emits the OBJE
+    /// reference and the next load silently restores the deleted photo from Media/.
+    @Test func portraitDeletionSurvivesReload() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        let bytes = Data([0xFF, 0xD8, 0xFF, 0xD9])
+        tree.people[0].photoData = bytes
+        _ = try await store.saveTree(tree)
+        let filename = try #require(tree.people[0].photoFilename)
+        let mediaFile = store.gedFileURL(for: tree).deletingLastPathComponent()
+            .appendingPathComponent("Media/\(filename)")
+        #expect(FileManager.default.fileExists(atPath: mediaFile.path))
+
+        tree.people[0].photoData = nil
+        #expect(tree.people[0].photoFilename == nil)
+        #expect(!tree.people[0].hasPhoto)
+        _ = try await store.saveTree(tree)
+        // The stale portrait went to the recoverable trash, not back into Media/.
+        #expect(!FileManager.default.fileExists(atPath: mediaFile.path))
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        let person = try #require(reloaded.trees.first?.people.first)
+        #expect(person.photoFilename == nil)
+        #expect(person.photoData == nil)
+    }
+
     @Test func migratesLegacyFlatLayout() throws {
         let temp = Temp()
         let fm = FileManager.default

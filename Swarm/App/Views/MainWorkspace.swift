@@ -198,6 +198,80 @@ struct MainWorkspace: View {
     }
 
     var body: some View {
+        surfaceWithObservers
+            .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
+            .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
+            .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
+            // Zoom-in/out notifications are handled inside TreeCanvasView where
+            // panOffset and viewport size are available for center-anchored zooming.
+            .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
+    }
+
+    /// The onChange observers, split from `body` and `surfaceWithSheets`: the
+    /// combined expression pushes the Swift type checker past its budget on CI.
+    private var surfaceWithObservers: some View {
+        surfaceWithSheets
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { newWidth in
+                workspaceWidth = newWidth
+            }
+            .onAppear { showInitialToastIfNeeded() }
+            .onChange(of: selectedPerson?.id) { _, newValue in handleSelectionChange(newValue) }
+            .onChange(of: secondaryPerson?.id) { _, newValue in handleSecondarySelectionChange(newValue) }
+            .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
+            .onChange(of: store.lastSaveWarning) { _, newValue in handleSaveWarning(newValue) }
+            .onChange(of: locale.identifier) { _, _ in handleLocaleChange() }
+            // Snapshot the tree when an editing session opens and record an undo entry
+            // when it closes (only if something changed).
+            .onChange(of: showAddSheet) { _, isShown in
+                if isShown { undo.begin(tree) } else { undo.commit(tree) }
+            }
+            .onChange(of: editingPerson?.id) { oldValue, newValue in
+                if newValue != nil { undo.begin(tree) } else if oldValue != nil { undo.commit(tree) }
+            }
+            // A merge mutates the tree outside the undo controller; without a session
+            // around it, ⌘Z after merging would restore (and save) the pre-merge tree,
+            // silently discarding the merged data. A cancelled merge records nothing.
+            .onChange(of: showMerge) { _, isShown in
+                if isShown { undo.begin(tree) } else { undo.commit(tree) }
+            }
+    }
+
+    private func showInitialToastIfNeeded() {
+        guard let initialToast, !didShowInitialToast else { return }
+        didShowInitialToast = true
+        showToast(initialToast)
+    }
+
+    private func handleSelectionChange(_ newValue: UUID?) {
+        recomputeHighlight()
+        // Arrow keys still walk the tree behind the dimmer; a portrait left open
+        // over a record the reader has already left belongs to nobody.
+        portraitPerson = nil
+        // Auto-collapse the hints to an icon when a card opens; restore when browsing.
+        withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
+    }
+
+    private func handleSecondarySelectionChange(_ newValue: UUID?) {
+        recomputeHighlight()
+        if newValue != nil { dualSelectHintSeen = true }
+    }
+
+    private func handleSaveWarning(_ warning: String?) {
+        guard let warning else { return }
+        showToast(warning)
+        store.lastSaveWarning = nil
+    }
+
+    private func handleLocaleChange() {
+        workspaceIndex.rebuild(tree: tree)
+        recomputeHighlight()
+    }
+
+    /// The sheets and alerts, split from `body`'s onChange/onReceive chain: the
+    /// combined expression pushes the Swift type checker past its budget on CI.
+    private var surfaceWithSheets: some View {
         workspaceSurface
             .sheet(isPresented: $showExportModal) {
                 ExportView(tree: tree, store: store, selectedIds: highlightedBranch, showPhotos: showPhotos)
@@ -235,47 +309,6 @@ struct MainWorkspace: View {
                 Text(store.lastSaveError ?? "")
             }
             .frame(minWidth: 900, minHeight: 600)
-            .onGeometryChange(for: CGFloat.self) { proxy in
-                proxy.size.width
-            } action: { newWidth in
-                workspaceWidth = newWidth
-            }
-            .onAppear {
-                guard let initialToast, !didShowInitialToast else { return }
-                didShowInitialToast = true
-                showToast(initialToast)
-            }
-            .onChange(of: selectedPerson?.id) { _, newValue in
-                recomputeHighlight()
-                // Arrow keys still walk the tree behind the dimmer; a portrait left open
-                // over a record the reader has already left belongs to nobody.
-                portraitPerson = nil
-                // Auto-collapse the hints to an icon when a card opens; restore when browsing.
-                withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded = (newValue == nil) }
-            }
-            .onChange(of: secondaryPerson?.id) { _, newValue in
-                recomputeHighlight()
-                if newValue != nil { dualSelectHintSeen = true }
-            }
-            .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
-            .onChange(of: locale.identifier) { _, _ in
-                workspaceIndex.rebuild(tree: tree)
-                recomputeHighlight()
-            }
-            // Snapshot the tree when an editing session opens and record an undo entry
-            // when it closes (only if something changed).
-            .onChange(of: showAddSheet) { _, isShown in
-                if isShown { undo.begin(tree) } else { undo.commit(tree) }
-            }
-            .onChange(of: editingPerson?.id) { oldValue, newValue in
-                if newValue != nil { undo.begin(tree) } else if oldValue != nil { undo.commit(tree) }
-            }
-            .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
-            .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
-            .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
-            // Zoom-in/out notifications are handled inside TreeCanvasView where
-            // panOffset and viewport size are available for center-anchored zooming.
-            .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
     }
 
     /// The workspace canvas and everything layered over it. Kept out of `body` because
@@ -1087,8 +1120,7 @@ struct MainWorkspace: View {
     @ViewBuilder
     private var treeFunctionMenuItems: some View {
         Button {
-            tree.optimizeRoot()
-            fitRequest += 1
+            optimizeTreeLayout()
         } label: {
             Label(L10n.tr("Обновить расположение дерева"), systemImage: "arrow.triangle.2.circlepath")
         }
@@ -1116,6 +1148,28 @@ struct MainWorkspace: View {
         .foregroundColor(SepiaTheme.inkSoft)
         .help(L10n.tr("Дерево сохраняется автоматически после каждого изменения"))
         .accessibilityLabel(L10n.tr("Сохранено в \(savedTime)"))
+    }
+
+    /// Re-root and de-duplicate the tree structure from the toolbar menu.
+    /// `optimizeRoot()` runs `deduplicateUnions()`, a destructive structural
+    /// mutation, so it gets the same undo session + immediate save as a delete.
+    private func optimizeTreeLayout() {
+        undo.begin(tree)
+        tree.optimizeRoot()
+        tree.updatedAt = Date()
+        fitRequest += 1
+        Task { @MainActor in
+            do {
+                _ = try await store.saveTree(tree)
+                workspaceIndex.rebuild(tree: tree)
+                undo.commit(tree)
+            } catch {
+                undo.cancel(tree)
+                reconcileSelectionAfterRestore()
+                workspaceIndex.rebuild(tree: tree)
+                showSaveError = true
+            }
+        }
     }
 
     private func deletePerson() {
@@ -1223,6 +1277,8 @@ struct MainWorkspace: View {
         withAnimation(reduceMotion ? nil : SepiaMotion.state) { toastMessage = message }
         announce(message)
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+            // Only clear our own message — a newer toast owns the slot now.
+            guard toastMessage == message else { return }
             withAnimation(reduceMotion ? nil : SepiaMotion.state) { toastMessage = nil }
         }
     }

@@ -280,6 +280,9 @@ struct RecoveryView: View {
     private func restore(_ item: RecoveryItem) {
         isWorking = true
         Task { @MainActor in
+            // The guard-return paths below must not leave the sheet disabled
+            // forever (isWorking gates every button, including Close).
+            defer { isWorking = false }
             do {
                 switch item.kind {
                 case .revision:
@@ -302,7 +305,6 @@ struct RecoveryView: View {
                 }
                 refresh()
             } catch { errorMessage = error.localizedDescription }
-            isWorking = false
         }
     }
 

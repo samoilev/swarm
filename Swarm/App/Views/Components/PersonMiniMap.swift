@@ -127,11 +127,6 @@ struct ApplePersonMiniMap: View {
         birth = nil
         death = nil
         resolved = false
-        // Also clear the in-memory geocoding cache for this person's places so
-        // that if wrong coordinates were previously cached (e.g. a disambiguation
-        // error) they don't survive across the task restart.
-        if let p = person.birthPlace { GeocodingService.shared.clearCache(for: p) }
-        if let p = person.deathPlace { GeocodingService.shared.clearCache(for: p) }
 
         let geo = GeocodingService.shared
         var b: CLLocationCoordinate2D?
@@ -144,11 +139,14 @@ struct ApplePersonMiniMap: View {
         // returning nil before it has finished loading.
         await withCheckedContinuation { cont in geo.whenReady { cont.resume() } }
 
+        // Display-only resolution: never write the geocoded result back to the
+        // person. A passive preview must not mutate genealogy data (the write
+        // used to land on disk with whatever unrelated save came next).
         if b == nil, let place = person.birthPlace, !place.isEmpty {
-            if let c = geo.coordinateSync(for: place) { b = c; person.birthLat = c.latitude; person.birthLon = c.longitude }
+            b = geo.coordinateSync(for: place)
         }
         if d == nil, let place = person.deathPlace, !place.isEmpty {
-            if let c = geo.coordinateSync(for: place) { d = c; person.deathLat = c.latitude; person.deathLon = c.longitude }
+            d = geo.coordinateSync(for: place)
         }
 
         birth = b

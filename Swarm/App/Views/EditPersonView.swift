@@ -982,15 +982,21 @@ struct EditPersonView: View {
         // .fileImporter may hand back a security-scoped URL (sandbox-safe).
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        guard let img = NSImage(contentsOf: url) else { return }
+        guard let img = NSImage(contentsOf: url) else {
+            saveError = L10n.tr("Не удалось открыть файл изображения.")
+            return
+        }
         cropSource = img
     }
 
     /// Store a (already cropped to 3:4) image as the card photo, downscaled to a thumbnail.
     private func storePhoto(_ image: NSImage) {
         let resized = resizeImage(image, maxDimension: 600)
-        if let tiff = resized.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff) {
-            photoData = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.85])
+        if let tiff = resized.tiffRepresentation, let rep = NSBitmapImageRep(data: tiff),
+           let jpeg = rep.representation(using: .jpeg, properties: [.compressionFactor: 0.85]) {
+            photoData = jpeg
+        } else {
+            saveError = L10n.tr("Не удалось обработать изображение.")
         }
     }
 
@@ -1076,6 +1082,14 @@ struct EditPersonView: View {
         )
         if (!birthDate.isEmpty && parsedBirthDate == nil) || (!isLiving && !deathDate.isEmpty && parsedDeathDate == nil) {
             saveError = L10n.tr("Исправьте некорректные даты перед сохранением.")
+            return
+        }
+        // The add sheet refuses a nameless person; the editor must too, or an
+        // existing person can be cleared to nameless and saved.
+        guard !(givenNames.trimmingCharacters(in: .whitespaces).isEmpty
+            && surname.trimmingCharacters(in: .whitespaces).isEmpty)
+        else {
+            saveError = L10n.tr("Укажите имя или фамилию.")
             return
         }
         let before = try? JSONEncoder().encode(tree)

@@ -465,7 +465,7 @@ struct TrustCompletenessTests {
         tree.people = [Person(givenNames: "Анна")]
         try await store.addTreeVerified(tree)
 
-        let archiveURL = store.archiveTree(tree)
+        let archiveURL = try #require(store.archiveTree(tree))
         #expect(FileManager.default.fileExists(atPath: archiveURL.path))
         #expect(store.trees.isEmpty)
         let item = try #require(store.recoveryItems().first { $0.kind == .archivedTree })

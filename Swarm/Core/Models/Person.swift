@@ -68,6 +68,10 @@ public final class Person: Identifiable, Codable, Hashable {
         set {
             loadedPhoto = .some(newValue)
             photoIsDirty = true
+            // Removing the portrait must also drop the on-disk reference; otherwise
+            // hasPhoto stays true, the exporter re-emits OBJE, and the next load
+            // silently restores the deleted photo from Media/.
+            if newValue == nil { photoFilename = nil }
         }
     }
 

@@ -97,7 +97,9 @@ struct PhotoCropView: View {
                             .buttonStyle(.glass)
                             .buttonBorderShape(.capsule)
                         Spacer()
-                        Button { if let c = cropped() { onConfirm(c) } } label: {
+                        // If cropping fails (degenerate frame, no CGImage), confirm with
+                        // the uncropped original rather than silently doing nothing.
+                        Button { onConfirm(cropped() ?? image) } label: {
                             Label(L10n.tr("Готово"), systemImage: "checkmark")
                         }
                         .buttonStyle(.glassProminent)
