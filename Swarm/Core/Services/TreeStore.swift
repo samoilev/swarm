@@ -479,8 +479,20 @@ public final class TreeStore {
             applySnapshot(imported.tree, to: tree)
             return try persistTree(tree)
         } catch {
-            if let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) { applySnapshot(snapshot, to: tree) }
+            rollBack(before, onto: tree)
             throw error
+        }
+    }
+
+    /// Decode a pre-operation snapshot and restore it into the live tree. A failed
+    /// decode is reported, never swallowed: silently leaving the half-applied state
+    /// in memory is how "the restore failed" turns into a mystery save later. The
+    /// on-disk bundle is still the last committed state either way.
+    private func rollBack(_ beforeData: Data, onto tree: FamilyTree) {
+        if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) {
+            applySnapshot(before, to: tree)
+        } else {
+            lastSaveError = L10n.tr("Восстановление прервано, и вернуть прежнее состояние в памяти не удалось. Файлы на диске не изменились — перезапустите приложение.")
         }
     }
 
@@ -520,7 +532,7 @@ public final class TreeStore {
             return try persistTree(tree)
         } catch {
             pendingBundleRestores[tree.id] = nil
-            if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) { applySnapshot(before, to: tree) }
+            rollBack(beforeData, onto: tree)
             throw error
         }
     }
@@ -557,7 +569,7 @@ public final class TreeStore {
         } catch {
             if let preparedForRollback { discardPreparedAttachment(preparedForRollback, in: tree) }
             pendingTrashRemovals[tree.id] = nil
-            if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) { applySnapshot(before, to: tree) }
+            rollBack(beforeData, onto: tree)
             throw error
         }
     }

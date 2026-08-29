@@ -229,7 +229,15 @@ struct AddPersonView: View {
             saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
             return
         }
-        let before = try? JSONEncoder().encode(tree)
+        // Capture the rollback copy up front and fail loudly: mutating the live tree
+        // with no way back is worse than refusing to add.
+        let rollback: FamilyTree
+        do {
+            rollback = try tree.deepCopy()
+        } catch {
+            saveError = error.localizedDescription
+            return
+        }
         let person = Person(
             givenNames: givenNames,
             patronymic: patronymic.isEmpty ? nil : patronymic,
@@ -289,16 +297,10 @@ struct AddPersonView: View {
                 onAdded(person)
                 dismiss()
             } catch {
-                if let before, let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) {
-                    tree.people = snapshot.people
-                    tree.unions = snapshot.unions
-                    tree.sourceRecords = snapshot.sourceRecords
-                    tree.parentLinks = snapshot.parentLinks
-                    tree.homePersonId = snapshot.homePersonId
-                    tree.rootUnionId = snapshot.rootUnionId
-                    tree.layoutVersion += 1
-                    store.refreshMediaFolders(for: tree)
-                }
+                // The new person has no outside references yet, so the wholesale
+                // canonical restore is safe here (unlike the edit sheet).
+                tree.applyContent(of: rollback)
+                store.refreshMediaFolders(for: tree)
                 saveError = error.localizedDescription
             }
         }

@@ -221,6 +221,11 @@ struct MainWorkspace: View {
             .onChange(of: secondaryPerson?.id) { _, newValue in handleSecondarySelectionChange(newValue) }
             .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }
             .onChange(of: store.lastSaveWarning) { _, newValue in handleSaveWarning(newValue) }
+            .onChange(of: undo.lastError) { _, newValue in
+                guard let message = newValue else { return }
+                showToast(message)
+                undo.lastError = nil
+            }
             .onChange(of: locale.identifier) { _, _ in handleLocaleChange() }
             // Snapshot the tree when an editing session opens and record an undo entry
             // when it closes (only if something changed).

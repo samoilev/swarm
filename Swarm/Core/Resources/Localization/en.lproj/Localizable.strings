@@ -794,3 +794,8 @@
 "Укажите имя или фамилию." = "Enter a given name or a surname.";
 "Не удалось открыть файл изображения." = "Couldn’t open the image file.";
 "Не удалось обработать изображение." = "Couldn’t process the image.";
+"Отмена (⌘Z) недоступна для этого изменения." = "Undo (⌘Z) isn’t available for this change.";
+"Не удалось отменить: снимок изменения повреждён." = "Couldn’t undo: the change snapshot is damaged.";
+"Не удалось открыть редактор" = "Couldn’t open the editor";
+"Не удалось подготовить черновик. Данные не изменены — попробуйте ещё раз." = "Couldn’t prepare the draft. Nothing was changed — try again.";
+"Восстановление прервано, и вернуть прежнее состояние в памяти не удалось. Файлы на диске не изменились — перезапустите приложение." = "The restore was interrupted and the previous in-memory state couldn’t be brought back. Files on disk are unchanged — restart the app.";

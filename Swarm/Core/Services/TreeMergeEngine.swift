@@ -149,8 +149,7 @@ public final class TreeMergeEngine {
 
     public func apply(_ preview: MergePreview, to local: FamilyTree) async throws -> SaveReceipt {
         guard preview.localTreeID == local.id else { throw TreeMergeError.wrongDestination }
-        guard let beforeData = try? JSONEncoder().encode(local),
-              let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) else {
+        guard let before = try? local.deepCopy() else {
             throw TreeMergeError.snapshotFailed
         }
 

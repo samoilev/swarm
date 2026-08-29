@@ -252,6 +252,59 @@ public final class Person: Identifiable, Codable, Hashable {
         applyStructuredEventToLegacy(event)
     }
 
+    /// Copy every content field of `source` onto this live instance, keeping identity
+    /// (`id`, `createdAt`). The canonical rollback path for editors that must preserve
+    /// the shared `Person` reference other views hold — hand-copied field lists drift
+    /// and silently drop new fields (see the applyContent completeness test).
+    public func applyContent(of source: Person) {
+        isSynchronizingStructured = true
+        givenNames = source.givenNames
+        patronymic = source.patronymic
+        surname = source.surname
+        maidenName = source.maidenName
+        sex = source.sex
+        birthDate = source.birthDate
+        birthPlace = source.birthPlace
+        birthLat = source.birthLat
+        birthLon = source.birthLon
+        deathDate = source.deathDate
+        deathPlace = source.deathPlace
+        deathLat = source.deathLat
+        deathLon = source.deathLon
+        isLiving = source.isLiving
+        burialPlace = source.burialPlace
+        burialLat = source.burialLat
+        burialLon = source.burialLon
+        occupation = source.occupation
+        education = source.education
+        notes = source.notes
+        sources = source.sources
+        isSynchronizingStructured = false
+        // Structured arrays last: they are canonical and override anything the
+        // legacy setters above would have synchronized into `events`.
+        names = source.names
+        events = source.events
+        citations = source.citations
+        attachments = source.attachments
+        links = source.links
+        photoFilename = source.photoFilename
+        // Snapshots carry only the portrait filename. Drop any dirty in-memory bytes
+        // so the portrait lazily re-reads from disk, which still holds the state the
+        // snapshot was taken from — unless the snapshot itself carries legacy inline
+        // bytes (old JSON), which stay dirty so the next save writes them out.
+        if case .some(let bytes) = source.loadedPhoto, source.photoIsDirty {
+            loadedPhoto = .some(bytes)
+            photoIsDirty = true
+        } else {
+            loadedPhoto = nil
+            photoIsDirty = false
+        }
+        gedcomXref = source.gedcomXref
+        unknownBranches = source.unknownBranches
+        eventExtras = source.eventExtras
+        updatedAt = source.updatedAt
+    }
+
     /// Called by the GEDCOM parser so qualifiers/ranges remain canonical while the
     /// old UI can continue displaying its normalized compatibility value.
     public func setStructuredDate(_ date: GenealogyDate?, for kind: GenealogyEvent.Kind) {

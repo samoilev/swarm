@@ -54,6 +54,7 @@ struct EditPersonView: View {
     @State private var isHomePerson = false
     @State private var preparedAttachmentIDs: Set<UUID> = []
     @State private var saveError: String?
+    @State private var sessionLoadFailed = false
     @State private var isSaving = false
     @State private var didCommit = false
     /// The open add/edit form, or nil while the section is just a list.
@@ -261,6 +262,11 @@ struct EditPersonView: View {
             Button("OK", role: .cancel) { saveError = nil }
         } message: {
             Text(saveError ?? "")
+        }
+        .alert(L10n.tr("Не удалось открыть редактор"), isPresented: $sessionLoadFailed) {
+            Button("OK", role: .cancel) { cancelEditing() }
+        } message: {
+            Text(L10n.tr("Не удалось подготовить черновик. Данные не изменены — попробуйте ещё раз."))
         }
         .sheet(isPresented: Binding(get: { cropSource != nil }, set: { if !$0 { cropSource = nil } })) {
             if let img = cropSource {
@@ -1026,7 +1032,13 @@ struct EditPersonView: View {
             // its portrait from is transient — without this the draft reads back no
             // portrait, the editor shows an empty photo well, and saving writes that
             // emptiness onto the live person.
-            if let editSession { store.refreshMediaFolders(for: editSession) }
+            if let editSession {
+                store.refreshMediaFolders(for: editSession)
+            } else {
+                // Without a draft, `editingTree` falls back to the live tree and every
+                // "draft" edit mutates real data. Refuse to open instead.
+                sessionLoadFailed = true
+            }
         }
         let source = editingPerson
         isHomePerson = tree.homePersonId == person.id
@@ -1092,7 +1104,15 @@ struct EditPersonView: View {
             saveError = L10n.tr("Укажите имя или фамилию.")
             return
         }
-        let before = try? JSONEncoder().encode(tree)
+        // Capture the rollback copy up front and fail loudly: mutating the live tree
+        // with no way back is worse than refusing to save.
+        let rollback: FamilyTree
+        do {
+            rollback = try tree.deepCopy()
+        } catch {
+            saveError = error.localizedDescription
+            return
+        }
         let draft = editingTree
         let draftPerson = editingPerson
         tree.unions = draft.unions
@@ -1158,9 +1178,7 @@ struct EditPersonView: View {
                 onSaved?(person)
                 dismiss()
             } catch {
-                if let before, let snapshot = try? JSONDecoder().decode(FamilyTree.self, from: before) {
-                    apply(snapshot: snapshot)
-                }
+                apply(snapshot: rollback)
                 saveError = error.localizedDescription
             }
         }
@@ -1196,34 +1214,9 @@ struct EditPersonView: View {
         tree.homePersonId = snapshot.homePersonId
         tree.rootUnionId = snapshot.rootUnionId
         if let source = snapshot.person(byId: person.id) {
-            person.givenNames = source.givenNames
-            person.patronymic = source.patronymic
-            person.surname = source.surname
-            person.maidenName = source.maidenName
-            person.sex = source.sex
-            person.birthDate = source.birthDate
-            person.birthPlace = source.birthPlace
-            person.birthLat = source.birthLat
-            person.birthLon = source.birthLon
-            person.deathDate = source.deathDate
-            person.deathPlace = source.deathPlace
-            person.deathLat = source.deathLat
-            person.deathLon = source.deathLon
-            person.isLiving = source.isLiving
-            person.burialPlace = source.burialPlace
-            person.burialLat = source.burialLat
-            person.burialLon = source.burialLon
-            person.occupation = source.occupation
-            person.education = source.education
-            person.notes = source.notes
-            person.names = source.names
-            person.events = source.events
-            person.citations = source.citations
-            person.attachments = source.attachments
-            person.photoFilename = source.photoFilename
-            person.gedcomXref = source.gedcomXref
-            person.unknownBranches = source.unknownBranches
-            person.eventExtras = source.eventExtras
+            // The shared reference other views hold must keep its identity, so the
+            // canonical per-field restore lives on Person, next to its field list.
+            person.applyContent(of: source)
         }
         tree.unions = snapshot.unions
         tree.sourceRecords = snapshot.sourceRecords
