@@ -261,6 +261,63 @@ struct TrustCompletenessTests {
         #expect(preview.acceptedHeuristicMatchIDs.isEmpty)
     }
 
+    /// "Keep both" must not duplicate a fact that both files already agree on.
+    /// Events carry a UUID, so the same birth arriving from two files never compared
+    /// equal and the merged person ended up with two BIRT events — with the
+    /// structured records now canonical, `event(ofKind:)` would return either one.
+    @Test func mergingIdenticalFactsDoesNotDuplicateThem() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let local = FamilyTree(name: "Локальное")
+        let same = Person(givenNames: "Иван", surname: "Петров", birthDate: "05.03.1901", birthPlace: "Москва")
+        local.people = [same]
+        try await store.addTreeVerified(local)
+
+        let incoming = FamilyTree(name: "Входящее")
+        // Same person, same facts, separately created records (fresh UUIDs).
+        let matching = Person(givenNames: "Иван", surname: "Петров", birthDate: "05.03.1901", birthPlace: "Москва")
+        matching.id = same.id
+        incoming.people = [matching]
+
+        let engine = TreeMergeEngine(store: store)
+        _ = try await engine.apply(engine.preview(local: local, incoming: incoming), to: local)
+
+        let merged = try #require(local.person(byId: same.id))
+        #expect(merged.events.filter { $0.kind == .birth }.count == 1)
+        #expect(merged.names.count == 1)
+        #expect(merged.birthDate == "05.03.1901")
+        #expect(merged.birthPlace == "Москва")
+    }
+
+    /// The suggestion scan used to compare every incoming person against every local
+    /// one and rebuild a FamilyIndex for both whole trees on each pair, which stalled
+    /// the merge sheet on real archives.
+    @Test func mergePreviewScalesToLargeTrees() {
+        let store = TreeStore(storageFolder: FileManager.default.temporaryDirectory
+            .appendingPathComponent("swarm-merge-scale-\(UUID().uuidString)", isDirectory: true))
+        func makeTree(_ label: String) -> FamilyTree {
+            let tree = FamilyTree(name: label)
+            // Name and birth year match across the two trees, and the shared birth
+            // place is the second corroborating fact a suggestion requires.
+            tree.people = (0 ..< 2000).map {
+                Person(
+                    givenNames: "Имя \($0)",
+                    surname: "Фамилия \($0 % 50)",
+                    birthDate: String(1800 + $0 % 150),
+                    birthPlace: "Место \($0 % 100)"
+                )
+            }
+            return tree
+        }
+        let local = makeTree("Локальное")
+        let incoming = makeTree("Входящее")
+
+        let started = Date()
+        let preview = TreeMergeEngine(store: store).preview(local: local, incoming: incoming)
+        #expect(Date().timeIntervalSince(started) < 5)
+        #expect(!preview.heuristicSuggestions.isEmpty)
+    }
+
     @Test func verifiedMergeCreatesBackupAndAppliesSafeMatches() async throws {
         let temp = try Temp()
         let store = TreeStore(storageFolder: temp.url)

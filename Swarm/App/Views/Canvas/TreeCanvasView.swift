@@ -1153,12 +1153,16 @@ enum PortraitThumbnail {
     /// with the screen when the reader has zoomed all the way in on a retina display.
     private static let maxPixelSize = 352
 
-    /// ponytail: keyed on the byte count, which changes whenever a portrait is replaced.
-    /// If that ever needs to be exact, give Person a photo revision counter and key on it.
+    /// Keyed on the portrait's filename plus `Person.photoRevision`, so a cache hit
+    /// costs no disk read and no byte comparison. (The previous key was the byte
+    /// count, which collided between two portraits of equal size.) On a miss the
+    /// bytes are read *uncached* — going through `person.photoData` would pin the
+    /// full-size JPEG on every person drawn, which is what this type exists to avoid.
     static func image(for person: Person) -> NSImage? {
-        guard let data = person.photoData else { return nil }
-        let key = "\(person.id.uuidString)-\(data.count)" as NSString
+        guard person.hasPhoto else { return nil }
+        let key = "\(person.id.uuidString)-\(person.photoFilename ?? "unsaved")-\(person.photoRevision)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
+        guard let data = person.photoDataUncached() else { return nil }
         guard let source = CGImageSourceCreateWithData(data as CFData, nil),
               let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
                   kCGImageSourceCreateThumbnailFromImageAlways: true,

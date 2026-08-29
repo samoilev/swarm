@@ -1182,9 +1182,6 @@ struct MainWorkspace: View {
         let name = person.displayName(language: .current)
         undo.begin(tree)
 
-        // Remove the person's attached files from the tree folder.
-        store.deleteAttachmentFiles(of: person, in: tree)
-
         // Remove from all unions
         for union in tree.unions {
             union.childrenIds.removeAll { $0 == person.id }

@@ -111,7 +111,6 @@ public final class TreeStore {
     }
 
     private var pendingAttachmentAdds: [UUID: [PendingAttachment]] = [:]
-    private var pendingAttachmentDeletes: [UUID: Set<String>] = [:]
     private var pendingImports: [UUID: PendingImport] = [:]
     /// Keyed by staged GEDCOM path: what an import preview could not bring across.
     private var pendingImportDiagnostics: [String: [ImportDiagnostic]] = [:]
@@ -706,7 +705,6 @@ public final class TreeStore {
             person.mediaFolderURL = mediaFolder
             person.photoIsDirty = false
         }
-        pendingAttachmentDeletes[tree.id] = nil
         if let additions = pendingAttachmentAdds.removeValue(forKey: tree.id) {
             for addition in additions { try? fm.removeItem(at: addition.temporaryURL) }
         }
@@ -1016,12 +1014,19 @@ public final class TreeStore {
         return digest.map { String(format: "%02x", $0) }.joined()
     }
 
-    private func timestamp() -> String {
+    /// Sortable UTC stamp used as the filename prefix of every history revision and
+    /// trashed file. The format is load-bearing — recovery lists sort on it — so it
+    /// stays exactly as written. Built once: this is called per file in a sweep.
+    private static let timestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         formatter.dateFormat = "yyyyMMdd-HHmmss-SSS"
-        return formatter.string(from: Date())
+        return formatter
+    }()
+
+    private func timestamp() -> String {
+        Self.timestampFormatter.string(from: Date())
     }
 
     private func inject(_ point: PersistenceFaultPoint) throws {
@@ -1050,6 +1055,7 @@ public final class TreeStore {
             try FileManager.default.trashItem(at: source, resultingItemURL: &trashed)
             trees.removeAll(where: { $0.id == tree.id })
             folderMap.removeValue(forKey: tree.id)
+            diagramCache.removeValue(forKey: tree.id)
             return true
         } catch {
             lastSaveError = L10n.tr("Не удалось переместить «\(tree.name)» в Корзину: \(error.localizedDescription)")
@@ -1089,6 +1095,7 @@ public final class TreeStore {
             try fm.moveItem(at: src, to: dest)
             folderMap.removeValue(forKey: tree.id)
             trees.removeAll { $0.id == tree.id }
+            diagramCache.removeValue(forKey: tree.id)
         } catch {
             lastSaveError = L10n.tr("Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)")
             return nil
@@ -1379,12 +1386,6 @@ public final class TreeStore {
             return pending.temporaryURL
         }
         return attachmentURL(attachment, in: tree)
-    }
-
-    /// Delete every attachment file belonging to a person (used when the person is
-    /// removed). Does not persist — the caller saves the tree afterward.
-    public func deleteAttachmentFiles(of person: Person, in tree: FamilyTree) {
-        pendingAttachmentDeletes[tree.id, default: []].formUnion(person.attachments.map(\.storedName))
     }
 
     // MARK: - Helpers

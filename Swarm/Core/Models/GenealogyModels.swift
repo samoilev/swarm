@@ -606,3 +606,41 @@ public struct ParentLink: Identifiable, Codable, Hashable, Sendable {
         self.notes = notes
     }
 }
+
+// MARK: - Content identity
+
+/// A record's identity by *content*, ignoring its UUID.
+///
+/// The synthesized `Hashable` on these types includes `id`, so the same fact
+/// imported from two files never compares equal. Merging two trees with
+/// "keep both" therefore kept two identical BIRT events on one person, and
+/// `Person.event(ofKind:)` silently returned whichever landed first.
+public protocol ContentIdentifiable {
+    /// Equal for two records that say the same thing, whatever their ids.
+    var contentKey: String { get }
+}
+
+extension Citation: ContentIdentifiable {
+    public var contentKey: String {
+        [sourceID.uuidString, page ?? "", detail ?? "", transcription ?? "", notes ?? ""]
+            .joined(separator: "\u{001F}")
+    }
+}
+
+extension GenealogyEvent: ContentIdentifiable {
+    public var contentKey: String {
+        [
+            kind.rawValue, typeName ?? "", value ?? "",
+            date?.canonicalGEDCOMValue ?? "", place?.displayName ?? "", notes ?? "",
+        ].joined(separator: "\u{001F}")
+    }
+}
+
+extension PersonName: ContentIdentifiable {
+    public var contentKey: String {
+        [
+            kind.rawValue, givenNames, patronymic ?? "", surname, maidenName ?? "",
+            prefix ?? "", suffix ?? "", nickname ?? "",
+        ].joined(separator: "\u{001F}")
+    }
+}

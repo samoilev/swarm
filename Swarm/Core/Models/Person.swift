@@ -52,11 +52,27 @@ public final class Person: Identifiable, Codable, Hashable {
         set {
             loadedPhoto = .some(newValue)
             photoIsDirty = true
+            photoRevision &+= 1
             // Removing the portrait must also drop the on-disk reference; otherwise
             // hasPhoto stays true, the exporter re-emits OBJE, and the next load
             // silently restores the deleted photo from Media/.
             if newValue == nil { photoFilename = nil }
         }
+    }
+
+    /// Bumped whenever the portrait changes. Transient, never persisted: it exists so
+    /// a thumbnail cache can be keyed without reading the bytes back, which is what
+    /// forced the full-size image to stay resident for every card on the canvas.
+    @ObservationIgnored public private(set) var photoRevision = 0
+
+    /// The portrait bytes *without* caching them on this person. The canvas keeps
+    /// only downsampled thumbnails; letting it go through `photoData` pinned a
+    /// full-size JPEG per drawn card, which is precisely what the thumbnailer exists
+    /// to avoid. Unsaved in-memory bytes still win over what is on disk.
+    public func photoDataUncached() -> Data? {
+        if let loaded = loadedPhoto { return loaded }
+        guard let name = photoFilename, let folder = mediaFolderURL else { return nil }
+        return try? Data(contentsOf: folder.appendingPathComponent(name))
     }
 
     /// Whether a portrait exists without forcing a disk load (a filename on disk, or
@@ -154,7 +170,7 @@ public final class Person: Identifiable, Codable, Hashable {
         set { setLegacyCoordinate(.death, lat: event(ofKind: .death)?.place?.latitude, lon: newValue) }
     }
 
-    // Precise grave/burial coordinates (entered manually, not geocoded)
+    /// Precise grave/burial coordinates (entered manually, not geocoded).
     public var burialLat: Double? {
         get { event(ofKind: .burial)?.place?.latitude }
         set { setLegacyCoordinate(.burial, lat: newValue, lon: event(ofKind: .burial)?.place?.longitude) }

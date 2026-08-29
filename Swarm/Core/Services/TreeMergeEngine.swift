@@ -115,17 +115,36 @@ public final class TreeMergeEngine {
             }
         }
 
+        // Bucket by the exact rule `heuristicReasons` requires (normalized name plus
+        // birth year) instead of comparing every incoming person against every local
+        // one: the pairwise scan rebuilt a FamilyIndex for both whole trees on each
+        // pair, which stalled the sheet on trees of a few thousand people.
         var suggestions: [MergePersonMatch] = []
-        for candidate in incoming.people where !matchedIncoming.contains(candidate.id) {
-            for localPerson in local.people where !matchedLocal.contains(localPerson.id) {
-                let reasons = Self.heuristicReasons(localPerson, candidate, local: local, incoming: incoming)
-                if reasons.count >= 2 {
-                    suggestions.append(MergePersonMatch(
-                        localPersonID: localPerson.id,
-                        incomingPersonID: candidate.id,
-                        kind: .heuristicSuggestion,
-                        reasons: reasons
-                    ))
+        var localBuckets: [String: [Person]] = [:]
+        for localPerson in local.people where !matchedLocal.contains(localPerson.id) {
+            guard let key = Self.candidateKey(localPerson) else { continue }
+            localBuckets[key, default: []].append(localPerson)
+        }
+        if !localBuckets.isEmpty {
+            let localIndex = FamilyIndex(tree: local)
+            let incomingIndex = FamilyIndex(tree: incoming)
+            for candidate in incoming.people where !matchedIncoming.contains(candidate.id) {
+                guard let key = Self.candidateKey(candidate), let bucket = localBuckets[key] else { continue }
+                for localPerson in bucket {
+                    let reasons = Self.heuristicReasons(
+                        localPerson,
+                        candidate,
+                        localIndex: localIndex,
+                        incomingIndex: incomingIndex
+                    )
+                    if reasons.count >= 2 {
+                        suggestions.append(MergePersonMatch(
+                            localPersonID: localPerson.id,
+                            incomingPersonID: candidate.id,
+                            kind: .heuristicSuggestion,
+                            reasons: reasons
+                        ))
+                    }
                 }
             }
         }
@@ -243,7 +262,7 @@ public final class TreeMergeEngine {
 
     /// Duplicate review uses the same conservative candidate rule as merge preview:
     /// matching normalized name and birth year plus at least one corroborating fact.
-    nonisolated public static func duplicateSuggestions(in tree: FamilyTree) -> [DuplicateSuggestion] {
+    public nonisolated static func duplicateSuggestions(in tree: FamilyTree) -> [DuplicateSuggestion] {
         var buckets: [String: [Person]] = [:]
         for person in tree.people {
             guard let year = person.event(ofKind: .birth)?.date?.year else { continue }
@@ -252,12 +271,15 @@ public final class TreeMergeEngine {
             buckets["\(name):\(year)", default: []].append(person)
         }
         var result: [DuplicateSuggestion] = []
+        guard buckets.values.contains(where: { $0.count > 1 }) else { return [] }
+        // One index for the whole tree, not one per candidate pair.
+        let index = FamilyIndex(tree: tree)
         for candidates in buckets.values where candidates.count > 1 {
             for firstIndex in candidates.indices {
                 for secondIndex in candidates.indices where secondIndex > firstIndex {
                     let first = candidates[firstIndex]
                     let second = candidates[secondIndex]
-                    let reasons = heuristicReasons(first, second, local: tree, incoming: tree)
+                    let reasons = heuristicReasons(first, second, localIndex: index, incomingIndex: index)
                     if reasons.count >= 2 {
                         result.append(DuplicateSuggestion(
                             firstPersonID: first.id,
@@ -271,11 +293,19 @@ public final class TreeMergeEngine {
         return result
     }
 
-    nonisolated private static func heuristicReasons(
+    /// Bucket key for the candidate rule: two people can only be suggested as the
+    /// same person when their normalized names and birth years both match.
+    private nonisolated static func candidateKey(_ person: Person) -> String? {
+        let name = TreeWorkspaceIndexes.normalize(person.fullName)
+        guard !name.isEmpty, let year = person.event(ofKind: .birth)?.date?.year else { return nil }
+        return "\(name):\(year)"
+    }
+
+    private nonisolated static func heuristicReasons(
         _ localPerson: Person,
         _ incomingPerson: Person,
-        local: FamilyTree,
-        incoming: FamilyTree
+        localIndex: FamilyIndex,
+        incomingIndex: FamilyIndex
     ) -> [String] {
         let leftName = TreeWorkspaceIndexes.normalize(localPerson.fullName)
         let rightName = TreeWorkspaceIndexes.normalize(incomingPerson.fullName)
@@ -289,13 +319,18 @@ public final class TreeMergeEngine {
         if !leftPlaces.intersection(rightPlaces).isEmpty { reasons.append(L10n.tr("совпадает место")) }
         if let death = localPerson.event(ofKind: .death)?.date?.year,
            death == incomingPerson.event(ofKind: .death)?.date?.year { reasons.append(L10n.tr("совпадает год смерти")) }
-        if corroboratingRelative(localPerson, incomingPerson, local: local, incoming: incoming) { reasons.append(L10n.tr("совпадает родственник")) }
+        if corroboratingRelative(localPerson, incomingPerson, localIndex: localIndex, incomingIndex: incomingIndex) {
+            reasons.append(L10n.tr("совпадает родственник"))
+        }
         return reasons
     }
 
-    nonisolated private static func corroboratingRelative(_ left: Person, _ right: Person, local: FamilyTree, incoming: FamilyTree) -> Bool {
-        let localIndex = FamilyIndex(tree: local)
-        let incomingIndex = FamilyIndex(tree: incoming)
+    private nonisolated static func corroboratingRelative(
+        _ left: Person,
+        _ right: Person,
+        localIndex: FamilyIndex,
+        incomingIndex: FamilyIndex
+    ) -> Bool {
         let leftParents = localIndex.parentsOf(left)
         let rightParents = incomingIndex.parentsOf(right)
         let leftRelatives = [leftParents.father, leftParents.mother].compactMap { $0 } + localIndex.spousesOf(left)
@@ -376,13 +411,17 @@ public final class TreeMergeEngine {
         if local.notes?.isEmpty != false { local.notes = incoming.notes }
     }
 
-    private func choose<T: Hashable>(_ local: [T], _ incoming: [T], choice: MergeFactChoice) -> [T] {
+    /// De-duplicates by content, not by `Hashable`: these records carry a UUID, so
+    /// the same fact arriving from two files never compares equal and "keep both"
+    /// would leave a person holding two identical birth events. Records that
+    /// genuinely differ are all kept — that is what the user asked for.
+    private func choose<T: ContentIdentifiable>(_ local: [T], _ incoming: [T], choice: MergeFactChoice) -> [T] {
         switch choice {
         case .local: return local
         case .incoming: return incoming
         case .both:
-            var seen = Set<T>()
-            return (local + incoming).filter { seen.insert($0).inserted }
+            var seen = Set<String>()
+            return (local + incoming).filter { seen.insert($0.contentKey).inserted }
         }
     }
 

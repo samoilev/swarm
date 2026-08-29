@@ -504,10 +504,6 @@ struct PersonCardsPDFExporter {
         let dest = NSRect(x: rect.midX - w / 2, y: rect.midY - h / 2, width: w, height: h)
         img.draw(in: dest, from: .zero, operation: .copy, fraction: 1.0)
     }
-
-    static func export(tree: FamilyTree, to url: URL) {
-        if let data = render(tree: tree) { try? data.write(to: url, options: .atomic) }
-    }
 }
 
 private extension NSFont {

@@ -13,15 +13,8 @@ public final class GeocodingService: @unchecked Sendable {
 
     public var isReady: Bool { places.isReady }
 
-    public init() {}
-
     public func whenReady(_ run: @escaping @MainActor @Sendable () -> Void) {
         places.whenReady(run)
-    }
-
-    public func clearCache(for placeName: String) {
-        let key = cacheKey(placeName, language: .current)
-        _ = lock.withLock { cache.removeValue(forKey: key) }
     }
 
     public func coordinateSync(

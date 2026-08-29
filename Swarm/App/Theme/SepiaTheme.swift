@@ -336,13 +336,3 @@ struct SepiaButtonStyle: ButtonStyle {
         )
     }
 }
-
-struct SepiaIconButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        SepiaControlSurface(
-            label: configuration.label.frame(width: 30, height: 30),
-            isPressed: configuration.isPressed,
-            isActive: false
-        )
-    }
-}

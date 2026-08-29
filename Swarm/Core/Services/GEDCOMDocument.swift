@@ -470,7 +470,15 @@ public enum GEDCOMCodec {
             missingMedia: missingMedia
         )
         tree.importReport = report
-        tree.acceptedBaselineIssueIDs = Set(TreeValidator.validate(tree).map(\.id))
+        // Only errors need baselining: a warning never blocks a save (see
+        // TreeValidator's isBlocking rule), so accepting warnings here only widened
+        // the set with ids that mean nothing. Matches what the import path records.
+        // ponytail: this baselines on every parse, including a plain load, so damage
+        // the app itself wrote is forgiven on the next launch. Narrowing that needs
+        // the load path to tell an imported tree from an app-written one.
+        tree.acceptedBaselineIssueIDs = Set(
+            TreeValidator.validate(tree).filter { $0.severity == .error }.map(\.id)
+        )
         return ImportResult(tree: tree, document: document, report: report)
     }
 
