@@ -253,6 +253,7 @@ public enum TreeValidator {
         }
 
         addDuplicatePeople(tree, into: &issues)
+        validateRelativeChronology(tree, into: &issues)
         if let report = tree.importReport {
             for pointer in report.unresolvedPointers {
                 issues.append(warning(
@@ -398,6 +399,74 @@ public enum TreeValidator {
                 personID: person.id,
                 field: "death"
             ))
+        }
+    }
+
+    /// Chronology that only makes sense across two records: a burial before the
+    /// death it follows, a marriage before one partner was born, a child born before
+    /// a parent or long after that parent died. All warnings — each has a legitimate
+    /// (if rare) explanation, and a research file should never be blocked over one.
+    private static func validateRelativeChronology(_ tree: FamilyTree, into issues: inout [TreeIssue]) {
+        let byID = Dictionary(uniqueKeysWithValues: tree.people.map { ($0.id, $0) })
+        func year(_ person: Person, _ kind: GenealogyEvent.Kind) -> Int? {
+            person.event(ofKind: kind)?.date?.year
+        }
+
+        for person in tree.people {
+            guard let burial = year(person, .burial), let death = year(person, .death), burial < death else { continue }
+            issues.append(warning(
+                id: "person.\(person.id).chronology.burial-before-death",
+                code: "chronology.burial-before-death",
+                title: L10n.tr("Хронология требует проверки"),
+                message: L10n.tr("Год погребения раньше года смерти."),
+                personID: person.id,
+                field: "burial"
+            ))
+        }
+
+        for union in tree.unions {
+            let partners = union.partnerIds.compactMap { byID[$0] }
+            if let marriage = union.event(ofKind: .marriage)?.date?.year {
+                for partner in partners where year(partner, .birth).map({ marriage < $0 }) == true {
+                    issues.append(warning(
+                        id: "union.\(union.id).chronology.marriage-before-birth.\(partner.id)",
+                        code: "chronology.marriage-before-birth",
+                        title: L10n.tr("Хронология требует проверки"),
+                        message: L10n.tr("Год брака раньше года рождения одного из супругов."),
+                        personID: partner.id,
+                        unionID: union.id,
+                        field: "marriage"
+                    ))
+                }
+            }
+            for childID in union.childrenIds {
+                guard let child = byID[childID], let childBirth = year(child, .birth) else { continue }
+                for parent in partners {
+                    if let parentBirth = year(parent, .birth), childBirth < parentBirth {
+                        issues.append(warning(
+                            id: "union.\(union.id).chronology.child-before-parent.\(child.id).\(parent.id)",
+                            code: "chronology.child-before-parent",
+                            title: L10n.tr("Хронология требует проверки"),
+                            message: L10n.tr("Ребёнок родился раньше родителя."),
+                            personID: child.id,
+                            unionID: union.id,
+                            field: "birth"
+                        ))
+                    }
+                    // A year of grace after a father's death covers a posthumous birth.
+                    if let parentDeath = year(parent, .death), childBirth > parentDeath + 1 {
+                        issues.append(warning(
+                            id: "union.\(union.id).chronology.child-after-parent-death.\(child.id).\(parent.id)",
+                            code: "chronology.child-after-parent-death",
+                            title: L10n.tr("Хронология требует проверки"),
+                            message: L10n.tr("Ребёнок родился больше чем через год после смерти родителя."),
+                            personID: child.id,
+                            unionID: union.id,
+                            field: "birth"
+                        ))
+                    }
+                }
+            }
         }
     }
 

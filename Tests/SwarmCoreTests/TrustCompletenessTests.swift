@@ -245,6 +245,27 @@ struct TrustCompletenessTests {
         #expect(minsk.longitude == 27.56653)
     }
 
+    /// The review screen must agree with what a save actually refuses. Building the
+    /// indexes without a context used to mean "accept no baseline", so an imported
+    /// problem showed as blocking there while persistTree let it through.
+    @Test func reviewIndexesHonourTheAcceptedBaseline() {
+        let tree = FamilyTree(name: "Импортированное")
+        let orphan = Person(givenNames: "Сирота")
+        tree.people = [orphan]
+        // A union pointing at somebody who is not in the file: a validator error.
+        tree.unions = [Union(partner1Id: orphan.id, partner2Id: UUID())]
+
+        let raw = TreeValidator.validate(tree)
+        let blockingBefore = raw.filter(\.isBlocking)
+        #expect(!blockingBefore.isEmpty)
+
+        // Accept it as the imported baseline, exactly as import does.
+        tree.acceptedBaselineIssueIDs = Set(raw.filter { $0.severity == .error }.map(\.id))
+        let indexes = TreeWorkspaceIndexes(tree: tree)
+        #expect(indexes.issues.contains { $0.severity == .error })
+        #expect(indexes.issues.allSatisfy { !$0.isBlocking })
+    }
+
     @Test func mergePreviewNeverAutomaticallyAcceptsHeuristics() {
         let temp = try? Temp()
         let store = TreeStore(storageFolder: temp?.url)

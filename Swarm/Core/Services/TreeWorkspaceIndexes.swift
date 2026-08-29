@@ -56,20 +56,24 @@ public final class TreeWorkspaceIndexes {
         rebuild(tree: tree)
     }
 
-    public func rebuild(tree: FamilyTree, validationContext: TreeValidationContext = .init()) {
+    /// `validationContext` defaults to the tree's own accepted baseline. Passing
+    /// nothing used to mean "accept nothing", so the review screen marked imported
+    /// problems as blocking while a save quietly allowed them — the opposite of what
+    /// its own hint text promises.
+    public func rebuild(tree: FamilyTree, validationContext: TreeValidationContext? = nil) {
         searchEntries = tree.people.map(Self.searchEntry)
             .sorted { Self.localizedLess($0.displayName, $1.displayName) }
         timelineEntries = (tree.people.flatMap(Self.timelineEntries) + Self.unionTimelineEntries(tree))
             .sorted(by: Self.timelineSort)
         placeEntries = Self.buildPlaces(from: timelineEntries)
         duplicateSuggestions = TreeMergeEngine.duplicateSuggestions(in: tree)
-        issues = TreeValidator.validate(tree, context: validationContext)
+        issues = TreeValidator.validate(tree, context: validationContext ?? Self.defaultContext(for: tree))
     }
 
     /// Incrementally replace one person's searchable/timeline/place metadata after a
     /// committed edit. Validation and duplicate candidates are recomputed because
     /// both depend on relationships outside the edited person.
-    public func update(person: Person, in tree: FamilyTree, validationContext: TreeValidationContext = .init()) {
+    public func update(person: Person, in tree: FamilyTree, validationContext: TreeValidationContext? = nil) {
         searchEntries.removeAll { $0.personID == person.id }
         searchEntries.append(Self.searchEntry(person))
         searchEntries.sort { Self.localizedLess($0.displayName, $1.displayName) }
@@ -80,7 +84,11 @@ public final class TreeWorkspaceIndexes {
         timelineEntries.sort(by: Self.timelineSort)
         placeEntries = Self.buildPlaces(from: timelineEntries)
         duplicateSuggestions = TreeMergeEngine.duplicateSuggestions(in: tree)
-        issues = TreeValidator.validate(tree, context: validationContext)
+        issues = TreeValidator.validate(tree, context: validationContext ?? Self.defaultContext(for: tree))
+    }
+
+    private static func defaultContext(for tree: FamilyTree) -> TreeValidationContext {
+        TreeValidationContext(acceptedBaselineIssueIDs: tree.acceptedBaselineIssueIDs)
     }
 
     private static func searchEntry(_ person: Person) -> PersonSearchEntry {

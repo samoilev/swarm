@@ -807,3 +807,7 @@
 "Версия %@ (%@)" = "Version %@ (%@)";
 "Версия %@" = "Version %@";
 "Убрать выбранного человека" = "Clear the selected person";
+"Год погребения раньше года смерти." = "The burial year is earlier than the death year.";
+"Год брака раньше года рождения одного из супругов." = "The marriage year is earlier than a spouse’s birth year.";
+"Ребёнок родился раньше родителя." = "The child was born before the parent.";
+"Ребёнок родился больше чем через год после смерти родителя." = "The child was born more than a year after the parent died.";

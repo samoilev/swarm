@@ -262,6 +262,37 @@ struct DefectRegressionTests {
         _ = TreeLayoutEngine().layout(tree: tree, direction: .topDown)
     }
 
+    /// Chronology that only shows up across two records. All warnings: each has a
+    /// rare but legitimate explanation, so none of them may block a save.
+    @Test func relativeChronologyIsReportedAsWarnings() {
+        let tree = FamilyTree(name: "Хронология")
+        let parent = Person(givenNames: "Родитель", sex: .male, birthDate: "1900", deathDate: "1940")
+        parent.isLiving = false
+        // Buried before he died.
+        parent.burialPlace = "Погост"
+        parent.setStructuredDate(GenealogyDate(userInput: "1935"), for: .burial)
+        let early = Person(givenNames: "Раньше", sex: .female, birthDate: "1890")
+        let late = Person(givenNames: "Позже", sex: .male, birthDate: "1950")
+        let spouse = Person(givenNames: "Супруга", sex: .female, birthDate: "1930")
+        tree.people = [parent, early, late, spouse]
+        let union = Union(partner1Id: parent.id, partner2Id: spouse.id, childrenIds: [early.id, late.id])
+        union.marriageDate = "1925"
+        tree.unions = [union]
+
+        let issues = TreeValidator.validate(tree)
+        for code in [
+            "chronology.burial-before-death",
+            "chronology.marriage-before-birth",
+            "chronology.child-before-parent",
+            "chronology.child-after-parent-death",
+        ] {
+            let issue = issues.first { $0.code == code }
+            #expect(issue != nil, "missing \(code)")
+            #expect(issue?.severity == .warning)
+            #expect(issue?.isBlocking == false)
+        }
+    }
+
     @Test func newArchivesHaveCompleteLayoutAndMissingActiveRootFailsClearly() async throws {
         let temp = try Temp()
         let store = TreeStore(storageFolder: temp.url)
