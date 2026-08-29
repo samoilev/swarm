@@ -42,7 +42,7 @@ struct PeopleWorkspaceView: View {
     var body: some View {
         workspaceSurface(title: L10n.tr("Люди"), count: entries.count) {
             HStack(spacing: 10) {
-                TextField(L10n.tr("Имя, дата или место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
+                SepiaSearchField(L10n.tr("Имя, дата или место"), text: $query).frame(maxWidth: 320)
                 Picker(L10n.tr("Сортировка"), selection: $sort) {
                     ForEach(Sort.allCases) { Text($0.displayName).tag($0) }
                 }.frame(width: 160)
@@ -112,13 +112,13 @@ struct TimelineWorkspaceView: View {
     var body: some View {
         workspaceSurface(title: L10n.tr("Хронология"), count: entries.count) {
             HStack(spacing: 10) {
-                TextField(L10n.tr("Персона или место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 300)
+                SepiaSearchField(L10n.tr("Персона или место"), text: $query).frame(maxWidth: 300)
                 Picker(L10n.tr("Событие"), selection: $kind) {
                     Text(L10n.tr("Все события")).tag(nil as GenealogyEvent.Kind?)
                     ForEach(GenealogyEvent.Kind.allCases, id: \.self) { Text(eventName($0)).tag($0 as GenealogyEvent.Kind?) }
                 }.frame(width: 180)
-                TextField(L10n.tr("С года"), text: $fromYear).textFieldStyle(.roundedBorder).frame(width: 80)
-                TextField(L10n.tr("По год"), text: $toYear).textFieldStyle(.roundedBorder).frame(width: 80)
+                SepiaSearchField(L10n.tr("С года"), text: $fromYear).frame(width: 80)
+                SepiaSearchField(L10n.tr("По год"), text: $toYear).frame(width: 80)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -174,7 +174,7 @@ struct PlacesWorkspaceView: View {
     var body: some View {
         workspaceSurface(title: L10n.tr("Места"), count: entries.count) {
             HStack(spacing: 12) {
-                TextField(L10n.tr("Найти место"), text: $query).textFieldStyle(.roundedBorder).frame(maxWidth: 320)
+                SepiaSearchField(L10n.tr("Найти место"), text: $query).frame(maxWidth: 320)
                 Toggle(L10n.tr("Только без координат"), isOn: $unpinnedOnly)
             }
         } content: {
@@ -277,9 +277,9 @@ struct ReviewWorkspaceView: View {
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: issue.severity == .error ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
-                    .foregroundStyle(issue.severity == .error ? Color.red.opacity(0.75) : SepiaTheme.accent2)
+                    .foregroundStyle(issue.severity == .error ? SepiaTheme.danger : SepiaTheme.accent2)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack { Text(issue.title).font(SepiaTheme.body(size: 15)); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(.red) } }
+                    HStack { Text(issue.title).font(SepiaTheme.body(size: 15)); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.danger) } }
                     Text(issue.message).font(SepiaTheme.ui(size: 11)).foregroundStyle(SepiaTheme.inkSoft)
                     if let field = issue.field {
                         Text(L10n.tr("Открыть поле: \(field)")).font(SepiaTheme.ui(size: 10)).foregroundStyle(SepiaTheme.accent2)

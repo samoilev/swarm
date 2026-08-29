@@ -113,11 +113,14 @@ struct SwarmApp: App {
         Settings {
             MapPrivacySettingsView()
                 .environment(\.locale, language.locale)
+                .sepiaSystemAccessibility()
                 .preferredColorScheme(.light)
         }
 
-        Window(Text(verbatim: "About Swarm"), id: Self.aboutWindowID) {
+        Window(Text(L10n.tr("О Swarm")), id: Self.aboutWindowID) {
             AboutView()
+                .environment(\.locale, language.locale)
+                .sepiaSystemAccessibility()
                 .preferredColorScheme(.light)
         }
         .windowStyle(.titleBar)
@@ -138,7 +141,7 @@ private struct AboutCommands: Commands {
             Button {
                 openWindow(id: SwarmApp.aboutWindowID)
             } label: {
-                Text(verbatim: "About Swarm")
+                Text(L10n.tr("О Swarm"))
             }
         }
     }

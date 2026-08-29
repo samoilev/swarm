@@ -318,6 +318,7 @@ struct EditPersonView: View {
                 Button(L10n.tr("Отмена")) { cancelEditing() }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.capsule)
+                    .keyboardShortcut(.cancelAction)
 
                 Spacer()
 
@@ -327,6 +328,9 @@ struct EditPersonView: View {
                 .buttonStyle(.glassProminent)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
+                // ⌘↩ rather than plain Return: this sheet is mostly text fields, and
+                // Return inside one must not commit the whole record.
+                .keyboardShortcut(.return, modifiers: .command)
                 .disabled(isSaving)
                 .disabled(givenNames.isEmpty && surname.isEmpty)
             }
@@ -460,7 +464,7 @@ struct EditPersonView: View {
             Button { removeEntry(citation: citation) } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.red.opacity(0.78))
+                    .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.glass)
@@ -676,7 +680,7 @@ struct EditPersonView: View {
             Button { onRemove() } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.red.opacity(0.78))
+                    .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.glass)
@@ -821,7 +825,7 @@ struct EditPersonView: View {
             Button { removeDraftAttachment(att) } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.red.opacity(0.78))
+                    .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.glass)
@@ -881,7 +885,7 @@ struct EditPersonView: View {
             Button { removeLink(at: index) } label: {
                 Image(systemName: "minus")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.red.opacity(0.78))
+                    .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.glass)
@@ -972,7 +976,7 @@ struct EditPersonView: View {
                             photoData = nil
                         } label: {
                             Label(L10n.tr("Удалить"), systemImage: "trash")
-                                .foregroundColor(.red.opacity(0.8))
+                                .foregroundColor(SepiaTheme.danger)
                         }
                         .buttonStyle(.glass)
                         .buttonBorderShape(.capsule)
@@ -1279,7 +1283,7 @@ private struct UnionDraftEditor: View {
                     } label: {
                         Image(systemName: "minus")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundStyle(Color.red.opacity(0.78))
+                            .foregroundStyle(SepiaTheme.danger)
                             .frame(width: 26, height: 26)
                     }
                     .buttonStyle(.glass)

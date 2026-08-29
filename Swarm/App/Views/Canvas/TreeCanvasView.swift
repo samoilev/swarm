@@ -423,7 +423,7 @@ struct TreeCanvasView: View {
             return
         }
 
-        withAnimation(.easeOut(duration: 0.12)) { connectorOpacity = 0 }
+        withAnimation(reduceMotion ? nil : SepiaMotion.connectorFade) { connectorOpacity = 0 }
         withAnimation(SepiaMotion.layout) {
             cachedLayout = l
             layoutGeneration += 1
@@ -443,7 +443,7 @@ struct TreeCanvasView: View {
             panOffset = bounded
             dragStart = bounded
         }
-        withAnimation(SepiaMotion.layout.delay(0.18)) { connectorOpacity = 1 }
+        withAnimation(reduceMotion ? nil : SepiaMotion.layout.delay(0.18)) { connectorOpacity = 1 }
     }
 
     // MARK: - Fit to Screen
@@ -573,7 +573,7 @@ struct TreeCanvasView: View {
         )
         coastVelocity = .zero
         if animated, !reduceMotion {
-            withAnimation(.easeInOut(duration: 0.25)) {
+            withAnimation(SepiaMotion.glide) {
                 panOffset = newPan
                 dragStart = newPan
             }

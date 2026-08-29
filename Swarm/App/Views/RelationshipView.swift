@@ -28,6 +28,8 @@ struct RelationshipView: View {
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .help(L10n.tr("Закрыть"))
+                .accessibilityLabel(L10n.tr("Закрыть"))
             }
             .padding(16)
 
@@ -103,6 +105,7 @@ struct RelationshipView: View {
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.tr("Убрать выбранного человека"))
                 }
                 .padding(.horizontal, 10)
                 .padding(.vertical, 8)
@@ -110,10 +113,7 @@ struct RelationshipView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 4))
             } else {
                 VStack(alignment: .leading, spacing: 0) {
-                    TextField(placeholder, text: search)
-                        .textFieldStyle(.roundedBorder)
-                        .font(SepiaTheme.body(size: 14))
-                        .colorMultiply(SepiaTheme.cardBg)
+                    SepiaSearchField(placeholder, text: search, label: label)
 
                     let filtered = filteredPeople(query: search.wrappedValue, excluding: personA?.id == selected.wrappedValue?.id ? personB : personA)
                     if !filtered.isEmpty && !search.wrappedValue.isEmpty {

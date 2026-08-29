@@ -100,7 +100,7 @@ struct AppleMapChartView: View {
             let clampedLon = max(0.5, min(newLonDelta, 360))
             currentSpan = MKCoordinateSpan(latitudeDelta: clampedLat, longitudeDelta: clampedLon)
 
-            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+            withAnimation(reduceMotion ? nil : SepiaMotion.camera) {
                 mapPosition = .region(MKCoordinateRegion(center: currentCenter, span: currentSpan))
             }
         }
@@ -382,7 +382,7 @@ struct AppleMapChartView: View {
         currentSpan = span
         lastZoom = zoom
 
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.5)) {
+        withAnimation(reduceMotion ? nil : SepiaMotion.cameraLong) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
     }

@@ -33,7 +33,7 @@ struct FanChartView: View {
                     FanWedgeShape(wedge: wedge, cx: layout.cx, cy: layout.cy, isSelected: selectedPerson?.id == wedge.personId, isHome: tree.homePersonId == wedge.personId)
                         .onTapGesture {
                             if let pid = wedge.personId, let p = tree.person(byId: pid) {
-                                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.15)) { selectedPerson = p }
+                                withAnimation(reduceMotion ? nil : SepiaMotion.state) { selectedPerson = p }
                             }
                         }
                         .accessibilityElement(children: .ignore)
@@ -105,7 +105,7 @@ struct FanChartView: View {
             viewSize: viewSize,
             content: CGSize(width: chartWidth, height: chartHeight)
         ) else { return }
-        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+        withAnimation(reduceMotion ? nil : SepiaMotion.camera) {
             zoom = fit.zoom
             panOffset = fit.offset
             dragStart = fit.offset

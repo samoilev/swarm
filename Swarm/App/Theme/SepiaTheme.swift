@@ -122,6 +122,15 @@ enum SepiaMotion {
     /// One press of zoom in/out. Deliberately not a spring: the canvas scales about a
     /// fixed anchor, so any overshoot at all is visible as the whole tree jiggling.
     static let zoomStep = Animation.easeOut(duration: 0.18)
+    /// Connector paths dropping out for the duration of a layout morph. Shorter than
+    /// the morph itself: the lines must be gone before the cards start moving.
+    static let connectorFade = Animation.easeOut(duration: 0.12)
+    /// Gliding the canvas to bring an off-screen record into view.
+    static let glide = Animation.easeInOut(duration: 0.25)
+    /// A chart or map viewport moving to a new subject.
+    static let camera = Animation.easeInOut(duration: 0.30)
+    /// The one long camera move: the map crossing continents between two places.
+    static let cameraLong = Animation.easeInOut(duration: 0.50)
     /// Longest stagger the entrance cascade may span, however tall the tree is.
     static let entranceStagger: Double = 0.30
 
@@ -153,7 +162,8 @@ private struct SepiaMotionModifier<V: Equatable>: ViewModifier {
 
 extension View {
     /// Strengthens the custom sepia palette for the system Increase Contrast setting.
-    /// Typography uses relative custom fonts above, so Larger Text scales in parallel.
+    /// Type is a fixed-point scale (see `SepiaType`), so Larger Text does not apply;
+    /// the canvas, fan chart and PDF share hand-tuned metrics with the screens.
     func sepiaSystemAccessibility() -> some View {
         modifier(SepiaSystemAccessibilityModifier())
     }
