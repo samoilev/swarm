@@ -209,12 +209,34 @@ public struct ImportDiagnostic: Identifiable, Codable, Hashable, Sendable {
     public var severity: Severity
     public var message: String
     public var recordXref: String?
+    /// Whether this finding refuses the file outright. Parse and structure failures
+    /// do; a relationship or chronology problem inside a readable file does not —
+    /// those are shown, acknowledged, and then fixed in Review, which is what the
+    /// accepted-baseline machinery exists for.
+    public var isBlocking: Bool
 
-    public init(id: String, severity: Severity, message: String, recordXref: String? = nil) {
+    public init(
+        id: String,
+        severity: Severity,
+        message: String,
+        recordXref: String? = nil,
+        isBlocking: Bool? = nil
+    ) {
         self.id = id
         self.severity = severity
         self.message = message
         self.recordXref = recordXref
+        self.isBlocking = isBlocking ?? (severity == .error)
+    }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        severity = try c.decode(Severity.self, forKey: .severity)
+        message = try c.decode(String.self, forKey: .message)
+        recordXref = try c.decodeIfPresent(String.self, forKey: .recordXref)
+        // Reports written before this flag existed treated every error as blocking.
+        isBlocking = try c.decodeIfPresent(Bool.self, forKey: .isBlocking) ?? (severity == .error)
     }
 }
 
@@ -236,8 +258,14 @@ public struct ImportReport: Codable, Hashable, Sendable {
         self.missingMedia = missingMedia
     }
 
-    public var blockingErrors: [ImportDiagnostic] {
+    /// Everything reported as an error, whether or not it refuses the file.
+    public var errors: [ImportDiagnostic] {
         diagnostics.filter { $0.severity == .error }
+    }
+
+    /// Errors that make the file unimportable.
+    public var blockingErrors: [ImportDiagnostic] {
+        diagnostics.filter { $0.severity == .error && $0.isBlocking }
     }
 
     public var warnings: [ImportDiagnostic] {
@@ -463,6 +491,18 @@ public enum GEDCOMCodec {
         }
 
         let unsupported = Set(nodes.map(\.tag).filter { !$0.hasPrefix("_") && !supportedTags.contains($0) }).sorted()
+        // Relationship and chronology problems are found by the validator, not by
+        // parsing. Without them the import sheet counted zero errors and said the
+        // check had passed for a file whose Review page then listed nine issues.
+        let validation = TreeValidator.validate(tree)
+        diagnostics.append(contentsOf: validation.map { issue in
+            ImportDiagnostic(
+                id: "validation.\(issue.id)",
+                severity: issue.severity == .error ? .error : .warning,
+                message: "\(issue.title): \(issue.message)",
+                isBlocking: false
+            )
+        })
         let report = ImportReport(
             diagnostics: diagnostics,
             preservedUnsupportedTags: unsupported,
@@ -476,9 +516,7 @@ public enum GEDCOMCodec {
         // ponytail: this baselines on every parse, including a plain load, so damage
         // the app itself wrote is forgiven on the next launch. Narrowing that needs
         // the load path to tell an imported tree from an app-written one.
-        tree.acceptedBaselineIssueIDs = Set(
-            TreeValidator.validate(tree).filter { $0.severity == .error }.map(\.id)
-        )
+        tree.acceptedBaselineIssueIDs = Set(validation.filter { $0.severity == .error }.map(\.id))
         return ImportResult(tree: tree, document: document, report: report)
     }
 

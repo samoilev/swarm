@@ -811,3 +811,4 @@
 "Год брака раньше года рождения одного из супругов." = "The marriage year is earlier than a spouse’s birth year.";
 "Ребёнок родился раньше родителя." = "The child was born before the parent.";
 "Ребёнок родился больше чем через год после смерти родителя." = "The child was born more than a year after the parent died.";
+"Я понимаю: в файле есть ошибки. Их можно исправить в «Проверке» после импорта." = "I understand the file has errors. They can be fixed under Review after importing.";

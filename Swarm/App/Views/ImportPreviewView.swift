@@ -7,9 +7,18 @@ struct ImportPreviewView: View {
     let onImport: () -> Void
     @State private var confirmedWarnings = false
 
+    /// Anything the reader should see before committing. Errors that do not refuse
+    /// the file still belong here: they are importable, but not silently.
     private var needsConfirmation: Bool {
-        !result.report.warnings.isEmpty || !result.report.preservedUnsupportedTags.isEmpty ||
+        !result.report.errors.isEmpty || !result.report.warnings.isEmpty ||
+            !result.report.preservedUnsupportedTags.isEmpty ||
             !result.report.unresolvedPointers.isEmpty || !result.report.missingMedia.isEmpty
+    }
+
+    private var acknowledgementLabel: String {
+        result.report.errors.isEmpty
+            ? L10n.tr("Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM")
+            : L10n.tr("Я понимаю: в файле есть ошибки. Их можно исправить в «Проверке» после импорта.")
     }
 
     var body: some View {
@@ -28,7 +37,7 @@ struct ImportPreviewView: View {
                 metric(L10n.tr("Персон"), result.tree.people.count)
                 metric(L10n.tr("Союзов"), result.tree.unions.count)
                 metric(L10n.tr("Источников"), result.tree.sourceRecords.count)
-                metric(L10n.tr("Ошибок"), result.report.blockingErrors.count)
+                metric(L10n.tr("Ошибок"), result.report.errors.count)
                 metric(L10n.tr("Предупреждений"), result.report.warnings.count)
                 Spacer()
             }.padding(18)
@@ -57,7 +66,7 @@ struct ImportPreviewView: View {
             }
 
             if needsConfirmation, result.report.blockingErrors.isEmpty {
-                Toggle(L10n.tr("Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM"), isOn: $confirmedWarnings)
+                Toggle(acknowledgementLabel, isOn: $confirmedWarnings)
                     .toggleStyle(.checkbox).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.ink).padding(.horizontal, 18)
             }
             Divider().overlay(SepiaTheme.toolbarLine)

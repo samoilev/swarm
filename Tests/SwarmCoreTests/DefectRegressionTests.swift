@@ -346,6 +346,68 @@ struct DefectRegressionTests {
         #expect(throws: GEDCOMCodecError.self) { try GEDCOMCodec.parse(source) }
     }
 
+    /// The import sheet reported "0 errors, check passed" for a file whose Review
+    /// page then listed nine issues: it only ever saw parse diagnostics, while
+    /// relationship and chronology problems come from the validator. Such a file is
+    /// still importable — that is what the accepted baseline is for — but never
+    /// silently, so the findings must reach the report.
+    @Test func previewReportsValidatorFindingsWithoutRefusingTheFile() throws {
+        let temp = try Temp()
+        let source = temp.url.appendingPathComponent("malformed.ged")
+        // I1 is his own father; I2 marries before she is born; I3 is born before both
+        // parents; I4 is born ten years after I1 dies.
+        try """
+        0 HEAD
+        1 CHAR UTF-8
+        0 @I1@ INDI
+        1 NAME Отец /Иванов/
+        1 SEX M
+        1 BIRT
+        2 DATE 1900
+        1 DEAT
+        2 DATE 1950
+        0 @I2@ INDI
+        1 NAME Мать /Иванова/
+        1 SEX F
+        1 BIRT
+        2 DATE 1930
+        0 @I3@ INDI
+        1 NAME Ребёнок /Иванов/
+        1 SEX M
+        1 BIRT
+        2 DATE 1890
+        0 @I4@ INDI
+        1 NAME Поздний /Иванов/
+        1 SEX M
+        1 BIRT
+        2 DATE 1960
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I1@
+        1 CHIL @I3@
+        1 CHIL @I4@
+        1 MARR
+        2 DATE 1920
+        0 TRLR
+        """.write(to: source, atomically: true, encoding: .utf8)
+
+        let preview = try GEDCOMCodec.preview(source)
+        #expect(preview.tree.people.count == 4)
+
+        let codes = preview.report.diagnostics.map(\.id)
+        #expect(codes.contains { $0.contains("self-parent") })
+        #expect(codes.contains { $0.contains("marriage-before-birth") })
+        #expect(codes.contains { $0.contains("child-before-parent") })
+        #expect(codes.contains { $0.contains("child-after-parent-death") })
+
+        // Reported as errors, so the sheet's count and its acknowledgement are honest…
+        #expect(!preview.report.errors.isEmpty)
+        #expect(!preview.report.warnings.isEmpty)
+        // …but the file still imports: these are fixed in Review, not at the door.
+        #expect(preview.report.blockingErrors.isEmpty)
+    }
+
     @Test func livingPeopleCannotSerializeHiddenDeathOrBurialData() throws {
         let tree = FamilyTree(name: "Living")
         let person = Person(givenNames: "Anna", deathDate: "2001", deathPlace: "Moscow", isLiving: true, burialPlace: "Cemetery")
