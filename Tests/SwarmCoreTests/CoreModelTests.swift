@@ -181,4 +181,26 @@ struct CoreModelTests {
         """
         #expect(try JSONDecoder().decode(SourceRecord.self, from: Data(current.utf8)).rawGEDCOMBranches.isEmpty)
     }
+
+    /// A FAM that lists the same person as partner and child says someone is their
+    /// own parent. GEDCOM can express it, the validator reports it as an error, and
+    /// an accepted baseline still reaches lineage and the canvas — where an edge from
+    /// a person to themselves used to trip `FamilyConnection`'s precondition and take
+    /// the app down.
+    @Test func selfParentingUnionIsIgnoredRatherThanCrashing() {
+        let tree = FamilyTree(name: "Повреждённое")
+        let person = Person(givenNames: "Сам", sex: .male)
+        let child = Person(givenNames: "Ребёнок", sex: .female)
+        tree.people = [person, child]
+        tree.unions = [Union(partner1Id: person.id, partner2Id: person.id, childrenIds: [person.id, child.id])]
+
+        let index = FamilyIndex(tree: tree)
+        let parents = index.parentsOf(person)
+        #expect(parents.father == nil)
+        #expect(parents.mother == nil)
+
+        let lineage = LineageCalculator(index: index).compute(for: person)
+        #expect(lineage.ids.contains(person.id))
+        #expect(lineage.connections.allSatisfy { $0.firstID != $0.secondID })
+    }
 }

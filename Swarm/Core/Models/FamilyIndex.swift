@@ -99,7 +99,10 @@ public struct FamilyIndex {
         var father: UUID? = nil
         var mother: UUID? = nil
         for edge in parentEdges(of: personId) {
-            guard let parent = byId[edge.parentID] else { continue }
+            // Never report a person as their own parent: a self-parenting FAM is
+            // invalid data the validator flags, and passing it on produces a lineage
+            // edge from someone to themselves.
+            guard edge.parentID != personId, let parent = byId[edge.parentID] else { continue }
             if parent.sex == .male {
                 if father == nil { father = parent.id }
             } else if parent.sex == .female {

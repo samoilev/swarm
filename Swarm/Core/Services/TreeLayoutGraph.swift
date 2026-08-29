@@ -53,8 +53,14 @@ struct LayoutGraph {
         for union in sortedUnions {
             let partners = Self.orderedPartners(of: union, index: index)
             guard let first = partners.first else { continue }
+            // A person cannot be their own parent, and a child listed twice is one
+            // child. GEDCOM can say otherwise (the same INDI as HUSB and CHIL of one
+            // FAM), which the validator reports as an error — but an already-accepted
+            // baseline still reaches the canvas, where drawing that edge means asking
+            // for a connector between a person and themselves.
+            var seenChildren = Set(partners)
             let children = union.childrenIds
-                .filter { index.byId[$0] != nil }
+                .filter { index.byId[$0] != nil && seenChildren.insert($0).inserted }
                 .sorted { Self.birthKey(index.byId[$0]!) < Self.birthKey(index.byId[$1]!) }
 
             let generation = partners.compactMap { generationOf[$0] }.min() ?? generationOf[first] ?? 0

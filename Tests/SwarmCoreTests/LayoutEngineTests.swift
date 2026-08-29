@@ -161,4 +161,37 @@ struct LayoutEngineTests {
         let layout = TreeLayoutEngine(config: config).layout(tree: t, direction: .topDown)
         #expect(layout.nodes.contains { $0.person.id == loner.id })
     }
+
+    /// The layout pipeline force-unwraps its index lookups. Each one is defended by a
+    /// filter on the line above, but the ids come from GEDCOM, where a union can point
+    /// at a person who is not in the file — and import only warns about that. This
+    /// pins the defence: a tree full of dangling references must lay out, not trap.
+    @Test func danglingReferencesDoNotTrapTheLayout() {
+        for direction in [LayoutDirection.topDown, .bottomUp, .leftRight] {
+            let t = FamilyTree(name: "Повреждённое")
+            let real = Person(givenNames: "Настоящий", sex: .male)
+            let spouse = Person(givenNames: "Супруга", sex: .female)
+            let child = Person(givenNames: "Ребёнок", sex: .male)
+            t.people = [real, spouse, child]
+
+            let ghost = UUID(), ghostChild = UUID()
+            t.unions = [
+                // Both partners missing from the file.
+                Union(partner1Id: ghost, partner2Id: UUID(), childrenIds: [ghostChild]),
+                // One partner present, one missing, one child of each kind.
+                Union(partner1Id: real.id, partner2Id: ghost, childrenIds: [child.id, ghostChild]),
+                // Self-partnered, and a self-parenting child.
+                Union(partner1Id: spouse.id, partner2Id: spouse.id, childrenIds: [spouse.id]),
+                // No partners and no children at all.
+                Union(),
+            ]
+            t.homePersonId = ghost
+            t.rootUnionId = UUID()
+
+            let layout = TreeLayoutEngine(config: config).layout(tree: t, direction: direction)
+            // Everyone who really exists is still drawn; the ghosts are not invented.
+            #expect(layout.nodes.count == 3)
+            #expect(layout.nodes.allSatisfy { node in t.people.contains { $0.id == node.person.id } })
+        }
+    }
 }
