@@ -13,6 +13,7 @@ struct FanChartView: View {
     private let rootR: CGFloat = 78
     private let ringW: CGFloat = 92
     private let sweep: Double = 180
+    private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
 
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
@@ -63,7 +64,10 @@ struct FanChartView: View {
             .gesture(
                 MagnifyGesture()
                     .onChanged { value in
-                        zoom = min(2.0, max(0.2, magnifyStart * value.magnification))
+                        // Same damping as the tree canvas: raw magnification crosses the
+                        // whole 0.2–2.0 range in one short pinch, too fast to land on a scale.
+                        let damped = 1 + (value.magnification - 1) * zoomSensitivity
+                        zoom = min(2.0, max(0.2, magnifyStart * damped))
                     }
                     .onEnded { _ in magnifyStart = zoom }
             )

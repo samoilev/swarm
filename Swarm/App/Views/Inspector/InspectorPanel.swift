@@ -573,7 +573,7 @@ struct InspectorPanel: View {
             || !spouses.isEmpty || !children.isEmpty || !siblings.isEmpty
         if hasAny {
             VStack(alignment: .leading, spacing: 0) {
-                SectionHeader(title: L10n.tr("Родственные"))
+                SectionHeader(title: L10n.tr("Родственные связи"))
                 if let f = parents.father { relRow(L10n.tr("Отец"), f) }
                 if let m = parents.mother { relRow(L10n.tr("Мать"), m) }
                 ForEach(spouses, id: \.id) { s in relRow(L10n.tr("Супруг"), s) }

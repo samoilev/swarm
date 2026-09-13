@@ -213,6 +213,8 @@
 "Рождение" = "Birth";
 "Смерть" = "Death";
 "Погребение" = "Burial";
+"Мужской" = "Male";
+"Женский" = "Female";
 "Занятие" = "Occupation";
 "Образование" = "Education";
 "Брак" = "Marriage";
@@ -248,7 +250,6 @@
 "Удалить связь" = "Remove Relationship";
 "Удалить ребёнка из союза" = "Remove Child from Union";
 "Открыть «%@»" = "Open “%@”";
-"Родственные" = "Relationships";
 "Родственные связи" = "Relationships";
 "Родственные связи не заданы" = "No relationships recorded";
 "Отец" = "Father";

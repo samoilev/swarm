@@ -11,6 +11,13 @@ struct LocalizationTests {
         #expect(L10n.tr("Добавлен: \(name)", language: .russian) == "Добавлен: Anna")
     }
 
+    @Test func sexReadsAsAFullWordInBothLanguages() {
+        #expect(Person.Sex.male.displayName(language: .russian) == "Мужской")
+        #expect(Person.Sex.female.displayName(language: .russian) == "Женский")
+        #expect(Person.Sex.male.displayName(language: .english) == "Male")
+        #expect(Person.Sex.female.displayName(language: .english) == "Female")
+    }
+
     @Test func swarmBrandAndMigrationCopyAreBilingual() {
         #expect(L10n.tr("Swarm", language: .russian) == "Swarm")
         #expect(L10n.tr("Swarm", language: .english) == "Swarm")

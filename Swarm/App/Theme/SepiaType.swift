@@ -31,7 +31,10 @@ enum SepiaType {
 
     /// Button and control labels.
     static let control = SepiaTheme.ui(size: 12)
-    /// Small tracked caps: field labels, section headers, badges.
+    /// Section headings inside a record ("Личность", "Рождение"). One step above a
+    /// field label so a group reads as a group rather than as another caption.
+    static let sectionLabel = SepiaTheme.ui(size: 13)
+    /// Small tracked caps: field labels, badges.
     static let label = SepiaTheme.ui(size: 11)
     /// The smallest legible step: legends, timestamps, card metadata.
     static let micro = SepiaTheme.ui(size: 10)

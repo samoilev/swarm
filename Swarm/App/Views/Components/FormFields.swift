@@ -96,6 +96,13 @@ struct SepiaNotesField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
+    /// Text inset, shared by the placeholder and the editor so the caret lands on the
+    /// first glyph of the placeholder it replaces.
+    private let inset: CGFloat = 9
+    /// ponytail: NSTextView adds its own horizontal container inset that TextEditor does
+    /// not expose, so the editor's padding is the placeholder's minus this. Measured, not
+    /// derived — re-check by eye if a macOS release moves it.
+    private let textViewInset: CGFloat = 5
     @State private var height: CGFloat = 90
     @State private var heightAtDragStart: CGFloat = 90
     @State private var isResizing = false
@@ -121,8 +128,8 @@ struct SepiaNotesField: View {
                     Text(placeholder)
                         .font(SepiaType.bodyLarge)
                         .foregroundColor(SepiaTheme.inkSoft)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 9)
+                        .padding(.horizontal, inset)
+                        .padding(.vertical, inset)
                         .allowsHitTesting(false)
                         .accessibilityHidden(true)
                 }
@@ -133,8 +140,8 @@ struct SepiaNotesField: View {
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
                     .accessibilityLabel(label)
-                    .padding(.horizontal, 4)
-                    .padding(.vertical, 3)
+                    .padding(.horizontal, inset - textViewInset)
+                    .padding(.vertical, inset)
             }
             .frame(height: height)
             .overlay(alignment: .bottom) {

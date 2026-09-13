@@ -9,6 +9,7 @@ struct OfflineVectorMapView: View {
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
 
     @State private var annotations: [OfflineMapAnnotation] = []
     @State private var routes: [OfflineMapRoute] = []
@@ -405,7 +406,12 @@ struct OfflineVectorMapView: View {
 
     private var magnificationGesture: some Gesture {
         MagnificationGesture()
-            .onChanged { value in mapScale = min(40, max(0.8, scaleAtGestureStart * value)) }
+            .onChanged { value in
+                // Same damping as the tree canvas. Undamped magnification is worst here:
+                // the scale range is 0.8–40, so a short pinch flew across it.
+                let damped = 1 + (value - 1) * zoomSensitivity
+                mapScale = min(40, max(0.8, scaleAtGestureStart * damped))
+            }
             .onEnded { _ in scaleAtGestureStart = mapScale }
     }
 
@@ -463,6 +469,30 @@ struct OfflinePersonMiniMap: View {
         .frame(height: miniPoints.isEmpty ? 64 : 150)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
+        .overlay(alignment: .topLeading) { legend }
+    }
+
+    /// Matches `ApplePersonMiniMap`'s legend so the card looks the same whichever map
+    /// provider is selected. Two items, not the full map's three: the mini map plots
+    /// birth and death only.
+    @ViewBuilder private var legend: some View {
+        let points = miniPoints
+        if !points.isEmpty {
+            HStack(spacing: 8) {
+                if points.contains(where: { $0.kind == .birth }) {
+                    HStack(spacing: 3) { Circle().fill(SepiaTheme.pinBirth).frame(width: 6, height: 6); Text(L10n.tr("Рожд.")) }
+                }
+                if points.contains(where: { $0.kind == .death }) {
+                    HStack(spacing: 3) { Circle().fill(SepiaTheme.pinDeath).frame(width: 6, height: 6); Text(L10n.tr("Смерть")) }
+                }
+            }
+            .font(SepiaTheme.ui(size: 9))
+            .foregroundColor(SepiaTheme.inkSoft)
+            .padding(5)
+            .background(SepiaTheme.paper.opacity(0.9))
+            .clipShape(RoundedRectangle(cornerRadius: 5))
+            .padding(6)
+        }
     }
 
     private var miniPoints: [OfflineMapAnnotation] {

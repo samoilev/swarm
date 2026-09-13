@@ -52,7 +52,7 @@ struct ApplePersonMiniMap: View {
                 .frame(height: 150)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
-                .overlay(alignment: .bottomLeading) { legend }
+                .overlay(alignment: .topLeading) { legend }
             } else if resolved {
                 placeholder(text: L10n.tr("Не удалось определить место на карте"))
             } else {

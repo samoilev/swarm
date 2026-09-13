@@ -9,7 +9,7 @@ struct SectionHeader: View {
     let title: String
     var body: some View {
         Text(title.uppercased())
-            .font(SepiaType.label).tracking(SepiaType.tracking(11)).foregroundColor(SepiaTheme.accent2).fontWeight(.semibold)
+            .font(SepiaType.sectionLabel).tracking(SepiaType.tracking(13)).foregroundColor(SepiaTheme.accent2).fontWeight(.semibold)
             .padding(.top, 16).padding(.bottom, 9)
             .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.fieldLine).frame(height: 1) }
             .padding(.bottom, 10)

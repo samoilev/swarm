@@ -35,7 +35,7 @@ struct TreeCanvasView: View {
     /// Rasterize once at 2×, then zoom with one GPU transform. At maximum zoom the
     /// bitmap is 1:1; lower zoom levels downsample it.
     private let superSample: CGFloat = 2
-    private let zoomSensitivity: CGFloat = 0.5 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
+    private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
     private let wheelZoomSensitivity: CGFloat = 0.05 // mouse-wheel zoom step per scroll unit (soft)
 
     @State private var panOffset: CGSize = .zero

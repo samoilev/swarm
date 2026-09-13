@@ -211,8 +211,8 @@ public final class Person: Identifiable, Codable, Hashable {
 
         public func displayName(language: AppLanguage) -> String {
             switch self {
-            case .male: language == .english ? "Male" : "Муж"
-            case .female: language == .english ? "Female" : "Жен"
+            case .male: L10n.tr("Мужской", language: language)
+            case .female: L10n.tr("Женский", language: language)
             case .unknown: L10n.tr("Не указан", language: language)
             }
         }
