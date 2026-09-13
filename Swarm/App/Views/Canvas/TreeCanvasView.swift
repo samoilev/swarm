@@ -36,7 +36,7 @@ struct TreeCanvasView: View {
     /// bitmap is 1:1; lower zoom levels downsample it.
     private let superSample: CGFloat = 2
     private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
-    private let wheelZoomSensitivity: CGFloat = 0.05 // mouse-wheel zoom step per scroll unit (soft)
+    private let wheelZoomSensitivity: CGFloat = 0.03 // mouse-wheel zoom step per scroll unit (soft)
 
     @State private var panOffset: CGSize = .zero
     @State private var dragStart: CGSize = .zero
@@ -163,7 +163,8 @@ struct TreeCanvasView: View {
                 ScrollWheelZoom(ignoreTrailing: trailingInset) { deltaY, location in
                     cancelInitialFocus()
                     var factor = 1 + deltaY * wheelZoomSensitivity
-                    factor = min(1.25, max(0.8, factor))
+                    // Reciprocal bounds, so one notch in and one notch out cancel.
+                    factor = min(1.15, max(1 / 1.15, factor))
                     let newZoom = min(2.0, max(0.2, zoom * factor))
                     guard newZoom != zoom else { return }
                     let ratio = newZoom / zoom
