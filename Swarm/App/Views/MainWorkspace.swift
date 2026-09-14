@@ -47,6 +47,10 @@ struct MainWorkspace: View {
     @State private var mapFocusScope: MapFocus.Scope = .branch
     @State private var showSaveError = false
     @State private var showMerge = false
+    /// The tree's save history, opened from the save clock in the toolbar.
+    @State private var showVersions = false
+    /// The full Recovery panel, reached from the version panel's footer.
+    @State private var showRecovery = false
     /// One-time teaching hint for the ⌘-click dual-select kinship feature.
     @AppStorage("dualSelectHintSeen") private var dualSelectHintSeen = false
     @State private var undo = TreeUndoController()
@@ -255,6 +259,29 @@ struct MainWorkspace: View {
             .onChange(of: showMerge) { _, isShown in
                 if isShown { undo.begin(tree) } else { undo.commit(tree) }
             }
+            // A restored version replaces the tree outside the undo controller. Without a
+            // session around it, ⌘Z afterwards would apply a snapshot taken before the
+            // restore and save it, silently undoing the restore the reader just asked for.
+            .onChange(of: showVersions) { _, isShown in
+                if isShown { undo.begin(tree) } else { undo.commit(tree) }
+            }
+    }
+
+    /// Held apart from the `.sheet` chain for the same reason the chain itself is split
+    /// from `body`: the combined expression pushes the type checker past its budget.
+    private var versionHistorySheet: some View {
+        VersionHistoryView(
+            tree: tree,
+            store: store,
+            onOpenRecovery: { showRecovery = true },
+            // A restored version swaps the whole tree under the canvas: the indexes and a
+            // selection pointing at someone that version never had both need reconciling.
+            onRestored: {
+                reconcileSelectionAfterRestore()
+                workspaceIndex.rebuild(tree: tree)
+                fitRequest += 1
+            }
+        )
     }
 
     private func showInitialToastIfNeeded() {
@@ -314,6 +341,8 @@ struct MainWorkspace: View {
                     showToast(L10n.tr("Слияние проверено и сохранено"))
                 }
             }
+            .sheet(isPresented: $showVersions) { versionHistorySheet }
+            .sheet(isPresented: $showRecovery) { RecoveryView(store: store, initialTreeID: tree.id) }
             .alert(L10n.tr("Удалить персону?"), isPresented: $showDeleteConfirm) {
                 Button(L10n.tr("Отмена"), role: .cancel) { personToDelete = nil }
                 Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
@@ -1211,27 +1240,38 @@ struct MainWorkspace: View {
         Button { showMerge = true } label: {
             Label(L10n.tr("Слить с локальным GEDCOM"), systemImage: "arrow.triangle.merge")
         }
+        Button { showVersions = true } label: {
+            Label(L10n.tr("Предыдущие версии"), systemImage: "clock.arrow.circlepath")
+        }
     }
 
     /// Quiet, always-visible reassurance that the vault is safe — edits persist
     /// immediately, so show that plainly rather than only warning when a save fails.
+    /// It is also the way into the history behind it: a reader wondering what was saved
+    /// is already looking at the word "saved", so the earlier versions open from there.
     private var savedStatus: some View {
         let savedTime = AppLanguage.current.formatted(
             tree.updatedAt,
             dateStyle: .none,
             timeStyle: .short
         )
-        return HStack(spacing: 4) {
-            Image(systemName: "checkmark.circle")
-                .font(SepiaTheme.icon(size: 10))
-            Text(L10n.tr("Сохранено в \(savedTime)"))
-                .font(SepiaType.micro)
-                .contentTransition(.numericText())
-                .sepiaMotion(SepiaMotion.state, value: tree.updatedAt)
+        let label = L10n.tr("Сохранено в \(savedTime). Открыть предыдущие версии")
+        return Button { showVersions = true } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "checkmark.circle")
+                    .font(SepiaTheme.icon(size: 10))
+                Text(L10n.tr("Сохранено в \(savedTime)"))
+                    .font(SepiaType.micro)
+                    .contentTransition(.numericText())
+                    .sepiaMotion(SepiaMotion.state, value: tree.updatedAt)
+            }
+            .foregroundColor(SepiaTheme.inkSoft)
+            .contentShape(Rectangle())
         }
-        .foregroundColor(SepiaTheme.inkSoft)
-        .help(L10n.tr("Дерево сохраняется автоматически после каждого изменения"))
-        .accessibilityLabel(L10n.tr("Сохранено в \(savedTime)"))
+        .buttonStyle(.plain)
+        .help(label)
+        .accessibilityLabel(label)
+        .accessibilityIdentifier("workspace.savedStatus")
     }
 
     /// Re-root and de-duplicate the tree structure from the toolbar menu.

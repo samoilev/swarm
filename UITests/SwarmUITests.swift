@@ -164,7 +164,10 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Восстановление"].waitForExistence(timeout: 5))
     }
 
-    func testRestoringGEDCOMRevisionCompletes() {
+    /// Restoring from the library, where the tree is not open: the card's own menu. The
+    /// version list used to live in Recovery as well; it does not any more, and this test
+    /// is what holds the library door open.
+    func testRestoringGEDCOMRevisionFromTheLibraryCard() {
         createInitialTree()
         app.buttons["Редактировать"].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         let name = app.textFields["ИМЯ"].firstMatch
@@ -172,15 +175,63 @@ final class SwarmUITests: XCTestCase {
         app.buttons["Сохранить"].click()
         XCTAssertTrue(app.staticTexts["Иванов Пётр"].waitForExistence(timeout: 5))
         app.buttons["Вернуться к списку деревьев"].click()
-        openRecoveryWorkspace()
+
+        let cardMenu = app.menuButtons["library.treeActions"].firstMatch
+        XCTAssertTrue(cardMenu.waitForExistence(timeout: 10), "The card actions menu is not reachable")
+        cardMenu.click()
+        let versions = app.menuItems["Предыдущие версии…"]
+        XCTAssertTrue(versions.waitForExistence(timeout: 5), "The card menu offers no version history")
+        versions.click()
+
         let restore = app.buttons["Вернуть эту версию"].firstMatch
         XCTAssertTrue(restore.waitForExistence(timeout: 15), "No saved revision was offered")
         restore.click()
+        let confirm = app.buttons["Вернуть версию"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5), "The restore was not confirmed first")
+        confirm.click()
+
         // Assert the outcome rather than the status line, which the sheet renders in a
         // way the accessibility tree does not surface: the edit is undone on the canvas.
         Thread.sleep(forTimeInterval: 3)
-        app.buttons["Закрыть восстановление"].firstMatch.click()
+        app.buttons["Закрыть предыдущие версии"].firstMatch.click()
         app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "UI Test")).firstMatch.click()
+        XCTAssertTrue(app.buttons["Иванов Иван"].waitForExistence(timeout: 15), "The restored version was not the one on the canvas")
+        XCTAssertFalse(app.buttons["Иванов Пётр"].exists)
+    }
+
+    /// Recovery is the rescue tool now, not a second version list. Its three groups stay;
+    /// the revisions group must not come back.
+    func testRecoveryNoLongerListsVersions() {
+        createInitialTree()
+        app.buttons["Вернуться к списку деревьев"].click()
+        openRecoveryWorkspace()
+        XCTAssertTrue(app.staticTexts["Восстановление"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Вернуть эту версию"].exists, "Recovery is listing versions again")
+    }
+
+    /// The same restore reached the way a reader actually finds it: the save clock in the
+    /// workspace toolbar, without closing the tree. The confirmation is the gate — nothing
+    /// is written until it is accepted.
+    func testRestoringAVersionFromTheSaveClock() {
+        createInitialTree()
+        app.buttons["Редактировать"].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let name = app.textFields["ИМЯ"].firstMatch
+        name.click(); name.typeKey("a", modifierFlags: .command); name.typeText("Пётр")
+        app.buttons["Сохранить"].click()
+        XCTAssertTrue(app.staticTexts["Иванов Пётр"].waitForExistence(timeout: 5))
+
+        let clock = app.buttons["workspace.savedStatus"].firstMatch
+        XCTAssertTrue(clock.waitForExistence(timeout: 10), "The save clock is not reachable")
+        clock.click()
+        XCTAssertTrue(app.staticTexts["Предыдущие версии"].waitForExistence(timeout: 5))
+
+        let restore = app.buttons["Вернуть эту версию"].firstMatch
+        XCTAssertTrue(restore.waitForExistence(timeout: 15), "No saved version was offered")
+        restore.click()
+        let confirm = app.buttons["Вернуть версию"].firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5), "The restore was not confirmed first")
+        confirm.click()
+
         XCTAssertTrue(app.buttons["Иванов Иван"].waitForExistence(timeout: 15), "The restored version was not the one on the canvas")
         XCTAssertFalse(app.buttons["Иванов Пётр"].exists)
     }
@@ -421,6 +472,15 @@ final class SwarmEnglishUITests: XCTestCase {
             XCTAssertTrue(item.waitForExistence(timeout: 5), "Missing English workspace: \(workspace)")
             item.click()
         }
+
+        // The save clock opens the version history, in English too. Restoring itself is
+        // covered by the Russian suite; what matters here is that the panel is reachable
+        // and translated.
+        let clock = app.buttons["workspace.savedStatus"].firstMatch
+        XCTAssertTrue(clock.waitForExistence(timeout: 10), "The save clock is not reachable")
+        clock.click()
+        XCTAssertTrue(app.staticTexts["Previous Versions"].waitForExistence(timeout: 5))
+        app.buttons["Close previous versions"].firstMatch.click()
 
         app.typeKey("?", modifierFlags: .command)
         XCTAssertTrue(app.staticTexts["Swarm Help"].waitForExistence(timeout: 3))

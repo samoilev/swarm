@@ -85,6 +85,24 @@ struct TreeSummary {
     }
 }
 
+/// Which archives Recovery opens on: everything in the storage folder, or one tree.
+private enum RecoveryScope: Identifiable {
+    case allTrees
+    case tree(UUID)
+
+    var id: String {
+        switch self {
+        case .allTrees: "all"
+        case let .tree(treeID): treeID.uuidString
+        }
+    }
+
+    var treeID: UUID? {
+        if case let .tree(treeID) = self { return treeID }
+        return nil
+    }
+}
+
 struct TreeLibraryView: View {
     let trees: [FamilyTree]
     let onSelect: (FamilyTree) -> Void
@@ -125,7 +143,13 @@ struct TreeLibraryView: View {
     /// Set from `store.lastLoadError` when trees on disk failed to parse at launch.
     @State private var showLoadError = false
     @State private var showStorageMigrationWarning = false
-    @State private var showRecovery = false
+    /// What Recovery opens on. It travels as the sheet's item rather than as a flag beside
+    /// it: setting an id and a bool separately raced the dismissal of the panel handing
+    /// over, and Recovery opened on the first tree in the library instead of that one.
+    @State private var recoveryScope: RecoveryScope?
+    /// The tree whose save history is open. The library reaches the version panel from the
+    /// card menu; the workspace reaches the same panel from its save clock.
+    @State private var versionsTree: FamilyTree?
     // Find / sort / keyboard traversal
     @State private var filterText = ""
     @AppStorage(TreeSortOrder.storageKey) private var sortOrderRaw = TreeSortOrder.recentlyUpdated.rawValue
@@ -286,7 +310,18 @@ struct TreeLibraryView: View {
         .onChange(of: store.storageMigrationWarning) { _, newValue in
             showStorageMigrationWarning = (newValue != nil)
         }
-        .sheet(isPresented: $showRecovery) { RecoveryView(store: store) }
+        .sheet(item: $recoveryScope) { recoverySheet(for: $0) }
+        .sheet(item: $versionsTree) { versionHistorySheet(for: $0) }
+    }
+
+    private func recoverySheet(for scope: RecoveryScope) -> some View {
+        RecoveryView(store: store, initialTreeID: scope.treeID)
+    }
+
+    private func versionHistorySheet(for tree: FamilyTree) -> some View {
+        VersionHistoryView(tree: tree, store: store, onOpenRecovery: {
+            recoveryScope = .tree(tree.id)
+        })
     }
 
     // MARK: - Chrome
@@ -360,7 +395,7 @@ struct TreeLibraryView: View {
             // Recovery is a once-a-year rescue tool. It stays reachable, but it no
             // longer sits at the front door with the same weight as creating a tree.
             Menu {
-                Button(L10n.tr("Восстановить из резервной копии…")) { showRecovery = true }
+                Button(L10n.tr("Восстановить из резервной копии…")) { recoveryScope = .allTrees }
                 Button(L10n.tr("Показать папку хранилища")) {
                     NSWorkspace.shared.activateFileViewerSelecting([store.storageFolderURL])
                 }
@@ -498,6 +533,7 @@ struct TreeLibraryView: View {
             onSelect: { onSelect(tree) },
             onReveal: { onRevealInFinder?(tree) },
             onRename: { startRename(tree) },
+            onVersions: { versionsTree = tree },
             onDelete: { treeToDelete = tree }
         )
         .opacity(shown ? 1 : 0)
@@ -647,7 +683,7 @@ struct TreeLibraryView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
-                Button(L10n.tr("Обновить формат…")) { showRecovery = true }
+                Button(L10n.tr("Обновить формат…")) { recoveryScope = .allTrees }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
             }
             .padding(.horizontal, 24)
@@ -811,6 +847,7 @@ struct TreeCardView: View {
     let onSelect: () -> Void
     var onReveal: (() -> Void)?
     var onRename: (() -> Void)?
+    var onVersions: (() -> Void)?
     var onDelete: (() -> Void)?
 
     @Environment(\.locale) private var locale
@@ -828,6 +865,7 @@ struct TreeCardView: View {
 
     @ViewBuilder private var menuItems: some View {
         Button { onRename?() } label: { Label(L10n.tr("Переименовать…"), systemImage: "pencil") }
+        Button { onVersions?() } label: { Label(L10n.tr("Предыдущие версии…"), systemImage: "clock.arrow.circlepath") }
         Button { onReveal?() } label: { Label(L10n.tr("Показать в Finder"), systemImage: "folder") }
         Divider()
         Button(role: .destructive) { onDelete?() } label: { Label(L10n.tr("Удалить…"), systemImage: "trash") }

@@ -5,6 +5,9 @@ import SwiftUI
 struct RecoveryView: View {
     @Environment(\.dismiss) private var dismiss
     let store: TreeStore
+    /// Which tree the panel opens on. The library shows the whole storage folder and
+    /// passes nothing; the workspace arrives from one open tree and passes its id.
+    var initialTreeID: UUID?
     @State private var selectedTreeID: UUID?
     /// Which person a deleted file goes back to, chosen per row.
     @State private var restoreTargets: [String: UUID] = [:]
@@ -40,11 +43,6 @@ struct RecoveryView: View {
                         if items.isEmpty {
                             emptyState
                         } else {
-                            group(
-                                .revision,
-                                title: L10n.tr("Предыдущие версии"),
-                                explanation: L10n.tr("Состояние дерева после каждого сохранения. Хранятся последние 50.")
-                            )
                             group(
                                 .deletedFile,
                                 title: L10n.tr("Удалённые файлы"),
@@ -84,7 +82,7 @@ struct RecoveryView: View {
         }
         .frame(width: SepiaTheme.scaledPanel(760, axis: .horizontal), height: SepiaTheme.scaledPanel(560, axis: .vertical))
         .onAppear {
-            if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
+            if selectedTreeID == nil { selectedTreeID = initialTreeID ?? store.trees.first?.id }
             refresh()
         }
         .onChange(of: selectedTreeID) { _, _ in restoreTargets = [:]; refresh() }
@@ -98,7 +96,7 @@ struct RecoveryView: View {
     private var header: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Восстановление"),
-            subtitle: L10n.tr("Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения."),
+            subtitle: L10n.tr("Удалённые файлы, полные копии архива и убранные деревья. Прошлые версии дерева — на его карточке, в «Предыдущих версиях»."),
             minimumHeight: 68,
             closeLabel: L10n.tr("Закрыть восстановление"),
             closeDisabled: isWorking,
@@ -123,7 +121,7 @@ struct RecoveryView: View {
             .labelsHidden()
             .pickerStyle(.menu)
             .frame(width: SepiaTheme.scaled(260))
-            .help(L10n.tr("Выберите дерево, историю которого нужно посмотреть"))
+            .help(L10n.tr("Выберите дерево, файлы и копии которого нужно посмотреть"))
 
             Spacer()
         }
@@ -131,12 +129,12 @@ struct RecoveryView: View {
 
     private var emptyState: some View {
         VStack(spacing: 8) {
-            Image(systemName: "clock.arrow.circlepath")
+            Image(systemName: "trash.slash")
                 .font(SepiaTheme.icon(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
             Text(selectedTree == nil ? L10n.tr("Выберите архив") : L10n.tr("Пока нечего восстанавливать"))
                 .font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
             Text(selectedTree == nil
-                ? L10n.tr("Выберите дерево выше, чтобы увидеть его версии и удалённые файлы.")
+                ? L10n.tr("Выберите дерево выше, чтобы увидеть его удалённые файлы и копии.")
                 : L10n.tr("Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы."))
                 .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                 .multilineTextAlignment(.center)
@@ -270,7 +268,9 @@ struct RecoveryView: View {
     // MARK: - Actions
 
     private func refresh() {
-        items = store.recoveryItems(for: selectedTree)
+        // Revisions are listed by the version panel, which knows how to describe one.
+        // Recovery keeps the three kinds nothing else surfaces.
+        items = store.recoveryItems(for: selectedTree).filter { $0.kind != .revision }
     }
 
     private func reveal(_ url: URL) {
@@ -286,9 +286,8 @@ struct RecoveryView: View {
             do {
                 switch item.kind {
                 case .revision:
-                    guard let tree = selectedTree else { return }
-                    _ = try await store.restoreRevision(item, to: tree)
-                    statusMessage = L10n.tr("Версия от \(formattedTimestamp(item.createdAt)) восстановлена.")
+                    // Filtered out of `items`; the version panel owns restoring these.
+                    return
                 case .deletedFile:
                     guard let tree = selectedTree,
                           let id = restoreTargets[item.id],

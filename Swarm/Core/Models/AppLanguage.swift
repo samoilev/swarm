@@ -64,6 +64,7 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 public enum L10n {
     public enum CountUnit: Sendable {
         case person
+        case family
         case event
         case tree
         case generation
@@ -124,6 +125,7 @@ public enum L10n {
         case .english:
             let noun = switch unit {
             case .person: value == 1 ? "person" : "people"
+            case .family: value == 1 ? "family" : "families"
             case .event: value == 1 ? "event" : "events"
             case .tree: value == 1 ? "tree" : "trees"
             case .generation: value == 1 ? "generation" : "generations"
@@ -133,6 +135,7 @@ public enum L10n {
         case .russian:
             let forms: (one: String, few: String, many: String) = switch unit {
             case .person: ("человек", "человека", "человек")
+            case .family: ("семья", "семьи", "семей")
             case .event: ("событие", "события", "событий")
             case .tree: ("дерево", "дерева", "деревьев")
             case .generation: ("поколение", "поколения", "поколений")

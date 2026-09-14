@@ -165,3 +165,40 @@ public enum TreeStoreError: LocalizedError {
         }
     }
 }
+
+/// What a history revision holds, so one save can be told apart from the next in the
+/// version list. Counts only — a revision carries no other metadata on disk.
+public struct RevisionSummary: Sendable, Hashable {
+    public var people: Int
+    public var families: Int
+
+    public init(people: Int, families: Int) {
+        self.people = people
+        self.families = families
+    }
+
+    /// Count the records in a revision file. A revision is always GEDCOM written by this
+    /// app's own serializer, so counting level-0 `INDI`/`FAM` lines is exact and costs a
+    /// single scan instead of building a whole `FamilyTree`.
+    ///
+    /// ponytail: line scan rather than `GEDCOMCodec.parse` — parsing 50 trees to show 50
+    /// numbers is the expensive path. Switch to a parse only if a row needs more than
+    /// counts. Returns nil when the file is gone or is not UTF-8.
+    public static func read(at url: URL) -> RevisionSummary? {
+        guard let text = try? String(contentsOf: url, encoding: .utf8) else { return nil }
+        var people = 0
+        var families = 0
+        for line in text.split(whereSeparator: \.isNewline) {
+            let fields = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard fields.count >= 3, fields[0] == "0" else { continue }
+            // `0 @I1@ INDI` — the tag is the third field; a level-0 line with a tag in
+            // second place (`0 HEAD`, `0 TRLR`) is not a record and falls through.
+            switch fields[2] {
+            case "INDI": people += 1
+            case "FAM": families += 1
+            default: continue
+            }
+        }
+        return RevisionSummary(people: people, families: families)
+    }
+}

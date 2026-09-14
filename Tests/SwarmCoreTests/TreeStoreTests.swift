@@ -413,4 +413,63 @@ struct TreeStoreTests {
         let parsed = try GEDCOMCodec.parse(ged).tree
         #expect(abs(parsed.updatedAt.timeIntervalSince(lastYear)) < 1)
     }
+
+    // MARK: - Version history
+
+    /// The version panel names each revision by what it held, so the counts have to come
+    /// from the revision itself — and a revision is the state *before* the save that
+    /// wrote it, not the state after.
+    @Test func revisionSummaryCountsTheStateBeforeTheSave() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+
+        let child = Person(givenNames: "Пётр", surname: "Иванов", sex: .male)
+        tree.people.append(child)
+        tree.unions[0].childrenIds.append(child.id)
+        _ = try await store.saveTree(tree)
+
+        let revisions = store.recoveryItems(for: tree).filter { $0.kind == .revision }
+        let newest = try #require(revisions.first)
+        let summary = try #require(RevisionSummary.read(at: newest.url))
+        #expect(summary.people == 2)
+        #expect(summary.families == 1)
+        #expect(tree.people.count == 3)
+    }
+
+    @Test func revisionSummaryIsNilForAMissingOrUnreadableFile() throws {
+        let temp = Temp()
+        let missing = temp.url.appendingPathComponent("gone.ged")
+        #expect(RevisionSummary.read(at: missing) == nil)
+
+        let notText = temp.url.appendingPathComponent("binary.ged")
+        try Data([0xFF, 0xFE, 0xFF]).write(to: notText)
+        #expect(RevisionSummary.read(at: notText) == nil)
+    }
+
+    /// Restoring is itself a save, so the state that was replaced becomes the newest
+    /// revision. The confirmation copy promises exactly this, and the panel's "undo by
+    /// restoring the top row" behaviour depends on it.
+    @Test func restoringARevisionKeepsTheReplacedStateAsTheNewestRevision() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+
+        let child = Person(givenNames: "Пётр", surname: "Иванов", sex: .male)
+        tree.people.append(child)
+        tree.unions[0].childrenIds.append(child.id)
+        _ = try await store.saveTree(tree)
+
+        let twoPeople = try #require(store.recoveryItems(for: tree).first { $0.kind == .revision })
+        _ = try await store.restoreRevision(twoPeople, to: tree)
+        #expect(tree.people.count == 2)
+
+        let revisions = store.recoveryItems(for: tree).filter { $0.kind == .revision }
+        let newest = try #require(revisions.first)
+        let summary = try #require(RevisionSummary.read(at: newest.url))
+        #expect(summary.people == 3)
+        #expect(revisions.count == 2)
+    }
 }

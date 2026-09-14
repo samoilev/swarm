@@ -393,13 +393,13 @@
 "Не удалось восстановить" = "Could Not Restore";
 "Закрыть восстановление" = "Close Recovery";
 "Закрыть карточку" = "Close Profile";
-"Здесь лежат прошлые версии дерева, удалённые файлы и резервные копии. Ничего не перезаписывается без вашего подтверждения." = "Previous tree versions, deleted files, and backups live here. Nothing is overwritten without your confirmation.";
+"Удалённые файлы, полные копии архива и убранные деревья. Прошлые версии дерева — на его карточке, в «Предыдущих версиях»." = "Deleted files, full archive copies, and trees you put away. Previous versions of a tree live on the tree itself, under Previous Versions.";
 "Архив" = "Archive";
 "Все архивы" = "All Archives";
-"Выберите дерево, историю которого нужно посмотреть" = "Choose the tree whose history you want to view";
+"Выберите дерево, файлы и копии которого нужно посмотреть" = "Choose the tree whose files and copies you want to view";
 "Выберите архив" = "Choose an Archive";
 "Пока нечего восстанавливать" = "Nothing to Recover Yet";
-"Выберите дерево выше, чтобы увидеть его версии и удалённые файлы." = "Choose a tree above to see its versions and deleted files.";
+"Выберите дерево выше, чтобы увидеть его удалённые файлы и копии." = "Choose a tree above to see its deleted files and copies.";
 "Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы." = "Copies will appear automatically after you save changes and remove files.";
 "Обновление формата" = "Format Upgrade";
 "Эти файлы записаны в старом формате. Они открываются и читаются, но сохранить в них изменения нельзя, пока формат не обновлён." = "These files use the old format. You can open and read them, but changes cannot be saved until the format is upgraded.";
@@ -788,7 +788,7 @@
 "Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки." = "The record is marked living but also contains death data; the original data was preserved for review.";
 "Карта и данные" = "Maps and Data";
 "Поиск мест и офлайн-карта работают локально: индекс GeoNames (бывший СССР, Европа, Северная Америка) и векторы Natural Earth. Координаты хранятся в GEDCOM. Apple Maps видит только область просмотра." = "Place search and the offline map run locally: a GeoNames index (former USSR, Europe, North America) and Natural Earth vectors. Coordinates are stored in the GEDCOM. Apple Maps sees only the visible region.";
-"Меню архива → восстановление. Хранятся 50 последних редакций, удалённые файлы — 30 дней. Swarm показывает, что будет заменено, до замены." = "Archive menu → Recovery. The last 50 revisions are kept, deleted files for 30 days. Swarm shows what will be replaced before replacing it.";
+"Предыдущие версии — по часам «Сохранено» в дереве или из меню его карточки: 50 последних сохранений, возврат с подтверждением. Меню архива → восстановление хранит удалённые файлы 30 дней и полные копии архива." = "Previous versions open from the Saved clock inside a tree, or from its card menu: the last 50 saves, restored after a confirmation. Archive menu → Recovery keeps deleted files for 30 days, plus full archive copies.";
 "Поддержка" = "Support";
 "Ошибки и вопросы — на GitHub. Не прикладывайте семейные данные." = "Report bugs and ask questions on GitHub. Don’t attach family data.";
 "Открыть поддержку на GitHub" = "Open GitHub Support";
@@ -831,3 +831,20 @@
 "Ребёнок родился больше чем через год после смерти родителя." = "The child was born more than a year after the parent died.";
 "Я понимаю: в файле есть ошибки. Их можно исправить в «Проверке» после импорта." = "I understand the file has errors. They can be fixed under Review after importing.";
 "Заметка очень длинная. Текст сохранён полностью." = "This note is very long. All of the text has been saved.";
+
+/* Version history */
+"Сохранено в %@. Открыть предыдущие версии" = "Saved at %@. Open previous versions";
+"Закрыть предыдущие версии" = "Close previous versions";
+"Сейчас · сохранено в %@" = "Now · saved at %@";
+"Считаем записи…" = "Counting records…";
+"Версия от %@. %@" = "Version from %@. %@";
+"%@ · на %@ больше, чем сейчас" = "%@ · %@ more than now";
+"%@ · на %@ меньше, чем сейчас" = "%@ · %@ fewer than now";
+"Вернуть версию от %@?" = "Restore the version from %@?";
+"Дерево вернётся к этому состоянию. Нынешнее состояние не пропадёт — оно само станет верхней версией в этом списке, так что возврат можно отменить." = "The tree goes back to this state. The current state is not lost: it becomes the newest version in this list, so the restore can be undone.";
+"Пока нет предыдущих версий" = "No Previous Versions Yet";
+"Версия записывается при каждом сохранении. Первая появится после следующей правки." = "A version is recorded on every save. The first one appears after your next edit.";
+"В версии только текст дерева. Удалённые фотографии и вложения — в «Восстановлении», 30 дней." = "A version holds the tree's text only. Deleted photos and attachments live under Recovery for 30 days.";
+"Удалённые файлы и копии…" = "Deleted files and copies…";
+"Вернуть версию" = "Restore Version";
+"Предыдущие версии…" = "Previous Versions…";
