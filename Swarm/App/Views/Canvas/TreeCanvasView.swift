@@ -1163,17 +1163,37 @@ enum PortraitThumbnail {
         guard person.hasPhoto else { return nil }
         let key = "\(person.id.uuidString)-\(person.photoFilename ?? "unsaved")-\(person.photoRevision)" as NSString
         if let cached = cache.object(forKey: key) { return cached }
-        guard let data = person.photoDataUncached() else { return nil }
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+        guard let data = person.photoDataUncached(),
+              let image = downsample(CGImageSourceCreateWithData(data as CFData, nil)) else { return nil }
+        cache.setObject(image, forKey: key)
+        return image
+    }
+
+    /// The same downsample for a file on disk — an image attachment in the gallery.
+    /// Keyed on path plus modification date, so replacing a file behind the app's back
+    /// still redraws.
+    static func image(url: URL) -> NSImage? {
+        let stamp = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)?
+            .timeIntervalSince1970 ?? 0
+        let key = "\(url.path)-\(stamp)" as NSString
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let image = downsample(CGImageSourceCreateWithURL(url as CFURL, nil)) else { return nil }
+        cache.setObject(image, forKey: key)
+        return image
+    }
+
+    /// `WithTransform` applies the EXIF orientation, so the size that comes back is the
+    /// size the picture is actually shown at — which is what lets a gallery tile take its
+    /// own aspect ratio rather than guessing one.
+    private static func downsample(_ source: CGImageSource?) -> NSImage? {
+        guard let source,
               let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, [
                   kCGImageSourceCreateThumbnailFromImageAlways: true,
                   kCGImageSourceCreateThumbnailWithTransform: true,
                   kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
               ] as CFDictionary)
         else { return nil }
-        let image = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
-        cache.setObject(image, forKey: key)
-        return image
+        return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
     }
 }
 

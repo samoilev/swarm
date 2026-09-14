@@ -245,6 +245,9 @@
 "Файл" = "File";
 "Портрет" = "Portrait";
 "Открыть фото" = "Open Photo";
+"Предыдущее фото" = "Previous Photo";
+"Следующее фото" = "Next Photo";
+"Фото %@ из %@" = "Photo %@ of %@";
 "Открыть на карте" = "Open on Map";
 "Фокус карты" = "Map Focus";
 "Фокус: один человек" = "Focus: One Person";

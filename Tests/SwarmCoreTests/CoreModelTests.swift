@@ -203,4 +203,29 @@ struct CoreModelTests {
         #expect(lineage.ids.contains(person.id))
         #expect(lineage.connections.allSatisfy { $0.firstID != $0.secondID })
     }
+
+    /// The card's photo gallery is exactly this list, and it is hidden below two
+    /// entries — so what counts as a photo, and in what order, is the whole rule.
+    @Test func photoRefsListThePortraitFirstThenImageAttachmentsOnly() {
+        let image = Attachment(storedName: "\(UUID().uuidString).jpg", originalName: "Свадьба.jpg")
+        let document = Attachment(storedName: "\(UUID().uuidString).pdf", originalName: "Метрика.pdf")
+
+        let withPortrait = Person(givenNames: "С портретом", sex: .female)
+        withPortrait.photoFilename = "portrait.jpg"
+        withPortrait.attachments = [document, image]
+        #expect(withPortrait.photoRefs == [.portrait, .attachment(image)])
+
+        // A portrait on its own, and a person with no pictures at all: no gallery.
+        let portraitOnly = Person(givenNames: "Только портрет", sex: .male)
+        portraitOnly.photoFilename = "portrait.jpg"
+        portraitOnly.attachments = [document]
+        #expect(portraitOnly.photoRefs == [.portrait])
+        #expect(Person(givenNames: "Пусто", sex: .male).photoRefs.isEmpty)
+
+        // No portrait: the attachments keep their own order and stand alone.
+        let second = Attachment(storedName: "\(UUID().uuidString).png", originalName: "Дом.png")
+        let noPortrait = Person(givenNames: "Без портрета", sex: .female)
+        noPortrait.attachments = [image, document, second]
+        #expect(noPortrait.photoRefs == [.attachment(image), .attachment(second)])
+    }
 }

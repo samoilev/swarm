@@ -9,10 +9,11 @@ struct InspectorPanel: View {
     @Binding var width: CGFloat
     var onEdit: ((Person) -> Void)?
     var onDelete: ((Person) -> Void)?
-    /// Opening the portrait is the workspace's job, not the panel's: a sheet is its own
+    /// Opening a photo is the workspace's job, not the panel's: a sheet is its own
     /// window, so a click on the dimmed canvas behind it never reaches us. The full-size
-    /// portrait is presented as an overlay over the whole window instead.
-    var onOpenPortrait: ((Person) -> Void)?
+    /// photo is presented as an overlay over the whole window instead. The index is into
+    /// `Person.photoRefs`, so the viewer opens on the picture that was clicked.
+    var onOpenPhoto: ((Person, Int) -> Void)?
     /// Switching the workspace to the map is the workspace's job too — the panel only
     /// says which person the map should open on.
     var onOpenMap: ((Person) -> Void)?
@@ -149,6 +150,11 @@ struct InspectorPanel: View {
         VStack(alignment: .leading, spacing: 13) {
             navRow(person)
             identityRow(person)
+            // Only worth a row of its own once there is a second picture: with just the
+            // portrait the header above is already showing it.
+            if person.photoRefs.count > 1 {
+                PersonPhotoStrip(person: person, tree: tree, store: store) { onOpenPhoto?(person, $0) }
+            }
         }
         .padding(.top, 13)
         .padding(.bottom, 10)
@@ -258,7 +264,7 @@ struct InspectorPanel: View {
     @ViewBuilder
     private func portrait(_ person: Person) -> some View {
         if person.photoData != nil {
-            Button { onOpenPortrait?(person) } label: { portraitPlate(person) }
+            Button { onOpenPhoto?(person, 0) } label: { portraitPlate(person) }
                 .buttonStyle(.plain)
                 .onHover { $0 ? NSCursor.pointingHand.set() : NSCursor.arrow.set() }
                 .help(L10n.tr("Открыть фото"))
@@ -423,7 +429,7 @@ struct InspectorPanel: View {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: L10n.tr("Файлы"))
                 if let portraitImage {
-                    Button { onOpenPortrait?(p) } label: {
+                    Button { onOpenPhoto?(p, 0) } label: {
                         fileRow(title: L10n.tr("Портрет"), format: portraitFormat(p)) {
                             Image(nsImage: portraitImage)
                                 .resizable()
@@ -625,17 +631,27 @@ struct InspectorPanel: View {
     }
 }
 
-/// The portrait at the size the file actually holds. The card can only ever show a
-/// thumbnail of it, and the photo is usually the one thing on a record worth looking at
-/// closely — a face, a uniform, a date written on the back.
+/// A photo at the size the file actually holds. The card can only ever show a thumbnail
+/// of it, and the pictures are usually the one thing on a record worth looking at closely
+/// — a face, a uniform, a date written on the back.
 ///
-/// An overlay over the workspace rather than a sheet: a sheet is a separate window, and
-/// the dimmed canvas around it belongs to the window underneath, which modality has
-/// already stopped answering the mouse. Owning the dimmer is what lets a click on it close.
+/// Walks the whole of `Person.photoRefs`: the portrait, then the image attachments. An
+/// overlay over the workspace rather than a sheet: a sheet is a separate window, and the
+/// dimmed canvas around it belongs to the window underneath, which modality has already
+/// stopped answering the mouse. Owning the dimmer is what lets a click on it close.
 struct PortraitPreview: View {
-    let image: NSImage?
-    let name: String
+    let person: Person
+    let tree: FamilyTree
+    var store: TreeStore
+    @Binding var index: Int
     let onClose: () -> Void
+
+    /// The photo currently on screen, tagged with the index it was loaded for: until
+    /// those agree the next file is still being read, which is not the same thing as a
+    /// file that isn't there.
+    @State private var loaded: (index: Int, image: NSImage?)?
+
+    private var photos: [PersonPhotoRef] { person.photoRefs }
 
     var body: some View {
         ZStack {
@@ -655,29 +671,34 @@ struct PortraitPreview: View {
             // click even when the window is barely bigger than the card.
             card.padding(28)
         }
+        // The count is part of the key: deleting a picture from the record under an open
+        // viewer has to reload it, not leave a file that is no longer attached on screen.
+        .task(id: [index, photos.count]) {
+            if index >= photos.count { index = max(0, photos.count - 1) }
+            let image = await load()
+            loaded = (index, image)
+        }
     }
 
     private var card: some View {
         VStack(spacing: 14) {
-            if let image {
-                Image(nsImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    .shadow(color: SepiaTheme.ink.opacity(0.24), radius: 14, y: 6)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else {
-                Text(L10n.tr("Портрет не найден"))
-                    .font(SepiaTheme.body(size: 14))
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-            }
+            photo
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .overlay(alignment: .leading) { step(-1, icon: "chevron.left", title: L10n.tr("Предыдущее фото")) }
+                .overlay(alignment: .trailing) { step(1, icon: "chevron.right", title: L10n.tr("Следующее фото")) }
 
             HStack(spacing: 10) {
-                Text(name)
-                    .font(SepiaType.body)
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .lineLimit(1).truncationMode(.tail)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(person.displayName(language: .current))
+                        .font(SepiaType.body)
+                        .foregroundColor(SepiaTheme.inkSoft)
+                        .lineLimit(1).truncationMode(.tail)
+                    if photos.count > 1 {
+                        Text(L10n.tr("Фото \(index + 1) из \(photos.count)"))
+                            .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5))
+                            .foregroundColor(SepiaTheme.inkSoft)
+                    }
+                }
                 Spacer(minLength: 8)
                 Button(L10n.tr("Закрыть")) { onClose() }
                     .buttonStyle(.glass)
@@ -698,6 +719,63 @@ struct PortraitPreview: View {
         // Stops a click on the card itself from reaching the dimmer behind it.
         .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .onTapGesture {}
+    }
+
+    @ViewBuilder
+    private var photo: some View {
+        if let loaded, loaded.index == index {
+            if let image = loaded.image {
+                Image(nsImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .shadow(color: SepiaTheme.ink.opacity(0.24), radius: 14, y: 6)
+            } else {
+                Text(L10n.tr("Портрет не найден"))
+                    .font(SepiaTheme.body(size: 14))
+                    .foregroundColor(SepiaTheme.inkSoft)
+            }
+        } else {
+            // Reading the next file, which is not the same as not finding it.
+            Color.clear
+        }
+    }
+
+    /// One arrow. Absent when there is nothing to step to, so a single photo keeps the
+    /// viewer it has always had.
+    @ViewBuilder
+    private func step(_ delta: Int, icon: String, title: String) -> some View {
+        if photos.count > 1 {
+            Button {
+                // ponytail: wraps instead of disabling at the ends — no end state to style.
+                index = (index + delta + photos.count) % photos.count
+            } label: {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                    .frame(width: 30, height: 30)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .keyboardShortcut(delta < 0 ? .leftArrow : .rightArrow, modifiers: [])
+            .padding(10)
+            .help(title)
+            .accessibilityLabel(title)
+        }
+    }
+
+    /// The bytes come off disk on a background thread: at full size that is the one part
+    /// of opening a photo worth keeping off the main actor. Only the visible file is read.
+    private func load() async -> NSImage? {
+        guard photos.indices.contains(index) else { return nil }
+        switch photos[index] {
+        case .portrait:
+            // `photoDataUncached` already prefers bytes chosen this session over the file.
+            guard let data = person.photoDataUncached() else { return nil }
+            return await Task.detached(priority: .userInitiated) { NSImage(data: data) }.value
+        case let .attachment(attachment):
+            let url = store.attachmentURL(attachment, in: tree)
+            return await Task.detached(priority: .userInitiated) { NSImage(contentsOf: url) }.value
+        }
     }
 }
 

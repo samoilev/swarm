@@ -27,8 +27,10 @@ struct MainWorkspace: View {
     @State private var showExportModal = false
     @State private var showAddSheet = false
     @State private var editingPerson: Person?
-    /// Person whose portrait is open full size. An overlay, not a sheet — see PortraitPreview.
+    /// Person whose photos are open full size. An overlay, not a sheet — see PortraitPreview.
     @State private var portraitPerson: Person?
+    /// Which of that person's photos the viewer is on, as an index into `photoRefs`.
+    @State private var photoIndex = 0
     @State private var toastMessage: String?
     @State private var highlightedBranch: Set<UUID> = []
     @State private var highlightedConnections: Set<FamilyConnection> = []
@@ -96,7 +98,10 @@ struct MainWorkspace: View {
                 personToDelete = person
                 showDeleteConfirm = true
             },
-            onOpenPortrait: { portraitPerson = $0 },
+            onOpenPhoto: { person, index in
+                portraitPerson = person
+                photoIndex = index
+            },
             onOpenMap: { person in
                 selectedPerson = person
                 mapFocusScope = .person
@@ -190,8 +195,10 @@ struct MainWorkspace: View {
             // inspector and the hint bar alike — and a click anywhere on it closes.
             if let portraitPerson {
                 PortraitPreview(
-                    image: portraitPerson.photoData.flatMap(NSImage.init(data:)),
-                    name: portraitPerson.displayName(language: .current),
+                    person: portraitPerson,
+                    tree: tree,
+                    store: store,
+                    index: $photoIndex,
                     onClose: { self.portraitPerson = nil }
                 )
                 .transition(.opacity)

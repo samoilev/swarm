@@ -57,3 +57,18 @@ public struct Attachment: Identifiable, Codable, Hashable {
         if !citations.isEmpty { try container.encode(citations, forKey: .citations) }
     }
 }
+
+/// One picture belonging to a person: either the portrait in `Media/` or an image
+/// attachment in `Attachments/`. Which of the two decides where the bytes are read
+/// from, so the card and the viewer can hold a mixed list and stay honest about it.
+public enum PersonPhotoRef: Identifiable, Hashable {
+    case portrait
+    case attachment(Attachment)
+
+    public var id: String {
+        switch self {
+        case .portrait: "portrait"
+        case let .attachment(a): a.id.uuidString
+        }
+    }
+}

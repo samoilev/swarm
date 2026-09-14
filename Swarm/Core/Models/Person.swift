@@ -87,6 +87,13 @@ public final class Person: Identifiable, Codable, Hashable {
     /// `Attachments/` folder; these entries only hold the linking metadata.
     public var attachments: [Attachment] = []
 
+    /// Every picture of this person the card can show, in one order: the portrait
+    /// first, then each image attachment as it was added. Built from metadata alone —
+    /// `hasPhoto` and `Attachment.isImage` both answer without touching the disk.
+    public var photoRefs: [PersonPhotoRef] {
+        (hasPhoto ? [.portrait] : []) + attachments.filter(\.isImage).map(PersonPhotoRef.attachment)
+    }
+
     /// Web links attached to this person (archive records, memorial pages).
     public var links: [WebLink] = []
 
