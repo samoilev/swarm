@@ -35,6 +35,37 @@ final class SwarmUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Несохранённое"].exists)
     }
 
+    /// The card's controls stop scrolling with the record: on a person too long to fit,
+    /// the edit and close circles are still in the corner, and closing the card does not
+    /// mean scrolling back to the top to find the button first.
+    func testCardActionsStayReachableWhileScrolled() {
+        createInitialTree()
+        // A record long enough to need scrolling. Notes are the cheapest way to make one:
+        // a single wrapped paragraph fills the card several screens deep.
+        app.buttons["Редактировать"].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let notes = app.textViews.firstMatch
+        XCTAssertTrue(notes.waitForExistence(timeout: 5))
+        notes.click()
+        notes.typeText(String(repeating: "Запись в метрической книге прихода. ", count: 60))
+        app.buttons["Сохранить"].firstMatch.click()
+
+        let close = app.buttons["Закрыть карточку"].firstMatch
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        let restingCorner = close.frame.origin
+
+        let scroller = app.scrollViews.firstMatch
+        XCTAssertTrue(scroller.waitForExistence(timeout: 5))
+        scroller.scroll(byDeltaX: 0, deltaY: -600)
+
+        XCTAssertTrue(app.buttons["Редактировать"].firstMatch.isHittable, "Edit scrolled out of reach")
+        XCTAssertTrue(close.isHittable, "Close scrolled out of reach")
+        XCTAssertEqual(close.frame.origin.x, restingCorner.x, accuracy: 1, "Close moved sideways")
+        XCTAssertEqual(close.frame.origin.y, restingCorner.y, accuracy: 1, "Close did not stay pinned")
+
+        close.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        XCTAssertFalse(close.waitForExistence(timeout: 2), "The card stayed open after Close")
+    }
+
     /// The whole point of the sources rebuild: an entry you add is visible in a list,
     /// survives a save/reopen, and can be changed and removed. Fields are addressed by
     /// accessibility identifier because labels like НАЗВАНИЕ appear more than once in

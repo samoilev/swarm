@@ -29,6 +29,22 @@ struct InspectorPanel: View {
     /// Hover over the resize gutter, which is otherwise invisible: the grabber only
     /// appears once the pointer is close enough to use it.
     @State private var resizeHovering = false
+    /// Bottom edge of the identity row in the scroller's own space, so the pinned
+    /// controls can tell when the record has climbed up to them. Starts below
+    /// everything: nothing has scrolled yet.
+    @State private var identityBottom: CGFloat = .greatestFiniteMagnitude
+
+    /// Name of the scroller's coordinate space, the frame `identityBottom` is read in.
+    private static let scrollSpace = "inspectorScroll"
+
+    /// Where the pinned row ends: its 13pt inset plus one 24pt circle.
+    private let barBottom: CGFloat = 37
+
+    /// Paper first, name second, 24pt of scroll apart: the rows are already dissolving
+    /// into the backdrop before the small name arrives, and the big one is long gone by
+    /// then, so the card never shows the same name twice.
+    private var barCovered: Bool { identityBottom < barBottom + 24 }
+    private var showBarName: Bool { identityBottom < barBottom }
 
     /// The panel floats rather than butting against the window edge, so its corner
     /// radius is a real one. Everything inside it stays concentric at a smaller radius.
@@ -98,6 +114,9 @@ struct InspectorPanel: View {
     /// The header scrolls away with the record rather than hovering over it: this is a
     /// card being read top to bottom, not a window with a title bar, and a pinned bar
     /// would spend most of a tall record repeating a name the reader has already left.
+    /// The exception is the two controls that act on the card rather than on the record
+    /// — `pinnedActions` keeps them over the scroller, so a deep record never has to be
+    /// scrolled back up to be closed.
     private func details(_ person: Person) -> some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -121,6 +140,7 @@ struct InspectorPanel: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 18)
         }
+        .coordinateSpace(.named(Self.scrollSpace))
         .scrollContentBackground(.hidden)
         // The overlay scroller lands on the trailing edge, right over the close button,
         // and swallows the click until it fades. The fades below already say there is
@@ -139,6 +159,9 @@ struct InspectorPanel: View {
                     .frame(height: 22)
             }
         }
+        // Outside the mask, so the top fade never dims the one pair of controls that is
+        // always supposed to be reachable.
+        .overlay(alignment: .top) { pinnedActions(person) }
     }
 
     // MARK: - Header
@@ -148,7 +171,7 @@ struct InspectorPanel: View {
     /// stacked in the margin — so no row of it was a row of anything.
     private func inspectorHeader(_ person: Person) -> some View {
         VStack(alignment: .leading, spacing: 13) {
-            navRow(person)
+            navRow
             identityRow(person)
             // Only worth a row of its own once there is a second picture: with just the
             // portrait the header above is already showing it.
@@ -160,38 +183,71 @@ struct InspectorPanel: View {
         .padding(.bottom, 10)
     }
 
-    /// Everything that acts on the card rather than on the record inside it, gathered
-    /// on one line: leave to the previous person, edit this one, close the card.
-    private func navRow(_ person: Person) -> some View {
+    /// Where you are, and the way back out of a relative-link walk. Edit and close left
+    /// this row for `pinnedActions`, which holds the same corner at every scroll
+    /// position; all that is still here of them is the gap they need.
+    private var navRow: some View {
+        HStack(spacing: 8) {
+            if !history.isEmpty {
+                Button {
+                    guard let prev = history.popLast() else { return }
+                    internalNav = true
+                    // Re-resolve against the live tree: an undo since this entry
+                    // was pushed may have replaced that Person instance.
+                    self.person = tree.person(byId: prev.id) ?? prev
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
+                        Text(L10n.tr("Назад")).font(SepiaType.label)
+                    }
+                }
+                .buttonStyle(.glass)
+                .buttonBorderShape(.capsule)
+                .foregroundStyle(SepiaTheme.accent2)
+                .controlSize(.small)
+                .help(L10n.tr("Вернуться к предыдущей персоне"))
+                .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
+                .transition(.opacity.combined(with: .move(edge: .leading)))
+            } else {
+                // The same tracked capitals the wordmark and the library use to say
+                // which room you are in. Holds the row's height when Back is absent,
+                // so the header doesn't grow and shrink as you walk the family.
+                SepiaTrackedLabel(L10n.tr("Персона"))
+                    .frame(height: 20)
+            }
+
+            Spacer(minLength: 8)
+        }
+        // The circles used to set this row's height; now that they float above it, the
+        // row has to hold that height itself or the whole header rides 4pt higher.
+        .frame(minHeight: 24)
+        // Two 24pt circles and the spacing between them float above this row, plus a gap
+        // before them, so a long Back capsule stops short of running underneath.
+        .padding(.trailing, 64)
+        .sepiaMotion(SepiaMotion.state, value: history.isEmpty)
+    }
+
+    /// Everything that acts on the card rather than on the record inside it: edit this
+    /// person, close the card. It rides over the scroller instead of in it, so the pair
+    /// is reachable however deep the record is read. At rest it lands on the same corner
+    /// the nav row used to hand it, so the card looks untouched until it is scrolled.
+    private func pinnedActions(_ person: Person) -> some View {
         GlassEffectContainer(spacing: 8) {
             HStack(spacing: 8) {
-                if !history.isEmpty {
-                    Button {
-                        guard let prev = history.popLast() else { return }
-                        internalNav = true
-                        // Re-resolve against the live tree: an undo since this entry
-                        // was pushed may have replaced that Person instance.
-                        self.person = tree.person(byId: prev.id) ?? prev
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
-                            Text(L10n.tr("Назад")).font(SepiaType.label)
-                        }
-                    }
-                    .buttonStyle(.glass)
-                    .buttonBorderShape(.capsule)
-                    .foregroundStyle(SepiaTheme.accent2)
-                    .controlSize(.small)
-                    .help(L10n.tr("Вернуться к предыдущей персоне"))
-                    .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
-                    .transition(.opacity.combined(with: .move(edge: .leading)))
-                } else {
-                    // The same tracked capitals the wordmark and the library use to say
-                    // which room you are in. Holds the row's height when Back is absent,
-                    // so the header doesn't grow and shrink as you walk the family.
-                    SepiaTrackedLabel(L10n.tr("Персона"))
-                        .frame(height: 20)
-                }
+                // The name the header was carrying, taken up only once the header has
+                // taken it away. A bar repeating a name that is still on screen is the
+                // thing this card was built not to do.
+                Text(person.displayName(language: .current))
+                    .font(SepiaType.label)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(SepiaTheme.ink)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .opacity(showBarName ? 1 : 0)
+                    // A label, never a target: at rest it is invisible but still laid
+                    // out, and it must not swallow clicks meant for the record below.
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
 
                 Spacer(minLength: 8)
 
@@ -225,7 +281,33 @@ struct InspectorPanel: View {
                 .accessibilityLabel(L10n.tr("Закрыть карточку"))
             }
         }
-        .sepiaMotion(SepiaMotion.state, value: history.isEmpty)
+        .padding(.top, 13)
+        .padding(.horizontal, 16)
+        .background(alignment: .top) { pinnedBackdrop }
+        .sepiaMotion(SepiaMotion.crossfade, value: showBarName)
+        .sepiaMotion(SepiaMotion.state, value: barCovered)
+    }
+
+    /// Paper rather than glass, and only once the record has actually climbed to the
+    /// controls: the rows have to dissolve under the circles instead of colliding with
+    /// them, and the fill the card is cut from is the only thing they can dissolve into.
+    ///
+    /// Solid for the whole height of the row and a little past it, and only then a fade.
+    /// A gradient that starts giving way at the top is already half transparent where
+    /// the name sits, which is what let a section label read through the name.
+    private var pinnedBackdrop: some View {
+        LinearGradient(
+            stops: [
+                .init(color: SepiaTheme.panelBg, location: 0),
+                .init(color: SepiaTheme.panelBg, location: 0.74),
+                .init(color: SepiaTheme.panelBg.opacity(0), location: 1),
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: 58)
+        .opacity(barCovered ? 1 : 0)
+        .allowsHitTesting(false)
     }
 
     private func identityRow(_ person: Person) -> some View {
@@ -254,6 +336,13 @@ struct InspectorPanel: View {
             }
             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
         }
+        // The one measurement the pinned row needs: how far this row's foot still is
+        // from the top of the card. Reading the row itself rather than a scroll offset
+        // keeps it right whatever the header is carrying — a portrait, a photo strip,
+        // a maiden name, none of them.
+        .onGeometryChange(for: CGFloat.self) { proxy in
+            proxy.frame(in: .named(Self.scrollSpace)).maxY
+        } action: { identityBottom = $0 }
     }
 
     /// 3:4 like every other portrait in the app, but rounded and inset rather than
