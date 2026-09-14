@@ -15,6 +15,9 @@ outputs/e2e-current-source-2026-08-01/swarm-e2e-current-source.xlsx
 # Local E2E planning — not part of the published project
 docs/e2e-test-scenarios.csv
 docs/e2e-since-3.3.1-agentic-runlist.md
+docs/e2e-since-3.4.0-agentic-runlist.md
+docs/e2e-post-3.4.0-execution-report.md
+outputs/e2e-post-3.4.0-2026-09-14/
 docs/e2e-post-3.3.1-execution-report.md
 
 # Impeccable critique snapshots / notes — local only

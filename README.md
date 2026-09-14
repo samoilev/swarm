@@ -6,7 +6,7 @@
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.4.0-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.4.0" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 26 or later" />
-  <img src="https://img.shields.io/badge/Swift-6.0%2B-F05138?style=flat&logo=swift&logoColor=white" alt="Swift 6.0 or later" />
+  <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
 </div>
   <br />
@@ -16,7 +16,7 @@ telemetry, no AI.
 
 It goes deep where most genealogy apps stop: exact kinship terms for any pair of
 people, patronymics, offline place search, and the encodings Soviet-era records
-arrive in. Native macOS, Swift 6, no third-party packages.
+arrive in. Native macOS, Swift, no third-party packages.
 
 ## Quick look
 
@@ -77,7 +77,7 @@ shasum -a 256 -c Swarm-3.4.0.dmg.sha256
 - **Nothing leaves the Mac.** Place lookup runs against a bundled index of 476,958
   bilingual GeoNames places, so searching for a village sends nothing anywhere. The map
   is the one optional network path: the default provider draws tiles through MapKit, and
-  the `offlineVector` provider in Settings removes even that.
+  switching Settings ▸ Map to **Offline Map** (`offlineVector`) removes even that.
 
 ## How Swarm compares
 
@@ -113,6 +113,10 @@ cd swarm
 swift build -c release
 swift run -c release Swarm
 ```
+
+The manifest is `swift-tools-version: 5.9`, so the package builds in Swift 5 language
+mode with strict concurrency checking turned on for the core module. A current Swift 6
+toolchain — the one in Xcode 26 — is what it is built and tested against.
 
 `swift build` alone gives you a debug build. Fine for development, slower on large trees.
 You can also open the package folder in Xcode (`File ▸ Open…`). To develop against a

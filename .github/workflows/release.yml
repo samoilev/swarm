@@ -75,8 +75,9 @@ jobs:
             echo "Open the DMG and drag Swarm to Applications."
             echo
             echo "This build is **not signed with an Apple Developer ID and is not notarized**, so the"
-            echo "first launch is blocked. Right-click the app in Applications and choose **Open**, then"
-            echo "confirm. You only need to do this once."
+            echo "first launch is blocked. Open it once, then allow it under **System Settings ▸ Privacy"
+            echo "& Security ▸ Open Anyway**. You only need to do this once. (Right-click ▸ Open no"
+            echo "longer works for an unsigned app on current macOS.)"
             echo
             echo "Apple silicon only, macOS 26 or later. Prefer to build it yourself? See the"
             echo "[README](https://github.com/${GITHUB_REPOSITORY}#build-and-run)."

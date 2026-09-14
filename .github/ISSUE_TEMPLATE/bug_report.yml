@@ -31,8 +31,8 @@ body:
     id: version
     attributes:
       label: Swarm version
-      description: The contents of the `VERSION` file, or the commit you built from.
-      placeholder: "2.1.0"
+      description: Shown in Swarm ▸ About. If you built it yourself, the commit instead.
+      placeholder: "3.4.0"
     validations:
       required: true
 
@@ -40,7 +40,7 @@ body:
     id: macos
     attributes:
       label: macOS version
-      placeholder: "15.2 (Apple silicon)"
+      placeholder: "26.0 (Apple silicon)"
     validations:
       required: true
 

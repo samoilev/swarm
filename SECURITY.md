@@ -7,9 +7,9 @@ backported fixes.
 
 Swarm is a local-only desktop app: no accounts, no server, no sync, no analytics, no AI.
 It sends no genealogy data anywhere, and place lookup runs against bundled data files.
-The one optional network path is Apple Maps. With the default `appleMaps` provider,
-MapKit renders tiles and Apple may receive the viewed region. The `offlineVector`
-provider removes even that.
+The one optional network path is Apple Maps. With the default provider — **Apple Maps**
+in Settings, `appleMaps` on disk — MapKit renders tiles and Apple may receive the viewed
+region. Switching to **Offline Map** (`offlineVector`) removes even that.
 
 The app does not run in the macOS App Sandbox, so it can read files the user selects
 anywhere on disk. That makes file parsing the main risk. The reports worth most:
