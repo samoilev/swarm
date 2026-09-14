@@ -296,6 +296,138 @@ struct GEDCOMRoundTripTests {
         #expect(parsed.people.first?.notes == longNote) // re-joined exactly
     }
 
+    // MARK: - Free-form text safety (notes and their siblings)
+
+    // The .ged file is this app's save format, not just an export, so anything the
+    // round-trip loses is lost on an ordinary save-and-reopen. These cover the ways a
+    // note used to be silently truncated or to corrupt the file outright.
+
+    /// A note line after the first, longer than one physical line, must survive. The
+    /// serializer emits `1 NOTE` + `2 CONT` per line and splits a long line into `CONC`
+    /// continuations, which for a `CONT` line land at level 3 — a level the parser used
+    /// to ignore, dropping everything past the first ~200 bytes of that line.
+    @Test func longSecondNoteLineSurvivesConcUnderCont() throws {
+        let tree = FamilyTree(name: "Длинная вторая строка")
+        let note = "Короткая первая строка\n" + String(repeating: "я", count: 600)
+        tree.people = [Person(givenNames: "Тест", surname: "Заметкин", sex: .male, notes: note)]
+
+        let back = try #require(roundTrip(tree).people.first)
+        #expect(back.notes == note)
+    }
+
+    /// The same defect for the scalar life fields, which share the CONT/CONC emission.
+    @Test func longMultilineOccupationAndEducationSurvive() throws {
+        let tree = FamilyTree(name: "Профессия")
+        let occupation = "Первая строка\n" + String(repeating: "к", count: 500)
+        let education = "Школа\n" + String(repeating: "у", count: 500)
+        let p = Person(givenNames: "Тест", surname: "Трудов", sex: .male)
+        p.occupation = occupation
+        p.education = education
+        tree.people = [p]
+
+        let back = try #require(roundTrip(tree).people.first)
+        #expect(back.occupation == occupation)
+        #expect(back.education == education)
+    }
+
+    /// Every character the readers treat as a physical line break has to be folded into a
+    /// newline by the writer. Left inline it tore the record in half on the way back in.
+    @Test func exoticLineSeparatorsInNotesBecomeNewlines() throws {
+        let tree = FamilyTree(name: "Разделители")
+        let note = "a\u{2028}b\u{2029}c\u{0085}d\re\u{000B}f\u{000C}g"
+        tree.people = [Person(givenNames: "Тест", surname: "Разделов", sex: .male, notes: note)]
+
+        let back = try #require(roundTrip(tree).people.first)
+        #expect(back.notes == "a\nb\nc\nd\ne\nf\ng")
+    }
+
+    /// The corruption regression. A pasted U+2028 used to produce a file whose own
+    /// re-parse threw — failing the save for an imported tree, and leaving an
+    /// app-created tree unreadable on next launch.
+    @Test func noteWithExoticSeparatorKeepsTheDocumentParseable() throws {
+        let tree = FamilyTree(name: "Целостность")
+        tree.people = [Person(
+            givenNames: "Тест",
+            surname: "Вставкин",
+            sex: .male,
+            notes: "Начало\u{2028}Продолжение\u{2029}Конец"
+        )]
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        let document = try GEDCOMDocument.parse(gedcom)
+        // The save path re-parses its own output when the tree carries a preserved
+        // document, so this is the exact call that used to throw.
+        #expect(throws: Never.self) { try GEDCOMCodec.serialize(tree: tree, document: document) }
+    }
+
+    /// A place is free-typed too, and used to be interpolated into a line untouched.
+    @Test func exoticSeparatorInAPlaceDoesNotCorruptTheFile() throws {
+        let tree = FamilyTree(name: "Место")
+        let p = Person(givenNames: "Тест", surname: "Местов", sex: .male)
+        p.birthPlace = "Москва\u{2028}Российская империя"
+        tree.people = [p]
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        #expect(throws: Never.self) { try GEDCOMDocument.parse(gedcom) }
+        // Folded to a space rather than a CONT: a place is a single-line value, and the
+        // parser recognises no continuation for it.
+        #expect(roundTrip(tree).people.first?.birthPlace == "Москва Российская империя")
+    }
+
+    /// Indentation and trailing spaces are content in a free-form note. The tokenizer
+    /// used to trim every line's value, so they evaporated on each save/reload.
+    @Test func noteIndentationAndTrailingSpacesSurvive() throws {
+        let tree = FamilyTree(name: "Отступы")
+        let note = "    с отступом\nс пробелами в конце   \n\tтабуляция\nобычная"
+        tree.people = [Person(givenNames: "Тест", surname: "Отступов", sex: .male, notes: note)]
+
+        let back = try #require(roundTrip(tree).people.first)
+        #expect(back.notes == note)
+    }
+
+    /// CRLF must collapse to one newline, not leave a blank line behind.
+    @Test func crlfInANoteDoesNotLeaveBlankLines() throws {
+        let tree = FamilyTree(name: "CRLF")
+        tree.people = [Person(givenNames: "Тест", surname: "Виндовсов", sex: .male, notes: "первая\r\nвторая")]
+
+        let back = try #require(roundTrip(tree).people.first)
+        #expect(back.notes == "первая\nвторая")
+    }
+
+    /// Source-record notes and a citation transcription ride the same emission path.
+    @Test func sourceNotesAndTranscriptionSurviveExoticText() {
+        let tree = FamilyTree(name: "Источники")
+        let record = SourceRecord(title: "Метрическая книга", notes: "  первая\u{2028}вторая строка   ")
+        let p = Person(givenNames: "Тест", surname: "Источников", sex: .male)
+        p.citations = [Citation(sourceID: record.id, transcription: "строка\u{2029}ещё строка")]
+        tree.sourceRecords = [record]
+        tree.people = [p]
+
+        let parsed = roundTrip(tree)
+        #expect(parsed.sourceRecords.first?.notes == "  первая\nвторая строка   ")
+        #expect(parsed.people.first?.citations.first?.transcription == "строка\nещё строка")
+    }
+
+    /// The stated ceiling, end to end: at the soft-warning limit nothing is truncated,
+    /// and the file stays conformant.
+    @Test func hundredThousandCharacterNoteRoundTripsExactly() throws {
+        let tree = FamilyTree(name: "Сто тысяч")
+        // Cyrillic, so the UTF-8 byte count is double the character count and the
+        // chunker's byte budget is genuinely exercised.
+        let unit = "Слово слово слово\n"
+        let note = String(String(repeating: unit, count: 100_000 / unit.count + 1).prefix(100_000))
+        #expect(note.count == 100_000)
+        tree.people = [Person(givenNames: "Тест", surname: "Длиннов", sex: .male, notes: note)]
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        for line in gedcom.split(separator: "\n") {
+            #expect(line.utf8.count <= 255, "line too long: \(line.utf8.count) bytes")
+        }
+        let back = try #require(GEDCOMParser.parse(gedcom: gedcom).people.first)
+        #expect(back.notes?.count == 100_000)
+        #expect(back.notes == note)
+    }
+
     /// A slash inside a given name must not corrupt the `/surname/` NAME structure.
     @Test func slashInNameIsSanitized() throws {
         let tree = FamilyTree(name: "Слэш")

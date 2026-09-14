@@ -76,9 +76,9 @@ public struct GEDCOMSerializer {
         // verbatim, so a stamp written up there would freeze at the first save.
         lines.append("1 _CREATED \(GEDCOMParser.timestampFormatter.string(from: tree.createdAt))")
         lines.append("1 _UPDATED \(GEDCOMParser.timestampFormatter.string(from: tree.updatedAt))")
-        lines.append("1 _NAME \(tree.name)")
+        lines.append("1 _NAME \(singleLineValue(tree.name))")
         if let sub = tree.subtitle, !sub.isEmpty {
-            lines.append("1 _SUBTITLE \(sub)")
+            lines.append("1 _SUBTITLE \(singleLineValue(sub))")
         }
         if let homeId = tree.homePersonId, let xref = indiXref[homeId] {
             lines.append("1 _HOME @\(xref)@")
@@ -161,11 +161,7 @@ public struct GEDCOMSerializer {
 
             // Notes (multi-line via CONT; long lines split further via CONC)
             if let n = p.notes, !n.isEmpty {
-                let noteLines = n.components(separatedBy: "\n")
-                appendValue(1, "NOTE", value: noteLines[0], to: &lines)
-                for noteLine in noteLines.dropFirst() {
-                    appendValue(2, "CONT", value: noteLine, to: &lines)
-                }
+                appendValue(1, "NOTE", value: n, to: &lines)
             }
 
             appendCitations(p.citations, level: 1, sourceXref: sourceXref, to: &lines)
@@ -196,8 +192,8 @@ public struct GEDCOMSerializer {
             for att in p.attachments {
                 lines.append("1 _ATTC")
                 lines.append("2 FILE Attachments/\(att.storedName)")
-                lines.append("2 TITL \(att.originalName)")
-                if let notes = att.notes, !notes.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: notes, to: &lines) }
+                lines.append("2 TITL \(singleLineValue(att.originalName))")
+                if let notes = att.notes, !notes.isEmpty { appendValue(2, "NOTE", value: notes, to: &lines) }
                 appendCitations(att.citations, level: 2, sourceXref: sourceXref, to: &lines)
             }
 
@@ -229,7 +225,7 @@ public struct GEDCOMSerializer {
                     lines.append("3 _FTSID \(link.id.uuidString)")
                     lines.append("3 PEDI \(link.kind.gedcomValue)")
                     if let notes = link.notes, !notes.isEmpty {
-                        appendMultiline(level: 3, tag: "NOTE", value: notes, to: &lines)
+                        appendValue(3, "NOTE", value: notes, to: &lines)
                     }
                     appendCitations(link.citations, level: 3, sourceXref: sourceXref, to: &lines)
                 }
@@ -389,7 +385,7 @@ public struct GEDCOMSerializer {
             to: &lines
         )
         if let type = event?.typeName, !type.isEmpty { appendValue(2, "TYPE", value: type, to: &lines) }
-        if let note = event?.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        if let note = event?.notes, !note.isEmpty { appendValue(2, "NOTE", value: note, to: &lines) }
         appendCitations(event?.citations ?? [], level: 2, sourceXref: sourceXref, to: &lines)
         lines.append(contentsOf: eventExtras)
         for branch in event?.rawGEDCOMBranches ?? [] { lines.append(contentsOf: branch) }
@@ -413,7 +409,7 @@ public struct GEDCOMSerializer {
         if let place = event.place {
             appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, datasetID: place.datasetID, to: &lines)
         }
-        if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        if let note = event.notes, !note.isEmpty { appendValue(2, "NOTE", value: note, to: &lines) }
         appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
         for branch in event.rawGEDCOMBranches { lines.append(contentsOf: branch) }
     }
@@ -430,7 +426,7 @@ public struct GEDCOMSerializer {
         if let place = event.place {
             appendPlace(place.displayName, lat: place.latitude, lon: place.longitude, datasetID: place.datasetID, to: &lines)
         }
-        if let note = event.notes, !note.isEmpty { appendMultiline(level: 2, tag: "NOTE", value: note, to: &lines) }
+        if let note = event.notes, !note.isEmpty { appendValue(2, "NOTE", value: note, to: &lines) }
         appendCitations(event.citations, level: 2, sourceXref: sourceXref, to: &lines)
         for mediaID in event.mediaIDs {
             guard let attachment = attachments[mediaID] else { continue }
@@ -458,10 +454,10 @@ public struct GEDCOMSerializer {
             if let detail = citation.detail, !detail.isEmpty { appendValue(level + 1, "EVEN", value: detail, to: &lines) }
             if let text = citation.transcription, !text.isEmpty {
                 lines.append("\(level + 1) DATA")
-                appendMultiline(level: level + 2, tag: "TEXT", value: text, to: &lines)
+                appendValue(level + 2, "TEXT", value: text, to: &lines)
             }
             if let notes = citation.notes, !notes.isEmpty {
-                appendMultiline(level: level + 1, tag: "NOTE", value: notes, to: &lines)
+                appendValue(level + 1, "NOTE", value: notes, to: &lines)
             }
             lines.append(contentsOf: preservedCitationDetail(citation, level: level))
         }
@@ -540,14 +536,8 @@ public struct GEDCOMSerializer {
         }
         if let callNumber = source.callNumber, !callNumber.isEmpty { appendValue(1, "CALN", value: callNumber, to: &lines) }
         if let url = source.url, !url.isEmpty { appendValue(1, "_URL", value: url, to: &lines) }
-        if let notes = source.notes, !notes.isEmpty { appendMultiline(level: 1, tag: "NOTE", value: notes, to: &lines) }
+        if let notes = source.notes, !notes.isEmpty { appendValue(1, "NOTE", value: notes, to: &lines) }
         for branch in source.rawGEDCOMBranches { lines.append(contentsOf: branch) }
-    }
-
-    private static func appendMultiline(level: Int, tag: String, value: String, to lines: inout [String]) {
-        let parts = value.components(separatedBy: "\n")
-        appendValue(level, tag, value: parts.first ?? "", to: &lines)
-        for line in parts.dropFirst() { appendValue(level + 1, "CONT", value: line, to: &lines) }
     }
 
     /// Remove preserved legacy NOTE/SOUR branches only when their structured
@@ -605,15 +595,24 @@ public struct GEDCOMSerializer {
 
     // MARK: - Line emission (GEDCOM 5.5.1 length limits)
 
-    /// Strip slashes from a NAME part so they can't corrupt the `/surname/` structure.
-    private static func sanitizeNamePart(_ s: String) -> String {
-        s.replacingOccurrences(of: "/", with: " ").trimmingCharacters(in: .whitespaces)
+    /// Collapse every character a reader would treat as a physical line break into a
+    /// space, for the handful of values that are interpolated straight into a line
+    /// instead of going through `appendValue`.
+    ///
+    /// These fields (a place, a tree name, an attachment title, the NAME structure) are
+    /// single-line by nature, and the alternative — emitting `CONT` for them — would lose
+    /// the continuation on the way back in, because the parser only recognises `_PLACID`
+    /// and `WWW`/`TITL` continuations at that level. Collapsing keeps every character the
+    /// user typed while making the pasted separator harmless.
+    private static func singleLineValue(_ s: String) -> String {
+        String(s.unicodeScalars.map { CharacterSet.newlines.contains($0) ? " " : Character($0) })
     }
 
-    /// Append a `level tag value` line, splitting a long value across `CONC`
-    /// continuation lines so no physical line exceeds the GEDCOM 5.5.1 limit
-    /// (255 bytes incl. the level/tag prefix). Chunking is by UTF-8 byte budget so
-    /// multi-byte Cyrillic text stays within bounds.
+    /// Strip slashes from a NAME part so they can't corrupt the `/surname/` structure.
+    private static func sanitizeNamePart(_ s: String) -> String {
+        singleLineValue(s).replacingOccurrences(of: "/", with: " ").trimmingCharacters(in: .whitespaces)
+    }
+
     /// Doubles the delimiting "@" of a value that would otherwise read back as a
     /// pointer. Only this exact shape is ambiguous: any inner "@" already disqualifies
     /// the token, so ordinary text containing an address is left alone.
@@ -623,7 +622,33 @@ public struct GEDCOMSerializer {
         return "@" + value + "@"
     }
 
+    /// Append a value that may contain line breaks: the first segment carries the tag and
+    /// every later one becomes a `CONT`, with long segments split further across `CONC`.
+    ///
+    /// The split uses `CharacterSet.newlines` — deliberately the same set the two readers
+    /// split physical lines on (`GEDCOMDocument.parse`, `GEDCOMParser.parse`). Splitting on
+    /// "\n" alone used to let U+2028/U+2029/U+0085/VT/FF and a lone CR — all of which arrive
+    /// routinely in text pasted from Word, a PDF or a web page — through into a physical
+    /// line. On the way back in that line tore in half, and the half without a `level tag`
+    /// prefix either failed the whole document (an imported tree, whose save re-parses its
+    /// own output) or was silently skipped (the tree parser). Keeping the two sets identical
+    /// is what makes that impossible rather than merely unlikely.
     private static func appendValue(_ level: Int, _ tag: String, value rawValue: String, to lines: inout [String]) {
+        // CRLF first: `.newlines` would treat it as two separators and emit a blank CONT.
+        let normalized = rawValue.replacingOccurrences(of: "\r\n", with: "\n")
+        let segments = normalized.components(separatedBy: .newlines)
+        appendSingleLine(level, tag, value: segments[0], to: &lines)
+        for segment in segments.dropFirst() {
+            appendSingleLine(level + 1, "CONT", value: segment, to: &lines)
+        }
+    }
+
+    /// Append one `level tag value` line, splitting a long value across `CONC`
+    /// continuation lines so no physical line exceeds the GEDCOM 5.5.1 limit
+    /// (255 bytes incl. the level/tag prefix). Chunking is by UTF-8 byte budget so
+    /// multi-byte Cyrillic text stays within bounds. The value must not contain a line
+    /// break — `appendValue` is the caller that guarantees it.
+    private static func appendSingleLine(_ level: Int, _ tag: String, value rawValue: String, to lines: inout [String]) {
         guard !rawValue.isEmpty else { lines.append("\(level) \(tag)"); return }
         // Text shaped exactly like "@X@" would tokenize as a pointer on re-import, so a
         // value the user typed into a field could leave the file naming a record that
@@ -671,7 +696,7 @@ public struct GEDCOMSerializer {
         to lines: inout [String]
     ) {
         if let place, !place.isEmpty {
-            lines.append("2 PLAC \(place)")
+            lines.append("2 PLAC \(singleLineValue(place))")
             if let datasetID, !datasetID.isEmpty { lines.append("3 _PLACID \(datasetID)") }
             // Foreign detail this app doesn't model (a place id from another program,
             // a note about the coordinates) goes back inside the place it came from.

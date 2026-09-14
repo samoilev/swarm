@@ -279,6 +279,40 @@ final class SwarmUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["UI Test"].exists)
     }
 
+    /// A note past the soft limit warns and keeps every character. The limit exists so a
+    /// note cannot quietly become a performance problem, but it must never be the reason
+    /// text goes missing — so this asserts the counter appeared AND nothing was cut.
+    /// Pasted line separators are folded to newlines, which is the one permitted edit.
+    func testOverlongNoteWarnsAndKeepsEveryCharacter() {
+        createInitialTree()
+        app.buttons["Редактировать"].firstMatch
+            .coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+
+        let notes = app.textViews["person.notes"].firstMatch
+        XCTAssertTrue(notes.waitForExistence(timeout: 5))
+
+        // Typing 100k characters is not viable; the pasteboard is the realistic path a
+        // note this size arrives by anyway. The U+2028 stands in for text copied out of
+        // a PDF or a web page.
+        let unit = "Запись в метрической книге\u{2028}"
+        let pasted = String(String(repeating: unit, count: 100_100 / unit.count + 1).prefix(100_100))
+        XCTAssertEqual(pasted.count, 100_100)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(pasted, forType: .string)
+
+        notes.click()
+        notes.typeKey("v", modifierFlags: .command)
+
+        XCTAssertTrue(
+            app.staticTexts["person.notes.overflow"].waitForExistence(timeout: 10),
+            "No overflow warning past the soft limit"
+        )
+        let value = notes.value as? String ?? ""
+        XCTAssertEqual(value.count, pasted.count, "Pasted text was truncated")
+        XCTAssertFalse(value.unicodeScalars.contains("\u{2028}"), "U+2028 survived into the field")
+        XCTAssertEqual(value, pasted.replacingOccurrences(of: "\u{2028}", with: "\n"))
+    }
+
     private func createInitialTree() {
         let newTree = app.buttons["Новое дерево"]
         if newTree.waitForExistence(timeout: 2) { newTree.click() }

@@ -67,16 +67,23 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
     /// error, the tree parser skips the line and carries on. The tag keeps its source
     /// casing here — canonicalising is the document parser's rule, not the format's.
     init?(rawLine raw: String) {
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Leading whitespace and the line ending are never part of a value — a value
+        // starts after `level<SP>tag<SP>` — so stripping those keeps this tolerant of
+        // indented foreign files. Trailing spaces and tabs are a different matter: they
+        // belong to the value, and trimming them here used to eat the indentation and
+        // trailing spaces of every note line on each save/reload cycle.
+        let trimmed = String(
+            raw.drop(while: { $0 == " " || $0 == "\t" })
+                .reversed().drop(while: { $0 == "\r" || $0 == "\n" }).reversed()
+        )
         guard let firstSpace = trimmed.firstIndex(of: " "),
               let level = Int(trimmed[..<firstSpace]) else { return nil }
-        var rest = String(trimmed[trimmed.index(after: firstSpace)...])
-            .trimmingCharacters(in: .whitespaces)
+        var rest = String(trimmed[trimmed.index(after: firstSpace)...]).drop(while: { $0 == " " })
 
         var xref: String?
         if rest.first == "@", let closing = rest.dropFirst().firstIndex(of: "@") {
             xref = String(rest[rest.index(after: rest.startIndex) ..< closing])
-            rest = String(rest[rest.index(after: closing)...]).trimmingCharacters(in: .whitespaces)
+            rest = rest[rest.index(after: closing)...].drop(while: { $0 == " " })
         }
         guard !rest.isEmpty else { return nil }
 
@@ -84,9 +91,11 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
         let tail: String
         if let space = rest.firstIndex(of: " ") {
             tag = String(rest[..<space])
-            tail = String(rest[rest.index(after: space)...]).trimmingCharacters(in: .whitespaces)
+            // Exactly one space delimits the tag from its value; everything after it,
+            // whitespace included, is the value.
+            tail = String(rest[rest.index(after: space)...])
         } else {
-            tag = rest
+            tag = String(rest)
             tail = ""
         }
 

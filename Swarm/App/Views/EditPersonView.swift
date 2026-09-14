@@ -107,7 +107,7 @@ struct EditPersonView: View {
             record.repository = repository.nilIfEmpty
             record.callNumber = callNumber.nilIfEmpty
             record.url = url.nilIfEmpty
-            record.notes = notes.nilIfEmpty
+            record.notes = notes.nilIfBlank
             return record
         }
     }
@@ -230,7 +230,12 @@ struct EditPersonView: View {
                         SectionHeader(title: L10n.tr("Жизнь"))
                         SepiaTextField(label: L10n.tr("ПРОФЕССИЯ"), text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: L10n.tr("ОБРАЗОВАНИЕ"), text: $education, placeholder: "—").padding(.bottom, 8)
-                        SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: L10n.tr("Свободный текст…")).padding(.bottom, 12)
+                        SepiaNotesField(
+                            label: L10n.tr("ЗАМЕТКИ"),
+                            text: $notes,
+                            placeholder: L10n.tr("Свободный текст…"),
+                            identifier: "person.notes"
+                        ).padding(.bottom, 12)
 
                         evidenceEditor
 
@@ -481,9 +486,15 @@ struct EditPersonView: View {
             SepiaNotesField(
                 label: L10n.tr("РАСШИФРОВКА"),
                 text: draftBinding(\.transcription),
-                placeholder: L10n.tr("Точная запись из источника…")
+                placeholder: L10n.tr("Точная запись из источника…"),
+                identifier: "source.transcription"
             )
-            SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: draftBinding(\.notes), placeholder: "—")
+            SepiaNotesField(
+                label: L10n.tr("ЗАМЕТКИ"),
+                text: draftBinding(\.notes),
+                placeholder: "—",
+                identifier: "source.notes"
+            )
 
             HStack(spacing: 10) {
                 Button(L10n.tr("Отмена")) { sourceDraft = nil }
@@ -540,13 +551,13 @@ struct EditPersonView: View {
             editingPerson.citations[index].sourceID = sourceID
             editingPerson.citations[index].page = sourceDraft.page.nilIfEmpty
             editingPerson.citations[index].detail = sourceDraft.detail.nilIfEmpty
-            editingPerson.citations[index].transcription = sourceDraft.transcription.nilIfEmpty
+            editingPerson.citations[index].transcription = sourceDraft.transcription.nilIfBlank
         } else {
             editingPerson.citations.append(Citation(
                 sourceID: sourceID,
                 page: sourceDraft.page.nilIfEmpty,
                 detail: sourceDraft.detail.nilIfEmpty,
-                transcription: sourceDraft.transcription.nilIfEmpty
+                transcription: sourceDraft.transcription.nilIfBlank
             ))
         }
 
@@ -1381,7 +1392,12 @@ private struct UnionEventDraftEditor: View {
             if enabled {
                 SepiaDateField(label: L10n.tr("ДАТА"), text: $dateText, qualifier: $qualifier, endText: $endText)
                 PlacePickerField(label: L10n.tr("МЕСТО"), text: $placeText, placeholder: "—") { selectedPlace = $0; commit() }
-                SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: "—")
+                SepiaNotesField(
+                    label: L10n.tr("ЗАМЕТКИ"),
+                    text: $notes,
+                    placeholder: "—",
+                    identifier: "event.notes"
+                )
                 if !attachments.isEmpty {
                     Menu {
                         ForEach(attachments) { attachment in
@@ -1441,7 +1457,7 @@ private struct UnionEventDraftEditor: View {
             value: old?.value,
             date: date,
             place: place,
-            notes: notes.nilIfEmpty,
+            notes: notes.nilIfBlank,
             citations: old?.citations ?? [],
             mediaIDs: Array(mediaIDs).sorted(),
             rawGEDCOMBranches: old?.rawGEDCOMBranches ?? []
@@ -1454,5 +1470,11 @@ private extension String {
     var nilIfEmpty: String? {
         let value = trimmingCharacters(in: .whitespacesAndNewlines)
         return value.isEmpty ? nil : value
+    }
+
+    /// Like `nilIfEmpty`, but keeps the text exactly as typed. For free-form fields, where
+    /// leading indentation and trailing spaces are content rather than noise.
+    var nilIfBlank: String? {
+        trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : self
     }
 }

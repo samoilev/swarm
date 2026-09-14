@@ -106,7 +106,7 @@ public struct GEDCOMParser {
                     switch line.tag {
                     case "_NAME": treeName = line.value
                     case "_SUBTITLE": treeSubtitle = line.value
-                    case "_TREEID": treeId = UUID(uuidString: line.value)
+                    case "_TREEID": treeId = UUID(uuidString: line.value.trimmingCharacters(in: .whitespaces))
                     case "_FTSVER": schemaVersion = Int(line.value) ?? 1
                     case "_CREATED": treeCreatedAt = timestampFormatter.date(from: line.value)
                     case "_UPDATED": treeUpdatedAt = timestampFormatter.date(from: line.value)
@@ -178,7 +178,7 @@ public struct GEDCOMParser {
     private static func stableUUID(in record: [String]) -> UUID? {
         for branch in level1Branches(of: record) {
             guard let first = branch.first.flatMap(parseLine), first.tag == "_FTSID" else { continue }
-            if let id = UUID(uuidString: first.value) { return id }
+            if let id = UUID(uuidString: first.value.trimmingCharacters(in: .whitespaces)) { return id }
         }
         return nil
     }
@@ -594,7 +594,7 @@ public struct GEDCOMParser {
                     for child in branches(in: linkBranch, atLevel: 3) {
                         guard let childLine = child.first.flatMap(parseLine) else { continue }
                         switch childLine.tag {
-                        case "_FTSID": parsed.id = UUID(uuidString: childLine.value)
+                        case "_FTSID": parsed.id = UUID(uuidString: childLine.value.trimmingCharacters(in: .whitespaces))
                         case "PEDI", "_PEDI": parsed.kind = ParentageKind(gedcomValue: childLine.value)
                         case "NOTE": parsed.notes = joinedText(branch: child)
                         case "SOUR":
@@ -707,11 +707,20 @@ public struct GEDCOMParser {
             let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { continue }
 
+            // `trimmed` decides emptiness and record boundaries only. The line that is
+            // kept kills leading indentation and the line ending but not trailing spaces
+            // or tabs, which are part of the value: a note line typed as "text   " has to
+            // read back with its spaces. `GEDCOMNode` does the rest of the tokenizing.
+            let kept = String(
+                line.drop(while: { $0 == " " || $0 == "\t" })
+                    .reversed().drop(while: { $0 == "\r" || $0 == "\n" }).reversed()
+            )
+
             if trimmed.hasPrefix("0 ") {
                 if !current.isEmpty { records.append(current) }
-                current = [trimmed]
+                current = [kept]
             } else {
-                current.append(trimmed)
+                current.append(kept)
             }
         }
         if !current.isEmpty { records.append(current) }
@@ -862,6 +871,20 @@ public struct GEDCOMParser {
                 }
 
             case 3:
+                // A long line inside a multi-line value: the serializer emits the value as
+                // `1 TAG` + `2 CONT` per line, and splits any over-long line further into
+                // `CONC` continuations — which for a `2 CONT` line land here at level 3.
+                // Without this branch everything past the first ~200 bytes of every note
+                // line after the first was dropped on load, silently truncating the note.
+                if tagAtLevel[2] == "CONT", tag == "CONC" {
+                    switch tagAtLevel[1] ?? "" {
+                    case "NOTE": notes = (notes ?? "") + value
+                    case "OCCU": occupation = (occupation ?? "") + value
+                    case "EDUC": education = (education ?? "") + value
+                    default: break
+                    }
+                    break
+                }
                 if tagAtLevel[1] == "WWW", tagAtLevel[2] == "TITL", tag == "CONC", !links.isEmpty {
                     links[links.count - 1].title += value
                     break

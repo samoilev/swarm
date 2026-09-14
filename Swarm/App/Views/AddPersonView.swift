@@ -149,7 +149,12 @@ struct AddPersonView: View {
                         SectionHeader(title: L10n.tr("Жизнь"))
                         SepiaTextField(label: L10n.tr("ПРОФЕССИЯ"), text: $occupation, placeholder: "—").padding(.bottom, 8)
                         SepiaTextField(label: L10n.tr("ОБРАЗОВАНИЕ"), text: $education, placeholder: "—").padding(.bottom, 8)
-                        SepiaNotesField(label: L10n.tr("ЗАМЕТКИ"), text: $notes, placeholder: L10n.tr("Свободный текст…")).padding(.bottom, 12)
+                        SepiaNotesField(
+                            label: L10n.tr("ЗАМЕТКИ"),
+                            text: $notes,
+                            placeholder: L10n.tr("Свободный текст…"),
+                            identifier: "person.notes"
+                        ).padding(.bottom, 12)
 
                         SectionHeader(title: L10n.tr("Родственные связи"))
                         if tree.people.isEmpty {

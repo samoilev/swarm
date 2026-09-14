@@ -92,10 +92,20 @@ struct SepiaTextField: View {
 }
 
 /// Multiline freeform notes field with a draggable bottom edge to resize vertically.
+///
+/// Nothing typed or pasted here is ever truncated, blocked or rejected. Past `softLimit`
+/// a counter appears and that is all it does — the binding is never rewritten by it.
 struct SepiaNotesField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
+    /// Stable handle for UI tests, as on `SepiaFieldInput` — ЗАМЕТКИ captions more than
+    /// one notes field in the person editor, so a label-based query is ambiguous.
+    var identifier: String?
+    /// Notes live in the tree's .ged, which is parsed in full on every load, so there is a
+    /// size past which one note is a performance problem rather than a note. Set far
+    /// beyond any realistic entry, and it only warns — nothing is ever cut.
+    private let softLimit = 100_000
     /// Text inset, shared by the placeholder and the editor so the caret lands on the
     /// first glyph of the placeholder it replaces.
     private let inset: CGFloat = 9
@@ -140,8 +150,21 @@ struct SepiaNotesField: View {
                     .scrollContentBackground(.hidden)
                     .focused($isFocused)
                     .accessibilityLabel(label)
+                    .accessibilityIdentifier(identifier ?? "")
                     .padding(.horizontal, inset - textViewInset)
                     .padding(.vertical, inset)
+                    .onChange(of: text) { _, newValue in
+                        // Text pasted out of Word, a PDF or a web page carries U+2028 and
+                        // friends. Both .ged readers treat every one of those as a physical
+                        // line break, so left alone they tear the saved record in half.
+                        // Fold them into real newlines here, where the user can still see
+                        // what will be stored. The assignment is guarded because typed
+                        // input never contains them: rewriting the binding on every
+                        // keystroke would move the insertion point. On a paste the caret
+                        // jumps to the end — the accepted cost of not corrupting the file.
+                        guard newValue.unicodeScalars.contains(where: Self.isExoticBreak) else { return }
+                        text = Self.foldingExoticBreaks(newValue)
+                    }
             }
             .frame(height: height)
             .overlay(alignment: .bottom) {
@@ -182,7 +205,40 @@ struct SepiaNotesField: View {
                             }
                     )
             }
+
+            // Gate on the UTF-8 count: it is O(1) on a native String and never smaller
+            // than the character count, so it is a safe over-approximation. The O(n)
+            // `count` runs only once the gate is open, not on every keystroke.
+            if text.utf8.count > softLimit, text.count > softLimit {
+                Text("\(text.count.formatted()) / \(softLimit.formatted())")
+                    .font(SepiaType.label)
+                    .foregroundColor(SepiaTheme.inkSoft)
+                    .accessibilityIdentifier(identifier.map { "\($0).overflow" } ?? "")
+                    .accessibilityLabel(L10n.tr("Заметка очень длинная. Текст сохранён полностью."))
+                    .help(L10n.tr("Заметка очень длинная. Текст сохранён полностью."))
+            }
         }
+    }
+
+    /// Characters the .ged readers treat as a physical line break: VT, FF, CR, NEL,
+    /// U+2028 LINE SEPARATOR, U+2029 PARAGRAPH SEPARATOR. The serializer handles these
+    /// too; folding them here as well means the text on screen is the text on disk.
+    private static func isExoticBreak(_ scalar: Unicode.Scalar) -> Bool {
+        scalar != "\n" && CharacterSet.newlines.contains(scalar)
+    }
+
+    /// Fold every exotic break into "\n", collapsing CRLF into a single newline rather
+    /// than leaving a blank line behind.
+    private static func foldingExoticBreaks(_ value: String) -> String {
+        var out = ""
+        out.reserveCapacity(value.count)
+        var previousWasCR = false
+        for scalar in value.unicodeScalars {
+            if scalar == "\n", previousWasCR { previousWasCR = false; continue }
+            previousWasCR = scalar == "\r"
+            out.unicodeScalars.append(isExoticBreak(scalar) ? "\n" : scalar)
+        }
+        return out
     }
 }
 
