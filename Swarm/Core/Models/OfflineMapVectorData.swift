@@ -17,10 +17,32 @@ public struct OfflineMapVectorData: Sendable {
     public let landPolygons: [[MapVectorPoint]]
     public let borderLines: [[MapVectorPoint]]
 
-    public static let shared = OfflineMapVectorData(
-        landPolygons: load(resource: "ne_110m_land"),
-        borderLines: load(resource: "ne_110m_admin_0_boundary_lines_land")
-    )
+    /// One of the two bundled resources was missing or unparsable, which leaves the
+    /// renderer with an empty sea and no coastlines.
+    public var didFail: Bool { landPolygons.isEmpty || borderLines.isEmpty }
+
+    private static let lock = NSLock()
+    private nonisolated(unsafe) static var cached: OfflineMapVectorData?
+
+    /// Parsed once and kept — failures included. `shared` is read from inside `Canvas`
+    /// drawing, so a failed parse must not be retried on every frame; `reload()` is the
+    /// only way back.
+    public static var shared: OfflineMapVectorData {
+        lock.withLock {
+            if let cached { return cached }
+            let value = OfflineMapVectorData(
+                landPolygons: load(resource: "ne_110m_land"),
+                borderLines: load(resource: "ne_110m_admin_0_boundary_lines_land")
+            )
+            cached = value
+            return value
+        }
+    }
+
+    /// Drops the parsed copy so the next `shared` re-reads the bundle.
+    public static func reload() {
+        lock.withLock { cached = nil }
+    }
 
     private static func load(resource: String) -> [[MapVectorPoint]] {
         guard let url = ResourceBundle.core.url(forResource: resource, withExtension: "geojson"),

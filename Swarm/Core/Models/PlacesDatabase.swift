@@ -200,25 +200,47 @@ public final class PlacesDatabase: @unchecked Sendable {
     private var labelCandidates: [PlaceLabelTier: [Int]] = [:]
     private var versions: Set<String> = []
     private var ready = false
+    private var failed = false
     private var readyCallbacks: [@MainActor @Sendable () -> Void] = []
 
     public var isReady: Bool { lock.withLock { ready } }
+    /// True when the bundled index could not be read. `isReady` still becomes true in that
+    /// case — the load settled, it just settled empty.
+    public var loadFailed: Bool { lock.withLock { failed } }
     public var count: Int { lock.withLock { entries.count } }
     public var datasetVersions: Set<String> { lock.withLock { versions } }
 
     private init() {
+        startLoading()
+    }
+
+    /// Re-reads the bundled index after a failed load. Callers that registered through
+    /// `whenReady` while the reload is in flight are served when it settles, exactly as they
+    /// are on first launch.
+    public func reload() {
+        lock.withLock {
+            ready = false
+            failed = false
+        }
+        startLoading()
+    }
+
+    private func startLoading() {
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             let loaded = Self.loadPlaces()
             guard let self else { return }
             let callbacks = self.lock.withLock {
-                self.entries = loaded.entries
-                self.byID = loaded.byID
-                self.uniqueBareNames = loaded.uniqueBareNames
-                self.fullAddresses = loaded.fullAddresses
-                self.spatialBuckets = loaded.spatialBuckets
-                self.searchPrefixes = loaded.searchPrefixes
-                self.labelCandidates = loaded.labelCandidates
-                self.versions = loaded.versions
+                self.entries = loaded?.entries ?? []
+                self.byID = loaded?.byID ?? [:]
+                self.uniqueBareNames = loaded?.uniqueBareNames ?? [:]
+                self.fullAddresses = loaded?.fullAddresses ?? [:]
+                self.spatialBuckets = loaded?.spatialBuckets ?? [:]
+                self.searchPrefixes = loaded?.searchPrefixes ?? [:]
+                self.labelCandidates = loaded?.labelCandidates ?? [:]
+                self.versions = loaded?.versions ?? []
+                self.failed = loaded == nil
+                // Settled, not loaded: a missing resource must still release every
+                // `whenReady` caller, or the map and every place field wait forever.
                 self.ready = true
                 defer { self.readyCallbacks = [] }
                 return self.readyCallbacks
@@ -404,35 +426,19 @@ public final class PlacesDatabase: @unchecked Sendable {
         }
     }
 
-    private static func loadPlaces() -> LoadedIndex {
+    /// `nil` means the snapshot could not be read at all, which the caller surfaces as a
+    /// retryable failure rather than as an index that happens to be empty.
+    private static func loadPlaces() -> LoadedIndex? {
         guard let url = ResourceBundle.core.url(
             forResource: "place_index_v2",
             withExtension: "tsv"
         ) else {
             log.error("place_index_v2.tsv not found in bundle")
-            return LoadedIndex(
-                entries: [],
-                byID: [:],
-                uniqueBareNames: [:],
-                fullAddresses: [:],
-                spatialBuckets: [:],
-                searchPrefixes: [:],
-                labelCandidates: [:],
-                versions: []
-            )
+            return nil
         }
         guard let data = try? String(contentsOf: url, encoding: .utf8) else {
             log.error("failed to read place_index_v2.tsv")
-            return LoadedIndex(
-                entries: [],
-                byID: [:],
-                uniqueBareNames: [:],
-                fullAddresses: [:],
-                spatialBuckets: [:],
-                searchPrefixes: [:],
-                labelCandidates: [:],
-                versions: []
-            )
+            return nil
         }
 
         var result: [IndexedEntry] = []

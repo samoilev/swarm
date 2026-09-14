@@ -172,7 +172,9 @@ struct OfflineVectorMapView: View {
             context.stroke(path, with: .color(SepiaTheme.line.opacity(0.18)), lineWidth: 0.5)
         }
 
-        for polygon in OfflineMapVectorData.shared.landPolygons {
+        // One read per frame: `shared` now takes a lock.
+        let vectors = OfflineMapVectorData.shared
+        for polygon in vectors.landPolygons {
             guard let first = polygon.first else { continue }
             var path = Path()
             path.move(to: project(vectorCoordinate(first), size: size))
@@ -182,7 +184,7 @@ struct OfflineVectorMapView: View {
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.45)), lineWidth: 0.8)
         }
 
-        for border in OfflineMapVectorData.shared.borderLines {
+        for border in vectors.borderLines {
             guard let first = border.first else { continue }
             var path = Path()
             path.move(to: project(vectorCoordinate(first), size: size))

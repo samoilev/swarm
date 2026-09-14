@@ -11,16 +11,183 @@ struct MapChartView: View {
 
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
 
+    @State private var placesSettled = false
+    @State private var placesFailed = false
+    @State private var vectorsFailed = false
+    @State private var tilesLoaded = false
+    @State private var tilesFailed = false
+    @State private var showsSlowIndicator = false
+    @State private var retryToken = 0
+
+    /// A slow load is only worth announcing once it stops looking instant.
+    private static let slowLoadThreshold = Duration.seconds(5)
+
+    private var provider: MapProviderSetting {
+        MapProviderSetting(rawValue: providerRaw) ?? .default
+    }
+
+    private var phase: MapLoadPhase {
+        MapLoadPhase.resolve(
+            provider: provider,
+            placesSettled: placesSettled,
+            placesFailed: placesFailed,
+            vectorsFailed: vectorsFailed,
+            tilesLoaded: tilesLoaded,
+            tilesFailed: tilesFailed
+        )
+    }
+
+    /// Both a retry and a provider switch start the load over from scratch.
+    private var loadAttempt: String { "\(retryToken)|\(providerRaw)" }
+
     var body: some View {
         Group {
-            if providerRaw == MapProviderSetting.appleMaps.rawValue {
+            if provider == .appleMaps {
                 AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
+                    .overlay(alignment: .bottomTrailing) { tileProbe }
             } else {
                 OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
             }
         }
+        .task(id: loadAttempt) { await refreshDataState() }
+        .task(id: loadAttempt) {
+            try? await Task.sleep(for: Self.slowLoadThreshold)
+            guard !Task.isCancelled else { return }
+            showsSlowIndicator = phase == .loading
+        }
+        .overlay { loadStateOverlay }
         .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in zoom = min(2.0, zoom + 0.1) }
         .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in zoom = max(0.2, zoom - 0.1) }
+    }
+
+    // MARK: - Load state
+
+    private var tileProbe: some View {
+        MapTileLoadProbe { loaded in
+            if loaded { tilesLoaded = true } else { tilesFailed = true }
+        }
+        // Kept tiny but not invisible: at `opacity(0)` or `.hidden` AppKit skips the tile
+        // fetch entirely and the probe never reports anything.
+        .frame(width: 1, height: 1)
+        .opacity(0.01)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+        .id(retryToken)
+    }
+
+    private func refreshDataState() async {
+        showsSlowIndicator = false
+        placesSettled = false
+        placesFailed = false
+        vectorsFailed = false
+        tilesLoaded = false
+        tilesFailed = false
+
+        await withCheckedContinuation { continuation in
+            PlacesDatabase.shared.whenReady { continuation.resume() }
+        }
+        guard !Task.isCancelled else { return }
+
+        placesFailed = PlacesDatabase.shared.loadFailed
+        // Only the offline renderer draws the bundled vectors, so only it waits on them.
+        vectorsFailed = provider == .offlineVector && OfflineMapVectorData.shared.didFail
+        placesSettled = true
+    }
+
+    private func retry() {
+        GeocodingService.shared.invalidateCache()
+        PlacesDatabase.shared.reload()
+        OfflineMapVectorData.reload()
+        retryToken += 1
+    }
+
+    @ViewBuilder
+    private var loadStateOverlay: some View {
+        switch phase {
+        case .failed:
+            failureCard
+        case .loading where showsSlowIndicator:
+            loadingIndicator
+        default:
+            EmptyView()
+        }
+    }
+
+    private var loadingIndicator: some View {
+        HStack(spacing: 8) {
+            ProgressView().controlSize(.small)
+            Text(L10n.tr("Карта загружается…"))
+                .font(SepiaType.label)
+                .foregroundColor(SepiaTheme.inkSoft)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(SepiaTheme.paper.opacity(0.94))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .strokeBorder(SepiaTheme.cardLine, lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.12), radius: 6, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("map.loading")
+    }
+
+    private var failureCard: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "exclamationmark.triangle")
+                .font(.system(size: 26))
+                .foregroundColor(SepiaTheme.inkSoft)
+            Text(L10n.tr("Не удалось загрузить карту"))
+                .font(SepiaTheme.body(size: 14))
+                .foregroundColor(SepiaTheme.ink)
+            Text(failureDetail)
+                .font(SepiaType.label)
+                .foregroundColor(SepiaTheme.inkSoft)
+                .multilineTextAlignment(.center)
+            // Stacked, not side by side: the Russian labels are long enough to truncate in
+            // a row narrow enough to sit over the map.
+            VStack(spacing: 8) {
+                Button(L10n.tr("Загрузить снова")) { retry() }
+                    .buttonStyle(.glassProminent)
+                    .tint(SepiaTheme.accent)
+                    .accessibilityIdentifier("map.retry")
+                if provider == .appleMaps {
+                    // The offline renderer needs no network, so it is the actual way out of a
+                    // tile failure rather than another round of retrying.
+                    Button(L10n.tr("Перейти на офлайн-карту")) {
+                        providerRaw = MapProviderSetting.offlineVector.rawValue
+                    }
+                    .buttonStyle(.glass)
+                    .accessibilityIdentifier("map.useOfflineMap")
+                }
+            }
+            .padding(.top, 2)
+        }
+        .padding(20)
+        .frame(maxWidth: 320)
+        .background(SepiaTheme.paper)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(SepiaTheme.cardLine, lineWidth: 0.5)
+        )
+        .shadow(color: .black.opacity(0.18), radius: 10, y: 3)
+        .padding(24)
+        // A scrim, not an opaque cover: whatever did load stays visible behind it.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(SepiaTheme.paper.opacity(0.45))
+        .accessibilityIdentifier("map.loadError")
+    }
+
+    private var failureDetail: String {
+        if placesFailed {
+            return L10n.tr("Справочник мест не открылся: места без сохранённых координат не отмечены.")
+        }
+        if vectorsFailed {
+            return L10n.tr("Контуры материков не открылись.")
+        }
+        return L10n.tr("Apple Maps не отдаёт карту. Проверьте подключение к сети.")
     }
 }
 

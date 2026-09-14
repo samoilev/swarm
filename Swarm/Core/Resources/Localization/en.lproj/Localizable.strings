@@ -436,6 +436,13 @@
 "Нет мест с координатами" = "No Places with Coordinates";
 "Место не отмечено" = "No Place Recorded";
 "Не удалось определить место на карте" = "Could Not Locate the Place on the Map";
+"Карта загружается…" = "Loading the map…";
+"Не удалось загрузить карту" = "Could Not Load the Map";
+"Загрузить снова" = "Try Again";
+"Перейти на офлайн-карту" = "Use the Offline Map";
+"Справочник мест не открылся: места без сохранённых координат не отмечены." = "The place index would not open, so places without stored coordinates are not pinned.";
+"Контуры материков не открылись." = "The bundled continent outlines would not open.";
+"Apple Maps не отдаёт карту. Проверьте подключение к сети." = "Apple Maps is not returning the map. Check the network connection.";
 "род." = "born";
 "ум." = "died";
 "погр." = "buried";

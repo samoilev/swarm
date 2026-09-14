@@ -28,6 +28,19 @@ struct PlaceIndexTests {
         #expect(database.datasetVersions == Set(["geonames-2026-07-28"]))
     }
 
+    @Test func theBundledSnapshotLoadsAndSurvivesAReload() async {
+        let database = await readyDatabase()
+        #expect(database.loadFailed == false)
+        let count = database.count
+
+        database.reload()
+        await withCheckedContinuation { continuation in
+            database.whenReady { continuation.resume() }
+        }
+        #expect(database.loadFailed == false)
+        #expect(database.count == count)
+    }
+
     @Test func representativeCitiesAreSearchableInBothLanguages() async {
         let database = await readyDatabase()
         let cases: [(id: String, english: String, russian: String)] = [

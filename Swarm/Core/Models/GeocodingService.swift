@@ -17,6 +17,12 @@ public final class GeocodingService: @unchecked Sendable {
         places.whenReady(run)
     }
 
+    /// Drops memoized lookups, including the negative ones. Required after the place index
+    /// reloads: a name that resolved to nil against an empty index must be asked again.
+    public func invalidateCache() {
+        lock.withLock { cache = [:] }
+    }
+
     public func coordinateSync(
         for placeName: String?,
         language: AppLanguage = .current
