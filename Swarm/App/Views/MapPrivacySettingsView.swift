@@ -11,163 +11,122 @@ struct MapPrivacySettingsView: View {
         ZStack {
             LiquidGlassPanelBackground()
 
-            VStack(alignment: .leading, spacing: 26) {
-                // The window frame carries no title, so the panel names itself once,
-                // centred over both sections.
-                Text(L10n.tr("Настройки"))
-                    .font(SepiaTheme.display(size: 26))
-                    .foregroundStyle(SepiaTheme.ink)
-                    .frame(maxWidth: .infinity)
-                    .accessibilityAddTraits(.isHeader)
-
-                settingsSection(L10n.tr("Язык"), systemImage: "globe") {
-                    LiquidGlassActionRow {
-                        ForEach(AppLanguage.allCases) { language in
-                            languageButton(language)
-                        }
+            Form {
+                Section {
+                    LabeledContent {
+                        languagePicker
+                    } label: {
+                        rowLabel(L10n.tr("Язык интерфейса"))
                     }
+
+                    LabeledContent {
+                        scaleSlider
+                    } label: {
+                        rowLabel(L10n.tr("Размер интерфейса"))
+                    }
+                } header: {
+                    SepiaTrackedLabel(L10n.tr("Общие"))
                 }
 
-                settingsSection(L10n.tr("Размер интерфейса"), systemImage: "textformat.size") {
-                    LiquidGlassActionRow {
-                        ForEach(UIScale.allCases) { scale in
-                            scaleButton(scale)
-                        }
+                Section {
+                    LabeledContent {
+                        providerPicker
+                    } label: {
+                        rowLabel(L10n.tr("Карта"))
                     }
-                    .id(languageRaw)
-                }
-
-                settingsSection(L10n.tr("Карта и конфиденциальность"), systemImage: "map") {
-                    LiquidGlassActionRow {
-                        ForEach(MapProviderSetting.allCases) { provider in
-                            providerButton(provider)
-                        }
-                    }
-                    .id(languageRaw)
-
+                } header: {
+                    SepiaTrackedLabel(L10n.tr("Карта и конфиденциальность"))
+                } footer: {
                     privacyNotice
                 }
             }
-            .padding(SepiaTheme.scaled(24))
-        }
-        // Two sections of fixed-height controls: the window takes its height from them
-        // rather than reserving room for content that is no longer here.
-        .frame(width: SepiaTheme.scaledPanel(560, axis: .horizontal))
-        // Blanks the tab/window title macOS would otherwise fill with "Swarm Settings".
-        .navigationTitle(Text(verbatim: ""))
-    }
-
-    private func settingsSection(
-        _ title: String,
-        systemImage: String,
-        @ViewBuilder content: () -> some View
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(title, systemImage: systemImage)
-                .font(SepiaTheme.display(size: 16))
-                .foregroundStyle(SepiaTheme.ink)
-                .accessibilityAddTraits(.isHeader)
-
-            content()
-        }
-    }
-
-    @ViewBuilder
-    private func languageButton(_ language: AppLanguage) -> some View {
-        let isSelected = currentLanguage == language
-        choiceButton(
-            title: language.displayName,
-            subtitle: nil,
-            isSelected: isSelected
-        ) {
-            languageBinding.wrappedValue = language
-        }
-    }
-
-    private func scaleButton(_ scale: UIScale) -> some View {
-        // The percentage alone. Five names side by side truncate at any width this
-        // panel can reasonably take, and a clipped "Очень кр…" says less than "130%".
-        choiceButton(
-            title: scale.summary,
-            subtitle: nil,
-            isSelected: currentScale == scale
-        ) {
-            scaleBinding.wrappedValue = scale
-        }
-    }
-
-    @ViewBuilder
-    private func providerButton(_ provider: MapProviderSetting) -> some View {
-        let isSelected = currentProvider == provider
-        choiceButton(
-            title: provider.displayName,
-            subtitle: provider.summary,
-            isSelected: isSelected
-        ) {
-            providerBinding.wrappedValue = provider
-        }
-    }
-
-    @ViewBuilder
-    private func choiceButton(
-        title: String,
-        subtitle: String?,
-        isSelected: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        if isSelected {
-            Button(action: action) {
-                choiceLabel(title: title, subtitle: subtitle, isSelected: true)
-            }
-            .buttonStyle(.glassProminent)
-            .buttonBorderShape(.roundedRectangle(radius: 12))
-            .controlSize(.small)
+            .formStyle(.grouped)
+            // The paper field behind the form is the window's background; the grouped
+            // style would otherwise paint its own over it.
+            .scrollContentBackground(.hidden)
             .tint(SepiaTheme.accent)
-            .accessibilityAddTraits(.isSelected)
-        } else {
-            Button(action: action) {
-                choiceLabel(title: title, subtitle: subtitle, isSelected: false)
+            // `L10n.tr` reads the stored language at call time, so the labels only pick
+            // up a new one when the whole form is rebuilt.
+            .id(languageRaw)
+        }
+        .frame(
+            width: SepiaTheme.scaledPanel(520, axis: .horizontal),
+            height: SepiaTheme.scaledPanel(250, axis: .vertical)
+        )
+        // The window frame carries the name now that the pane no longer repeats it;
+        // left unset, macOS fills the title bar with "Swarm Settings".
+        .navigationTitle(Text(L10n.tr("Настройки")))
+    }
+
+    private func rowLabel(_ title: String) -> some View {
+        Text(title)
+            .font(SepiaType.body)
+            .foregroundStyle(SepiaTheme.ink)
+    }
+
+    private var languagePicker: some View {
+        Picker(selection: languageBinding) {
+            ForEach(AppLanguage.allCases) { language in
+                Text(language.displayName).tag(language)
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.roundedRectangle(radius: 12))
-            .controlSize(.small)
+        } label: {
+            EmptyView()
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(width: SepiaTheme.scaled(180))
+    }
+
+    /// The five steps ride one slider rather than five buttons: the setting is a scale,
+    /// and a row of percentages that had to lose their names to fit said so less clearly.
+    private var scaleSlider: some View {
+        HStack(spacing: SepiaTheme.scaled(12)) {
+            Slider(value: scaleIndexBinding, in: 0 ... Double(UIScale.allCases.count - 1), step: 1)
+                .frame(width: SepiaTheme.scaled(170))
+                .accessibilityLabel(Text(L10n.tr("Размер интерфейса")))
+                .accessibilityValue(Text(currentScale.summary))
+
+            Text(currentScale.summary)
+                .font(SepiaType.control)
+                .monospacedDigit()
+                .foregroundStyle(SepiaTheme.inkSoft)
+                .frame(width: SepiaTheme.scaled(38), alignment: .trailing)
+                .accessibilityHidden(true)
         }
     }
 
-    private func choiceLabel(title: String, subtitle: String?, isSelected: Bool) -> some View {
-        HStack(spacing: SepiaTheme.scaled(7)) {
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(SepiaTheme.icon(size: 12, weight: .semibold))
-                .frame(width: SepiaTheme.scaled(15))
-
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title)
-                    .font(SepiaTheme.ui(size: 11.5))
-                    .fontWeight(.semibold)
-                if let subtitle {
-                    Text(subtitle)
-                        .font(SepiaTheme.ui(size: 9.5))
-                        .opacity(0.82)
-                        .lineLimit(1)
-                }
+    private var providerPicker: some View {
+        Picker(selection: providerBinding) {
+            ForEach(MapProviderSetting.allCases) { provider in
+                Text(provider.displayName).tag(provider)
             }
-
-            Spacer(minLength: 4)
+        } label: {
+            EmptyView()
         }
-        .multilineTextAlignment(.leading)
-        .padding(.horizontal, SepiaTheme.scaled(7))
-        .frame(maxWidth: .infinity, minHeight: SepiaTheme.scaled(42))
+        .pickerStyle(.menu)
+        .labelsHidden()
+        .fixedSize()
+        // The form's accent tint reaches a menu picker's own label, and a provider name
+        // in accent red reads as a link rather than as the current value.
+        .tint(SepiaTheme.ink)
     }
 
+    /// The chosen provider's own summary plus what it costs in privacy: the menu shows
+    /// only the two names, so the sentence under the section carries the rest.
     private var privacyNotice: some View {
         Label(
-            currentProvider == .offlineVector
-                ? L10n.tr("Ничего не уходит в сеть.")
-                : L10n.tr("Apple видит область просмотра карты."),
+            "\(currentProvider.summary) \(privacySummary)",
             systemImage: currentProvider == .offlineVector ? "network.slash" : "network"
         )
-        .font(SepiaTheme.body(size: 12.5))
-        .foregroundStyle(SepiaTheme.ink)
+        .font(SepiaType.label)
+        .foregroundStyle(SepiaTheme.inkSoft)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    private var privacySummary: String {
+        currentProvider == .offlineVector
+            ? L10n.tr("Ничего не уходит в сеть.")
+            : L10n.tr("Apple видит область просмотра карты.")
     }
 
     private var currentProvider: MapProviderSetting {
@@ -198,6 +157,18 @@ struct MapPrivacySettingsView: View {
             set: {
                 SepiaTheme.scale = CGFloat($0.factor)
                 scaleRaw = $0.rawValue
+            }
+        )
+    }
+
+    /// The slider moves over the step's position, not its factor: the five factors are
+    /// unevenly spaced, so a continuous slider over them would drag unevenly too.
+    private var scaleIndexBinding: Binding<Double> {
+        Binding(
+            get: { Double(UIScale.allCases.firstIndex(of: currentScale) ?? 0) },
+            set: { index in
+                let position = min(max(Int(index.rounded()), 0), UIScale.allCases.count - 1)
+                scaleBinding.wrappedValue = UIScale.allCases[position]
             }
         )
     }
