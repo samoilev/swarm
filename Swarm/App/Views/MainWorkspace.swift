@@ -94,7 +94,11 @@ struct MainWorkspace: View {
                 personToDelete = person
                 showDeleteConfirm = true
             },
-            onOpenPortrait: { portraitPerson = $0 }
+            onOpenPortrait: { portraitPerson = $0 },
+            onOpenMap: { person in
+                selectedPerson = person
+                viewMode = .map
+            }
         )
         .transition(.move(edge: .trailing).combined(with: .opacity))
     }

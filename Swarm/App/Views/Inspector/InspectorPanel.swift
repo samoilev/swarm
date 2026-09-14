@@ -13,6 +13,9 @@ struct InspectorPanel: View {
     /// window, so a click on the dimmed canvas behind it never reaches us. The full-size
     /// portrait is presented as an overlay over the whole window instead.
     var onOpenPortrait: ((Person) -> Void)?
+    /// Switching the workspace to the map is the workspace's job too — the panel only
+    /// says which person the map should open on.
+    var onOpenMap: ((Person) -> Void)?
 
     private let minWidth: CGFloat = 260
     private let maxWidth: CGFloat = 500
@@ -397,7 +400,16 @@ struct InspectorPanel: View {
         if hasPlace {
             VStack(alignment: .leading, spacing: 0) {
                 SectionHeader(title: L10n.tr("Карта"))
-                PersonMiniMap(person: p).padding(.bottom, 12)
+                // The thumbnail passes hit testing through so the card keeps scrolling;
+                // the button around it restores a click target of its own.
+                Button { onOpenMap?(p) } label: {
+                    PersonMiniMap(person: p).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .onHover { $0 ? NSCursor.pointingHand.set() : NSCursor.arrow.set() }
+                .help(L10n.tr("Открыть на карте"))
+                .accessibilityLabel(L10n.tr("Открыть на карте"))
+                .padding(.bottom, 12)
             }
         }
     }
