@@ -668,8 +668,15 @@ struct PortraitPreview: View {
             .accessibilityLabel(L10n.tr("Закрыть"))
 
             // Keeps a band of dimmer visible all round, so there is always something to
-            // click even when the window is barely bigger than the card.
-            card.padding(28)
+            // click even when the window is barely bigger than the card. The arrows ride
+            // beside the card rather than over the photo: a face or a line of a document
+            // is exactly what sits under a centred overlay button.
+            HStack(spacing: 12) {
+                if photos.count > 1 { step(-1, icon: "chevron.left", title: L10n.tr("Предыдущее фото")) }
+                card
+                if photos.count > 1 { step(1, icon: "chevron.right", title: L10n.tr("Следующее фото")) }
+            }
+            .padding(20)
         }
         // The count is part of the key: deleting a picture from the record under an open
         // viewer has to reload it, not leave a file that is no longer attached on screen.
@@ -683,9 +690,10 @@ struct PortraitPreview: View {
     private var card: some View {
         VStack(spacing: 14) {
             photo
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .overlay(alignment: .leading) { step(-1, icon: "chevron.left", title: L10n.tr("Предыдущее фото")) }
-                .overlay(alignment: .trailing) { step(1, icon: "chevron.right", title: L10n.tr("Следующее фото")) }
+                // No height ceiling of its own: `maxHeight` would claim the whole window
+                // and centre the picture in it, which is the band of bare paper above and
+                // below a landscape scan. Fitting the aspect already bounds both sides.
+                .aspectRatio(photoAspect, contentMode: .fit)
 
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -707,9 +715,11 @@ struct PortraitPreview: View {
             }
         }
         .padding(18)
-        // A ceiling, not a fixed size: in a short window the card shrinks with it instead
-        // of running off both ends.
-        .frame(maxWidth: 560, maxHeight: 680)
+        // A ceiling, not a fixed size: in a small window the card shrinks with it instead
+        // of running off the ends. Height is left to the picture — the photo above carries
+        // the only height limit, so the card ends up the shape of what it is holding
+        // rather than a fixed rectangle with bands of paper above and below it.
+        .frame(maxWidth: cardWidthCeiling)
         .background(SepiaTheme.panelBg, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -741,26 +751,37 @@ struct PortraitPreview: View {
         }
     }
 
-    /// One arrow. Absent when there is nothing to step to, so a single photo keeps the
-    /// viewer it has always had.
-    @ViewBuilder
+    /// The shape of the picture on screen. Until a file has loaded this is the portrait
+    /// column every other photo in the app is drawn in — and while stepping it stays on
+    /// the last photo's shape rather than snapping back to that default between two
+    /// landscape scans.
+    private var photoAspect: CGFloat {
+        guard let image = loaded?.image, image.size.height > 0 else { return SepiaTheme.portraitAspect }
+        return image.size.width / image.size.height
+    }
+
+    /// How wide the card may grow for what it is holding: the height ceiling times the
+    /// photo's own aspect. One width for every shape left a wide document small inside a
+    /// portrait-shaped card, with the paper around it taking the space the scan needed.
+    private var cardWidthCeiling: CGFloat {
+        min(1240, max(440, 760 * photoAspect))
+    }
+
+    /// One arrow, beside the card on the dimmer.
     private func step(_ delta: Int, icon: String, title: String) -> some View {
-        if photos.count > 1 {
-            Button {
-                // ponytail: wraps instead of disabling at the ends — no end state to style.
-                index = (index + delta + photos.count) % photos.count
-            } label: {
-                Image(systemName: icon)
-                    .font(.system(size: 12, weight: .semibold))
-                    .frame(width: 30, height: 30)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .keyboardShortcut(delta < 0 ? .leftArrow : .rightArrow, modifiers: [])
-            .padding(10)
-            .help(title)
-            .accessibilityLabel(title)
+        Button {
+            // ponytail: wraps instead of disabling at the ends — no end state to style.
+            index = (index + delta + photos.count) % photos.count
+        } label: {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .frame(width: 36, height: 36)
         }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .keyboardShortcut(delta < 0 ? .leftArrow : .rightArrow, modifiers: [])
+        .help(title)
+        .accessibilityLabel(title)
     }
 
     /// The bytes come off disk on a background thread: at full size that is the one part
