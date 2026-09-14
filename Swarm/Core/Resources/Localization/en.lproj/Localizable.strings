@@ -246,6 +246,11 @@
 "Портрет" = "Portrait";
 "Открыть фото" = "Open Photo";
 "Открыть на карте" = "Open on Map";
+"Фокус карты" = "Map Focus";
+"Фокус: один человек" = "Focus: One Person";
+"Фокус: ветвь" = "Focus: Branch";
+"Фокус: все" = "Focus: Everyone";
+"Переключить, кого карта показывает целиком" = "Change who the map shows at full strength";
 "ФОТО" = "PHOTO";
 "Удалить файл" = "Delete File";
 "Удалить связь" = "Remove Relationship";

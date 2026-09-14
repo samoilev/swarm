@@ -41,6 +41,8 @@ struct MainWorkspace: View {
     @State private var fitRequest: Int = 0
     @State private var fanLevels: Int = 4
     @State private var showPhotos: Bool = true
+    /// How much of the family the map keeps at full strength around the selected person.
+    @State private var mapFocusScope: MapFocus.Scope = .branch
     @State private var showSaveError = false
     @State private var showMerge = false
     /// One-time teaching hint for the ⌘-click dual-select kinship feature.
@@ -97,6 +99,7 @@ struct MainWorkspace: View {
             onOpenPortrait: { portraitPerson = $0 },
             onOpenMap: { person in
                 selectedPerson = person
+                mapFocusScope = .person
                 viewMode = .map
             }
         )
@@ -360,7 +363,11 @@ struct MainWorkspace: View {
                         zoom: $mapZoom,
                         selectedPerson: $selectedPerson,
                         fitRequest: $fitRequest,
-                        focus: MapFocus(selectedID: selectedPerson?.id, branchIDs: highlightedBranch)
+                        focus: MapFocus(
+                            selectedID: selectedPerson?.id,
+                            branchIDs: highlightedBranch,
+                            scope: mapFocusScope
+                        )
                     )
                 } else if viewMode == .people {
                     PeopleWorkspaceView(
@@ -842,6 +849,13 @@ struct MainWorkspace: View {
                     .padding(.horizontal, 3)
             }
             .sharedBackgroundVisibility(.visible)
+        } else if !usesCompactToolbar, viewMode == .map {
+            ToolbarSpacer(.fixed, placement: .principal)
+            ToolbarItemGroup(placement: .principal) {
+                mapFocusControl
+                    .padding(.horizontal, 3)
+            }
+            .sharedBackgroundVisibility(.visible)
         }
 
         if !usesCompactToolbar, [.tree, .fan, .map].contains(viewMode) {
@@ -913,6 +927,13 @@ struct MainWorkspace: View {
                     Label(L10n.tr("Больше поколений"), systemImage: "plus")
                 }
                 .disabled(fanLevels >= 8)
+            } else if viewMode == .map {
+                Picker(L10n.tr("Фокус карты"), selection: $mapFocusScope) {
+                    ForEach(MapFocus.Scope.allCases, id: \.self) { scope in
+                        Label(Self.mapFocusLabel(scope), systemImage: Self.mapFocusIcon(scope))
+                            .tag(scope)
+                    }
+                }
             }
 
             if [.tree, .fan, .map].contains(viewMode) {
@@ -1055,6 +1076,42 @@ struct MainWorkspace: View {
         .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: showPhotos))
         .help(showPhotos ? L10n.tr("Скрыть фотографии") : L10n.tr("Показать фотографии"))
         .accessibilityLabel(showPhotos ? L10n.tr("Скрыть фотографии") : L10n.tr("Показать фотографии"))
+    }
+
+    /// Cycles person → branch → everyone. One button rather than three: the map has one
+    /// question to answer, and the toolbar is already close to its item ceiling.
+    private var mapFocusControl: some View {
+        Button {
+            withAnimation(reduceMotion ? nil : SepiaMotion.state) {
+                mapFocusScope = switch mapFocusScope {
+                case .person: .branch
+                case .branch: .everyone
+                case .everyone: .person
+                }
+            }
+        } label: {
+            Image(systemName: Self.mapFocusIcon(mapFocusScope))
+        }
+        .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: mapFocusScope != .everyone))
+        .help(Self.mapFocusLabel(mapFocusScope))
+        .accessibilityLabel(Self.mapFocusLabel(mapFocusScope))
+        .accessibilityHint(L10n.tr("Переключить, кого карта показывает целиком"))
+    }
+
+    private static func mapFocusLabel(_ scope: MapFocus.Scope) -> String {
+        switch scope {
+        case .person: L10n.tr("Фокус: один человек")
+        case .branch: L10n.tr("Фокус: ветвь")
+        case .everyone: L10n.tr("Фокус: все")
+        }
+    }
+
+    private static func mapFocusIcon(_ scope: MapFocus.Scope) -> String {
+        switch scope {
+        case .person: "person.fill"
+        case .branch: "point.3.connected.trianglepath.dotted"
+        case .everyone: "person.3.fill"
+        }
     }
 
     private var fanLevelControls: some View {

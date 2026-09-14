@@ -42,6 +42,37 @@ struct MapFocusTests {
         #expect(focus.emphasis(forAny: []) == .dimmed)
     }
 
+    @Test func personScopeFadesTheLineageToo() {
+        let focus = MapFocus(selectedID: selected, branchIDs: [selected, relative], scope: .person)
+        #expect(focus.isActive)
+        #expect(focus.emphasis(for: selected) == .focused)
+        // The whole point of the scope: a relative on the branch fades like a stranger.
+        #expect(focus.emphasis(for: relative) == .dimmed)
+        #expect(focus.emphasis(for: stranger) == .dimmed)
+    }
+
+    @Test func personScopeDoesNotDependOnTheBranchSet() {
+        let focus = MapFocus(selectedID: selected, branchIDs: [], scope: .person)
+        #expect(focus.isActive)
+        #expect(focus.emphasis(for: selected) == .focused)
+        #expect(focus.emphasis(for: stranger) == .dimmed)
+    }
+
+    @Test func everyoneScopeNeverFades() {
+        let focus = MapFocus(selectedID: selected, branchIDs: [selected, relative], scope: .everyone)
+        #expect(focus.isActive == false)
+        #expect(focus.emphasis(for: selected) == .normal)
+        #expect(focus.emphasis(for: relative) == .normal)
+        #expect(focus.emphasis(for: stranger) == .normal)
+    }
+
+    @Test func personScopeClusterKeepsOnlyTheSelectedPerson() {
+        let focus = MapFocus(selectedID: selected, branchIDs: [selected, relative], scope: .person)
+        #expect(focus.emphasis(forAny: [stranger, selected]) == .focused)
+        // A place shared by two relatives is no longer worth keeping lit.
+        #expect(focus.emphasis(forAny: [relative, stranger]) == .dimmed)
+    }
+
     @Test func lineageResultDrivesTheFade() {
         let tree = FamilyTree(name: "Род")
         let father = Person(givenNames: "Отец", surname: "Тест", sex: .male)
