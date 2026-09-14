@@ -329,7 +329,12 @@ public enum GEDCOMCodec {
     public static func parse(_ url: URL) throws -> ImportResult {
         let text = try GEDCOMTextDecoder.decode(Data(contentsOf: url))
         let document = try GEDCOMDocument.parse(text)
-        return try project(document: document, text: text, baseURL: url.deletingLastPathComponent())
+        return try project(
+            document: document,
+            text: text,
+            baseURL: url.deletingLastPathComponent(),
+            sourceURL: url
+        )
     }
 
     /// Preview keeps parse/structure failures inside the import sheet so its blocking
@@ -411,7 +416,12 @@ public enum GEDCOMCodec {
         }
     }
 
-    private static func project(document: GEDCOMDocument, text: String, baseURL: URL?) throws -> ImportResult {
+    private static func project(
+        document: GEDCOMDocument,
+        text: String,
+        baseURL: URL?,
+        sourceURL: URL? = nil
+    ) throws -> ImportResult {
         guard document.records.contains(where: { $0.tag == "HEAD" }) else {
             throw GEDCOMCodecError.missingHeader
         }
@@ -428,6 +438,13 @@ public enum GEDCOMCodec {
         tree.sourceRecords = parsed.sourceRecords
         tree.parentLinks = parsed.parentLinks
         tree.gedcomDocument = document
+        // A tree built from a file was not created or modified just now, whatever the
+        // initializer stamped. Prefer what this app wrote into HEAD; for files that
+        // predate those tags (or come from another program), the file's own dates are
+        // the closest honest answer.
+        let fileDates = sourceURL?.fileDates
+        tree.createdAt = parsed.createdAt ?? fileDates?.created ?? tree.createdAt
+        tree.updatedAt = parsed.updatedAt ?? fileDates?.modified ?? tree.updatedAt
 
         var diagnostics: [ImportDiagnostic] = []
         if !document.records.contains(where: { $0.tag == "TRLR" }) {
@@ -520,4 +537,11 @@ public enum GEDCOMCodec {
         return ImportResult(tree: tree, document: document, report: report)
     }
 
+}
+
+private extension URL {
+    var fileDates: (created: Date?, modified: Date?) {
+        let values = try? resourceValues(forKeys: [.creationDateKey, .contentModificationDateKey])
+        return (values?.creationDate, values?.contentModificationDate)
+    }
 }

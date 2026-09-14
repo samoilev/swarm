@@ -20,6 +20,9 @@ public struct GEDCOMParser {
         public var sourceRecords: [SourceRecord] = []
         public var parentLinks: [ParentLink] = []
         public var headUnknownBranches: [[String]] = []
+        /// Written by this app into HEAD; nil for files from elsewhere.
+        public var createdAt: Date?
+        public var updatedAt: Date?
         /// Top-level records the parser doesn't model, kept verbatim for re-export.
         public var unknownRecords: [[String]] = []
     }
@@ -42,7 +45,17 @@ public struct GEDCOMParser {
     private static let modeledRecordTags: Set<String> = ["HEAD", "INDI", "FAM", "TRLR"]
     private static let modeledHeadTags: Set<String> = [
         "_TREEID", "_FTSVER", "_NAME", "_SUBTITLE", "_HOME", "_ROOT",
+        "_CREATED", "_UPDATED",
     ]
+
+    /// ISO-8601 for the `_CREATED`/`_UPDATED` HEAD stamps. GEDCOM's own DATE is
+    /// day-granular and, once imported, is re-emitted verbatim from the preserved
+    /// HEAD — neither of which can say when the user last saved this tree.
+    static let timestampFormatter: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
 
     public static func parse(from url: URL) throws -> ParsedTree {
         let raw = try Data(contentsOf: url)
@@ -59,6 +72,8 @@ public struct GEDCOMParser {
         var treeName = L10n.tr("Без названия")
         var treeSubtitle: String? = nil
         var treeId: UUID? = nil
+        var treeCreatedAt: Date? = nil
+        var treeUpdatedAt: Date? = nil
         var schemaVersion = 1
         var homeXref: String? = nil
         var rootFamXref: String? = nil
@@ -93,6 +108,8 @@ public struct GEDCOMParser {
                     case "_SUBTITLE": treeSubtitle = line.value
                     case "_TREEID": treeId = UUID(uuidString: line.value)
                     case "_FTSVER": schemaVersion = Int(line.value) ?? 1
+                    case "_CREATED": treeCreatedAt = timestampFormatter.date(from: line.value)
+                    case "_UPDATED": treeUpdatedAt = timestampFormatter.date(from: line.value)
                     case "_HOME": homeXref = line.pointer
                     case "_ROOT": rootFamXref = line.pointer
                     default: break
@@ -152,6 +169,8 @@ public struct GEDCOMParser {
             sourceRecords: sourceRecords,
             parentLinks: parentLinks,
             headUnknownBranches: headUnknownBranches,
+            createdAt: treeCreatedAt,
+            updatedAt: treeUpdatedAt,
             unknownRecords: unknownRecords
         )
     }

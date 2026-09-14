@@ -74,6 +74,32 @@ struct GEDCOMRoundTripTests {
         #expect(GEDCOMParser.parse(gedcom: gedcom).people.count == 3)
     }
 
+    /// The library dates every card from `updatedAt`. GEDCOM carries no such field, so
+    /// without the `_UPDATED` stamp a parsed tree is born "just now" and every card
+    /// claims it was modified this second.
+    @Test func preservesTreeTimestamps() {
+        let tree = makeTree()
+        tree.createdAt = Date(timeIntervalSince1970: 1_000_000_000)
+        tree.updatedAt = Date(timeIntervalSince1970: 1_700_000_000)
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        let parsed = GEDCOMParser.parse(gedcom: gedcom)
+
+        #expect(parsed.createdAt == tree.createdAt)
+        #expect(parsed.updatedAt == tree.updatedAt)
+    }
+
+    /// An imported HEAD is re-emitted verbatim on save, so a stamp the parser does not
+    /// claim gets preserved *and* rewritten — one more copy on every save.
+    @Test func stampsSurviveResaveWithoutDuplicating() throws {
+        let first = GEDCOMSerializer.serialize(tree: makeTree()).gedcom
+        let imported = try GEDCOMCodec.parse(first)
+        let second = try GEDCOMCodec.serialize(tree: imported.tree, document: imported.document).gedcom
+
+        #expect(second.components(separatedBy: "\n1 _UPDATED ").count - 1 == 1)
+        #expect(second.components(separatedBy: "\n1 _CREATED ").count - 1 == 1)
+    }
+
     @Test func preservesPersonFields() throws {
         let parsed = roundTrip(makeTree())
         let father = try #require(parsed.people.first { $0.givenNames == "Иван" })

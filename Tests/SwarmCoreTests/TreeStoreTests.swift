@@ -371,4 +371,46 @@ struct TreeStoreTests {
         #expect(store.pendingMigrations.isEmpty)
         #expect(store.lastLoadError == nil)
     }
+
+    /// The library's card caption and its recency order both read `updatedAt`. Before
+    /// the HEAD stamp, a reload rebuilt every tree with `updatedAt = Date()`, so each
+    /// card claimed "изменено только что" and the order collapsed to load order.
+    @Test func reloadKeepsTheSaveTimeInsteadOfStampingNow() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        _ = try await store.addTreeVerified(tree)
+
+        // Backdate the stamp in the stored file: a save and an immediate reload are
+        // both "now", so only an old file can tell a preserved date from a fresh one.
+        let folder = temp.url.appendingPathComponent(tree.name, isDirectory: true)
+        let ged = folder.appendingPathComponent("\(tree.name).ged")
+        let lastYear = Date(timeIntervalSinceNow: -365 * 24 * 3600)
+        let stamp = GEDCOMParser.timestampFormatter.string(from: lastYear)
+        let text = try String(contentsOf: ged, encoding: .utf8)
+            .replacingOccurrences(
+                of: "1 _UPDATED \(GEDCOMParser.timestampFormatter.string(from: tree.updatedAt))",
+                with: "1 _UPDATED \(stamp)"
+            )
+        #expect(text.contains("1 _UPDATED \(stamp)"))
+        try text.write(to: ged, atomically: true, encoding: .utf8)
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        let loaded = try #require(reloaded.trees.first)
+        #expect(abs(loaded.updatedAt.timeIntervalSince(lastYear)) < 1)
+    }
+
+    /// Trees written before the stamp existed (and files from other programs) have no
+    /// `_UPDATED`; the file's own modification date is the closest honest answer.
+    @Test func fileWithoutStampFallsBackToItsModificationDate() throws {
+        let temp = Temp()
+        let ged = temp.url.appendingPathComponent("plain.ged")
+        try "0 HEAD\n1 CHAR UTF-8\n1 _NAME Род\n0 @I1@ INDI\n1 NAME Иван /Иванов/\n0 TRLR\n"
+            .write(to: ged, atomically: true, encoding: .utf8)
+        let lastYear = Date(timeIntervalSinceNow: -365 * 24 * 3600)
+        try FileManager.default.setAttributes([.modificationDate: lastYear], ofItemAtPath: ged.path)
+
+        let parsed = try GEDCOMCodec.parse(ged).tree
+        #expect(abs(parsed.updatedAt.timeIntervalSince(lastYear)) < 1)
+    }
 }

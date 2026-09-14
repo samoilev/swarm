@@ -72,6 +72,10 @@ public struct GEDCOMSerializer {
         // Custom metadata
         lines.append("1 _TREEID \(tree.id.uuidString)")
         lines.append("1 _FTSVER 2")
+        // Outside the HEAD if/else above on purpose: an imported HEAD is re-emitted
+        // verbatim, so a stamp written up there would freeze at the first save.
+        lines.append("1 _CREATED \(GEDCOMParser.timestampFormatter.string(from: tree.createdAt))")
+        lines.append("1 _UPDATED \(GEDCOMParser.timestampFormatter.string(from: tree.updatedAt))")
         lines.append("1 _NAME \(tree.name)")
         if let sub = tree.subtitle, !sub.isEmpty {
             lines.append("1 _SUBTITLE \(sub)")
