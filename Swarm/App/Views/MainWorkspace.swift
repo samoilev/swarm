@@ -351,7 +351,13 @@ struct MainWorkspace: View {
                         trailingInset: canvasTrailingInset
                     )
                 } else if viewMode == .map {
-                    MapChartView(tree: tree, zoom: $mapZoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                    MapChartView(
+                        tree: tree,
+                        zoom: $mapZoom,
+                        selectedPerson: $selectedPerson,
+                        fitRequest: $fitRequest,
+                        focus: MapFocus(selectedID: selectedPerson?.id, branchIDs: highlightedBranch)
+                    )
                 } else if viewMode == .people {
                     PeopleWorkspaceView(
                         tree: tree,

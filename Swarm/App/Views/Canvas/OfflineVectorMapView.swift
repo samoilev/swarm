@@ -8,7 +8,9 @@ struct OfflineVectorMapView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
+    let focus: MapFocus
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
 
     @State private var annotations: [OfflineMapAnnotation] = []
@@ -51,6 +53,7 @@ struct OfflineVectorMapView: View {
             }
             .clipped()
             .background(SepiaTheme.mapSea)
+            .animation(reduceMotion ? nil : SepiaMotion.select, value: focus)
             .overlay(alignment: .topLeading) {
                 Label(L10n.tr("Офлайн"), systemImage: "network.slash")
                     .font(SepiaType.micro)
@@ -120,6 +123,7 @@ struct OfflineVectorMapView: View {
                         .foregroundColor(.white)
                 }
             }
+            .opacity(focus.emphasis(forAny: cluster.annotations.map(\.personID)).pinOpacity)
             .frame(width: 34, height: 34)
         }
         .buttonStyle(.plain)
@@ -138,6 +142,7 @@ struct OfflineVectorMapView: View {
                                 Text(annotation.placeName).font(SepiaTheme.ui(size: 9)).foregroundColor(SepiaTheme.inkSoft)
                             }
                         }
+                        .opacity(focus.emphasis(for: annotation.personID).pinOpacity)
                     }
                     .buttonStyle(.plain)
                 }
@@ -271,10 +276,16 @@ struct OfflineVectorMapView: View {
             var path = Path()
             path.move(to: project(route.start, size: size))
             path.addLine(to: project(route.end, size: size))
+            let emphasis = focus.emphasis(for: route.personID)
+            let base = route.isBurial ? SepiaTheme.pinBurial.opacity(0.7) : SepiaTheme.mapLine
+            let bump: CGFloat = emphasis == .focused ? 1 : 0
             context.stroke(
                 path,
-                with: .color(route.isBurial ? SepiaTheme.pinBurial.opacity(0.7) : SepiaTheme.mapLine),
-                style: StrokeStyle(lineWidth: route.isBurial ? 2.5 : 2, dash: route.isBurial ? [1, 5] : [6, 4])
+                with: .color(base.opacity(emphasis.lineOpacity)),
+                style: StrokeStyle(
+                    lineWidth: (route.isBurial ? 2.5 : 2) + bump,
+                    dash: route.isBurial ? [1, 5] : [6, 4]
+                )
             )
         }
     }
@@ -347,8 +358,12 @@ struct OfflineVectorMapView: View {
                     coordinate: burial
                 ))
             }
-            if let birth, let death { newRoutes.append(OfflineMapRoute(start: birth, end: death, isBurial: false)) }
-            if let death, let burial { newRoutes.append(OfflineMapRoute(start: death, end: burial, isBurial: true)) }
+            if let birth, let death {
+                newRoutes.append(OfflineMapRoute(personID: person.id, start: birth, end: death, isBurial: false))
+            }
+            if let death, let burial {
+                newRoutes.append(OfflineMapRoute(personID: person.id, start: death, end: burial, isBurial: true))
+            }
         }
         annotations = result
         routes = newRoutes
@@ -365,6 +380,10 @@ struct OfflineVectorMapView: View {
     }
 
     private func fit(size: CGSize) {
+        // With a branch selected, frame that branch rather than every place in the tree.
+        let onBranch = focus.isActive ? annotations.filter { focus.emphasis(for: $0.personID) != .dimmed } : []
+        let annotations = onBranch.isEmpty ? annotations : onBranch
+
         guard !annotations.isEmpty, size.width > 0, size.height > 0 else { return }
         let normalized = annotations.map { Self.normalized($0.coordinate) }
         let minX = normalized.map(\.x).min()!, maxX = normalized.map(\.x).max()!
@@ -556,6 +575,7 @@ private struct OfflineMapAnnotation: Identifiable {
 
 private struct OfflineMapRoute: Identifiable {
     let id = UUID()
+    let personID: UUID
     let start: OfflineCoordinate
     let end: OfflineCoordinate
     let isBurial: Bool

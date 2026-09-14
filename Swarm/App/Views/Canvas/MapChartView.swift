@@ -7,15 +7,16 @@ struct MapChartView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
+    let focus: MapFocus
 
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
 
     var body: some View {
         Group {
             if providerRaw == MapProviderSetting.appleMaps.rawValue {
-                AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
             } else {
-                OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest)
+                OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in zoom = min(2.0, zoom + 0.1) }
@@ -28,6 +29,7 @@ struct AppleMapChartView: View {
     @Binding var zoom: CGFloat
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
+    let focus: MapFocus
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -54,15 +56,11 @@ struct AppleMapChartView: View {
             // Connection lines: dashed birth→death life line, dotted death→grave burial line.
             ForEach(polylines) { line in
                 MapPolyline(coordinates: line.coordinates)
-                    .stroke(
-                        line.dotted ? SepiaTheme.pinBurial.opacity(0.8) : SepiaTheme.mapLine,
-                        style: line.dotted
-                            ? StrokeStyle(lineWidth: 3, lineCap: .round, dash: [0.1, 6])
-                            : StrokeStyle(lineWidth: 2, dash: [6, 4])
-                    )
+                    .stroke(lineColor(for: line), style: lineStroke(for: line))
             }
         }
         .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+        .animation(reduceMotion ? nil : SepiaMotion.select, value: focus)
         .mapControls {
             MapCompass()
             MapScaleView()
@@ -112,6 +110,21 @@ struct AppleMapChartView: View {
         }
     }
 
+    // MARK: - Focus Styling
+
+    private func lineColor(for line: MapPolylineData) -> Color {
+        let base = line.dotted ? SepiaTheme.pinBurial.opacity(0.8) : SepiaTheme.mapLine
+        return base.opacity(focus.emphasis(for: line.personId).lineOpacity)
+    }
+
+    /// The selected person's own path thickens by a point so it reads above their branch.
+    private func lineStroke(for line: MapPolylineData) -> StrokeStyle {
+        let bump: CGFloat = focus.emphasis(for: line.personId) == .focused ? 1 : 0
+        return line.dotted
+            ? StrokeStyle(lineWidth: 3 + bump, lineCap: .round, dash: [0.1, 6])
+            : StrokeStyle(lineWidth: 2 + bump, dash: [6, 4])
+    }
+
     // MARK: - Pin Button (interactive)
 
     @ViewBuilder
@@ -156,6 +169,7 @@ struct AppleMapChartView: View {
             }
         }
         .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
+        .opacity(focus.emphasis(forAny: group.annotations.map(\.personId)).pinOpacity)
         .frame(width: 30, height: 30)
         .contentShape(Rectangle())
         .accessibilityElement(children: .ignore)
@@ -201,6 +215,7 @@ struct AppleMapChartView: View {
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
+                        .opacity(focus.emphasis(for: ann.personId).pinOpacity)
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -338,11 +353,11 @@ struct AppleMapChartView: View {
 
             // Life line (dashed): birth → death.
             if let b = birthCoord, let d = deathCoord {
-                newPolylines.append(MapPolylineData(coordinates: [b, d]))
+                newPolylines.append(MapPolylineData(personId: person.id, coordinates: [b, d]))
             }
             // Burial line (dotted): death → grave.
             if let d = deathCoord, let g = burialCoord {
-                newPolylines.append(MapPolylineData(coordinates: [d, g], dotted: true))
+                newPolylines.append(MapPolylineData(personId: person.id, coordinates: [d, g], dotted: true))
             }
         }
 
@@ -354,6 +369,11 @@ struct AppleMapChartView: View {
     }
 
     private func fitToAnnotations() {
+        // With a branch selected, frame that branch rather than the whole tree. A branch
+        // with no coordinates of its own falls back to everything.
+        let onBranch = focus.isActive ? annotations.filter { focus.emphasis(for: $0.personId) != .dimmed } : []
+        let annotations = onBranch.isEmpty ? annotations : onBranch
+
         guard !annotations.isEmpty else {
             // Default: show Eurasia
             let defaultSpan = MKCoordinateSpan(latitudeDelta: 40, longitudeDelta: 60)
@@ -421,6 +441,7 @@ struct PersonMapAnnotation: Identifiable {
 
 struct MapPolylineData: Identifiable {
     let id = UUID()
+    let personId: UUID
     let coordinates: [CLLocationCoordinate2D]
     /// Life line (birth→death) is dashed; the burial line (death→grave) is dotted.
     var dotted: Bool = false
