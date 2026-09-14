@@ -1183,7 +1183,11 @@ struct MainWorkspace: View {
                 if viewMode == .fan {
                     fanZoom = min(1.6, max(0.25, fanZoom + delta))
                 } else if viewMode == .map {
-                    mapZoom = min(1.6, max(0.25, mapZoom + delta))
+                    // Multiplicative, and over a range that matches what the map can
+                    // actually do: the offline renderer spans a 50x scale range and
+                    // reads `mapZoom` as a ratio, so an additive 0.25-1.6 clamp left
+                    // the buttons dead after about five clicks.
+                    mapZoom = min(8, max(0.1, mapZoom * (delta > 0 ? 1.25 : 0.8)))
                 }
             }
         }

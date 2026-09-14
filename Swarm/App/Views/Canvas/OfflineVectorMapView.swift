@@ -1,8 +1,12 @@
+import AppKit
 import SwarmCore
 import SwiftUI
 
 /// Network-free map surface. It deliberately has no MapKit dependency and renders a
 /// compact bundled world outline plus the tree's stored coordinates with SwiftUI Canvas.
+///
+/// All projection and camera math lives in `OfflineMapProjection` so it can be tested
+/// without driving the UI.
 struct OfflineVectorMapView: View {
     let tree: FamilyTree
     @Binding var zoom: CGFloat
@@ -21,6 +25,64 @@ struct OfflineVectorMapView: View {
     @State private var expandedClusterID: String?
     @State private var placeIndexRevision = 0
 
+    /// Parsed once on appear. Reading `OfflineMapVectorData.shared` from inside the
+    /// `Canvas` closure took an `NSLock` on every frame of every pan.
+    @State private var vectors: OfflineMapVectorData?
+    /// Gazetteer labels for the current viewport, refreshed by `labelTask` rather than
+    /// re-queried per frame. The per-frame query walked up to 27,000 rows in the dense
+    /// buckets around Moscow, St Petersburg and Kyiv — copying a multi-string struct
+    /// for each — which is what made panning stutter worst where the data is richest.
+    @State private var labels: [PlaceEntry] = []
+    /// `.global` frame, needed both for the label query and to place scroll events.
+    @State private var mapFrame: CGRect = .zero
+    @State private var centerAtDragStart: CGPoint?
+    @State private var pointer: CGPoint?
+    @State private var scrollMonitor: Any?
+    /// Mirrors `AppleMapChartView.lastZoom`. Without it `fit()` corrupted its own
+    /// result: it set `mapScale`, then assigned `zoom = 0.85`, and the `onChange`
+    /// below re-scaled by the ratio of that assignment.
+    @State private var lastZoom: CGFloat = 0.85
+
+    private var viewSize: CGSize { mapFrame.size }
+
+    private var labelTier: PlaceLabelTier {
+        if mapScale <= 1.4 {
+            .world
+        } else if mapScale <= 4 {
+            .regional
+        } else if mapScale <= 12 {
+            .city
+        } else {
+            .close
+        }
+    }
+
+    /// Quantised so a small pan does not re-run the query. The centre is rounded to
+    /// eighths of the visible span, so the gazetteer is read roughly once per
+    /// half-screen of movement instead of once per frame.
+    private var labelKey: LabelKey {
+        let quantum = max(0.000_01, 1 / Double(mapScale) / 8)
+        return LabelKey(
+            tier: labelTier,
+            centerX: Int((Double(center.x) / quantum).rounded()),
+            centerY: Int((Double(center.y) / quantum).rounded()),
+            width: Int(viewSize.width),
+            height: Int(viewSize.height),
+            language: languageRaw,
+            revision: placeIndexRevision
+        )
+    }
+
+    struct LabelKey: Equatable {
+        let tier: PlaceLabelTier
+        let centerX: Int
+        let centerY: Int
+        let width: Int
+        let height: Int
+        let language: String
+        let revision: Int
+    }
+
     var body: some View {
         GeometryReader { proxy in
             ZStack {
@@ -31,7 +93,8 @@ struct OfflineVectorMapView: View {
                 .id("\(languageRaw)-\(placeIndexRevision)")
                 .contentShape(Rectangle())
                 .gesture(dragGesture(size: proxy.size))
-                .simultaneousGesture(magnificationGesture)
+                .simultaneousGesture(magnificationGesture(size: proxy.size))
+                .simultaneousGesture(doubleTapGesture(size: proxy.size))
 
                 ForEach(clusters(in: proxy.size)) { cluster in
                     clusterButton(cluster)
@@ -54,6 +117,14 @@ struct OfflineVectorMapView: View {
             .clipped()
             .background(SepiaTheme.mapSea)
             .animation(reduceMotion ? nil : SepiaMotion.select, value: focus)
+            .onContinuousHover { phase in
+                switch phase {
+                case let .active(location): pointer = location
+                case .ended: pointer = nil
+                @unknown default: pointer = nil
+                }
+            }
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { mapFrame = $0 }
             .overlay(alignment: .topLeading) {
                 Label(L10n.tr("Офлайн"), systemImage: "network.slash")
                     .font(SepiaType.micro)
@@ -64,7 +135,10 @@ struct OfflineVectorMapView: View {
                     .padding(12)
             }
             .overlay(alignment: .bottomLeading) { legend }
+            .overlay(alignment: .bottomTrailing) { scaleBar }
             .onAppear {
+                if vectors == nil { vectors = OfflineMapVectorData.shared }
+                installScrollMonitor()
                 resolveAnnotations()
                 fit(size: proxy.size)
                 PlacesDatabase.shared.whenReady {
@@ -73,16 +147,26 @@ struct OfflineVectorMapView: View {
                     fit(size: proxy.size)
                 }
             }
+            .onDisappear {
+                if let scrollMonitor { NSEvent.removeMonitor(scrollMonitor) }
+                scrollMonitor = nil
+            }
+            .task(id: labelKey) { await refreshLabels() }
             .onChange(of: tree.layoutVersion) { _, _ in
                 resolveAnnotations()
                 fit(size: proxy.size)
             }
             .onChange(of: languageRaw) { _, _ in resolveAnnotations() }
             .onChange(of: fitRequest) { _, _ in fit(size: proxy.size) }
-            .onChange(of: zoom) { oldValue, newValue in
-                guard oldValue > 0 else { return }
-                mapScale = min(40, max(0.8, mapScale * newValue / oldValue))
-                scaleAtGestureStart = mapScale
+            .onChange(of: zoom) { _, newValue in
+                guard abs(newValue - lastZoom) > 0.001, lastZoom > 0 else { return }
+                let factor = newValue / lastZoom
+                lastZoom = newValue
+                zoomBy(
+                    factor: factor,
+                    anchor: CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2),
+                    size: proxy.size
+                )
             }
         }
         .accessibilityElement(children: .contain)
@@ -90,6 +174,11 @@ struct OfflineVectorMapView: View {
         .accessibilityRepresentation {
             VStack {
                 Text(L10n.tr("Места семьи"))
+                // The overlays sit inside the subtree this representation replaces, so
+                // without this line the distance reading exists only for sighted users.
+                if let bar = currentScaleBar {
+                    Text(L10n.tr("Масштаб: \(scaleLabel(bar.kilometres))"))
+                }
                 ForEach(annotations) { annotation in
                     Button("\(annotation.personName): \(annotation.placeName), \(annotation.kind.label)") {
                         selectedPerson = tree.person(byId: annotation.personID)
@@ -98,6 +187,23 @@ struct OfflineVectorMapView: View {
             }
         }
     }
+
+    // MARK: - Labels
+
+    private func refreshLabels() async {
+        let size = viewSize
+        guard size.width > 0, size.height > 0, PlacesDatabase.shared.isReady else { return }
+        let tier = labelTier
+        let bounds = OfflineMapProjection.visibleBounds(center: center, scale: mapScale, size: size)
+        let language = AppLanguage(rawValue: languageRaw) ?? .default
+        let result = await Task.detached(priority: .userInitiated) {
+            PlacesDatabase.shared.mapLabels(tier: tier, bounds: bounds, language: language)
+        }.value
+        guard !Task.isCancelled else { return }
+        labels = result
+    }
+
+    // MARK: - Pins
 
     private func clusterButton(_ cluster: OfflineMapCluster) -> some View {
         let presented = Binding(
@@ -151,126 +257,132 @@ struct OfflineVectorMapView: View {
         }
     }
 
+    // MARK: - Drawing
+
     private func drawBackground(context: inout GraphicsContext, size: CGSize) {
         context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SepiaTheme.mapSea))
+        drawGraticule(context: &context, size: size)
 
-        // Latitude/longitude grid.
-        for longitude in stride(from: -180.0, through: 180.0, by: 30.0) {
-            var path = Path()
-            for latitude in stride(from: -80.0, through: 80.0, by: 4.0) {
-                let point = project(OfflineCoordinate(latitude: latitude, longitude: longitude), size: size)
-                if latitude == -80 { path.move(to: point) } else { path.addLine(to: point) }
-            }
-            context.stroke(path, with: .color(SepiaTheme.line.opacity(0.18)), lineWidth: 0.5)
-        }
-        for latitude in stride(from: -60.0, through: 75.0, by: 15.0) {
-            var path = Path()
-            for longitude in stride(from: -180.0, through: 180.0, by: 5.0) {
-                let point = project(OfflineCoordinate(latitude: latitude, longitude: longitude), size: size)
-                if longitude == -180 { path.move(to: point) } else { path.addLine(to: point) }
-            }
-            context.stroke(path, with: .color(SepiaTheme.line.opacity(0.18)), lineWidth: 0.5)
-        }
-
-        // One read per frame: `shared` now takes a lock.
-        let vectors = OfflineMapVectorData.shared
-        for polygon in vectors.landPolygons {
-            guard let first = polygon.first else { continue }
-            var path = Path()
-            path.move(to: project(vectorCoordinate(first), size: size))
-            for coordinate in polygon.dropFirst() { path.addLine(to: project(vectorCoordinate(coordinate), size: size)) }
-            path.closeSubpath()
+        guard let vectors else { return }
+        let bounds = OfflineMapProjection.visibleBounds(center: center, scale: mapScale, size: size)
+        for ring in vectors.land(intersecting: bounds) {
+            guard let path = path(for: ring, size: size, closed: true) else { continue }
             context.fill(path, with: .color(SepiaTheme.mapLand))
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.45)), lineWidth: 0.8)
         }
-
-        for border in vectors.borderLines {
-            guard let first = border.first else { continue }
-            var path = Path()
-            path.move(to: project(vectorCoordinate(first), size: size))
-            for coordinate in border.dropFirst() { path.addLine(to: project(vectorCoordinate(coordinate), size: size)) }
+        for ring in vectors.borders(intersecting: bounds) {
+            guard let path = path(for: ring, size: size, closed: false) else { continue }
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.28)), lineWidth: 0.45)
         }
 
         drawPlaceLabels(context: &context, size: size)
     }
 
-    private func drawPlaceLabels(context: inout GraphicsContext, size: CGSize) {
-        guard PlacesDatabase.shared.isReady, size.width > 0, size.height > 0 else { return }
-        let tier: PlaceLabelTier = if mapScale <= 1.4 {
-            .world
-        } else if mapScale <= 4 {
-            .regional
-        } else if mapScale <= 12 {
-            .city
-        } else {
-            .close
+    private func path(for ring: MapVectorRing, size: CGSize, closed: Bool) -> Path? {
+        guard let first = ring.points.first else { return nil }
+        var path = Path()
+        path.move(to: project(coordinate(first), size: size))
+        for point in ring.points.dropFirst() {
+            path.addLine(to: project(coordinate(point), size: size))
         }
-        let bounds = visibleBounds(size: size)
-        let language = AppLanguage(rawValue: languageRaw) ?? .default
-        let candidates = PlacesDatabase.shared.mapLabels(
-            tier: tier,
-            bounds: bounds,
-            language: language
-        )
-        var occupied: [CGRect] = []
-        occupied.reserveCapacity(tier.maximumLabels)
+        if closed { path.closeSubpath() }
+        return path
+    }
 
-        for place in candidates {
-            guard let latitude = place.latitude, let longitude = place.longitude else { continue }
-            let point = project(
-                OfflineCoordinate(latitude: latitude, longitude: longitude),
-                size: size
-            )
-            guard point.x >= 0, point.x <= size.width, point.y >= 0, point.y <= size.height else {
-                continue
-            }
-            let name = place.name(language: language)
-            let width = min(170, max(34, CGFloat(name.count) * 6.2 + 10))
-            let rect = CGRect(
-                x: point.x - width / 2,
-                y: point.y - 8,
-                width: width,
-                height: 16
-            )
-            guard !occupied.contains(where: { $0.insetBy(dx: -3, dy: -2).intersects(rect) }) else {
-                continue
-            }
-            context.draw(
-                Text(name)
-                    .font(SepiaTheme.ui(size: tier == .close ? 10 : 9, scaled: false))
-                    .foregroundColor(SepiaTheme.inkSoft.opacity(0.86)),
-                at: point
-            )
-            occupied.append(rect)
-            if occupied.count >= tier.maximumLabels { break }
+    /// Meridians and parallels are both straight lines in Mercator, so each needs two
+    /// points rather than the stepped polyline this used to build. Spacing follows the
+    /// zoom: the old fixed 30°/15° grid drew nothing once the viewport was narrower
+    /// than one cell.
+    private func drawGraticule(context: inout GraphicsContext, size: CGSize) {
+        let step = OfflineMapProjection.graticuleStep(for: mapScale)
+        let color = SepiaTheme.line.opacity(0.18)
+        let limit = OfflineMapProjection.latitudeLimit
+
+        for index in 0 ... Int(360 / step) {
+            let longitude = -180 + Double(index) * step
+            let x = project(MapCoordinate(latitude: 0, longitude: longitude), size: size).x
+            guard x >= 0, x <= size.width else { continue }
+            var path = Path()
+            path.move(to: project(MapCoordinate(latitude: limit, longitude: longitude), size: size))
+            path.addLine(to: project(MapCoordinate(latitude: -limit, longitude: longitude), size: size))
+            context.stroke(path, with: .color(color), lineWidth: 0.5)
+        }
+        for index in 0 ... Int(160 / step) {
+            let latitude = -80 + Double(index) * step
+            let y = project(MapCoordinate(latitude: latitude, longitude: 0), size: size).y
+            guard y >= 0, y <= size.height else { continue }
+            var path = Path()
+            path.move(to: project(MapCoordinate(latitude: latitude, longitude: -180), size: size))
+            path.addLine(to: project(MapCoordinate(latitude: latitude, longitude: 180), size: size))
+            context.stroke(path, with: .color(color), lineWidth: 0.5)
         }
     }
 
-    private func visibleBounds(size: CGSize) -> PlaceBounds {
-        let horizontalHalfSpan = 0.5 / Double(mapScale)
-        let verticalHalfSpan = Double(size.height / max(1, size.width))
-            * 0.5 / Double(mapScale)
-        let minimumX = Double(center.x) - horizontalHalfSpan
-        let maximumX = Double(center.x) + horizontalHalfSpan
-        let topY = Double(center.y) - verticalHalfSpan
-        let bottomY = Double(center.y) + verticalHalfSpan
+    private func drawPlaceLabels(context: inout GraphicsContext, size: CGSize) {
+        var occupied: [CGRect] = []
 
-        func longitude(_ normalizedX: Double) -> Double {
-            let wrapped = normalizedX - floor(normalizedX)
-            return wrapped * 360 - 180
+        // The tree's own places are laid out first and win every collision. They used
+        // to carry no name at all — gazetteer cities were labelled while the family's
+        // own villages were bare dots, which is backwards for this map.
+        if mapScale >= 3 {
+            for cluster in clusters(in: size) where cluster.annotations.count == 1 {
+                guard let annotation = cluster.annotations.first,
+                      focus.emphasis(for: annotation.personID) != .dimmed,
+                      !annotation.placeName.isEmpty else { continue }
+                let resolved = context.resolve(
+                    Text(annotation.placeName)
+                        .font(SepiaTheme.ui(size: 10, scaled: false))
+                        .foregroundColor(SepiaTheme.ink)
+                )
+                let measured = resolved.measure(in: size)
+                let rect = CGRect(
+                    x: cluster.point.x + 13,
+                    y: cluster.point.y - measured.height / 2,
+                    width: measured.width,
+                    height: measured.height
+                )
+                guard !occupied.contains(where: { $0.insetBy(dx: -3, dy: -2).intersects(rect) }) else { continue }
+                // The pin is a button drawn above the canvas; reserve its circle so a
+                // gazetteer name cannot land under it.
+                occupied.append(CGRect(x: cluster.point.x - 12, y: cluster.point.y - 12, width: 24, height: 24))
+                occupied.append(rect)
+                context.draw(resolved, in: rect)
+            }
         }
-        func latitude(_ normalizedY: Double) -> Double {
-            let clamped = min(1, max(0, normalizedY))
-            return atan(sinh(.pi * (1 - 2 * clamped))) * 180 / .pi
+
+        guard PlacesDatabase.shared.isReady else { return }
+        let tier = labelTier
+        let language = AppLanguage(rawValue: languageRaw) ?? .default
+        var drawn = 0
+        for place in labels {
+            guard let latitude = place.latitude, let longitude = place.longitude else { continue }
+            let point = project(MapCoordinate(latitude: latitude, longitude: longitude), size: size)
+            guard point.x >= 0, point.x <= size.width, point.y >= 0, point.y <= size.height else { continue }
+            let resolved = context.resolve(
+                Text(place.name(language: language))
+                    .font(SepiaTheme.ui(size: tier == .close ? 10 : 9, scaled: false))
+                    .foregroundColor(SepiaTheme.inkSoft.opacity(0.86))
+            )
+            // Measured, not guessed: the collision box used to be `name.count * 6.2`.
+            let measured = resolved.measure(in: size)
+            // Offset from the dot. Labels used to be centred on the place they named,
+            // hiding the very point they marked.
+            let rect = CGRect(
+                x: point.x + 5,
+                y: point.y - measured.height / 2,
+                width: measured.width,
+                height: measured.height
+            )
+            guard !occupied.contains(where: { $0.insetBy(dx: -3, dy: -2).intersects(rect) }) else { continue }
+            context.fill(
+                Path(ellipseIn: CGRect(x: point.x - 1.5, y: point.y - 1.5, width: 3, height: 3)),
+                with: .color(SepiaTheme.inkSoft.opacity(0.7))
+            )
+            context.draw(resolved, in: rect)
+            occupied.append(rect)
+            drawn += 1
+            if drawn >= tier.maximumLabels { break }
         }
-        let showsWholeWorld = horizontalHalfSpan * 2 >= 1
-        return PlaceBounds(
-            minimumLatitude: latitude(bottomY),
-            maximumLatitude: latitude(topY),
-            minimumLongitude: showsWholeWorld ? -180 : longitude(minimumX),
-            maximumLongitude: showsWholeWorld ? 180 : longitude(maximumX)
-        )
     }
 
     private func drawRoutes(context: inout GraphicsContext, size: CGSize) {
@@ -292,8 +404,10 @@ struct OfflineVectorMapView: View {
         }
     }
 
-    private func vectorCoordinate(_ point: MapVectorPoint) -> OfflineCoordinate {
-        OfflineCoordinate(latitude: point.latitude, longitude: point.longitude)
+    // MARK: - Model
+
+    private func coordinate(_ point: MapVectorPoint) -> MapCoordinate {
+        MapCoordinate(latitude: point.latitude, longitude: point.longitude)
     }
 
     private func clusters(in size: CGSize) -> [OfflineMapCluster] {
@@ -371,15 +485,17 @@ struct OfflineVectorMapView: View {
         routes = newRoutes
     }
 
-    private func coordinate(latitude: Double?, longitude: Double?, place: String?) -> OfflineCoordinate? {
+    private func coordinate(latitude: Double?, longitude: Double?, place: String?) -> MapCoordinate? {
         if let latitude, let longitude, (-90 ... 90).contains(latitude), (-180 ... 180).contains(longitude) {
-            return OfflineCoordinate(latitude: latitude, longitude: longitude)
+            return MapCoordinate(latitude: latitude, longitude: longitude)
         }
         if let coordinate = GeocodingService.shared.coordinateSync(for: place) {
-            return OfflineCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            return MapCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
         }
         return nil
     }
+
+    // MARK: - Camera
 
     private func fit(size: CGSize) {
         // With a branch selected, frame that branch rather than every place in the tree.
@@ -387,54 +503,138 @@ struct OfflineVectorMapView: View {
         let annotations = onBranch.isEmpty ? annotations : onBranch
 
         guard !annotations.isEmpty, size.width > 0, size.height > 0 else { return }
-        let normalized = annotations.map { Self.normalized($0.coordinate) }
+        let normalized = annotations.map { OfflineMapProjection.normalized($0.coordinate) }
         let minX = normalized.map(\.x).min()!, maxX = normalized.map(\.x).max()!
         let minY = normalized.map(\.y).min()!, maxY = normalized.map(\.y).max()!
-        center = CGPoint(x: (minX + maxX) / 2, y: (minY + maxY) / 2)
         let width = max(maxX - minX, 0.025)
         let height = max(maxY - minY, 0.025)
         mapScale = min(32, max(0.9, min(0.78 / width, 0.78 * size.height / size.width / height)))
         scaleAtGestureStart = mapScale
+        center = OfflineMapProjection.clampCenter(
+            CGPoint(x: (minX + maxX) / 2, y: (minY + maxY) / 2),
+            scale: mapScale,
+            size: size
+        )
+        // Set before `zoom` so the `onChange` above sees no delta: it used to re-scale
+        // by 0.85/previous and undo the fit that just ran.
+        lastZoom = 0.85
         zoom = 0.85
     }
 
-    private func project(_ coordinate: OfflineCoordinate, size: CGSize) -> CGPoint {
-        let normalized = Self.normalized(coordinate)
-        return CGPoint(
-            x: size.width / 2 + (normalized.x - center.x) * size.width * mapScale,
-            y: size.height / 2 + (normalized.y - center.y) * size.width * mapScale
+    private func project(_ coordinate: MapCoordinate, size: CGSize) -> CGPoint {
+        OfflineMapProjection.project(coordinate, center: center, scale: mapScale, size: size)
+    }
+
+    private func zoomBy(factor: CGFloat, anchor: CGPoint, size: CGSize) {
+        guard size.width > 0, factor > 0, factor.isFinite else { return }
+        let newScale = min(
+            OfflineMapProjection.maximumScale,
+            max(OfflineMapProjection.minimumScale, mapScale * factor)
         )
+        guard newScale != mapScale else { return }
+        center = OfflineMapProjection.anchoredCenter(
+            center: center,
+            anchor: anchor,
+            oldScale: mapScale,
+            newScale: newScale,
+            size: size
+        )
+        mapScale = newScale
+        scaleAtGestureStart = newScale
     }
 
-    private static func normalized(_ coordinate: OfflineCoordinate) -> CGPoint {
-        let latitude = min(85.0511, max(-85.0511, coordinate.latitude))
-        let x = (coordinate.longitude + 180) / 360
-        let radians = latitude * .pi / 180
-        let y = (1 - log(tan(radians) + 1 / cos(radians)) / .pi) / 2
-        return CGPoint(x: x, y: y)
-    }
+    // MARK: - Gestures
 
+    /// Tracks the pointer while the button is down. This used to be `.onEnded` only,
+    /// so the map stayed frozen through the whole drag and jumped on release.
     private func dragGesture(size: CGSize) -> some Gesture {
         DragGesture()
-            .onEnded { value in
+            .onChanged { value in
                 guard size.width > 0 else { return }
-                center.x -= value.translation.width / (size.width * mapScale)
-                center.y -= value.translation.height / (size.width * mapScale)
-                center.x = min(1, max(0, center.x))
-                center.y = min(1, max(0, center.y))
+                let anchor: CGPoint
+                if let centerAtDragStart {
+                    anchor = centerAtDragStart
+                } else {
+                    anchor = center
+                    centerAtDragStart = center
+                }
+                center = OfflineMapProjection.clampCenter(
+                    CGPoint(
+                        x: anchor.x - value.translation.width / (size.width * mapScale),
+                        y: anchor.y - value.translation.height / (size.width * mapScale)
+                    ),
+                    scale: mapScale,
+                    size: size
+                )
             }
+            .onEnded { _ in centerAtDragStart = nil }
     }
 
-    private var magnificationGesture: some Gesture {
+    private func magnificationGesture(size: CGSize) -> some Gesture {
         MagnificationGesture()
             .onChanged { value in
                 // Same damping as the tree canvas. Undamped magnification is worst here:
                 // the scale range is 0.8–40, so a short pinch flew across it.
                 let damped = 1 + (value - 1) * zoomSensitivity
-                mapScale = min(40, max(0.8, scaleAtGestureStart * damped))
+                let target = min(
+                    OfflineMapProjection.maximumScale,
+                    max(OfflineMapProjection.minimumScale, scaleAtGestureStart * damped)
+                )
+                guard target != mapScale else { return }
+                let anchor = pointer ?? CGPoint(x: size.width / 2, y: size.height / 2)
+                center = OfflineMapProjection.anchoredCenter(
+                    center: center,
+                    anchor: anchor,
+                    oldScale: mapScale,
+                    newScale: target,
+                    size: size
+                )
+                mapScale = target
             }
             .onEnded { _ in scaleAtGestureStart = mapScale }
     }
+
+    private func doubleTapGesture(size: CGSize) -> some Gesture {
+        SpatialTapGesture(count: 2)
+            .modifiers(.option)
+            .onEnded { value in zoomBy(factor: 1 / 2, anchor: value.location, size: size) }
+            .exclusively(
+                before: SpatialTapGesture(count: 2)
+                    .onEnded { value in zoomBy(factor: 2, anchor: value.location, size: size) }
+            )
+    }
+
+    /// Scroll-wheel zoom, anchored at the pointer.
+    ///
+    /// A local monitor rather than an `NSViewRepresentable`: AppKit delivers scroll
+    /// events by hit-testing, and any view placed over the canvas to catch them would
+    /// also swallow the clicks meant for the pins underneath.
+    private func installScrollMonitor() {
+        guard scrollMonitor == nil else { return }
+        scrollMonitor = NSEvent.addLocalMonitorForEvents(matching: .scrollWheel) { event in
+            guard let contentView = event.window?.contentView else { return event }
+            // AppKit measures from the window's bottom-left; SwiftUI's global space is
+            // top-left.
+            let inWindow = event.locationInWindow
+            let point = CGPoint(x: inWindow.x, y: contentView.bounds.height - inWindow.y)
+            let frame = mapFrame
+            guard frame.width > 0, frame.contains(point) else { return event }
+            let delta = event.scrollingDeltaY
+            guard delta != 0 else { return event }
+            // A trackpad reports many small precise deltas; a wheel reports one notch.
+            let factor: CGFloat = event.hasPreciseScrollingDeltas
+                ? exp(delta * 0.01)
+                : (delta > 0 ? 1.2 : 1 / 1.2)
+            zoomBy(
+                factor: factor,
+                anchor: CGPoint(x: point.x - frame.minX, y: point.y - frame.minY),
+                size: frame.size
+            )
+            return nil
+        }
+    }
+
+    // MARK: - Chrome
 
     private var legend: some View {
         HStack(spacing: 12) {
@@ -453,6 +653,43 @@ struct OfflineVectorMapView: View {
             Circle().fill(color).frame(width: 8, height: 8)
             Text(text).font(SepiaType.label).foregroundColor(SepiaTheme.inkSoft)
         }
+    }
+
+    /// Distance reference. Offline mode had none at all, so there was no way to tell a
+    /// 10 km view from a 1000 km one. Apple mode gets `MapScaleView` for free.
+    private var currentScaleBar: (kilometres: Double, width: CGFloat)? {
+        guard viewSize.width > 0 else { return nil }
+        return OfflineMapProjection.scaleBar(
+            scale: mapScale,
+            latitude: OfflineMapProjection.coordinate(atNormalized: center).latitude,
+            size: viewSize,
+            maximumWidth: 120
+        )
+    }
+
+    @ViewBuilder private var scaleBar: some View {
+        if let bar = currentScaleBar {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(scaleLabel(bar.kilometres))
+                    .font(SepiaType.micro)
+                    .foregroundColor(SepiaTheme.inkSoft)
+                Rectangle()
+                    .fill(SepiaTheme.inkSoft.opacity(0.75))
+                    .frame(width: max(1, bar.width), height: 3)
+            }
+            .padding(7)
+            .background(SepiaTheme.paper.opacity(0.92))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .padding(12)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(L10n.tr("Масштаб: \(scaleLabel(bar.kilometres))"))
+        }
+    }
+
+    private func scaleLabel(_ kilometres: Double) -> String {
+        kilometres >= 1
+            ? L10n.tr("\(Int(kilometres.rounded())) км")
+            : L10n.tr("\(Int((kilometres * 1000).rounded())) м")
     }
 }
 
@@ -537,15 +774,15 @@ struct OfflinePersonMiniMap: View {
         return result
     }
 
-    private func miniCoordinate(_ latitude: Double?, _ longitude: Double?, _ place: String?) -> OfflineCoordinate? {
-        if let latitude, let longitude { return OfflineCoordinate(latitude: latitude, longitude: longitude) }
+    private func miniCoordinate(_ latitude: Double?, _ longitude: Double?, _ place: String?) -> MapCoordinate? {
+        if let latitude, let longitude { return MapCoordinate(latitude: latitude, longitude: longitude) }
         if let coordinate = GeocodingService.shared.coordinateSync(for: place) {
-            return OfflineCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            return MapCoordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
         }
         return nil
     }
 
-    private func miniProject(_ coordinate: OfflineCoordinate, points: [OfflineMapAnnotation], size: CGSize) -> CGPoint {
+    private func miniProject(_ coordinate: MapCoordinate, points: [OfflineMapAnnotation], size: CGSize) -> CGPoint {
         let longitudes = points.map(\.coordinate.longitude)
         let latitudes = points.map(\.coordinate.latitude)
         let minLon = longitudes.min() ?? coordinate.longitude
@@ -561,25 +798,20 @@ struct OfflinePersonMiniMap: View {
     }
 }
 
-private struct OfflineCoordinate: Hashable {
-    let latitude: Double
-    let longitude: Double
-}
-
 private struct OfflineMapAnnotation: Identifiable {
     var id: String { "\(personID)-\(kind.rawValue)-\(coordinate.latitude)-\(coordinate.longitude)" }
     let personID: UUID
     let personName: String
     let placeName: String
     let kind: OfflineMapPinKind
-    let coordinate: OfflineCoordinate
+    let coordinate: MapCoordinate
 }
 
 private struct OfflineMapRoute: Identifiable {
     let id = UUID()
     let personID: UUID
-    let start: OfflineCoordinate
-    let end: OfflineCoordinate
+    let start: MapCoordinate
+    let end: MapCoordinate
     let isBurial: Bool
 }
 

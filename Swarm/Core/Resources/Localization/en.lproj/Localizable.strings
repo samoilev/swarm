@@ -848,3 +848,6 @@
 "Удалённые файлы и копии…" = "Deleted files and copies…";
 "Вернуть версию" = "Restore Version";
 "Предыдущие версии…" = "Previous Versions…";
+"%@ км" = "%@ km";
+"%@ м" = "%@ m";
+"Масштаб: %@" = "Scale: %@";

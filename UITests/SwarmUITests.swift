@@ -532,3 +532,205 @@ final class SwarmEnglishUITests: XCTestCase {
     }
 
 }
+
+/// The offline vector map, launched straight into that provider rather than switched
+/// to through Settings.
+///
+/// Screenshots are written when `SWARM_UI_SHOTS` names a directory, so the same test
+/// can capture a before and an after run for visual comparison.
+final class SwarmOfflineMapUITests: XCTestCase {
+    private var app: XCUIApplication!
+    private var storageURL: URL!
+
+    private var exampleTree: URL {
+        URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Examples/romanovy/romanovy.ged")
+    }
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        storageURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("swarm-ui-map-\(UUID().uuidString)", isDirectory: true)
+        // Seeded on disk rather than imported: a tree folder is any directory holding a
+        // .ged, and the open panel is out of process and exposes no window to XCUITest.
+        let treeFolder = storageURL.appendingPathComponent("Романовы", isDirectory: true)
+        try FileManager.default.createDirectory(at: treeFolder, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(
+            at: exampleTree,
+            to: treeFolder.appendingPathComponent("romanovy.ged")
+        )
+        app = XCUIApplication(url: swarmUITestHostURL)
+        app.launchArguments = [
+            "-appLanguage", "ru",
+            "-appLanguageChoiceCompleted", "YES",
+            // Straight into the offline renderer: the provider is plain `@AppStorage`.
+            "-mapProvider", "offlineVector",
+            "--storage-folder", storageURL.path,
+        ]
+        app.launch()
+    }
+
+    override func tearDownWithError() throws {
+        app.terminate()
+        try? FileManager.default.removeItem(at: storageURL)
+    }
+
+    // MARK: - Tests
+
+    func testOfflineMapReportsItsScale() throws {
+        try openOfflineMap()
+        let reading = try XCTUnwrap(scaleReading(), "The offline map published no distance reading")
+        XCTAssertTrue(reading.hasSuffix("км") || reading.hasSuffix("м"), reading)
+    }
+
+    /// Guards the zoom buttons against saturating again. `mapZoom` was clamped to
+    /// 0.25-1.6 and read as a ratio by a renderer spanning a 50x range, so the button
+    /// went dead after about five clicks with most of the range unreached.
+    func testZoomStepperKeepsWorkingPastTheOldCeiling() throws {
+        try openOfflineMap()
+        let start = try XCTUnwrap(zoomPercentage(), "No zoom readout to compare against")
+        let startDistance = scaleReading()
+
+        var readings: [Int] = []
+        for _ in 0 ..< 10 {
+            clickZoomIn()
+            if let reading = zoomPercentage() { readings.append(reading) }
+        }
+        let last = try XCTUnwrap(readings.last)
+        XCTAssertGreaterThan(last, start, "Ten zoom-in clicks left the zoom where it began")
+
+        // The later clicks have to still do something. The old clamp stopped at 160%,
+        // which five clicks reached, and every click after that was inert.
+        XCTAssertGreaterThan(
+            Set(readings.suffix(5)).count, 1,
+            "Zoom stopped responding partway through: \(readings)"
+        )
+        XCTAssertGreaterThan(last, 160, "Zoom never passed the old 160% ceiling")
+
+        // The distance reading has to follow the camera, not just the percentage.
+        XCTAssertNotEqual(scaleReading(), startDistance, "The scale bar did not follow the zoom")
+    }
+
+    func testDraggingPansTheMap() throws {
+        try openOfflineMap()
+        // Zoom in first. The fitted view of this tree spans more than the window, so the
+        // camera sits on its clamp and a drag correctly has nowhere to go.
+        for _ in 0 ..< 6 { clickZoomIn() }
+        let before = try screenshot(named: "drag-before")
+
+        let window = app.windows.firstMatch
+        window.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.5))
+            .press(
+                forDuration: 0.3,
+                thenDragTo: window.coordinate(withNormalizedOffset: CGVector(dx: 0.62, dy: 0.58))
+            )
+        let after = try screenshot(named: "drag-after")
+        XCTAssertNotEqual(before, after, "The drag did not move the map")
+    }
+
+    /// Capture only — the comparison is done by eye against a run of the previous build.
+    /// Off by default: it asserts nothing, and parsing the place index a fourth time in
+    /// one run makes it the slowest and flakiest thing in the class.
+    func testCaptureOfflineMapAtThreeZoomLevels() throws {
+        try XCTSkipIf(
+            ProcessInfo.processInfo.environment["SWARM_UI_SHOTS"] == nil,
+            "Screenshot capture aid; set SWARM_UI_SHOTS to a writable folder to run it."
+        )
+        try openOfflineMap()
+        _ = try screenshot(named: "01-fitted")
+        for _ in 0 ..< 5 { clickZoomIn() }
+        _ = try screenshot(named: "02-country")
+        for _ in 0 ..< 6 { clickZoomIn() }
+        _ = try screenshot(named: "03-close")
+    }
+
+    // MARK: - Helpers
+
+    private func openOfflineMap() throws {
+        let card = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "Романовы")
+        ).firstMatch
+        XCTAssertTrue(card.waitForExistence(timeout: 30), "The seeded tree never appeared")
+        card.click()
+
+        // Addressed by identifier, not label: every button in a toolbar `Group` reports
+        // the first button's accessibility label, so this one announces itself as
+        // "Древовидная схема" and both zoom buttons as "Уменьшить масштаб".
+        let map = app.buttons["map"].firstMatch
+        XCTAssertTrue(map.waitForExistence(timeout: 60), "The workspace never opened")
+        map.click()
+        // The gazetteer is read from an 80 MB bundled index on a background queue; the
+        // map draws before it settles.
+        XCTAssertTrue(
+            app.staticTexts["Места семьи"].waitForExistence(timeout: 60),
+            "The offline map never appeared"
+        )
+        waitForPlaceIndex()
+    }
+
+    /// The gazetteer is an 80 MB bundled index parsed on a background queue, and the map
+    /// draws long before it settles - without labels until it does. The slow-load
+    /// indicator only appears five seconds in, so its absence alone does not mean ready;
+    /// this waits for a sustained quiet window instead.
+    private func waitForPlaceIndex() {
+        let loading = app.activityIndicators["map.loading"]
+        let deadline = Date().addingTimeInterval(300)
+        var quiet = 0
+        while Date() < deadline {
+            quiet = loading.exists ? 0 : quiet + 1
+            if quiet >= 6 { return }
+            Thread.sleep(forTimeInterval: 2)
+        }
+        XCTFail("The place index never finished loading")
+    }
+
+    private func clickZoomIn() {
+        let button = app.buttons["plus"].firstMatch
+        guard button.exists, button.isHittable else { return }
+        button.click()
+        Thread.sleep(forTimeInterval: 0.4)
+    }
+
+    /// SwiftUI surfaces a `Text` inside an accessibility representation as the element's
+    /// value, not its label.
+    /// The toolbar readout, exposed as the element's value.
+    private func zoomPercentage() -> Int? {
+        let readout = app.staticTexts.matching(
+            NSPredicate(format: "value BEGINSWITH %@", "Масштаб ")
+        ).firstMatch
+        guard readout.waitForExistence(timeout: 10),
+              let value = readout.value as? String else { return nil }
+        return Int(value.filter(\.isNumber))
+    }
+
+    private func scaleReading() -> String? {
+        let reading = app.staticTexts.matching(
+            NSPredicate(format: "value BEGINSWITH %@", "Масштаб: ")
+        ).firstMatch
+        guard reading.waitForExistence(timeout: 10) else { return nil }
+        return reading.value as? String
+    }
+
+    /// The runner is sandboxed, so screenshots go to its own temporary directory unless
+    /// `SWARM_UI_SHOTS` names somewhere it can reach. The path is printed either way.
+    @discardableResult
+    private func screenshot(named name: String) throws -> Data {
+        Thread.sleep(forTimeInterval: 1)
+        let data = app.screenshot().pngRepresentation
+        let folder = ProcessInfo.processInfo.environment["SWARM_UI_SHOTS"]
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
+            ?? FileManager.default.temporaryDirectory
+            .appendingPathComponent("swarm-map-shots", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            let file = folder.appendingPathComponent("\(name).png")
+            try data.write(to: file)
+            print("SHOT \(file.path)")
+        } catch {
+            print("SHOT FAILED \(folder.path): \(error)")
+        }
+        return data
+    }
+}
