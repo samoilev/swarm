@@ -82,7 +82,7 @@ struct RecoveryView: View {
                 }
             }
         }
-        .frame(width: 760, height: 560)
+        .frame(width: SepiaTheme.scaledPanel(760, axis: .horizontal), height: SepiaTheme.scaledPanel(560, axis: .vertical))
         .onAppear {
             if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
             refresh()
@@ -122,7 +122,7 @@ struct RecoveryView: View {
             }
             .labelsHidden()
             .pickerStyle(.menu)
-            .frame(width: 260)
+            .frame(width: SepiaTheme.scaled(260))
             .help(L10n.tr("Выберите дерево, историю которого нужно посмотреть"))
 
             Spacer()
@@ -132,7 +132,7 @@ struct RecoveryView: View {
     private var emptyState: some View {
         VStack(spacing: 8) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
+                .font(SepiaTheme.icon(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
             Text(selectedTree == nil ? L10n.tr("Выберите архив") : L10n.tr("Пока нечего восстанавливать"))
                 .font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
             Text(selectedTree == nil

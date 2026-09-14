@@ -28,7 +28,7 @@ struct TreeMergeView: View {
                 Spacer()
                 Button { close() } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(SepiaTheme.icon(size: 12, weight: .semibold))
                         .foregroundStyle(SepiaTheme.ink)
                         .frame(width: 30, height: 30)
                 }
@@ -75,7 +75,7 @@ struct TreeMergeView: View {
             } else {
                 Spacer()
                 VStack(spacing: 14) {
-                    Image(systemName: "arrow.triangle.merge").font(.system(size: 44)).foregroundStyle(SepiaTheme.inkSoft)
+                    Image(systemName: "arrow.triangle.merge").font(SepiaTheme.icon(size: 44)).foregroundStyle(SepiaTheme.inkSoft)
                     Text(L10n.tr("Выберите файл для объединения")).font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
                     Text(L10n.tr("Если родственник прислал своё дерево или вы выгрузили его из другого сервиса, объединение перенесёт недостающих людей, даты и источники в ваш архив. Совпадающие персоны сольются в одну, а не задвоятся."))
                         .font(SepiaTheme.body(size: 12.5)).foregroundStyle(SepiaTheme.inkSoft)
@@ -109,7 +109,7 @@ struct TreeMergeView: View {
                 }
             }.padding(16)
         }
-        .frame(width: 760, height: 620)
+        .frame(width: SepiaTheme.scaledPanel(760, axis: .horizontal), height: SepiaTheme.scaledPanel(620, axis: .vertical))
         .background(SepiaTheme.paper)
         .fileImporter(isPresented: $showImporter, allowedContentTypes: [gedcomType]) { result in
             if case let .success(url) = result { loadPreview(url) }
@@ -186,7 +186,7 @@ struct TreeMergeView: View {
                 Text(L10n.tr("Локальное")).tag(MergeFactChoice.local)
                 Text(L10n.tr("Входящее")).tag(MergeFactChoice.incoming)
                 Text(L10n.tr("Оба")).tag(MergeFactChoice.both)
-            }.pickerStyle(.segmented).frame(width: 260)
+            }.pickerStyle(.segmented).frame(width: SepiaTheme.scaled(260))
         }.padding(10).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 7))
     }
 

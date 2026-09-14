@@ -50,7 +50,7 @@ private struct RepeatIconButtonStyle: ButtonStyle {
                 // In the toolbar these steppers stand beside plain icon buttons, so they
                 // answer the pointer the same way: one hover/press disc, no border.
                 configuration.label
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 12, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
                     .modifier(WorkspaceToolbarIconChrome(isPressed: configuration.isPressed))
             case .sepia:

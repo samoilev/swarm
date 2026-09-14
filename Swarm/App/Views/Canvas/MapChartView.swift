@@ -136,7 +136,7 @@ struct MapChartView: View {
     private var failureCard: some View {
         VStack(spacing: 10) {
             Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 26))
+                .font(SepiaTheme.icon(size: 26))
                 .foregroundColor(SepiaTheme.inkSoft)
             Text(L10n.tr("Не удалось загрузить карту"))
                 .font(SepiaTheme.body(size: 14))

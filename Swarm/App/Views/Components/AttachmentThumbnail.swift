@@ -25,7 +25,7 @@ struct AttachmentThumbnail: View {
                         .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                     if !format.isEmpty {
                         Text(format)
-                            .font(SepiaTheme.ui(size: max(7, size * 0.16)))
+                            .font(SepiaTheme.ui(size: max(7, size * 0.16), scaled: false))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }

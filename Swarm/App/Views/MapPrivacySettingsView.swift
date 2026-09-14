@@ -5,6 +5,7 @@ struct MapPrivacySettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
+    @AppStorage(UIScale.storageKey) private var scaleRaw = UIScale.default.rawValue
 
     var body: some View {
         ZStack {
@@ -27,6 +28,15 @@ struct MapPrivacySettingsView: View {
                     }
                 }
 
+                settingsSection(L10n.tr("Размер интерфейса"), systemImage: "textformat.size") {
+                    LiquidGlassActionRow {
+                        ForEach(UIScale.allCases) { scale in
+                            scaleButton(scale)
+                        }
+                    }
+                    .id(languageRaw)
+                }
+
                 settingsSection(L10n.tr("Карта и конфиденциальность"), systemImage: "map") {
                     LiquidGlassActionRow {
                         ForEach(MapProviderSetting.allCases) { provider in
@@ -38,11 +48,11 @@ struct MapPrivacySettingsView: View {
                     privacyNotice
                 }
             }
-            .padding(24)
+            .padding(SepiaTheme.scaled(24))
         }
         // Two sections of fixed-height controls: the window takes its height from them
         // rather than reserving room for content that is no longer here.
-        .frame(width: 560)
+        .frame(width: SepiaTheme.scaledPanel(560, axis: .horizontal))
         // Blanks the tab/window title macOS would otherwise fill with "Swarm Settings".
         .navigationTitle(Text(verbatim: ""))
     }
@@ -71,6 +81,18 @@ struct MapPrivacySettingsView: View {
             isSelected: isSelected
         ) {
             languageBinding.wrappedValue = language
+        }
+    }
+
+    private func scaleButton(_ scale: UIScale) -> some View {
+        // The percentage alone. Five names side by side truncate at any width this
+        // panel can reasonably take, and a clipped "Очень кр…" says less than "130%".
+        choiceButton(
+            title: scale.summary,
+            subtitle: nil,
+            isSelected: currentScale == scale
+        ) {
+            scaleBinding.wrappedValue = scale
         }
     }
 
@@ -113,10 +135,10 @@ struct MapPrivacySettingsView: View {
     }
 
     private func choiceLabel(title: String, subtitle: String?, isSelected: Bool) -> some View {
-        HStack(spacing: 7) {
+        HStack(spacing: SepiaTheme.scaled(7)) {
             Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 12, weight: .semibold))
-                .frame(width: 15)
+                .font(SepiaTheme.icon(size: 12, weight: .semibold))
+                .frame(width: SepiaTheme.scaled(15))
 
             VStack(alignment: .leading, spacing: 1) {
                 Text(title)
@@ -133,8 +155,8 @@ struct MapPrivacySettingsView: View {
             Spacer(minLength: 4)
         }
         .multilineTextAlignment(.leading)
-        .padding(.horizontal, 7)
-        .frame(maxWidth: .infinity, minHeight: 42)
+        .padding(.horizontal, SepiaTheme.scaled(7))
+        .frame(maxWidth: .infinity, minHeight: SepiaTheme.scaled(42))
     }
 
     private var privacyNotice: some View {
@@ -152,6 +174,10 @@ struct MapPrivacySettingsView: View {
         MapProviderSetting(rawValue: providerRaw) ?? .default
     }
 
+    private var currentScale: UIScale {
+        UIScale(rawValue: scaleRaw) ?? .default
+    }
+
     private var currentLanguage: AppLanguage {
         AppLanguage(rawValue: languageRaw) ?? .default
     }
@@ -160,6 +186,19 @@ struct MapPrivacySettingsView: View {
         Binding(
             get: { currentProvider },
             set: { providerRaw = $0.rawValue }
+        )
+    }
+
+    /// The multiplier is written here, at the point of mutation, rather than from an
+    /// `.onChange` on the stored value: the `.id(scaleRaw)` bumps that re-run every body
+    /// ride on the same update, and this way the global is already correct when they do.
+    private var scaleBinding: Binding<UIScale> {
+        Binding(
+            get: { currentScale },
+            set: {
+                SepiaTheme.scale = CGFloat($0.factor)
+                scaleRaw = $0.rawValue
+            }
         )
     }
 

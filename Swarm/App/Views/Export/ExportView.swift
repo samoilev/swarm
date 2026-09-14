@@ -94,7 +94,7 @@ struct ExportView: View {
     private func exportButtonLabel(_ title: String, systemImage: String) -> some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 13, weight: .semibold))
+                .font(SepiaTheme.icon(size: 13, weight: .semibold))
                 .frame(width: 20)
             Text(title)
                 .font(SepiaTheme.ui(size: 12.5))

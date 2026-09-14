@@ -161,7 +161,7 @@ struct LiquidGlassPanelHeader: View {
                 if let onClose {
                     Button(action: onClose) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(SepiaTheme.icon(size: 12, weight: .semibold))
                             .foregroundStyle(SepiaTheme.ink)
                             .frame(width: 34, height: 34)
                     }

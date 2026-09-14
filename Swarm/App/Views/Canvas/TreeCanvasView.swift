@@ -898,7 +898,7 @@ private struct TreeContentLayer: View, Equatable {
                         ? L10n.tr("Без имени")
                         : node.person.displayName(language: .current)
                     context.draw(
-                        Text(label).font(SepiaTheme.ui(size: 12 * superSample)).foregroundStyle(SepiaTheme.ink),
+                        Text(label).font(SepiaTheme.ui(size: 12 * superSample, scaled: false)).foregroundStyle(SepiaTheme.ink),
                         at: CGPoint(x: rect.midX, y: rect.midY),
                         anchor: .center
                     )
@@ -1307,14 +1307,14 @@ struct PersonCardView: View, Equatable {
                         // Surname — allow up to 2 lines so long names are never truncated.
                         // The maiden name sits on its own line below (1-line, clipped if needed).
                         Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: s(8)))
+                            .font(SepiaTheme.ui(size: s(8), scaled: false))
                             .tracking(s(1.0))
                             .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(2)
                             .minimumScaleFactor(0.8)
                         if let maiden = person.maidenName, !maiden.isEmpty, !person.surname.isEmpty {
                             Text("(\(maiden.uppercased()))")
-                                .font(SepiaTheme.ui(size: s(7)))
+                                .font(SepiaTheme.ui(size: s(7), scaled: false))
                                 .tracking(s(0.6))
                                 .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                                 .lineLimit(1)
@@ -1324,7 +1324,7 @@ struct PersonCardView: View, Equatable {
                     Spacer(minLength: s(4))
                     if let glyph = sexGlyph {
                         Text(glyph)
-                            .font(SepiaTheme.ui(size: s(9)))
+                            .font(SepiaTheme.ui(size: s(9), scaled: false))
                             .foregroundColor(SepiaTheme.inkSoft)
                             .padding(.trailing, isHome ? s(3) : 0)
                     }
@@ -1343,14 +1343,14 @@ struct PersonCardView: View, Equatable {
                         .filter { !$0.isEmpty }
                         .joined(separator: " ")
                     Text(nameDisplay.isEmpty ? L10n.tr("Неизвестно") : nameDisplay)
-                        .font(SepiaTheme.display(size: s(13.5)))
+                        .font(SepiaTheme.display(size: s(13.5), scaled: false))
                         .fontWeight(.semibold)
                         .foregroundColor(SepiaTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.8)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
-                            .font(SepiaTheme.body(size: s(10.5)))
+                            .font(SepiaTheme.body(size: s(10.5), scaled: false))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
@@ -1383,7 +1383,7 @@ struct PersonCardView: View, Equatable {
         .overlay(alignment: .topTrailing) {
             if let label = lineageLabel {
                 Text(label)
-                    .font(SepiaTheme.ui(size: s(9)))
+                    .font(SepiaTheme.ui(size: s(9), scaled: false))
                     .fontWeight(.medium)
                     .foregroundColor(.white)
                     .padding(.horizontal, s(5))

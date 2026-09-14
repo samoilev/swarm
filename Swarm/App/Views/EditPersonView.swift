@@ -255,7 +255,7 @@ struct EditPersonView: View {
                     .padding(.vertical, 10)
             }
         }
-        .frame(width: 540, height: 720)
+        .frame(width: SepiaTheme.scaledPanel(540, axis: .horizontal), height: SepiaTheme.scaledPanel(720, axis: .vertical))
         .onAppear { loadPerson() }
         .onDisappear {
             if !didCommit { discardPreparedAttachments() }
@@ -419,7 +419,7 @@ struct EditPersonView: View {
 
             Button { sourceDraft = SourceDraft(citation: citation, source: source) } label: {
                 Image(systemName: "pencil")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
@@ -432,7 +432,7 @@ struct EditPersonView: View {
                 if let openable { NSWorkspace.shared.open(openable) }
             } label: {
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
@@ -444,7 +444,7 @@ struct EditPersonView: View {
 
             Button { removeEntry(citation: citation) } label: {
                 Image(systemName: "minus")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
@@ -622,7 +622,7 @@ struct EditPersonView: View {
                     }
                 }
                 .pickerStyle(.menu)
-                .frame(width: 200)
+                .frame(width: SepiaTheme.scaled(200))
                 .font(SepiaType.body)
 
                 if addRelType != .none {
@@ -660,14 +660,14 @@ struct EditPersonView: View {
         HStack(spacing: 8) {
             Text(tag.uppercased())
                 .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5)).foregroundColor(SepiaTheme.inkSoft)
-                .frame(width: 80, alignment: .leading)
+                .frame(width: SepiaTheme.scaled(80), alignment: .leading)
             Text(p.displayName(language: .current))
                 .font(SepiaTheme.body(size: 13.5))
                 .foregroundColor(SepiaTheme.ink)
             Spacer()
             Button { onRemove() } label: {
                 Image(systemName: "minus")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
@@ -812,7 +812,7 @@ struct EditPersonView: View {
 
             Button { removeDraftAttachment(att) } label: {
                 Image(systemName: "minus")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
@@ -861,7 +861,7 @@ struct EditPersonView: View {
                 if let url = link.openableURL { NSWorkspace.shared.open(url) }
             } label: {
                 Image(systemName: "arrow.up.right")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
@@ -872,7 +872,7 @@ struct EditPersonView: View {
 
             Button { removeLink(at: index) } label: {
                 Image(systemName: "minus")
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 11, weight: .semibold))
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
@@ -942,7 +942,7 @@ struct EditPersonView: View {
                             .fill(SepiaTheme.photoA.opacity(0.3))
                             .frame(width: 96, height: 128)
                         Image(systemName: "person.crop.rectangle")
-                            .font(.system(size: 28))
+                            .font(SepiaTheme.icon(size: 28))
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.5))
                     }
                 }
@@ -1264,13 +1264,13 @@ private struct UnionDraftEditor: View {
                     Spacer()
                     Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
                         ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
-                    }.pickerStyle(.menu).frame(width: 150)
+                    }.pickerStyle(.menu).frame(width: SepiaTheme.scaled(150))
                     Button(role: .destructive) {
                         union.childrenIds.removeAll { $0 == childID }
                         tree.parentLinks.removeAll { $0.unionID == union.id && $0.childID == childID }
                     } label: {
                         Image(systemName: "minus")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(SepiaTheme.icon(size: 11, weight: .semibold))
                             .foregroundStyle(SepiaTheme.danger)
                             .frame(width: 26, height: 26)
                     }

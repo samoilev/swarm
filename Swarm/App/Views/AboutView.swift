@@ -85,7 +85,7 @@ struct AboutView: View {
             .padding(.top, 34)
             .padding(.bottom, 30)
         }
-        .frame(width: 420)
+        .frame(width: SepiaTheme.scaledPanel(420, axis: .horizontal))
     }
 
     private var versionText: String {

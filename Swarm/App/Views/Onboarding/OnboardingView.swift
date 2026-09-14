@@ -80,7 +80,7 @@ struct OnboardingView: View {
         .toolbar { onboardingToolbar }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
-        .frame(minWidth: 900, minHeight: 560)
+        .frame(minWidth: SepiaTheme.scaled(900), minHeight: SepiaTheme.scaled(560))
         .onChange(of: step) { _, newValue in
             sepiaAnnounce("\(stepHeadline(newValue)). \(L10n.tr("Шаг \(newValue.rawValue + 1) из 2"))")
         }
@@ -348,11 +348,11 @@ struct OnboardingView: View {
     private func receiptLine(_ text: String) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 8) {
             Image(systemName: "checkmark")
-                .font(.system(size: 11, weight: .bold))
+                .font(SepiaTheme.icon(size: 11, weight: .bold))
                 .foregroundColor(SepiaTheme.pinBirth)
                 .accessibilityHidden(true)
             Text(text)
-                .font(.system(size: 12, design: .monospaced))
+                .font(SepiaTheme.icon(size: 12, design: .monospaced))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .textSelection(.enabled)
         }
@@ -596,7 +596,7 @@ struct OnboardingView: View {
     private func failureBanner(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 14))
+                .font(SepiaTheme.icon(size: 14))
                 .foregroundColor(SepiaTheme.danger)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 3) {

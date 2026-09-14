@@ -1,4 +1,5 @@
 import AppKit
+import SwarmCore
 import SwiftUI
 
 struct SepiaTheme {
@@ -81,16 +82,72 @@ struct SepiaTheme {
     /// nil, so `Font.custom("New York", …)` fell back to the default font and every
     /// `.weight()`/`.fontWeight()` on top of it logged "Unable to update Font Descriptor's
     /// weight". The `.serif` design *is* New York and takes weights properly.
-    static func display(size: CGFloat) -> Font {
-        .system(size: size, weight: .semibold, design: .serif)
+    static func display(size: CGFloat, scaled: Bool = true) -> Font {
+        .system(size: resolve(size, scaled), weight: .semibold, design: .serif)
     }
 
-    static func body(size: CGFloat) -> Font {
-        .system(size: size, design: .serif)
+    static func body(size: CGFloat, scaled: Bool = true) -> Font {
+        .system(size: resolve(size, scaled), design: .serif)
     }
 
-    static func ui(size: CGFloat) -> Font {
-        .system(size: size, weight: .medium, design: .serif)
+    static func ui(size: CGFloat, scaled: Bool = true) -> Font {
+        .system(size: resolve(size, scaled), weight: .medium, design: .serif)
+    }
+
+    /// SF Symbols and the handful of sans-serif labels, so glyphs track the text
+    /// beside them instead of staying put while their labels grow.
+    static func icon(
+        size: CGFloat,
+        weight: Font.Weight = .regular,
+        design: Font.Design = .default,
+        scaled: Bool = true
+    ) -> Font {
+        .system(size: resolve(size, scaled), weight: weight, design: design)
+    }
+
+    // MARK: - Interface scale
+
+    /// Live multiplier for chrome type and panel metrics, from the `UIScale` setting.
+    ///
+    /// A stored global rather than an `EnvironmentValue` because all 254 type call
+    /// sites reach the three constructors above statically; threading a value through
+    /// every one of them is the rewrite this setting exists to avoid. Written only
+    /// from `SwarmApp.init` and the Settings window, both on the main actor, and only
+    /// when the reader picks a step.
+    ///
+    /// Changing it does not invalidate SwiftUI bodies on its own — the scenes carry
+    /// an `.id(scaleRaw)` for that.
+    // ponytail: nonisolated(unsafe) over @MainActor — isolating these constructors
+    // cascades into SepiaButtonStyle.makeBody and sepiaFieldChrome under
+    // StrictConcurrency for a CGFloat that changes on a menu click.
+    nonisolated(unsafe) static var scale: CGFloat = .init(UIScale.default.factor)
+
+    /// A fixed point metric, scaled. For panel frames and fixed text columns, which
+    /// clip rather than grow when the type inside them gets bigger.
+    static func scaled(_ value: CGFloat) -> CGFloat {
+        value * scale
+    }
+
+    /// A panel's fixed size: never smaller than the size it was designed at, never
+    /// larger than the screen it opens on.
+    ///
+    /// Both clamps are load-bearing. Upward, 1.30× would turn the merge sheet's 760×620
+    /// into 988×806 and run it off the bottom of the default 1280×800 window. Downward,
+    /// a panel has no reason to shrink at all — the smaller steps shrink the type inside
+    /// it, and taking the box in as well only crowds rows that were already sized for
+    /// their contents.
+    static func scaledPanel(_ value: CGFloat, axis: Axis) -> CGFloat {
+        let grown = max(value, scaled(value))
+        guard let visible = NSScreen.main?.visibleFrame else { return grown }
+        let limit = (axis == .horizontal ? visible.width : visible.height) - 40
+        return min(grown, max(value, limit))
+    }
+
+    /// `scaled` is opt-out rather than opt-in so a new screen gets the setting for
+    /// free; the canvas, fan chart and map pass `false` because their type is sized
+    /// from layout geometry that SwarmCore computes at a fixed scale.
+    private static func resolve(_ size: CGFloat, _ scaled: Bool) -> CGFloat {
+        scaled ? size * scale : size
     }
 }
 
@@ -166,8 +223,9 @@ private struct SepiaMotionModifier<V: Equatable>: ViewModifier {
 
 extension View {
     /// Strengthens the custom sepia palette for the system Increase Contrast setting.
-    /// Type is a fixed-point scale (see `SepiaType`), so Larger Text does not apply;
-    /// the canvas, fan chart and PDF share hand-tuned metrics with the screens.
+    /// Larger Text still does not apply — the canvas, fan chart and PDF share
+    /// hand-tuned metrics with the screens — so the app carries its own chrome scale
+    /// instead; see `UIScale` and `SepiaTheme.scale`.
     func sepiaSystemAccessibility() -> some View {
         modifier(SepiaSystemAccessibilityModifier())
     }
@@ -281,9 +339,11 @@ extension View {
         fontSize: CGFloat = 15
     ) -> some View {
         let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
-        let inset: CGFloat = height >= 40 ? 14 : 9
+        // Scaled off the *unscaled* height, so the 40pt threshold keeps picking the
+        // roomier inset for the same fields it always did.
+        let inset = SepiaTheme.scaled(height >= 40 ? 14 : 9)
         return padding(.horizontal, inset)
-            .frame(height: height)
+            .frame(height: SepiaTheme.scaled(height))
             .background {
                 ZStack(alignment: .leading) {
                     shape.fill(SepiaTheme.fieldBg)

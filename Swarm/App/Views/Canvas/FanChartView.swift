@@ -269,27 +269,27 @@ struct FanWedgeShape: View {
                 VStack(spacing: 2) {
                     if AppLanguage.current == .russian {
                         Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: 8.5))
+                            .font(SepiaTheme.ui(size: 8.5, scaled: false))
                             .tracking(1.0)
                             .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(1)
                     }
                     if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                         Text("(\(maiden))".uppercased())
-                            .font(SepiaTheme.ui(size: 7.5))
+                            .font(SepiaTheme.ui(size: 7.5, scaled: false))
                             .tracking(0.8)
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                             .lineLimit(1)
                     }
                     Text(personFullGivenName(person))
-                        .font(SepiaTheme.display(size: 13))
+                        .font(SepiaTheme.display(size: 13, scaled: false))
                         .fontWeight(.semibold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.45)
                         .allowsTightening(true)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
-                            .font(SepiaTheme.body(size: 9))
+                            .font(SepiaTheme.body(size: 9, scaled: false))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
@@ -312,27 +312,27 @@ struct FanWedgeShape: View {
                 VStack(spacing: 2) {
                     if AppLanguage.current == .russian {
                         Text(person.displaySurname.uppercased())
-                            .font(SepiaTheme.ui(size: 8.5))
+                            .font(SepiaTheme.ui(size: 8.5, scaled: false))
                             .tracking(1.0)
                             .foregroundColor(SepiaTheme.inkSoft)
                             .lineLimit(1)
                     }
                     if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                         Text("(\(maiden))".uppercased())
-                            .font(SepiaTheme.ui(size: 7.5))
+                            .font(SepiaTheme.ui(size: 7.5, scaled: false))
                             .tracking(0.8)
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                             .lineLimit(1)
                     }
                     Text(personFullGivenName(person))
-                        .font(SepiaTheme.display(size: 13))
+                        .font(SepiaTheme.display(size: 13, scaled: false))
                         .fontWeight(.semibold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.45)
                         .allowsTightening(true)
                     if !person.lifespan.isEmpty {
                         Text(person.lifespan)
-                            .font(SepiaTheme.body(size: 9))
+                            .font(SepiaTheme.body(size: 9, scaled: false))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                 }
@@ -378,7 +378,7 @@ struct FanWedgeShape: View {
             // Large: "Фамилия И.О." + "(девичья)" + year
             VStack(spacing: 1) {
                 Text(personShortName(person))
-                    .font(SepiaTheme.ui(size: fontSize))
+                    .font(SepiaTheme.ui(size: fontSize, scaled: false))
                     .fontWeight(.medium)
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
@@ -386,14 +386,14 @@ struct FanWedgeShape: View {
                     .allowsTightening(true)
                 if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
                     Text("(\(maiden))".uppercased())
-                        .font(SepiaTheme.ui(size: max(6, fontSize - 1.5)))
+                        .font(SepiaTheme.ui(size: max(6, fontSize - 1.5), scaled: false))
                         .tracking(0.5)
                         .foregroundColor(SepiaTheme.inkSoft.opacity(0.7))
                         .lineLimit(1)
                 }
                 if !person.yearFrom.isEmpty {
                     Text(person.yearFrom)
-                        .font(SepiaTheme.body(size: max(6.5, fontSize - 2)))
+                        .font(SepiaTheme.body(size: max(6.5, fontSize - 2), scaled: false))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
                 }
@@ -402,14 +402,14 @@ struct FanWedgeShape: View {
             // Medium: "Фамилия И.О." + year
             VStack(spacing: 1) {
                 Text(personShortName(person))
-                    .font(SepiaTheme.ui(size: max(7, fontSize - 0.5)))
+                    .font(SepiaTheme.ui(size: max(7, fontSize - 0.5), scaled: false))
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.45)
                     .allowsTightening(true)
                 if !person.yearFrom.isEmpty {
                     Text(person.yearFrom)
-                        .font(SepiaTheme.body(size: max(6, fontSize - 2.5)))
+                        .font(SepiaTheme.body(size: max(6, fontSize - 2.5), scaled: false))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
                 }
@@ -418,14 +418,14 @@ struct FanWedgeShape: View {
             // Minimal: "Фам. И." + year
             VStack(spacing: 0) {
                 Text(personMinimalName(person))
-                    .font(SepiaTheme.ui(size: max(7, fontSize - 1)))
+                    .font(SepiaTheme.ui(size: max(7, fontSize - 1), scaled: false))
                     .foregroundColor(SepiaTheme.ink)
                     .lineLimit(1)
                     .minimumScaleFactor(0.45)
                     .allowsTightening(true)
                 if !person.yearFrom.isEmpty {
                     Text(person.yearFrom)
-                        .font(SepiaTheme.body(size: max(5.5, fontSize - 3)))
+                        .font(SepiaTheme.body(size: max(5.5, fontSize - 3), scaled: false))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .lineLimit(1)
                 }

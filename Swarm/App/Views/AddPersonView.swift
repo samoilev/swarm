@@ -174,7 +174,7 @@ struct AddPersonView: View {
                                     }.labelsHidden().pickerStyle(.menu)
                                     Button { pendingRels.removeAll { $0.id == rel.id } } label: {
                                         Image(systemName: "minus.circle.fill")
-                                            .font(.system(size: 14)).foregroundColor(SepiaTheme.danger)
+                                            .font(SepiaTheme.icon(size: 14)).foregroundColor(SepiaTheme.danger)
                                             .frame(width: 24, height: 24).contentShape(Rectangle())
                                     }.buttonStyle(.plain)
                                 }

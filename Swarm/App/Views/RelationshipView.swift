@@ -23,7 +23,7 @@ struct RelationshipView: View {
                     .fontWeight(.semibold)
                 Spacer()
                 Button { isPresented = false } label: {
-                    Image(systemName: "xmark").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
+                    Image(systemName: "xmark").font(SepiaTheme.icon(size: 12)).foregroundColor(SepiaTheme.inkSoft)
                         .frame(width: 28, height: 28)
                         .contentShape(Rectangle())
                 }
@@ -72,7 +72,7 @@ struct RelationshipView: View {
 
             Spacer()
         }
-        .frame(width: 440, height: 520)
+        .frame(width: SepiaTheme.scaledPanel(440, axis: .horizontal), height: SepiaTheme.scaledPanel(520, axis: .vertical))
         .background(SepiaTheme.paper)
         .onAppear {
             if let p = preselectedPerson {
@@ -101,7 +101,7 @@ struct RelationshipView: View {
                         result = nil
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .font(.system(size: 14))
+                            .font(SepiaTheme.icon(size: 14))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }
                     .buttonStyle(.plain)

@@ -284,7 +284,7 @@ struct ReviewWorkspaceView: View {
                     if let field = issue.field {
                         Text(L10n.tr("Открыть поле: \(field)")).font(SepiaType.micro).foregroundStyle(SepiaTheme.accent2)
                     }
-                    Text(issue.code).font(.system(size: 9, design: .monospaced)).foregroundStyle(SepiaTheme.inkSoft)
+                    Text(issue.code).font(SepiaTheme.icon(size: 9, design: .monospaced)).foregroundStyle(SepiaTheme.inkSoft)
                 }.foregroundStyle(SepiaTheme.ink)
                 Spacer()
             }.padding(16).contentShape(Rectangle())

@@ -197,7 +197,7 @@ struct InspectorPanel: View {
                     self.person = tree.person(byId: prev.id) ?? prev
                 } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "chevron.left").font(.system(size: 10, weight: .semibold))
+                        Image(systemName: "chevron.left").font(SepiaTheme.icon(size: 10, weight: .semibold))
                         Text(L10n.tr("Назад")).font(SepiaType.label)
                     }
                 }
@@ -257,7 +257,7 @@ struct InspectorPanel: View {
                 if let onEdit {
                     Button { onEdit(person) } label: {
                         Image(systemName: "pencil")
-                            .font(.system(size: 10.5, weight: .semibold))
+                            .font(SepiaTheme.icon(size: 10.5, weight: .semibold))
                             .frame(width: 24, height: 24)
                     }
                     .buttonStyle(.glassProminent)
@@ -270,7 +270,7 @@ struct InspectorPanel: View {
 
                 Button { self.person = nil } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10.5, weight: .semibold))
+                        .font(SepiaTheme.icon(size: 10.5, weight: .semibold))
                         .foregroundStyle(SepiaTheme.ink)
                         .frame(width: 24, height: 24)
                 }
@@ -378,7 +378,7 @@ struct InspectorPanel: View {
                         endPoint: .bottom
                     )
                     Image(systemName: "person.fill")
-                        .font(.system(size: 26))
+                        .font(SepiaTheme.icon(size: 26))
                         .foregroundColor(SepiaTheme.inkSoft.opacity(0.42))
                 }
             }
@@ -405,7 +405,7 @@ struct InspectorPanel: View {
                 Button(role: .destructive) { onDelete(person) } label: {
                     HStack(spacing: 6) {
                         Image(systemName: "trash")
-                            .font(.system(size: 11, weight: .semibold))
+                            .font(SepiaTheme.icon(size: 11, weight: .semibold))
                         Text(L10n.tr("Удалить персону"))
                             .font(SepiaType.control)
                             .fontWeight(.semibold)
@@ -580,7 +580,7 @@ struct InspectorPanel: View {
 
         return HStack(alignment: .top, spacing: 10) {
             Image(systemName: "doc.text")
-                .font(.system(size: 13))
+                .font(SepiaTheme.icon(size: 13))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .frame(width: 40, height: 40)
                 .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
@@ -619,7 +619,7 @@ struct InspectorPanel: View {
                     } label: {
                         HStack(spacing: 10) {
                             Image(systemName: "link")
-                                .font(.system(size: 13))
+                                .font(SepiaTheme.icon(size: 13))
                                 .foregroundColor(SepiaTheme.inkSoft)
                                 .frame(width: 40, height: 40)
                                 .background(RoundedRectangle(cornerRadius: 5).fill(SepiaTheme.photoA.opacity(0.3)))
@@ -707,7 +707,7 @@ struct InspectorPanel: View {
                     Text(p.displayName(language: .current))
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(SepiaTheme.icon(size: 10, weight: .semibold))
                         .foregroundStyle(SepiaTheme.inkSoft)
                 }
             }
@@ -863,7 +863,7 @@ struct PortraitPreview: View {
             index = (index + delta + photos.count) % photos.count
         } label: {
             Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
+                .font(SepiaTheme.icon(size: 13, weight: .semibold))
                 .frame(width: 36, height: 36)
         }
         .buttonStyle(.glass)

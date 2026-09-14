@@ -41,7 +41,7 @@ struct OfflineVectorMapView: View {
                 if annotations.isEmpty {
                     VStack(spacing: 8) {
                         Image(systemName: "mappin.slash")
-                            .font(.system(size: 28))
+                            .font(SepiaTheme.icon(size: 28))
                         Text(L10n.tr("Нет мест с координатами"))
                             .font(SepiaTheme.body(size: 14))
                         Text(L10n.tr("Выберите место из справочника или укажите координаты вручную"))
@@ -238,7 +238,7 @@ struct OfflineVectorMapView: View {
             }
             context.draw(
                 Text(name)
-                    .font(SepiaTheme.ui(size: tier == .close ? 10 : 9))
+                    .font(SepiaTheme.ui(size: tier == .close ? 10 : 9, scaled: false))
                     .foregroundColor(SepiaTheme.inkSoft.opacity(0.86)),
                 at: point
             )

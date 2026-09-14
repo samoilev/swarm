@@ -9,35 +9,37 @@ import SwiftUI
 /// a view needs a size that is not here, the question is which job it is doing, not
 /// which number looks right.
 ///
-/// Sizes are fixed points, deliberately: the canvas, fan chart and PDF share these
-/// metrics with hand-tuned card geometry, so Dynamic Type is not adopted. Every
-/// call site routes through this enum, so that decision lives in one file.
+/// The numbers below are the unscaled points. Dynamic Type is still not adopted —
+/// the canvas, fan chart and PDF share these metrics with hand-tuned card geometry —
+/// but every step passes through `SepiaTheme`, which multiplies it by the reader's
+/// `UIScale` setting. They are computed rather than stored for that reason: a `let`
+/// would freeze whatever the scale was at first access.
 enum SepiaType {
     // Display — serif semibold. Titles that name a screen or a sheet.
 
     /// Sheet and panel titles ("Экспорт", "Слияние").
-    static let display = SepiaTheme.display(size: 22)
+    static var display: Font { SepiaTheme.display(size: 22) }
     /// Section titles inside a panel, and the inspector's person name.
-    static let title = SepiaTheme.display(size: 20)
+    static var title: Font { SepiaTheme.display(size: 20) }
 
     // Body — serif regular. Everything the reader actually reads.
 
     /// Form values and primary record text.
-    static let bodyLarge = SepiaTheme.body(size: 15)
+    static var bodyLarge: Font { SepiaTheme.body(size: 15) }
     /// Default reading size: list rows, record fields, descriptions.
-    static let body = SepiaTheme.body(size: 13)
+    static var body: Font { SepiaTheme.body(size: 13) }
 
     // UI — serif medium. Controls and labels, not prose.
 
     /// Button and control labels.
-    static let control = SepiaTheme.ui(size: 12)
+    static var control: Font { SepiaTheme.ui(size: 12) }
     /// Section headings inside a record ("Личность", "Рождение"). One step above a
     /// field label so a group reads as a group rather than as another caption.
-    static let sectionLabel = SepiaTheme.ui(size: 13)
+    static var sectionLabel: Font { SepiaTheme.ui(size: 13) }
     /// Small tracked caps: field labels, badges.
-    static let label = SepiaTheme.ui(size: 11)
+    static var label: Font { SepiaTheme.ui(size: 11) }
     /// The smallest legible step: legends, timestamps, card metadata.
-    static let micro = SepiaTheme.ui(size: 10)
+    static var micro: Font { SepiaTheme.ui(size: 10) }
 
     /// Letter-spacing for small caps labels, as a fraction of the font size.
     ///
@@ -46,8 +48,11 @@ enum SepiaType {
     /// 0.2 that `SepiaTrackedLabel` applied was the outlier, not the rule.
     static let trackingRatio: CGFloat = 0.1
 
-    /// Tracking for a tracked-caps label at `size`.
+    /// Tracking for a tracked-caps label at `size`, where `size` is the unscaled point
+    /// value the call site passes to `SepiaTheme.ui`. Scaled to match, or the letter
+    /// spacing on a tracked label would stay put while the glyphs around it grew.
+    /// Only chrome uses this — the canvas tracks its labels with literals.
     static func tracking(_ size: CGFloat) -> CGFloat {
-        size * trackingRatio
+        SepiaTheme.scaled(size) * trackingRatio
     }
 }

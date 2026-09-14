@@ -182,7 +182,7 @@ struct TreeLibraryView: View {
         .toolbar { libraryToolbar }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
-        .frame(minWidth: 600, minHeight: 400)
+        .frame(minWidth: SepiaTheme.scaled(600), minHeight: SepiaTheme.scaled(400))
         .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in
             // ⌘F means "find" wherever you are; in the library that is the tree filter.
             guard showsFilter else { return }
@@ -366,7 +366,7 @@ struct TreeLibraryView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 13, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
             }
             .buttonStyle(.glass)
@@ -391,7 +391,7 @@ struct TreeLibraryView: View {
             HStack(spacing: 6) {
                 Text(sortOrder.label)
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(.system(size: 9, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 9, weight: .semibold))
                     .accessibilityHidden(true)
             }
             .font(SepiaType.control)
@@ -410,10 +410,10 @@ struct TreeLibraryView: View {
         .accessibilityLabel(L10n.tr("Порядок деревьев"))
     }
 
-    private func filterField(width: CGFloat = 206) -> some View {
+    private func filterField(width: CGFloat = SepiaTheme.scaled(206)) -> some View {
         HStack(spacing: 7) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 11))
+                .font(SepiaTheme.icon(size: 11))
                 .foregroundColor(SepiaTheme.inkSoft)
                 .accessibilityHidden(true)
             TextField(L10n.tr("Название или фамилия"), text: $filterText)
@@ -425,7 +425,7 @@ struct TreeLibraryView: View {
             if !filterText.isEmpty {
                 Button { filterText = "" } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 11))
+                        .font(SepiaTheme.icon(size: 11))
                         .foregroundColor(SepiaTheme.inkSoft)
                         .frame(width: 18, height: 18)
                         .contentShape(Rectangle())
@@ -435,7 +435,7 @@ struct TreeLibraryView: View {
             }
         }
         .padding(.horizontal, 12)
-        .frame(width: width, height: 30)
+        .frame(width: width, height: SepiaTheme.scaled(30))
         .glassEffect(.regular, in: Capsule())
         .sepiaMotion(SepiaMotion.state, value: filterText.isEmpty)
     }
@@ -461,9 +461,10 @@ struct TreeLibraryView: View {
         }
     }
 
-    private static let cardMinWidth: CGFloat = 300
-    private static let gridGutter: CGFloat = 16
-    private static let pagePadding: CGFloat = 24
+    private static var cardMinWidth: CGFloat { SepiaTheme.scaled(300) }
+    private static var cardMaxWidth: CGFloat { SepiaTheme.scaled(420) }
+    private static var gridGutter: CGFloat { SepiaTheme.scaled(16) }
+    private static var pagePadding: CGFloat { SepiaTheme.scaled(24) }
 
     /// Mirrors what `.adaptive(minimum:)` will do with the same width, so arrow-key
     /// row stepping matches what the user actually sees.
@@ -476,7 +477,7 @@ struct TreeLibraryView: View {
     private var gridContent: some View {
         let visible = visibleTrees
         return LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: Self.cardMinWidth, maximum: 420), spacing: Self.gridGutter)],
+            columns: [GridItem(.adaptive(minimum: Self.cardMinWidth, maximum: Self.cardMaxWidth), spacing: Self.gridGutter)],
             spacing: Self.gridGutter
         ) {
             ForEach(Array(visible.enumerated()), id: \.element.id) { index, tree in
@@ -631,7 +632,7 @@ struct TreeLibraryView: View {
         if !store.pendingMigrations.isEmpty {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "clock.arrow.circlepath")
-                    .font(.system(size: 15))
+                    .font(SepiaTheme.icon(size: 15))
                     .foregroundColor(SepiaTheme.accent2)
                     .padding(.top, 1)
                     .accessibilityHidden(true)
@@ -760,7 +761,7 @@ struct TreeLibraryView: View {
                 .padding(.bottom, 20)
             }
         }
-        .frame(width: 440)
+        .frame(width: SepiaTheme.scaledPanel(440, axis: .horizontal))
         .interactiveDismissDisabled(renameSaving)
         .onAppear {
             DispatchQueue.main.async { renameNameFocused = true }
@@ -820,8 +821,8 @@ struct TreeCardView: View {
     @State private var nameClipped = false
     @State private var subtitleClipped = false
 
-    static let height: CGFloat = 198
-    static let plateHeight: CGFloat = 96
+    static var height: CGFloat { SepiaTheme.scaled(198) }
+    static var plateHeight: CGFloat { SepiaTheme.scaled(96) }
 
     private var summary: TreeSummary { TreeSummary(tree: tree) }
 
@@ -870,7 +871,7 @@ struct TreeCardView: View {
             // A sibling of the Button, not part of its label, so macOS exposes "open
             // tree" and "tree actions" as two honest, focusable controls.
             actionsMenu
-                .padding(.top, Self.plateHeight + 9)
+                .padding(.top, Self.plateHeight + SepiaTheme.scaled(9))
                 .padding(.trailing, 14)
         }
         // Hover is a lift, never a tint change. A card that changes colour under the
@@ -968,7 +969,7 @@ struct TreeCardView: View {
             menuItems
         } label: {
             Image(systemName: "ellipsis")
-                .font(.system(size: 13, weight: .semibold))
+                .font(SepiaTheme.icon(size: 13, weight: .semibold))
                 .foregroundColor(SepiaTheme.inkSoft)
                 // The glyph is 13pt; the hit area is not.
                 .frame(width: 28, height: 22)

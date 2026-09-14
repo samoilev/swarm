@@ -22,6 +22,7 @@ struct ContentView: View {
     @Environment(TreeStore.self) private var store
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
+    @AppStorage(UIScale.storageKey) private var scaleRaw = UIScale.default.rawValue
     @State private var destination: Destination = .library
     /// The card whose diagram hands its geometry to the canvas while a tree opens.
     @State private var morphingTreeID: UUID?
@@ -106,6 +107,15 @@ struct ContentView: View {
                 }
             }
         }
+        // `SepiaTheme.scale` is a stored global, so changing it invalidates no body on
+        // its own. This is the bump that re-runs them — the same trick the settings
+        // window already uses for a language change.
+        //
+        // It sits on the ZStack rather than on `ContentView` in the scene so that
+        // `destination` above survives: bumping one level higher would throw the reader
+        // out of the tree they have open and back to the library. What it does reset is
+        // deeper @State — canvas pan and zoom — which resets on every launch anyway.
+        .id(scaleRaw)
         .sepiaMotion(SepiaMotion.crossfade, value: languageChoiceCompleted)
         .sepiaSystemAccessibility()
         .sheet(isPresented: $showHelp) {

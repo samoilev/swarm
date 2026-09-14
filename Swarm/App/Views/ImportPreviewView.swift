@@ -84,7 +84,7 @@ struct ImportPreviewView: View {
                     .disabled(!result.report.blockingErrors.isEmpty || (needsConfirmation && !confirmedWarnings))
             }.padding(16)
         }
-        .frame(width: 680, height: 560)
+        .frame(width: SepiaTheme.scaledPanel(680, axis: .horizontal), height: SepiaTheme.scaledPanel(560, axis: .vertical))
         .background(SepiaTheme.paper)
     }
 

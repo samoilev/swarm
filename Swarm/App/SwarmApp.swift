@@ -8,9 +8,13 @@ struct SwarmApp: App {
 
     @State private var store: TreeStore
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @AppStorage(UIScale.storageKey) private var scaleRaw = UIScale.default.rawValue
 
     init() {
         AppLanguage.migrateLegacyPreferenceIfNeeded()
+        // Before any view body runs, so the first frame is already at the reader's size
+        // rather than snapping to it.
+        SepiaTheme.scale = CGFloat(UIScale.current.factor)
         let arguments = ProcessInfo.processInfo.arguments
         let storageFolder: URL? = arguments.firstIndex(of: "--storage-folder").flatMap { index in
             guard arguments.indices.contains(index + 1) else { return nil }
@@ -112,6 +116,7 @@ struct SwarmApp: App {
 
         Settings {
             MapPrivacySettingsView()
+                .id(scaleRaw)
                 .environment(\.locale, language.locale)
                 .sepiaSystemAccessibility()
                 .preferredColorScheme(.light)
@@ -119,6 +124,7 @@ struct SwarmApp: App {
 
         Window(Text(L10n.tr("О Swarm")), id: Self.aboutWindowID) {
             AboutView()
+                .id(scaleRaw)
                 .environment(\.locale, language.locale)
                 .sepiaSystemAccessibility()
                 .preferredColorScheme(.light)

@@ -327,7 +327,7 @@ struct MainWorkspace: View {
             } message: {
                 Text(store.lastSaveError ?? "")
             }
-            .frame(minWidth: 900, minHeight: 600)
+            .frame(minWidth: SepiaTheme.scaled(900), minHeight: SepiaTheme.scaled(600))
     }
 
     /// The workspace canvas and everything layered over it. Kept out of `body` because
@@ -446,7 +446,7 @@ struct MainWorkspace: View {
     private var emptyTreeState: some View {
         VStack(spacing: 14) {
             Image(systemName: "person.2.badge.plus")
-                .font(.system(size: 46))
+                .font(SepiaTheme.icon(size: 46))
                 .foregroundColor(SepiaTheme.inkSoft)
             Text(L10n.tr("В дереве пока никого нет"))
                 .font(SepiaTheme.body(size: 18))
@@ -509,14 +509,14 @@ struct MainWorkspace: View {
         if viewMode == .tree, tree.people.count >= 2, selectedPerson != nil, secondaryPerson == nil, !dualSelectHintSeen, !searchActive {
             HStack(spacing: 10) {
                 Image(systemName: "hand.point.up.left")
-                    .font(.system(size: 12))
+                    .font(SepiaTheme.icon(size: 12))
                     .foregroundColor(SepiaTheme.accent2)
                 Text(L10n.tr("⌘-щелчок по второму человеку покажет, кем они приходятся друг другу"))
                     .font(SepiaTheme.body(size: 12.5))
                     .foregroundColor(SepiaTheme.ink)
                 Button { dualSelectHintSeen = true } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(SepiaTheme.icon(size: 10, weight: .semibold))
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
                 .buttonStyle(.plain)
@@ -541,7 +541,7 @@ struct MainWorkspace: View {
         if viewMode == .tree, let p = selectedPerson, let s = secondaryPerson, let name = relationshipName {
             HStack(spacing: 10) {
                 Image(systemName: "person.2.fill")
-                    .font(.system(size: 13))
+                    .font(SepiaTheme.icon(size: 13))
                     .foregroundColor(SepiaTheme.accent)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(name)
@@ -554,7 +554,7 @@ struct MainWorkspace: View {
                 }
                 Button { secondaryPerson = nil } label: {
                     Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(SepiaTheme.icon(size: 10, weight: .semibold))
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
                 .buttonStyle(.plain)
@@ -581,7 +581,7 @@ struct MainWorkspace: View {
             let results = searchResults
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass").font(.system(size: 12)).foregroundColor(SepiaTheme.inkSoft)
+                    Image(systemName: "magnifyingglass").font(SepiaTheme.icon(size: 12)).foregroundColor(SepiaTheme.inkSoft)
                     TextField(L10n.tr("Найти персону…"), text: $searchQuery)
                         .textFieldStyle(.plain)
                         .font(SepiaTheme.body(size: 14))
@@ -622,7 +622,7 @@ struct MainWorkspace: View {
                         .padding(.horizontal, 12).padding(.vertical, 8)
                 }
             }
-            .frame(width: 340)
+            .frame(width: SepiaTheme.scaled(340))
             .background(SepiaTheme.panelBg)
             .clipShape(RoundedRectangle(cornerRadius: 10))
             .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
@@ -692,7 +692,7 @@ struct MainWorkspace: View {
                 withAnimation(reduceMotion ? nil : SepiaMotion.state) { hintsExpanded.toggle() }
             } label: {
                 Image(systemName: hintsExpanded ? "chevron.left" : "keyboard")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(SepiaTheme.icon(size: 11, weight: .medium))
                     .foregroundColor(SepiaTheme.inkSoft)
                     .frame(width: 18, height: 16)
                     .contentShape(Rectangle())
@@ -740,7 +740,7 @@ struct MainWorkspace: View {
     private func hint(symbol: String, _ label: String) -> some View {
         hint(label) {
             Image(systemName: symbol)
-                .font(.system(size: 11))
+                .font(SepiaTheme.icon(size: 11))
                 .foregroundColor(SepiaTheme.ink)
                 .accessibilityHidden(true)
         }
@@ -804,7 +804,7 @@ struct MainWorkspace: View {
         ToolbarItem(placement: .navigation) {
             Button(action: onBack) {
                 Image(systemName: "house.fill")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 12, weight: .semibold))
             }
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
@@ -962,7 +962,7 @@ struct MainWorkspace: View {
             }
         } label: {
             Image(systemName: "chevron.right.2")
-                .font(.system(size: 12, weight: .semibold))
+                .font(SepiaTheme.icon(size: 12, weight: .semibold))
                 .foregroundColor(SepiaTheme.ink)
                 // 34, not 30: the export button and the Add Relative capsule beside it
                 // are 34 tall, and a 30pt circle read as a different class of control.
@@ -1028,7 +1028,7 @@ struct MainWorkspace: View {
             } label: {
                 let isActive = [.fan, .people, .timeline, .places, .review].contains(viewMode)
                 Image(systemName: isActive ? "square.grid.2x2.fill" : "square.grid.2x2")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(SepiaTheme.icon(size: 12, weight: .semibold))
                     .foregroundColor(isActive ? .white : SepiaTheme.ink)
                     .frame(width: 30, height: 30)
             }
@@ -1168,7 +1168,7 @@ struct MainWorkspace: View {
             Text("\(Int(activeZoom * 100))%")
                 .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.inkSoft)
-                .frame(width: 34)
+                .frame(width: SepiaTheme.scaled(34))
                 .contentTransition(.numericText())
                 .sepiaMotion(SepiaMotion.state, value: Int(activeZoom * 100))
                 .accessibilityLabel(L10n.tr("Масштаб \(Int(activeZoom * 100)) процентов"))
@@ -1188,7 +1188,7 @@ struct MainWorkspace: View {
             treeFunctionMenuItems
         } label: {
             Image(systemName: "wrench.and.screwdriver")
-                .font(.system(size: 12, weight: .semibold))
+                .font(SepiaTheme.icon(size: 12, weight: .semibold))
                 .frame(width: 30, height: 30)
                 .foregroundColor(SepiaTheme.ink)
         }
@@ -1223,7 +1223,7 @@ struct MainWorkspace: View {
         )
         return HStack(spacing: 4) {
             Image(systemName: "checkmark.circle")
-                .font(.system(size: 10))
+                .font(SepiaTheme.icon(size: 10))
             Text(L10n.tr("Сохранено в \(savedTime)"))
                 .font(SepiaType.micro)
                 .contentTransition(.numericText())
@@ -1419,7 +1419,7 @@ private struct WorkspaceToolbarIconButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 12, weight: .semibold))
+            .font(SepiaTheme.icon(size: 12, weight: .semibold))
             .foregroundColor(isActive ? .white : SepiaTheme.ink)
             .modifier(
                 WorkspaceToolbarIconChrome(isActive: isActive, isPressed: configuration.isPressed)
