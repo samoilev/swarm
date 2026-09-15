@@ -228,4 +228,42 @@ struct CoreModelTests {
         noPortrait.attachments = [image, document, second]
         #expect(noPortrait.photoRefs == [.attachment(image), .attachment(second)])
     }
+
+    /// The card header breaks the name itself rather than leaving it to whatever width
+    /// the inspector has been dragged to. The invariant that keeps that honest: the two
+    /// lines rejoined are exactly the name the rest of the app shows.
+    @Test func displayNameLinesSplitWithoutReordering() {
+        let p = Person(givenNames: "Константин", patronymic: "Александрович", surname: "Преображенский", sex: .male)
+
+        let ru = p.displayNameLines(language: .russian)
+        #expect(ru.primary == "Преображенский")
+        #expect(ru.secondary == "Константин Александрович")
+        #expect(p.displayName(language: .russian) == "\(ru.primary) \(ru.secondary)")
+
+        let en = p.displayNameLines(language: .english)
+        #expect(en.primary == "Константин")
+        #expect(en.secondary == "Александрович Преображенский")
+        #expect(p.displayName(language: .english) == "\(en.primary) \(en.secondary)")
+
+        // A missing part must not leave an empty line or a doubled space: the first
+        // name there is the one that gets the big line.
+        let surnameOnly = Person(surname: "Романов", sex: .male)
+        #expect(surnameOnly.displayNameLines(language: .russian) == ("Романов", ""))
+        let givenOnly = Person(givenNames: "Пётр", sex: .male)
+        #expect(givenOnly.displayNameLines(language: .russian) == ("Пётр", ""))
+        #expect(Person(sex: .unknown).displayNameLines(language: .russian) == ("", ""))
+    }
+
+    /// The medallion's stand-in when there is no photograph: the two identifying names,
+    /// in the order the language shows them, and never the patronymic.
+    @Test func monogramTakesTwoNamesInDisplayOrder() {
+        let p = Person(givenNames: "Клавдия", patronymic: "Фёдоровна", surname: "Преображенская", sex: .female)
+        #expect(p.monogram(language: .russian) == "ПК")
+        #expect(p.monogram(language: .english) == "КП")
+
+        // One name gives one letter; no name at all gives nothing, which is the view's
+        // signal to fall back to the silhouette.
+        #expect(Person(givenNames: "пётр", sex: .male).monogram(language: .russian) == "П")
+        #expect(Person(sex: .unknown).monogram(language: .russian).isEmpty)
+    }
 }

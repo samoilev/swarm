@@ -295,6 +295,40 @@ public final class Person: Identifiable, Codable, Hashable {
         }
     }
 
+    /// `displayName` split across two lines for the card's medallion header: the first
+    /// component on its own line, everything after it under. The words and their order
+    /// are untouched — joining the pair with a space gives `displayName` back — so the
+    /// only new thing is that the break is chosen here rather than by whatever width
+    /// the panel happens to have been dragged to.
+    public func displayNameLines(language: AppLanguage = .current) -> (primary: String, secondary: String) {
+        let components = switch language {
+        case .russian:
+            [surname, givenNames, patronymic ?? ""]
+        case .english:
+            [givenNames, patronymic ?? "", surname]
+        }
+        let parts = components.filter { !$0.isEmpty }
+        guard let primary = parts.first else { return ("", "") }
+        return (primary, parts.dropFirst().joined(separator: " "))
+    }
+
+    /// Up to two letters for a portrait medallion with no photograph. The patronymic is
+    /// skipped — these are the two names that identify the person, in the order the
+    /// language shows them — and a record with neither name gets an empty string, which
+    /// the caller is expected to read as "draw the silhouette instead".
+    public func monogram(language: AppLanguage = .current) -> String {
+        let parts = switch language {
+        case .russian:
+            [surname, givenNames]
+        case .english:
+            [givenNames, surname]
+        }
+        return parts
+            .compactMap(\.first)
+            .map { String($0).uppercased(with: language.locale) }
+            .joined()
+    }
+
     /// Stable, locale-aware sort key. English still sorts genealogical lists by
     /// surname, while showing the natural given-name-first form.
     public func sortName(language: AppLanguage = .current) -> String {

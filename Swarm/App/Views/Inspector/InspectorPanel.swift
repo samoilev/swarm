@@ -37,8 +37,9 @@ struct InspectorPanel: View {
     /// Name of the scroller's coordinate space, the frame `identityBottom` is read in.
     private static let scrollSpace = "inspectorScroll"
 
-    /// Where the pinned row ends: its 13pt inset plus one 24pt circle.
-    private let barBottom: CGFloat = 37
+    /// Where the pinned row ends: its 13pt inset plus the taller of one 24pt circle and
+    /// the two-line name beside it, which at 12pt over 10pt comes to 26.
+    private let barBottom: CGFloat = 39
 
     /// Paper first, name second, 24pt of scroll apart: the rows are already dissolving
     /// into the backdrop before the small name arrives, and the big one is long gone by
@@ -180,7 +181,12 @@ struct InspectorPanel: View {
             }
         }
         .padding(.top, 13)
-        .padding(.bottom, 10)
+        .padding(.bottom, 16)
+        // The card turns its axis here — centred identity above, left-aligned record
+        // below — and a rule is what says so. It rides the header's bottom edge rather
+        // than sitting in the stack, so a photo strip can come and go above it without
+        // any spacing being recomputed.
+        .overlay(alignment: .bottom) { Rectangle().fill(SepiaTheme.cardRule).frame(height: 1) }
     }
 
     /// Where you are, and the way back out of a relative-link walk. Edit and close left
@@ -208,18 +214,14 @@ struct InspectorPanel: View {
                 .help(L10n.tr("Вернуться к предыдущей персоне"))
                 .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
                 .transition(.opacity.combined(with: .move(edge: .leading)))
-            } else {
-                // The same tracked capitals the wordmark and the library use to say
-                // which room you are in. Holds the row's height when Back is absent,
-                // so the header doesn't grow and shrink as you walk the family.
-                SepiaTrackedLabel(L10n.tr("Персона"))
-                    .frame(height: 20)
             }
 
             Spacer(minLength: 8)
         }
-        // The circles used to set this row's height; now that they float above it, the
-        // row has to hold that height itself or the whole header rides 4pt higher.
+        // Empty unless a relative link has been walked: a card that is already showing
+        // the person's name and face does not also need a caption saying "Персона".
+        // The row stays because the two circles float above it — the height is the
+        // space they need, and without it the whole header rides up under them.
         .frame(minHeight: 24)
         // Two 24pt circles and the spacing between them float above this row, plus a gap
         // before them, so a long Back capsule stops short of running underneath.
@@ -232,22 +234,36 @@ struct InspectorPanel: View {
     /// is reachable however deep the record is read. At rest it lands on the same corner
     /// the nav row used to hand it, so the card looks untouched until it is scrolled.
     private func pinnedActions(_ person: Person) -> some View {
-        GlassEffectContainer(spacing: 8) {
+        let name = person.displayNameLines(language: .current)
+        return GlassEffectContainer(spacing: 8) {
             HStack(spacing: 8) {
                 // The name the header was carrying, taken up only once the header has
                 // taken it away. A bar repeating a name that is still on screen is the
-                // thing this card was built not to do.
-                Text(person.displayName(language: .current))
-                    .font(SepiaType.label)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(SepiaTheme.ink)
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .opacity(showBarName ? 1 : 0)
-                    // A label, never a target: at rest it is invisible but still laid
-                    // out, and it must not swallow clicks meant for the record below.
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
+                // thing this card was built not to do. It keeps the split the header
+                // made — surname over the rest — so the two are the same name in two
+                // sizes rather than two different treatments of it; both lines are
+                // clipped at one line each, because a bar that grows while you scroll
+                // is worse than a truncated patronymic.
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(name.primary)
+                        .font(SepiaType.control)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(SepiaTheme.ink)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    if !name.secondary.isEmpty {
+                        Text(name.secondary)
+                            .font(SepiaType.micro)
+                            .foregroundStyle(SepiaTheme.inkSoft)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+                .opacity(showBarName ? 1 : 0)
+                // A label, never a target: at rest it is invisible but still laid
+                // out, and it must not swallow clicks meant for the record below.
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
 
                 Spacer(minLength: 8)
 
@@ -305,37 +321,53 @@ struct InspectorPanel: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: 58)
+        .frame(height: 60)
         .opacity(barCovered ? 1 : 0)
         .allowsHitTesting(false)
     }
 
+    /// Who this is, on the card's own centre line. The name used to share a row with the
+    /// portrait, which left it a column of `panel width − 125pt` — 120pt at the narrow
+    /// end, where a surname set in 20pt serif simply does not fit, so it broke wherever
+    /// the layout engine chose or ran off the edge. Stacked under a medallion it gets
+    /// the full width instead, and the one break it still needs is the deliberate one
+    /// `displayNameLines` makes between the surname and the rest.
     private func identityRow(_ person: Person) -> some View {
-        HStack(alignment: .top, spacing: 13) {
+        let name = person.displayNameLines(language: .current)
+        return VStack(spacing: 8) {
             portrait(person)
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(person.displayName(language: .current))
+            VStack(spacing: 2) {
+                Text(name.primary)
                     .font(SepiaType.title)
                     .fontWeight(.semibold)
                     .foregroundColor(SepiaTheme.ink)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityAddTraits(.isHeader)
-                if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
-                    Text(L10n.tr("урожд. \(maiden)"))
-                        .font(SepiaTheme.body(size: 12.5))
-                        .italic()
+                if !name.secondary.isEmpty {
+                    Text(name.secondary)
+                        .font(SepiaTheme.body(size: 15))
                         .foregroundColor(SepiaTheme.inkSoft)
-                }
-                if !person.lifespan.isEmpty {
-                    Text(person.lifespan)
-                        .font(SepiaType.body)
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .padding(.top, 1)
                 }
             }
-            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            // One utterance to VoiceOver: two lines are a typographic choice, not two
+            // separate things to hear.
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
+
+            if let maiden = person.maidenName, !maiden.isEmpty, maiden != person.surname {
+                Text(L10n.tr("урожд. \(maiden)"))
+                    .font(SepiaTheme.body(size: 12.5))
+                    .italic()
+                    .foregroundColor(SepiaTheme.inkSoft)
+            }
+            if !person.lifespan.isEmpty {
+                Text(person.lifespan)
+                    .font(SepiaType.body)
+                    .foregroundColor(SepiaTheme.inkSoft)
+            }
         }
+        .frame(maxWidth: .infinity)
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
         // The one measurement the pinned row needs: how far this row's foot still is
         // from the top of the card. Reading the row itself rather than a scroll offset
         // keeps it right whatever the header is carrying — a portrait, a photo strip,
@@ -345,31 +377,45 @@ struct InspectorPanel: View {
         } action: { identityBottom = $0 }
     }
 
-    /// 3:4 like every other portrait in the app, but rounded and inset rather than
-    /// bled into the panel's corner — a square-cropped photo jammed against a rounded
-    /// glass edge was the single loudest mismatch in the old header. Absent photos get
-    /// the tree node's placeholder instead of collapsing the row. A real photo is a
-    /// button onto the full-size copy; the placeholder stands for nothing to open.
+    /// A medallion rather than a plate: off the text's line entirely, so nothing it does
+    /// can narrow the name. Everywhere else in the app a portrait stays the 3:4 plate —
+    /// only the card's own header is round. A real photo is a button onto the full-size
+    /// copy; the placeholder stands for nothing to open.
     @ViewBuilder
     private func portrait(_ person: Person) -> some View {
         if person.photoData != nil {
-            Button { onOpenPhoto?(person, 0) } label: { portraitPlate(person) }
+            Button { onOpenPhoto?(person, 0) } label: { portraitMedallion(person) }
                 .buttonStyle(.plain)
                 .onHover { $0 ? NSCursor.pointingHand.set() : NSCursor.arrow.set() }
                 .help(L10n.tr("Открыть фото"))
                 .accessibilityLabel(L10n.tr("Открыть фото"))
         } else {
-            portraitPlate(person).accessibilityHidden(true)
+            portraitMedallion(person).accessibilityHidden(true)
         }
     }
 
-    private func portraitPlate(_ person: Person) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+    /// The medallion's diameter, and how far down the photograph its window sits.
+    ///
+    /// `.scaledToFill()` alone centres that window, and a face lives in the upper third
+    /// of a portrait, so a centred circle framed the chin and the chest — true even of
+    /// the honest 3:4 crop `PhotoCropView` produces. The window is anchored to the top
+    /// of the frame instead and then nudged back down by `portraitTopBias` so the hair
+    /// never touches the rim. That bias is the one number to turn if crops come out
+    /// high or low; it is a fraction of the diameter rather than of the photograph,
+    /// which is exact for the 3:4 the crop tool stores and close enough for the other
+    /// shapes that reach a record by restore or by merge.
+    private static let portraitSide: CGFloat = 84
+    private static let portraitTopBias: CGFloat = 0.09
+
+    private func portraitMedallion(_ person: Person) -> some View {
+        let side = SepiaTheme.scaled(Self.portraitSide)
+        let monogram = person.monogram(language: .current)
         return Group {
             if let data = person.photoData, let nsImage = NSImage(data: data) {
                 Image(nsImage: nsImage)
                     .resizable()
                     .scaledToFill()
+                    .offset(y: -side * Self.portraitTopBias)
             } else {
                 ZStack {
                     LinearGradient(
@@ -377,15 +423,28 @@ struct InspectorPanel: View {
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    Image(systemName: "person.fill")
-                        .font(SepiaTheme.icon(size: 26))
-                        .foregroundColor(SepiaTheme.inkSoft.opacity(0.42))
+                    // Initials read at this size; the silhouette does not — at 64pt it
+                    // is a blot. It stays for the records that have no name to set.
+                    if monogram.isEmpty {
+                        Image(systemName: "person.fill")
+                            .font(SepiaTheme.icon(size: 28))
+                            .foregroundColor(SepiaTheme.inkSoft.opacity(0.42))
+                    } else {
+                        Text(monogram)
+                            .font(SepiaTheme.display(size: 28))
+                            .tracking(1)
+                            .foregroundColor(SepiaTheme.inkSoft.opacity(0.75))
+                    }
                 }
             }
         }
-        .frame(width: 84, height: 84 / SepiaTheme.portraitAspect)
-        .clipShape(shape)
-        .overlay { shape.strokeBorder(.white.opacity(0.55), lineWidth: 1) }
+        .frame(width: side, height: side, alignment: .top)
+        .clipShape(Circle())
+        // Two hairlines, not one: the white is the glass edge catching light, the ink
+        // inside it is the bezel a medallion has. Together they own the rim, so the
+        // seam where the crop ends is never the strongest line in the circle.
+        .overlay { Circle().strokeBorder(.white.opacity(0.55), lineWidth: 1) }
+        .overlay { Circle().strokeBorder(SepiaTheme.ink.opacity(0.10), lineWidth: 1).padding(1) }
         .shadow(color: SepiaTheme.ink.opacity(0.18), radius: 6, y: 3)
     }
 
