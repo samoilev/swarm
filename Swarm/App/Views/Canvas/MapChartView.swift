@@ -46,7 +46,14 @@ struct MapChartView: View {
                 AppleMapChartView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
                     .overlay(alignment: .bottomTrailing) { tileProbe }
             } else {
-                OfflineVectorMapView(tree: tree, zoom: $zoom, selectedPerson: $selectedPerson, fitRequest: $fitRequest, focus: focus)
+                OfflineVectorMapView(
+                    tree: tree,
+                    zoom: $zoom,
+                    selectedPerson: $selectedPerson,
+                    fitRequest: $fitRequest,
+                    focus: focus,
+                    reloadToken: retryToken
+                )
             }
         }
         .task(id: loadAttempt) { await refreshDataState() }
@@ -56,8 +63,12 @@ struct MapChartView: View {
             showsSlowIndicator = phase == .loading
         }
         .overlay { loadStateOverlay }
-        .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in zoom = min(2.0, zoom + 0.1) }
-        .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in zoom = max(0.2, zoom - 0.1) }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomInRequested)) { _ in
+            zoom = OfflineMapProjection.steppedZoom(zoom, zoomingIn: true)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .zoomOutRequested)) { _ in
+            zoom = OfflineMapProjection.steppedZoom(zoom, zoomingIn: false)
+        }
     }
 
     // MARK: - Load state

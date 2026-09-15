@@ -16,6 +16,22 @@ enum ResourceBundle {
     /// Resources belonging to `SwarmCore` — place data, map vectors, translations.
     static let core: Bundle = packaged(named: "Swarm_SwarmCore") ?? .module
 
+    /// A resource URL that a retry can actually recover.
+    ///
+    /// `Bundle`'s own lookup memoises its answer for the life of the process, a miss
+    /// included, so a file restored while the app runs stays invisible to it and Try Again
+    /// keeps reporting the original failure. Falling back to the bundle's resource folder
+    /// asks the file system instead.
+    ///
+    /// ponytail: a flat-resource fallback, not a general replacement for bundle lookup —
+    /// it does not walk localised subdirectories. Every caller here wants a flat resource.
+    static func url(forResource name: String, withExtension ext: String) -> URL? {
+        if let url = core.url(forResource: name, withExtension: ext) { return url }
+        guard let direct = core.resourceURL?.appendingPathComponent("\(name).\(ext)"),
+              FileManager.default.fileExists(atPath: direct.path) else { return nil }
+        return direct
+    }
+
     private static func packaged(named name: String) -> Bundle? {
         guard let url = Bundle.main.url(forResource: name, withExtension: "bundle") else { return nil }
         return Bundle(url: url)

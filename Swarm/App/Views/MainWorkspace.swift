@@ -220,6 +220,7 @@ struct MainWorkspace: View {
             .onReceive(NotificationCenter.default.publisher(for: .undoRequested)) { _ in performUndo() }
             .onReceive(NotificationCenter.default.publisher(for: .redoRequested)) { _ in performRedo() }
             .onReceive(NotificationCenter.default.publisher(for: .findPersonRequested)) { _ in openSearch() }
+            .onReceive(NotificationCenter.default.publisher(for: .exportRequested)) { _ in showExportModal = true }
             // Zoom-in/out notifications are handled inside TreeCanvasView where
             // panOffset and viewport size are available for center-anchored zooming.
             .onReceive(NotificationCenter.default.publisher(for: .zoomFitRequested)) { _ in fitRequest += 1 }
@@ -985,6 +986,15 @@ struct MainWorkspace: View {
                 }
             }
 
+            // Only the canvas modes put anything above it; in the list modes Export is
+            // the first row and a leading separator would hang off the top of the menu.
+            if [.tree, .fan, .map].contains(viewMode) {
+                Divider()
+            }
+            Button { showExportModal = true } label: {
+                Label(L10n.tr("Экспорт карточек в PDF или GEDCOM"), systemImage: "square.and.arrow.up")
+            }
+
             if viewMode == .tree {
                 Divider()
                 treeFunctionMenuItems
@@ -1183,11 +1193,9 @@ struct MainWorkspace: View {
                 if viewMode == .fan {
                     fanZoom = min(1.6, max(0.25, fanZoom + delta))
                 } else if viewMode == .map {
-                    // Multiplicative, and over a range that matches what the map can
-                    // actually do: the offline renderer spans a 50x scale range and
-                    // reads `mapZoom` as a ratio, so an additive 0.25-1.6 clamp left
-                    // the buttons dead after about five clicks.
-                    mapZoom = min(8, max(0.1, mapZoom * (delta > 0 ? 1.25 : 0.8)))
+                    // Shared with the keyboard path in `MapChartView`, which used to keep
+                    // its own tighter clamp and zoomed back out above 200%.
+                    mapZoom = OfflineMapProjection.steppedZoom(mapZoom, zoomingIn: delta > 0)
                 }
             }
         }

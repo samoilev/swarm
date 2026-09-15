@@ -851,3 +851,6 @@
 "%@ км" = "%@ km";
 "%@ м" = "%@ m";
 "Масштаб: %@" = "Scale: %@";
+"Изменить размер интерфейса?" = "Change Interface Size?";
+"Изменить и потерять правки" = "Change and Lose Edits";
+"В открытой карточке есть несохранённые изменения. Смена размера закроет её, и они пропадут." = "An open form has unsaved changes. Changing the size closes it, and they will be lost.";

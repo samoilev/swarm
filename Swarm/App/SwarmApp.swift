@@ -7,6 +7,9 @@ struct SwarmApp: App {
     static let aboutWindowID = "about"
 
     @State private var store: TreeStore
+    /// Shared with the Settings scene below: changing the interface size there rebuilds
+    /// this window's whole view tree, and the gate is how Settings knows to ask first.
+    @State private var draftGate = DraftGate()
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @AppStorage(UIScale.storageKey) private var scaleRaw = UIScale.default.rawValue
 
@@ -38,6 +41,7 @@ struct SwarmApp: App {
         WindowGroup {
             ContentView()
                 .environment(store)
+                .environment(draftGate)
                 .environment(\.locale, language.locale)
                 .preferredColorScheme(.light)
                 .onAppear {
@@ -86,6 +90,16 @@ struct SwarmApp: App {
                 }
                 .keyboardShortcut("z", modifiers: [.command, .shift])
             }
+            // Export's only other way in is a toolbar button, and the toolbar drops it
+            // into the system overflow — where an icon-only button does not survive — as
+            // soon as the window is narrow, the interface large or the labels long. A menu
+            // item is reachable at every one of those.
+            CommandGroup(replacing: .importExport) {
+                Button(L10n.tr("Экспорт карточек в PDF или GEDCOM")) {
+                    NotificationCenter.default.post(name: .exportRequested, object: nil)
+                }
+                .keyboardShortcut("e")
+            }
             CommandGroup(after: .textEditing) {
                 Button(L10n.tr("Найти персону")) {
                     NotificationCenter.default.post(name: .findPersonRequested, object: nil)
@@ -117,6 +131,7 @@ struct SwarmApp: App {
         Settings {
             MapPrivacySettingsView()
                 .id(scaleRaw)
+                .environment(draftGate)
                 .environment(\.locale, language.locale)
                 .sepiaSystemAccessibility()
                 .preferredColorScheme(.light)
@@ -162,5 +177,6 @@ extension Notification.Name {
     static let undoRequested = Notification.Name("undoRequested")
     static let redoRequested = Notification.Name("redoRequested")
     static let findPersonRequested = Notification.Name("findPersonRequested")
+    static let exportRequested = Notification.Name("exportRequested")
     static let helpRequested = Notification.Name("helpRequested")
 }

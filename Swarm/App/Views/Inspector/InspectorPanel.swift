@@ -845,10 +845,6 @@ struct PortraitPreview: View {
     private var card: some View {
         VStack(spacing: 14) {
             photo
-                // No height ceiling of its own: `maxHeight` would claim the whole window
-                // and centre the picture in it, which is the band of bare paper above and
-                // below a landscape scan. Fitting the aspect already bounds both sides.
-                .aspectRatio(photoAspect, contentMode: .fit)
 
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
@@ -893,6 +889,15 @@ struct PortraitPreview: View {
                 Image(nsImage: image)
                     .resizable()
                     .scaledToFit()
+                    // No height ceiling of its own: `maxHeight` would claim the whole
+                    // window and centre the picture in it, which is the band of bare paper
+                    // above and below a landscape scan. Fitting the aspect already bounds
+                    // both sides.
+                    //
+                    // On the picture rather than on `photo` as a whole: applied to the
+                    // builder it also squeezed the not-found message below into a portrait
+                    // column, where one line of it truncated to an ellipsis.
+                    .aspectRatio(photoAspect, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     .shadow(color: SepiaTheme.ink.opacity(0.24), radius: 14, y: 6)
             } else {
@@ -901,8 +906,11 @@ struct PortraitPreview: View {
                     .foregroundColor(SepiaTheme.inkSoft)
             }
         } else {
-            // Reading the next file, which is not the same as not finding it.
+            // Reading the next file, which is not the same as not finding it. It keeps the
+            // aspect so the card holds the last photo's shape while stepping instead of
+            // collapsing between two of them.
             Color.clear
+                .aspectRatio(photoAspect, contentMode: .fit)
         }
     }
 

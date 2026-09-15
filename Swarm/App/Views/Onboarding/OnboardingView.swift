@@ -81,6 +81,7 @@ struct OnboardingView: View {
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
         .frame(minWidth: SepiaTheme.scaled(900), minHeight: SepiaTheme.scaled(560))
+        .tracksUnsavedDraft()
         .onChange(of: step) { _, newValue in
             sepiaAnnounce("\(stepHeadline(newValue)). \(L10n.tr("Шаг \(newValue.rawValue + 1) из 2"))")
         }

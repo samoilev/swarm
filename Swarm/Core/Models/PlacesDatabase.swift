@@ -429,7 +429,7 @@ public final class PlacesDatabase: @unchecked Sendable {
     /// `nil` means the snapshot could not be read at all, which the caller surfaces as a
     /// retryable failure rather than as an index that happens to be empty.
     private static func loadPlaces() -> LoadedIndex? {
-        guard let url = ResourceBundle.core.url(
+        guard let url = ResourceBundle.url(
             forResource: "place_index_v2",
             withExtension: "tsv"
         ) else {

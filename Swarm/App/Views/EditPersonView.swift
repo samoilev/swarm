@@ -256,6 +256,7 @@ struct EditPersonView: View {
             }
         }
         .frame(width: SepiaTheme.scaledPanel(540, axis: .horizontal), height: SepiaTheme.scaledPanel(720, axis: .vertical))
+        .tracksUnsavedDraft()
         .onAppear { loadPerson() }
         .onDisappear {
             if !didCommit { discardPreparedAttachments() }

@@ -1,7 +1,19 @@
+import Foundation
 @testable import SwarmCore
 import Testing
 
 struct OfflineMapVectorDataTests {
+    /// `Bundle`'s own lookup memoises a miss for the life of the process, so Try Again
+    /// could never find a resource restored while the app ran. The helper falls back to
+    /// the resource folder on disk; both bundled files have to resolve through it.
+    @Test func resourceLookupResolvesTheBundledMapDataAndRejectsWhatIsNotThere() throws {
+        for (name, ext) in [("ne_110m_land", "geojson"), ("place_index_v2", "tsv")] {
+            let url = try #require(ResourceBundle.url(forResource: name, withExtension: ext))
+            #expect(FileManager.default.fileExists(atPath: url.path))
+        }
+        #expect(ResourceBundle.url(forResource: "no_such_resource", withExtension: "geojson") == nil)
+    }
+
     /// Longitude is passed as a pair rather than a range: a viewport straddling the
     /// antimeridian has a minimum above its maximum, which `ClosedRange` refuses.
     private func bounds(

@@ -85,7 +85,7 @@ public struct OfflineMapVectorData: Sendable {
     }
 
     private static func load(resource: String) -> [MapVectorRing] {
-        guard let url = ResourceBundle.core.url(forResource: resource, withExtension: "geojson"),
+        guard let url = ResourceBundle.url(forResource: resource, withExtension: "geojson"),
               let root = try? JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any],
               let features = root["features"] as? [[String: Any]] else { return [] }
         var result: [MapVectorRing] = []

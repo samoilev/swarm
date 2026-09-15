@@ -118,6 +118,7 @@ struct TreeMergeView: View {
         .alert(L10n.tr("Слияние не выполнено"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
         )) { Button("OK", role: .cancel) {} } message: { Text(errorMessage ?? "") }
+        .tracksUnsavedDraft()
         .onDisappear { if let pendingURL { store.discardImportPreview(at: pendingURL) } }
     }
 

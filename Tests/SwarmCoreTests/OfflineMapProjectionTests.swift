@@ -226,4 +226,40 @@ struct OfflineMapProjectionTests {
         #expect(OfflineMapProjection.minimumScale == 0.8)
         #expect(OfflineMapProjection.maximumScale == 40)
     }
+
+    // MARK: - Zoom stepping
+
+    /// Zoom In zoomed the map *out* above 200%: the keyboard clamped to 2.0 while the
+    /// toolbar ran to 8, so `min(2.0, …)` above that was a downward assignment, and both
+    /// renderers read the binding as a ratio.
+    @Test func steppingInNeverZoomsOutAnywhereInTheRange() {
+        var zoom = OfflineMapProjection.minimumZoom
+        while zoom < OfflineMapProjection.maximumZoom {
+            let next = OfflineMapProjection.steppedZoom(zoom, zoomingIn: true)
+            #expect(next > zoom)
+            zoom = next
+        }
+        #expect(zoom == OfflineMapProjection.maximumZoom)
+    }
+
+    @Test func steppingOutNeverZoomsIn() {
+        var zoom = OfflineMapProjection.maximumZoom
+        while zoom > OfflineMapProjection.minimumZoom {
+            let next = OfflineMapProjection.steppedZoom(zoom, zoomingIn: false)
+            #expect(next < zoom)
+            zoom = next
+        }
+        #expect(zoom == OfflineMapProjection.minimumZoom)
+    }
+
+    @Test func steppingSaturatesAtBothEndsRatherThanPassingThem() {
+        let top = OfflineMapProjection.maximumZoom
+        #expect(OfflineMapProjection.steppedZoom(top, zoomingIn: true) == top)
+        // The reported case exactly: 800% asked to zoom in stays at 800%.
+        #expect(OfflineMapProjection.steppedZoom(top, zoomingIn: false) < top)
+
+        let bottom = OfflineMapProjection.minimumZoom
+        #expect(OfflineMapProjection.steppedZoom(bottom, zoomingIn: false) == bottom)
+        #expect(OfflineMapProjection.steppedZoom(bottom, zoomingIn: true) > bottom)
+    }
 }

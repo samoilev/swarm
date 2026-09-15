@@ -30,6 +30,25 @@ public enum OfflineMapProjection {
     public static let minimumScale: CGFloat = 0.8
     public static let maximumScale: CGFloat = 40
 
+    /// The bounds of the `zoom` binding the workspace hands both map renderers. Distinct
+    /// from `minimumScale`/`maximumScale` above, which bound the offline camera: both
+    /// renderers read `zoom` as a *ratio against its previous value*, so this is the range
+    /// the toolbar and the keyboard are allowed to drive it over.
+    public static let minimumZoom: CGFloat = 0.1
+    public static let maximumZoom: CGFloat = 8
+
+    /// One step of the map's zoom, for every control that offers one.
+    ///
+    /// Multiplicative, because the renderers read a ratio: an additive step covers the
+    /// bottom of this range in one click and never reaches the top. It lives here because
+    /// the toolbar and the keyboard used to clamp it separately — the keyboard stopped at
+    /// 2.0, so pressing Zoom In above 200% assigned a *smaller* number and the map zoomed
+    /// out.
+    public static func steppedZoom(_ zoom: CGFloat, zoomingIn: Bool) -> CGFloat {
+        let stepped = zoom * (zoomingIn ? 1.25 : 0.8)
+        return min(maximumZoom, max(minimumZoom, stepped))
+    }
+
     /// Equatorial circumference, WGS 84. The full world is this many kilometres wide
     /// in normalised space; every other latitude shrinks by `cos(latitude)`.
     public static let equatorialCircumferenceKilometres = 40075.016686

@@ -2,6 +2,9 @@ import SwarmCore
 import SwiftUI
 
 struct MapPrivacySettingsView: View {
+    @Environment(DraftGate.self) private var draftGate
+    /// A size the reader asked for that is waiting on the discard confirmation below.
+    @State private var pendingScale: UIScale?
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @AppStorage(AppLanguage.choiceCompletedKey) private var languageChoiceCompleted = false
     @AppStorage("mapProvider") private var providerRaw = MapProviderSetting.default.rawValue
@@ -56,6 +59,24 @@ struct MapPrivacySettingsView: View {
         // The window frame carries the name now that the pane no longer repeats it;
         // left unset, macOS fills the title bar with "Swarm Settings".
         .navigationTitle(Text(L10n.tr("Настройки")))
+        // Applying a new size rebuilds the whole main window, taking any unsaved draft
+        // with it. That used to happen in silence, from a different window.
+        .confirmationDialog(
+            L10n.tr("Изменить размер интерфейса?"),
+            isPresented: Binding(
+                get: { pendingScale != nil },
+                set: { if !$0 { pendingScale = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button(L10n.tr("Изменить и потерять правки"), role: .destructive) {
+                if let pendingScale { applyScale(pendingScale) }
+                pendingScale = nil
+            }
+            Button(L10n.tr("Отмена"), role: .cancel) { pendingScale = nil }
+        } message: {
+            Text(L10n.tr("В открытой карточке есть несохранённые изменения. Смена размера закроет её, и они пропадут."))
+        }
     }
 
     private func rowLabel(_ title: String) -> some View {
@@ -148,17 +169,30 @@ struct MapPrivacySettingsView: View {
         )
     }
 
-    /// The multiplier is written here, at the point of mutation, rather than from an
-    /// `.onChange` on the stored value: the `.id(scaleRaw)` bumps that re-run every body
-    /// ride on the same update, and this way the global is already correct when they do.
+    /// Holds the change back while a draft is open, rather than writing and asking after:
+    /// the write is the destructive act, so there would be nothing left to keep.
+    ///
+    /// Cancelling needs no undo — nothing was written, and the slider's own position is
+    /// read back out of `currentScale` below.
     private var scaleBinding: Binding<UIScale> {
         Binding(
             get: { currentScale },
             set: {
-                SepiaTheme.scale = CGFloat($0.factor)
-                scaleRaw = $0.rawValue
+                guard !draftGate.hasUnsavedDrafts else {
+                    pendingScale = $0
+                    return
+                }
+                applyScale($0)
             }
         )
+    }
+
+    /// The multiplier is written here, at the point of mutation, rather than from an
+    /// `.onChange` on the stored value: the `.id(scaleRaw)` bumps that re-run every body
+    /// ride on the same update, and this way the global is already correct when they do.
+    private func applyScale(_ scale: UIScale) {
+        SepiaTheme.scale = CGFloat(scale.factor)
+        scaleRaw = scale.rawValue
     }
 
     /// The slider moves over the step's position, not its factor: the five factors are

@@ -335,13 +335,18 @@ public enum GEDCOMCodec {
         "VERS", "CORP", "ADDR", "PHON", "EMAIL", "FAX", "WWW",
     ]
 
-    public static func parse(_ url: URL) throws -> ImportResult {
+    /// `baseURL` is what `FILE` paths resolve against. It defaults to the file's own
+    /// folder, which is right whenever the .ged sits beside `Media/` — every path but a
+    /// revision in `.Swarm/History`, whose media lives two levels up. A caller reading a
+    /// .ged from somewhere else has to say where the archive actually is, or every file
+    /// it references is reported missing.
+    public static func parse(_ url: URL, baseURL: URL? = nil) throws -> ImportResult {
         let text = try GEDCOMTextDecoder.decode(Data(contentsOf: url))
         let document = try GEDCOMDocument.parse(text)
         return try project(
             document: document,
             text: text,
-            baseURL: url.deletingLastPathComponent(),
+            baseURL: baseURL ?? url.deletingLastPathComponent(),
             sourceURL: url
         )
     }

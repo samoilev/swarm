@@ -553,4 +553,79 @@ struct DefectRegressionTests {
         #expect(repoLine != nil)
         #expect(GEDCOMNode(rawLine: String(repoLine ?? ""))?.pointer == nil)
     }
+
+    // MARK: - Revision restore
+
+    /// A revision lives in `.Swarm/History`, two levels below the media it references.
+    /// Parsed against its own folder every existing file resolved to nothing, and Review
+    /// showed missing-file warnings for photos that open perfectly well.
+    @Test func restoringARevisionResolvesMediaAgainstTheTreeFolderNotTheHistoryFolder() throws {
+        let temp = try Temp()
+        let treeFolder = temp.url.appendingPathComponent("Atlas", isDirectory: true)
+        let media = treeFolder.appendingPathComponent("Media", isDirectory: true)
+        let history = treeFolder
+            .appendingPathComponent(".Swarm", isDirectory: true)
+            .appendingPathComponent("History", isDirectory: true)
+        try FileManager.default.createDirectory(at: media, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: history, withIntermediateDirectories: true)
+        try Data([0x89, 0x50, 0x4E, 0x47]).write(to: media.appendingPathComponent("portrait.png"))
+
+        let revision = history.appendingPathComponent("2026-09-15T06-54-53.ged")
+        try """
+        0 HEAD
+        1 CHAR UTF-8
+        0 @I1@ INDI
+        1 NAME Анна /Иванова/
+        1 OBJE
+        2 FILE Media/portrait.png
+        2 FORM png
+        1 OBJE
+        2 FILE Media/gone.png
+        2 FORM png
+        0 TRLR
+        """.write(to: revision, atomically: true, encoding: .utf8)
+
+        // What `restoreRevision` now does.
+        let resolved = try GEDCOMCodec.parse(revision, baseURL: treeFolder)
+        #expect(resolved.report.missingMedia == ["Media/gone.png"])
+
+        // And what it used to do, kept so the default stays the file's own folder.
+        let unresolved = try GEDCOMCodec.parse(revision)
+        #expect(unresolved.report.missingMedia.contains("Media/portrait.png"))
+    }
+
+    /// The displayed save time is `FamilyTree.updatedAt`, and `applyContent` stamps it
+    /// with "now" on every apply — rollback included. A restore that could not write
+    /// therefore advertised a save that never happened.
+    @Test func aFailedRestoreLeavesTheSavedTimeWhereItWas() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = FamilyTree(name: "Atlas")
+        tree.people = [Person(givenNames: "Анна", surname: "Иванова", sex: .female)]
+        try await store.addTreeVerified(tree)
+
+        tree.people.append(Person(givenNames: "Пётр", surname: "Иванов", sex: .male))
+        _ = try await store.saveTree(tree)
+
+        let revision = try #require(store.recoveryItems(for: tree).first { $0.kind == .revision })
+        let savedAt = tree.updatedAt
+        let gedcom = store.gedFileURL(for: tree)
+        let bytesBefore = try Data(contentsOf: gedcom)
+
+        // Staging is written beside the tree, so a read-only storage folder is what the
+        // reported unwritable-library case actually blocks.
+        try FileManager.default.setAttributes([.posixPermissions: 0o555], ofItemAtPath: temp.url.path)
+        defer {
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755], ofItemAtPath: temp.url.path
+            )
+        }
+
+        await #expect(throws: (any Error).self) {
+            _ = try await store.restoreRevision(revision, to: tree)
+        }
+
+        #expect(tree.updatedAt == savedAt)
+        #expect(try Data(contentsOf: gedcom) == bytesBefore)
+    }
 }

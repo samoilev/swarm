@@ -474,7 +474,10 @@ public final class TreeStore {
         }
         let before = try JSONEncoder().encode(tree)
         do {
-            let imported = try GEDCOMCodec.parse(item.url)
+            // The revision file lives in `.Swarm/History`, but the media it references
+            // lives in the tree folder. Parsed against its own folder, every existing
+            // file came back as missing and Review showed warnings for photos that open.
+            let imported = try GEDCOMCodec.parse(item.url, baseURL: folder(for: tree))
             applySnapshot(imported.tree, to: tree)
             return try persistTree(tree)
         } catch {
@@ -490,6 +493,10 @@ public final class TreeStore {
     private func rollBack(_ beforeData: Data, onto tree: FamilyTree) {
         if let before = try? JSONDecoder().decode(FamilyTree.self, from: beforeData) {
             applySnapshot(before, to: tree)
+            // `applyContent` stamps `updatedAt` with now on every apply, which is right for
+            // an edit and wrong for a rollback: the restore threw, so nothing was saved and
+            // the displayed save time has to stay where it was. The snapshot carries it.
+            tree.updatedAt = before.updatedAt
         } else {
             lastSaveError = L10n.tr("Восстановление прервано, и вернуть прежнее состояние в памяти не удалось. Файлы на диске не изменились — перезапустите приложение.")
         }

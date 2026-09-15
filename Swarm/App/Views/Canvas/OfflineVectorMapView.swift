@@ -13,6 +13,9 @@ struct OfflineVectorMapView: View {
     @Binding var selectedPerson: Person?
     @Binding var fitRequest: Int
     let focus: MapFocus
+    /// Bumped by the map's Try Again. Without it the cached `vectors` below outlive every
+    /// retry, so even a reload that succeeded kept drawing the empty world it first read.
+    var reloadToken: Int = 0
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
@@ -136,6 +139,11 @@ struct OfflineVectorMapView: View {
             }
             .overlay(alignment: .bottomLeading) { legend }
             .overlay(alignment: .bottomTrailing) { scaleBar }
+            .onChange(of: reloadToken) {
+                // Re-read rather than `.id(reloadToken)` on the map: rebuilding the whole
+                // renderer would throw away pan and zoom on every retry.
+                vectors = OfflineMapVectorData.shared
+            }
             .onAppear {
                 if vectors == nil { vectors = OfflineMapVectorData.shared }
                 installScrollMonitor()
