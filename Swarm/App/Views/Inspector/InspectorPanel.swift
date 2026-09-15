@@ -338,7 +338,11 @@ struct InspectorPanel: View {
     private func identityRow(_ person: Person) -> some View {
         let name = person.displayNameLines(language: .current)
         return VStack(spacing: 8) {
+            // The portrait carries its own extra gap rather than the stack widening
+            // its spacing: the rest of the block — maiden name, lifespan — is one
+            // paragraph of text and reads as one only while its lines stay close.
             portrait(person)
+                .padding(.bottom, 4)
 
             VStack(spacing: 2) {
                 Text(name.primary)
