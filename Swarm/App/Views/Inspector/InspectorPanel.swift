@@ -38,8 +38,8 @@ struct InspectorPanel: View {
     private static let scrollSpace = "inspectorScroll"
 
     /// Where the pinned row ends: its 13pt inset plus the taller of one 24pt circle and
-    /// the two-line name beside it, which at 12pt over 10pt comes to 26.
-    private let barBottom: CGFloat = 39
+    /// the two-line name beside it, which at 15pt over 13pt comes to 34.
+    private let barBottom: CGFloat = 47
 
     /// Paper first, name second, 24pt of scroll apart: the rows are already dissolving
     /// into the backdrop before the small name arrives, and the big one is long gone by
@@ -241,19 +241,20 @@ struct InspectorPanel: View {
                 // taken it away. A bar repeating a name that is still on screen is the
                 // thing this card was built not to do. It keeps the split the header
                 // made — surname over the rest — so the two are the same name in two
-                // sizes rather than two different treatments of it; both lines are
-                // clipped at one line each, because a bar that grows while you scroll
-                // is worse than a truncated patronymic.
+                // sizes rather than two different treatments of it — the header's
+                // 20-over-15 pair, two steps down. Both lines are clipped at one line
+                // each, because a bar that grows while you scroll is worse than a
+                // truncated patronymic.
                 VStack(alignment: .leading, spacing: 0) {
                     Text(name.primary)
-                        .font(SepiaType.control)
+                        .font(SepiaType.bodyLarge)
                         .fontWeight(.semibold)
                         .foregroundStyle(SepiaTheme.ink)
                         .lineLimit(1)
                         .truncationMode(.tail)
                     if !name.secondary.isEmpty {
                         Text(name.secondary)
-                            .font(SepiaType.micro)
+                            .font(SepiaType.body)
                             .foregroundStyle(SepiaTheme.inkSoft)
                             .lineLimit(1)
                             .truncationMode(.tail)
@@ -308,9 +309,11 @@ struct InspectorPanel: View {
     /// controls: the rows have to dissolve under the circles instead of colliding with
     /// them, and the fill the card is cut from is the only thing they can dissolve into.
     ///
-    /// Solid for the whole height of the row and a little past it, and only then a fade.
-    /// A gradient that starts giving way at the top is already half transparent where
-    /// the name sits, which is what let a section label read through the name.
+    /// Solid for the whole height of the row and a good way past it, and only then a
+    /// fade. A gradient that starts giving way at the top is already half transparent
+    /// where the name sits, which is what let a section label read through the name —
+    /// and the clearance is measured from the name, not the circles, since the name is
+    /// now the taller of the two: at 0.74 of 84 the fade starts 15pt below the row.
     private var pinnedBackdrop: some View {
         LinearGradient(
             stops: [
@@ -321,7 +324,7 @@ struct InspectorPanel: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        .frame(height: 60)
+        .frame(height: 84)
         .opacity(barCovered ? 1 : 0)
         .allowsHitTesting(false)
     }
@@ -404,7 +407,7 @@ struct InspectorPanel: View {
     /// high or low; it is a fraction of the diameter rather than of the photograph,
     /// which is exact for the 3:4 the crop tool stores and close enough for the other
     /// shapes that reach a record by restore or by merge.
-    private static let portraitSide: CGFloat = 84
+    private static let portraitSide: CGFloat = 104
     private static let portraitTopBias: CGFloat = 0.09
 
     private func portraitMedallion(_ person: Person) -> some View {
@@ -427,11 +430,11 @@ struct InspectorPanel: View {
                     // is a blot. It stays for the records that have no name to set.
                     if monogram.isEmpty {
                         Image(systemName: "person.fill")
-                            .font(SepiaTheme.icon(size: 28))
+                            .font(SepiaTheme.icon(size: 34))
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.42))
                     } else {
                         Text(monogram)
-                            .font(SepiaTheme.display(size: 28))
+                            .font(SepiaTheme.display(size: 34))
                             .tracking(1)
                             .foregroundColor(SepiaTheme.inkSoft.opacity(0.75))
                     }
