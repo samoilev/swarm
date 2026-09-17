@@ -97,12 +97,17 @@ struct AddPersonView: View {
                                     ForEach([Person.Sex.male, .female], id: \.rawValue) { option in
                                         Button(option.displayName) { sex = (sex == option) ? .unknown : option }
                                             .buttonStyle(SepiaButtonStyle(isActive: sex == option))
+                                            // The row's text field takes every point it is
+                                            // offered, which left "Мужской" wrapping inside
+                                            // its own button. A label is not a flexible field.
+                                            .fixedSize()
                                             .accessibilityAddTraits(sex == option ? [.isSelected] : [])
                                     }
                                     if sex == .unknown {
                                         Text(Person.Sex.unknown.displayName)
                                             .font(SepiaTheme.ui(size: 11.5))
                                             .foregroundColor(SepiaTheme.inkSoft)
+                                            .fixedSize()
                                             .padding(.leading, 2)
                                     }
                                 }
