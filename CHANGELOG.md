@@ -11,6 +11,35 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.1] — 2026-09-17
+
+### Fixed
+
+- The library toolbar draws to one control height. It was built two ways at once: the
+  filter field and the sort pill were glass with an explicit frame, while import, New Tree
+  and the overflow were system glass buttons sized from their own label and padding. They
+  came out 34 and 37 points at the default step, and only the first pair grew with the
+  interface setting, so the row disagreed with itself further at every step up. All five
+  now share the scaled 34pt the workspace toolbar already uses, so the two windows draw
+  the same row, and the wordmark scales its rule, gaps and dot along with its type instead
+  of holding fixed points while the words grew.
+- The sex labels no longer wrap inside their buttons. The maiden name field shares the row
+  and took every point it was offered, squeezing the pair until “Мужской” broke across two
+  lines — Russian shows it first, its words being longer than the English. The labels hold
+  their own width now and the field takes what is left, including the “Не указан” hint,
+  which started wrapping once the buttons stopped.
+- Settings copy reads straight in both languages. The map footer said “offline” twice, the
+  provider summary and the privacy line sitting one sentence apart; the summary now names
+  what the provider needs and the privacy line where the data stays, matching how the
+  English pair already read. “The visible map region” is viewport-speak, so both languages
+  now say which part of the map the reader is looking at. The size dialog called the
+  person card a “form” in English where every other string calls it a profile, the
+  language row drops to “Язык”/“Language” rather than spending “Interface” on two adjacent
+  rows, and the map section header goes singular.
+- The Help section on maps matches that copy, having kept the wording Settings was cleaned
+  up out of — “локально” for what Settings calls this Mac, and the viewport phrasing for
+  what Apple actually sees. A GEDCOM is also a file, not a place to keep things in.
+
 ## [3.5.0] — 2026-09-17
 
 ### Added
@@ -972,7 +1001,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.1...HEAD
+[3.5.1]: https://github.com/samoilev/swarm/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/samoilev/swarm/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/samoilev/swarm/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/samoilev/swarm/compare/v3.3.0...v3.3.1
