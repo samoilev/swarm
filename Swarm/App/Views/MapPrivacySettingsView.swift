@@ -19,7 +19,7 @@ struct MapPrivacySettingsView: View {
                     LabeledContent {
                         languagePicker
                     } label: {
-                        rowLabel(L10n.tr("Язык интерфейса"))
+                        rowLabel(L10n.tr("Язык"))
                     }
 
                     LabeledContent {
@@ -69,13 +69,13 @@ struct MapPrivacySettingsView: View {
             ),
             titleVisibility: .visible
         ) {
-            Button(L10n.tr("Изменить без сохранения"), role: .destructive) {
+            Button(L10n.tr("Изменить, не сохраняя"), role: .destructive) {
                 if let pendingScale { applyScale(pendingScale) }
                 pendingScale = nil
             }
             Button(L10n.tr("Отмена"), role: .cancel) { pendingScale = nil }
         } message: {
-            Text(L10n.tr("В открытой карточке есть несохранённые изменения. Смена размера закроет её, и они пропадут."))
+            Text(L10n.tr("В открытой карточке есть несохранённые изменения. Смена размера закроет карточку — изменения пропадут."))
         }
     }
 
@@ -146,8 +146,8 @@ struct MapPrivacySettingsView: View {
 
     private var privacySummary: String {
         currentProvider == .offlineVector
-            ? L10n.tr("Ничего не уходит в сеть.")
-            : L10n.tr("Apple видит область просмотра карты.")
+            ? L10n.tr("Ничего не уходит с этого Mac.")
+            : L10n.tr("Apple видит, какой участок карты открыт.")
     }
 
     private var currentProvider: MapProviderSetting {

@@ -158,7 +158,7 @@ final class SwarmUITests: XCTestCase {
             NSPredicate(format: "label BEGINSWITH %@", "Apple Maps")
         ).firstMatch
         XCTAssertTrue(apple.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Apple видит область просмотра карты."].exists)
+        XCTAssertTrue(app.staticTexts["Apple видит, какой участок карты открыт."].exists)
         XCTAssertFalse(app.alerts.firstMatch.exists)
     }
 

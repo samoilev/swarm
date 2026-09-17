@@ -3,10 +3,10 @@
 "Язык интерфейса" = "Interface language";
 "Настройки" = "Settings";
 "Размер интерфейса" = "Interface size";
-"Переключить язык интерфейса" = "Switch the interface language";
-"Карта и конфиденциальность" = "Maps and privacy";
-"Ничего не уходит в сеть." = "Nothing leaves this Mac.";
-"Apple видит область просмотра карты." = "Apple sees the visible map region.";
+"Переключить язык интерфейса" = "Switch interface language";
+"Карта и конфиденциальность" = "Map and privacy";
+"Ничего не уходит с этого Mac." = "Nothing leaves this Mac.";
+"Apple видит, какой участок карты открыт." = "Apple sees which part of the map you’re looking at.";
 "Восстановление" = "Recovery";
 
 /* App commands and common actions */
@@ -456,8 +456,8 @@
 " и " = " and ";
 " по " = " to ";
 "Офлайн-карта" = "Offline map";
-"Подробная. Нужна сеть." = "Detailed. Needs internet.";
-"Контуры стран. Без сети." = "Country outlines. Offline.";
+"Подробная. Нужен интернет." = "Detailed. Needs internet.";
+"Контуры стран. Без интернета." = "Country outlines. No internet needed.";
 "Сохранение" = "Save";
 "Перед обновлением формата" = "Before format update";
 "Перед объединением" = "Before merge";
@@ -754,8 +754,8 @@
 "%@ м" = "%@ m";
 "Масштаб: %@" = "Scale: %@";
 "Изменить размер интерфейса?" = "Change interface size?";
-"Изменить без сохранения" = "Change without saving";
-"В открытой карточке есть несохранённые изменения. Смена размера закроет её, и они пропадут." = "An open form has unsaved changes. Changing the size closes it, and they will be lost.";
+"Изменить, не сохраняя" = "Change without saving";
+"В открытой карточке есть несохранённые изменения. Смена размера закроет карточку — изменения пропадут." = "You have unsaved changes in an open profile. Changing the size closes it and discards them.";
 "Фамилия заполнена автоматически" = "Surname filled automatically";
 "Дерево создано" = "Tree created";
 "Деревья объединены" = "Trees merged";
