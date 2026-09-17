@@ -698,8 +698,8 @@
 "Не указано имя" = "Missing name";
 "У человека не указаны ни имя, ни фамилия." = "This person has neither a given name nor a surname.";
 "Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки." = "The record is marked living but also contains death data; the original data was preserved for review.";
-"Карта и данные" = "Maps and data";
-"Поиск мест и офлайн-карта работают локально: индекс GeoNames (бывший СССР, Европа, Северная Америка) и векторы Natural Earth. Координаты хранятся в GEDCOM. Apple Maps видит только область просмотра." = "Place search and the offline map run locally: a GeoNames index (former USSR, Europe, North America) and Natural Earth vectors. Coordinates are stored in the GEDCOM. Apple Maps sees only the visible region.";
+"Карта и данные" = "Map and data";
+"Поиск мест и офлайн-карта работают на этом Mac: индекс GeoNames (бывший СССР, Европа, Северная Америка) и векторы Natural Earth. Координаты сохраняются в файле GEDCOM. Apple Maps видит только, какой участок карты открыт." = "Place search and the offline map run on this Mac: a GeoNames index (former USSR, Europe, North America) and Natural Earth vectors. Coordinates are saved in your GEDCOM file. Apple Maps sees only which part of the map is open.";
 "Поддержка" = "Support";
 "Ошибки и вопросы — на GitHub. Не прикладывайте семейные данные." = "Report bugs and ask questions on GitHub. Don’t attach family data.";
 "Открыть поддержку на GitHub" = "Get help on GitHub";
