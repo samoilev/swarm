@@ -11,6 +11,145 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.0] — 2026-09-17
+
+### Added
+
+- The interface scales from a setting. Five steps — 85, 92, 100, 115 and 130% — sit in the
+  ⌘, window beside the language, applied live. Every glyph used to be a fixed point size,
+  so a reader on a 5K display had no way to enlarge 10–13pt serif chrome short of the
+  system-wide Zoom. The canvas, the fan chart's ring labels and the map's place labels
+  keep their own sizes, because their geometry is fixed and enlarged text would overflow a
+  card; the tree keeps its own zoom. Exported PDFs are untouched by construction — a
+  document should not change size because the reader's screen preference did.
+- The save history has its own panel. The 50-deep revision list has shipped since the
+  folder layout landed, but it was buried in Recovery, a library-only rescue sheet that
+  also holds deleted files and archived trees, with no route to it at all from inside an
+  open tree. Предыдущие версии now opens from the save clock, the wrench menu and the
+  library card menu. Rows carry people and family counts read off each revision, plus the
+  difference from the tree as it stands, and the live tree heads the list, because history
+  holds the state *before* each save. Restoring asks first and says the replaced state
+  becomes the newest version, which it does — a restore is itself a save.
+- A person's photographs can be browsed from the card. The header gains a scrolling strip
+  of miniatures — the portrait first, then every image attachment — and the full-size
+  viewer walks the whole set with arrows, wrapping at either end. Image attachments were
+  previously reachable only as 40pt rows in Файлы, each one a handoff to Finder. Tiles
+  share a height and keep their own width, clamped to 2:1, because family photos come in
+  whatever shape the scanner left them.
+- The photo viewer takes the shape of what it holds. A landscape scan — a page of a
+  casualty list, a group photograph — used to be drawn inside a portrait-shaped card, so
+  the part worth reading got a third of the window. The arrows moved out of the card and
+  onto the dimmer beside it, off the top of a face or a line of text.
+- A focus scope on the map: one person, their branch, or everyone. In a 68-person tree a
+  selected person's lineage is most of the map, so there was no way to look at one path on
+  its own. Person scope keeps the selected person at full strength and fades everyone else
+  to 20% — nothing is removed, so context and click targets stay — and fitting the camera
+  then frames just that person's places.
+- Everyone off the selected branch fades on the map. The selected person keeps a thicker
+  path, their branch stays at full strength, and the rest drop to 20% but stay clickable.
+  The emphasis rules live in the core module so the MapKit and offline providers share one
+  testable definition.
+- The inspector's mini map opens the full map on that person, where their branch stays lit
+  and everyone else fades. The thumbnail itself still passes hit testing through — MapKit
+  eats scroll-wheel events and would break a scroll already in progress — so the click
+  target is a button around it.
+- The map reports a failed load and offers a retry. A missing place index, tiles that
+  never arrive and unreadable bundled vectors all failed silently before, and none could
+  be retried without relaunching. A spinner appears once a load passes five seconds, then
+  a card naming the failed source with Retry and, on Apple Maps, a switch to the
+  network-free offline renderer.
+- A scale bar and a zoom-aware graticule on the offline map, which offered no way to judge
+  distance, and whose fixed 30/15-degree grid drew nothing once the viewport was narrower
+  than one cell. The tree's own places are labelled too; gazetteer cities were named while
+  the family's villages stayed bare dots.
+- Export gains a File-menu item with ⌘E and a row in the compact overflow. It was
+  reachable only through an icon-only toolbar button, which does not survive the system
+  overflow.
+
+### Changed
+
+- The person card puts the name on its own line, under a round medallion. The name used to
+  share a row with the portrait, leaving it panel width minus 125pt — 120pt at the narrow
+  end, where a surname in 20pt serif does not fit, so it broke wherever the layout engine
+  chose or ran off the edge. The medallion's window is anchored to the top of the frame, so
+  a face lands in the circle rather than a chin and a chest, and a person with no
+  photograph gets initials, which read at that size where the silhouette was a blot.
+- The medallion grew from 84 to 104pt and the pinned bar's name from two steps below
+  everything else to 15 over 13, with the header's pair two steps down instead of four.
+  Section headings take a new 13pt step, so the card no longer reads as one flat list of
+  11pt tracked caps.
+- The card's edit and close controls are pinned over the scroller, outside the top fade.
+  On a tall record both were buried, so closing or editing meant scrolling back to the top
+  first. Paper fades in behind them once the record reaches it, and the name follows 24pt
+  later, by which time the big one is gone — the card never shows the same name twice.
+- Settings is laid out as a grouped form. Nine radio pills in three rows gave every setting
+  the same weight and squeezed the five scale steps until only their percentages fit. Rows
+  name the setting on the left and carry its control on the right, the scale rides one
+  slider, and the map provider's summary joins the privacy line as a footnote.
+- The export panel's three rows are one shape. They were 60/36/60pt tall, capsules
+  carrying two lines of text, and a disabled row that gave no reason for being dead. Rows
+  are cards now, each with a description; the selection row stays a disabled button with
+  the same geometry as its neighbours and shows how many people are selected. The panel's
+  width goes through the shared scaler and its height is the content's own, so a longer
+  translation or a larger interface step grows the sheet instead of clipping inside it. A
+  footer line says what will land on disk, read from metadata rather than the media folder.
+- Interface copy simplified in both languages, with the English and Russian tables brought
+  into line with each other. Kinship labels read as sentences across generations and
+  uncertainty — “Great-great-grandfather”, “Ancestor, 5 generations back”, “Father
+  (uncertain)” — and the family-editing screens lost the phrasing that did not survive
+  translation.
+- Scroll-wheel zoom on the canvas takes the same 0.6× cut the pinch constants took, and its
+  per-event clamp is reciprocal, so one notch in and one notch out return to the same
+  scale; the old pair did not. Pinch zoom crossed the whole scale range in one gesture:
+  tree damping drops from 0.5 to 0.3, and the fan chart and offline map, undamped
+  entirely, now match.
+- The minimap legend moved to the top-left, out from under pins near the lower edge, and
+  the offline minimap gained the same legend, which it did not have.
+- Documentation corrected where it had drifted: bug-report placeholders asked for macOS
+  15.2 and Swarm 2.1.0 on an app that requires macOS 26; release notes told users to
+  right-click and Open, a bypass that no longer works for an unsigned app on current
+  macOS; the Swift 6 badge implied Swift 6 language mode where the manifest is
+  tools-version 5.9; and map providers were named by raw value, so neither string was
+  findable in the Settings menu being described.
+
+### Fixed
+
+- Notes no longer lose text on save. The `.ged` file is the save format, not just an
+  export, so a lossy round trip is data loss on an ordinary save-and-reopen, and there were
+  three ways it happened invisibly: a note line after the first was cut at about 200 bytes,
+  because the continuation was split into a level the walker ignored; a pasted line or
+  paragraph separator was written inline, and since the readers split on those characters
+  the record tore in half, making an app-created tree unreadable on next launch; and
+  leading and trailing whitespace, which in a free-form note is content, was trimmed by the
+  tokenizer. Notes now warn past 100k characters instead of being limited, and the counter
+  never truncates, blocks or rejects a paste.
+- The offline map is usable at real zoom. Labels were queried from inside the draw closure,
+  so every frame of every pan walked a 5-degree gazetteer bucket — the densest hold 27,000
+  rows and sit over St Petersburg, Moscow and Kyiv — and the query now runs on a quantised
+  viewport key, roughly once per half-screen of movement. Coastlines and borders are culled
+  to the viewport instead of re-projected whole each frame, panning tracks the pointer
+  instead of moving on mouse-up, the wheel zooms anchored under the cursor, and zoom no
+  longer goes dead after about five clicks with 8× of range left.
+- The library shows a tree's real modification date. GEDCOM carries no modification
+  timestamp, so every reload rebuilt each tree with the current date: every card read
+  “изменено только что” and the recency order collapsed into load order. The header now
+  carries created and updated stamps, written below the imported-header passthrough so a
+  save cannot freeze them, and files without them fall back to the file's own dates.
+- Seven defects found in the post-3.4.0 end-to-end run, each reproduced with a named root
+  cause: changing the interface size discarded unsaved drafts; the missing-photo message
+  truncated to an ellipsis because the photo aspect was applied to the whole builder; Zoom
+  In zoomed out above 200%, the keyboard clamping to 2.0 while the toolbar ran to 8; Try
+  Again could not recover, because a failed parse was cached past every retry and a missed
+  bundle lookup is memoised for the life of the process; Restore reported existing media as
+  missing, a revision living two levels above the media it references; a failed restore
+  advanced the displayed save time, stamping “now” on a rollback; and Export was reachable
+  only through a toolbar button that the system overflow drops.
+- Sex read as a clipped “Муж”/“Жен” on the person card. The literals bypassed the string
+  table, where “Муж” is already claimed as Husband.
+- The notes caret sat to the right of the placeholder it replaced — different insets on the
+  two, neither accounting for the container inset the text view adds. The relatives heading
+  read “Родственные”, an adjective with no noun.
+
 ## [3.4.0] — 2026-08-29
 
 ### Added
@@ -833,7 +972,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.4.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.0...HEAD
+[3.5.0]: https://github.com/samoilev/swarm/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/samoilev/swarm/compare/v3.3.1...v3.4.0
 [3.3.1]: https://github.com/samoilev/swarm/compare/v3.3.0...v3.3.1
 [3.3.0]: https://github.com/samoilev/swarm/compare/v3.2.1...v3.3.0
