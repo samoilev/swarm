@@ -92,17 +92,21 @@ struct SepiaWordmark: View {
         // Centred, not baseline-aligned: the dot is a separator between two names, so it
         // belongs at the optical middle of the wordmark, with the room label beside it —
         // sitting them on the baseline dropped both to the foot of the word.
-        HStack(alignment: .center, spacing: 9) {
+        // Every metric here is scaled, not just the type: the rule, the gaps and the
+        // optical nudges are all measured against the wordmark beside them. Left as
+        // fixed points they held still while the type grew, so the group came apart
+        // a little further at every interface step.
+        HStack(alignment: .center, spacing: SepiaTheme.scaled(9)) {
             Rectangle()
                 .fill(SepiaTheme.ink.opacity(0.13))
-                .frame(width: 1, height: 26)
-                .padding(.trailing, 9)
+                .frame(width: 1, height: SepiaTheme.scaled(26))
+                .padding(.trailing, SepiaTheme.scaled(9))
                 .accessibilityHidden(true)
 
             Text("Swarm")
                 .font(SepiaTheme.display(size: 21))
                 .foregroundStyle(SepiaTheme.ink)
-                .offset(y: 1)
+                .offset(y: SepiaTheme.scaled(1))
 
             if let label, !label.isEmpty {
                 // Both sit below the mathematical centre, and the label a point further
@@ -111,12 +115,12 @@ struct SepiaWordmark: View {
                 // the two need different nudges to look level with the wordmark.
                 Circle()
                     .fill(SepiaTheme.accent)
-                    .frame(width: 4, height: 4)
-                    .offset(y: 1.5)
+                    .frame(width: SepiaTheme.scaled(4), height: SepiaTheme.scaled(4))
+                    .offset(y: SepiaTheme.scaled(1.5))
                     .accessibilityHidden(true)
 
                 SepiaTrackedLabel(label)
-                    .offset(y: 2.5)
+                    .offset(y: SepiaTheme.scaled(2.5))
             }
         }
         .accessibilityElement(children: .combine)

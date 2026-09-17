@@ -373,10 +373,14 @@ struct TreeLibraryView: View {
                 // way New Tree stays where it belongs, against the trailing edge.
                 Button(action: { onImport?() }) {
                     Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                        .labelStyle(.iconOnly)
+                        .font(SepiaTheme.icon(size: 13, weight: .semibold))
+                        .foregroundColor(SepiaTheme.ink)
+                        .frame(width: Self.controlHeight, height: Self.controlHeight)
+                        .contentShape(Capsule())
+                        .glassEffect(.regular.interactive(), in: Capsule())
                 }
-                .buttonStyle(.glass)
-                .buttonBorderShape(.capsule)
-                .labelStyle(.iconOnly)
+                .buttonStyle(.plain)
                 .help(Self.importHint)
                 .accessibilityLabel(L10n.tr("Импорт GEDCOM"))
 
@@ -384,12 +388,17 @@ struct TreeLibraryView: View {
                 // app, and a bare + does not name itself.
                 Button(action: onCreate) {
                     Label(L10n.tr("Новое дерево"), systemImage: "plus")
+                        .labelStyle(.titleAndIcon)
+                        .font(SepiaType.control)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(SepiaTheme.paper)
                         .lineLimit(1)
+                        .padding(.horizontal, SepiaTheme.scaled(14))
+                        .frame(height: Self.controlHeight)
+                        .contentShape(Capsule())
+                        .glassEffect(.regular.tint(SepiaTheme.accent).interactive(), in: Capsule())
                 }
-                .buttonStyle(.glassProminent)
-                .buttonBorderShape(.capsule)
-                .labelStyle(.titleAndIcon)
-                .tint(SepiaTheme.accent)
+                .buttonStyle(.plain)
             }
 
             // Recovery is a once-a-year rescue tool. It stays reachable, but it no
@@ -403,15 +412,25 @@ struct TreeLibraryView: View {
                 Image(systemName: "ellipsis")
                     .font(SepiaTheme.icon(size: 13, weight: .semibold))
                     .foregroundColor(SepiaTheme.ink)
+                    .frame(width: Self.controlHeight, height: Self.controlHeight)
+                    .contentShape(Circle())
+                    .glassEffect(.regular.interactive(), in: Circle())
             }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
+            .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
+            .fixedSize()
             .help(L10n.tr("Действия с библиотекой"))
             .accessibilityLabel(L10n.tr("Действия с библиотекой"))
         }
         .sharedBackgroundVisibility(.hidden)
     }
+
+    /// Every control in this bar is drawn to one height, and that height scales with the
+    /// interface setting like the type inside it. The glass button styles size themselves
+    /// from their label and its padding, the glass pills from an explicit frame, so the
+    /// two disagreed by three points at every step — and only the pills grew with the
+    /// setting. 34 is what the workspace toolbar already draws its controls at.
+    private static var controlHeight: CGFloat { SepiaTheme.scaled(34) }
 
     private var sortMenu: some View {
         Menu {
@@ -432,14 +451,14 @@ struct TreeLibraryView: View {
             .font(SepiaType.control)
             .fontWeight(.semibold)
             .foregroundColor(SepiaTheme.ink)
-            .padding(.horizontal, 10)
-            .frame(height: 30)
+            .padding(.horizontal, SepiaTheme.scaled(10))
+            .frame(height: Self.controlHeight)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)
         .fixedSize()
-        .padding(.horizontal, 12)
-        .frame(height: 30)
+        .padding(.horizontal, SepiaTheme.scaled(12))
+        .frame(height: Self.controlHeight)
         .glassEffect(.regular, in: Capsule())
         .help(L10n.tr("Порядок деревьев"))
         .accessibilityLabel(L10n.tr("Порядок деревьев"))
@@ -469,8 +488,8 @@ struct TreeLibraryView: View {
                 .accessibilityLabel(L10n.tr("Очистить фильтр"))
             }
         }
-        .padding(.horizontal, 12)
-        .frame(width: width, height: SepiaTheme.scaled(30))
+        .padding(.horizontal, SepiaTheme.scaled(12))
+        .frame(width: width, height: Self.controlHeight)
         .glassEffect(.regular, in: Capsule())
         .sepiaMotion(SepiaMotion.state, value: filterText.isEmpty)
     }
