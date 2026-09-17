@@ -68,7 +68,7 @@ public struct LineageCalculator {
 
         let formatter = KinshipFormatter(language: language, style: .lineage)
         var labels = descriptors.mapValues(formatter.label)
-        labels[person.id] = L10n.tr("Я", language: language)
+        labels[person.id] = L10n.tr("Выбранный человек", language: language)
         return LineageResult(
             ids: ids,
             labels: labels,
@@ -90,12 +90,12 @@ public struct LineageCalculator {
             guard let parent = index.byId[edge.parentID],
                   visited.insert(parent.id).inserted else { continue }
             let pathKinds = ParentageKind.unique(
-                parentage + (edge.kind == .biological ? [] : [edge.kind])
+                parentage + edge.qualifiers
             )
             ids.insert(parent.id)
             connections.insert(FamilyConnection(parent.id, personID))
             descriptors[parent.id] = generation == 1
-                ? .parent(sex: parent.sex, kind: edge.kind)
+                ? edge.qualifying(.parent(sex: parent.sex, kind: edge.kind))
                 : qualified(
                     .ancestor(generation: generation, sex: parent.sex),
                     by: pathKinds
@@ -125,12 +125,12 @@ public struct LineageCalculator {
             guard let child = index.byId[edge.childID],
                   visited.insert(child.id).inserted else { continue }
             let pathKinds = ParentageKind.unique(
-                parentage + (edge.kind == .biological ? [] : [edge.kind])
+                parentage + edge.qualifiers
             )
             ids.insert(child.id)
             connections.insert(FamilyConnection(personID, child.id))
             descriptors[child.id] = generation == 1
-                ? .child(sex: child.sex, kind: edge.kind)
+                ? edge.qualifying(.child(sex: child.sex, kind: edge.kind))
                 : qualified(
                     .descendant(generation: generation, sex: child.sex),
                     by: pathKinds

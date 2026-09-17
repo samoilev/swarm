@@ -29,7 +29,7 @@ struct CoreModelTests {
     @Test func lineageLabelsAncestorsDescendantsAndSpouse() throws {
         let (t, p) = threeGenerationTree()
         let result = try LineageCalculator(index: FamilyIndex(tree: t)).compute(for: #require(p["me"]))
-        #expect(try result.labels[#require(p["me"]?.id)] == "Я")
+        #expect(try result.labels[#require(p["me"]?.id)] == "Выбранный человек")
         #expect(try result.labels[#require(p["dad"]?.id)] == "Отец")
         #expect(try result.labels[#require(p["mom"]?.id)] == "Мать")
         #expect(try result.labels[#require(p["gf"]?.id)] == "Дедушка")

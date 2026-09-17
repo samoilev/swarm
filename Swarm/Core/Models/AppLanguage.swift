@@ -69,6 +69,8 @@ public enum L10n {
         case tree
         case generation
         case step
+        case child
+        case citation
     }
 
     public struct Key: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
@@ -130,6 +132,8 @@ public enum L10n {
             case .tree: value == 1 ? "tree" : "trees"
             case .generation: value == 1 ? "generation" : "generations"
             case .step: value == 1 ? "step" : "steps"
+            case .child: value == 1 ? "child" : "children"
+            case .citation: value == 1 ? "citation" : "citations"
             }
             return "\(value) \(noun)"
         case .russian:
@@ -140,6 +144,8 @@ public enum L10n {
             case .tree: ("дерево", "дерева", "деревьев")
             case .generation: ("поколение", "поколения", "поколений")
             case .step: ("шаг", "шага", "шагов")
+            case .child: ("ребёнок", "ребёнка", "детей")
+            case .citation: ("ссылка на источник", "ссылки на источники", "ссылок на источники")
             }
             let absolute = abs(value)
             let lastTwo = absolute % 100

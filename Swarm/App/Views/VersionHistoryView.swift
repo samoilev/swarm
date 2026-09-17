@@ -69,7 +69,7 @@ struct VersionHistoryView: View {
             }
             Button(L10n.tr("Отмена"), role: .cancel) { pendingRestore = nil }
         } message: {
-            Text(L10n.tr("Дерево вернётся к этому состоянию. Нынешнее состояние не пропадёт — оно само станет верхней версией в этом списке, так что возврат можно отменить."))
+            Text(L10n.tr("Текущая версия сохранится в истории. Вы сможете восстановить её позже."))
         }
         .alert(L10n.tr("Не удалось восстановить"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
@@ -81,7 +81,7 @@ struct VersionHistoryView: View {
     private var header: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Предыдущие версии"),
-            subtitle: L10n.tr("Состояние дерева после каждого сохранения. Хранятся последние 50."),
+            subtitle: L10n.tr("Хранятся последние 50 версий дерева. Фотографии и вложения в них не входят."),
             minimumHeight: 68,
             closeLabel: L10n.tr("Закрыть предыдущие версии"),
             closeDisabled: isWorking,
@@ -108,7 +108,7 @@ struct VersionHistoryView: View {
                 // A revision is GEDCOM text only; files removed since then come back from
                 // the 30-day trash instead. Naming both halves in that order stops the
                 // sentence reading as "the files are gone, and also they are kept".
-                Text(L10n.tr("В версии только текст дерева. Удалённые фотографии и вложения — в «Восстановлении», 30 дней."))
+                Text(L10n.tr("Удалённые фотографии и вложения доступны в разделе «Восстановление» в течение 30 дней."))
                     .font(SepiaTheme.ui(size: 10.5))
                     .foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
@@ -211,7 +211,7 @@ struct VersionHistoryView: View {
     /// Counts plus how the revision differs from the tree as it stands, which is the part
     /// that tells two saves a minute apart from each other.
     private func detail(for item: RecoveryItem) -> String {
-        guard let summary = summaries[item.id] else { return L10n.tr("Считаем записи…") }
+        guard let summary = summaries[item.id] else { return L10n.tr("Загрузка…") }
         let counts = "\(L10n.count(summary.people, .person)) · \(L10n.count(summary.families, .family))"
         let delta = summary.people - tree.people.count
         if delta == 0 { return counts }

@@ -33,7 +33,7 @@ enum SepiaType {
 
     /// Button and control labels.
     static var control: Font { SepiaTheme.ui(size: 12) }
-    /// Section headings inside a record ("Личность", "Рождение"). One step above a
+    /// Section headings inside a record ("Основные сведения", "Рождение"). One step above a
     /// field label so a group reads as a group rather than as another caption.
     static var sectionLabel: Font { SepiaTheme.ui(size: 13) }
     /// Small tracked caps: field labels, badges.

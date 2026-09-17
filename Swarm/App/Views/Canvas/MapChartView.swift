@@ -198,7 +198,7 @@ struct MapChartView: View {
         if vectorsFailed {
             return L10n.tr("Контуры материков не открылись.")
         }
-        return L10n.tr("Apple Maps не отдаёт карту. Проверьте подключение к сети.")
+        return L10n.tr("Не удалось загрузить Apple Maps. Проверьте подключение к интернету.")
     }
 }
 
@@ -355,7 +355,7 @@ struct AppleMapChartView: View {
         .accessibilityLabel(group.label)
         .accessibilityHint(
             count == 1
-                ? L10n.tr("Выбрать персону")
+                ? L10n.tr("Выбрать человека")
                 : L10n.tr("Показать \(L10n.count(count, .person))")
         )
         .accessibilityAction {

@@ -6,6 +6,15 @@ public struct FamilyIndex {
         public let parentID: UUID
         public let childID: UUID
         public let kind: ParentageKind
+        public var isUncertain = false
+
+        public var qualifiers: [ParentageKind] {
+            ParentageKind.unique([kind] + (isUncertain ? [.uncertain] : []))
+        }
+
+        public func qualifying(_ descriptor: KinshipDescriptor) -> KinshipDescriptor {
+            isUncertain && kind != .uncertain ? .qualified(base: descriptor, kind: .uncertain) : descriptor
+        }
     }
 
     public let tree: FamilyTree
@@ -66,7 +75,8 @@ public struct FamilyIndex {
             result[link.parentID] = ParentEdge(
                 parentID: link.parentID,
                 childID: childID,
-                kind: link.kind
+                kind: link.kind,
+                isUncertain: link.hasUncertainParentage
             )
         }
         return result.values.sorted { $0.parentID.uuidString < $1.parentID.uuidString }
@@ -87,7 +97,8 @@ public struct FamilyIndex {
             result[link.childID] = ParentEdge(
                 parentID: parentID,
                 childID: link.childID,
-                kind: link.kind
+                kind: link.kind,
+                isUncertain: link.hasUncertainParentage
             )
         }
         return result.values.sorted { $0.childID.uuidString < $1.childID.uuidString }

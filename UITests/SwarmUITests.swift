@@ -77,7 +77,8 @@ final class SwarmUITests: XCTestCase {
         createInitialTree()
         app.buttons["Редактировать"].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         XCTAssertTrue(app.staticTexts["ИСТОЧНИКИ"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Источники не добавлены"].exists)
+        XCTAssertTrue(app.buttons["Добавить источник"].exists)
+        XCTAssertFalse(app.buttons["Изменить источник"].exists)
 
         func field(_ identifier: String) -> XCUIElement {
             app.textFields[identifier].firstMatch
@@ -113,7 +114,8 @@ final class SwarmUITests: XCTestCase {
 
         // Delete it.
         app.buttons["Удалить источник"].firstMatch.click()
-        XCTAssertTrue(app.staticTexts["Источники не добавлены"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Добавить источник"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Изменить источник"].exists)
         app.buttons["Сохранить"].click()
         XCTAssertTrue(app.staticTexts["Иванов Иван"].waitForExistence(timeout: 5))
     }
@@ -132,7 +134,8 @@ final class SwarmUITests: XCTestCase {
 
         app.buttons["Отмена"].firstMatch.click()
         app.buttons["Редактировать"].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
-        XCTAssertTrue(app.staticTexts["Источники не добавлены"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Добавить источник"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Изменить источник"].exists)
     }
 
     func testSwitchingToOfflineMapDoesNotAskForNetworkConsent() {
@@ -367,7 +370,7 @@ final class SwarmUITests: XCTestCase {
     private func createInitialTree() {
         let newTree = app.buttons["Новое дерево"]
         if newTree.waitForExistence(timeout: 2) { newTree.click() }
-        let title = app.textFields["НАЗВАНИЕ СЕМЬИ"]
+        let title = app.textFields["Название дерева"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click(); title.typeText("UI Test")
         let name = app.textFields["ИМЯ"]
@@ -405,7 +408,7 @@ final class SwarmUITests: XCTestCase {
     }
 
     private func openRecoveryWorkspace() {
-        let maintenance = app.menuButtons["Обслуживание архива"]
+        let maintenance = app.menuButtons["Действия с библиотекой"]
         XCTAssertTrue(maintenance.waitForExistence(timeout: 10))
         maintenance.click()
         let restore = app.menuItems["Восстановить из резервной копии…"]

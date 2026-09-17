@@ -123,7 +123,7 @@ struct EditPersonView: View {
             case .parent: L10n.tr("Добавить родителя")
             case .spouse: L10n.tr("Добавить супруга")
             case .child: L10n.tr("Добавить ребёнка")
-            case .sibling: L10n.tr("Добавить брата/сестру")
+            case .sibling: L10n.tr("Добавить брата или сестру")
             }
         }
     }
@@ -147,16 +147,16 @@ struct EditPersonView: View {
                     VStack(alignment: .leading, spacing: 0) {
                         photoEditor
 
-                        SectionHeader(title: L10n.tr("Личность"))
+                        SectionHeader(title: L10n.tr("Основные сведения"))
                         HStack(spacing: 12) {
                             if AppLanguage.current == .english {
-                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО (необяз.)"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: "")
+                                SepiaTextField(label: L10n.tr("Отчество (необязательно)"), text: $patronymic, placeholder: "")
                             } else {
-                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: "")
                             }
                         }.padding(.bottom, 12)
 
@@ -187,7 +187,6 @@ struct EditPersonView: View {
                         }.padding(.bottom, 12)
 
                         homePersonControl
-                            .help(L10n.tr("Домашняя персона открывается первой и служит центром дерева"))
                             .padding(.bottom, 12)
 
                         SectionHeader(title: L10n.tr("Рождение"))
@@ -233,7 +232,7 @@ struct EditPersonView: View {
                         SepiaNotesField(
                             label: L10n.tr("ЗАМЕТКИ"),
                             text: $notes,
-                            placeholder: L10n.tr("Свободный текст…"),
+                            placeholder: "",
                             identifier: "person.notes"
                         ).padding(.bottom, 12)
 
@@ -242,8 +241,6 @@ struct EditPersonView: View {
                         attachmentsEditor
 
                         linksEditor
-
-                        unionsEditor
 
                         relationshipsEditor
                     }
@@ -319,29 +316,17 @@ struct EditPersonView: View {
 
     // MARK: - Relationships Editor
 
-    @ViewBuilder
     private var homePersonControl: some View {
-        if isHomePerson {
-            Label(L10n.tr("Домашняя персона"), systemImage: "house.fill")
-                .font(SepiaType.control)
-                .fontWeight(.semibold)
-                .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .frame(height: 34)
-                .glassEffect(.regular.tint(SepiaTheme.accent), in: Capsule())
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(L10n.tr("Домашняя персона"))
-        } else {
-            Button {
-                isHomePerson = true
-            } label: {
-                Label(L10n.tr("Сделать домашней персоной"), systemImage: "house")
-            }
-            .buttonStyle(.glassProminent)
-            .buttonBorderShape(.capsule)
-            .tint(SepiaTheme.accent)
-            .accessibilityLabel(L10n.tr("Сделать домашней персоной"))
+        Button { isHomePerson = true } label: {
+            Image(systemName: isHomePerson ? "house.fill" : "house")
+                .frame(width: 34, height: 34)
         }
+        .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .tint(isHomePerson ? SepiaTheme.accent : nil)
+        .accessibilityLabel(L10n.tr("Открывать дерево с этого человека"))
+        .accessibilityValue(isHomePerson ? L10n.tr("Выбрано") : L10n.tr("Не выбрано"))
+        .help(L10n.tr("Открывать дерево с этого человека"))
     }
 
     // MARK: - Sources Editor
@@ -360,11 +345,7 @@ struct EditPersonView: View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: L10n.tr("Источники"))
 
-            if sourceEntries.isEmpty {
-                Text(L10n.tr("Источники не добавлены"))
-                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
-                    .padding(.bottom, 8)
-            } else {
+            if !sourceEntries.isEmpty {
                 ForEach(sourceEntries, id: \.citation.id) { entry in
                     sourceEntryRow(citation: entry.citation, source: entry.source)
                 }
@@ -571,46 +552,24 @@ struct EditPersonView: View {
         editingTree.pruneUnreferencedSourceRecords()
     }
 
-    private var unionsEditor: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SectionHeader(title: L10n.tr("Союзы и дети"))
-            let unions = editingTree.unions.filter { $0.partnerIds.contains(editingPerson.id) }
-            if unions.isEmpty {
-                Text(L10n.tr("Союзы не заданы")).font(SepiaType.body).foregroundStyle(SepiaTheme.inkSoft)
-            } else {
-                ForEach(unions, id: \.id) { union in
-                    UnionDraftEditor(union: union, tree: editingTree, subject: editingPerson)
-                    Divider().overlay(SepiaTheme.fieldLine).padding(.vertical, 8)
-                }
-            }
-        }.padding(.bottom, 12)
-    }
-
     private var relationshipsEditor: some View {
         VStack(alignment: .leading, spacing: 0) {
-            SectionHeader(title: L10n.tr("Родство"))
+            SectionHeader(title: L10n.tr("Семья"))
 
             let editPerson = editingPerson
             let idx = FamilyIndex(tree: editingTree)
             let parents = idx.parentsOf(editPerson)
-            let spouses = idx.spousesOf(editPerson)
-            let children = idx.childrenOf(editPerson)
             let siblings = idx.siblingsOf(editPerson)
 
             // Current relationships
             if let f = parents.father { relEditRow(L10n.tr("Отец"), f) { removeParent(f) } }
             if let m = parents.mother { relEditRow(L10n.tr("Мать"), m) { removeParent(m) } }
-            ForEach(spouses, id: \.id) { s in relEditRow(L10n.tr("Супруг"), s) { removeSpouse(s) } }
-            ForEach(children, id: \.id) { c in relEditRow(L10n.tr("Ребёнок"), c) { removeChild(c) } }
             ForEach(siblings, id: \.id) { s in
-                relEditRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат/сестра"), s) { removeSibling(s) }
+                relEditRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат или сестра"), s) { removeSibling(s) }
             }
 
-            if parents.father == nil && parents.mother == nil && spouses.isEmpty && children.isEmpty && siblings.isEmpty {
-                Text(L10n.tr("Родственные связи не заданы"))
-                    .font(SepiaType.body)
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .padding(.bottom, 8)
+            ForEach(editingTree.unions.filter { $0.partnerIds.contains(editPerson.id) }) { union in
+                UnionDraftEditor(union: union, tree: editingTree, subject: editPerson)
             }
 
             // Add new relationship
@@ -700,38 +659,6 @@ struct EditPersonView: View {
         editingTree.reconcileParentLinks()
     }
 
-    private func removeSpouse(_ spouse: Person) {
-        let editPerson = editingPerson
-        editingTree.unions.removeAll { union in
-            union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) && union.childrenIds.isEmpty
-        }
-        // If the union has children, remove only the partner link.
-        for union in editingTree.unions {
-            if union.partnerIds.contains(editPerson.id) && union.partnerIds.contains(spouse.id) {
-                if union.partner1Id == spouse.id { union.partner1Id = nil }
-                else if union.partner2Id == spouse.id { union.partner2Id = nil }
-                break
-            }
-        }
-        editingTree.optimizeRoot()
-        editingTree.reconcileParentLinks()
-    }
-
-    private func removeChild(_ child: Person) {
-        let editPerson = editingPerson
-        for union in editingTree.unions {
-            if union.partnerIds.contains(editPerson.id) && union.childrenIds.contains(child.id) {
-                union.childrenIds.removeAll { $0 == child.id }
-                if union.childrenIds.isEmpty && union.partnerIds.count <= 1 {
-                    editingTree.unions.removeAll { $0.id == union.id }
-                }
-                break
-            }
-        }
-        editingTree.optimizeRoot()
-        editingTree.reconcileParentLinks()
-    }
-
     private func removeSibling(_ sibling: Person) {
         let editPerson = editingPerson
         for union in editingTree.unions {
@@ -767,11 +694,7 @@ struct EditPersonView: View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: L10n.tr("Файлы"))
 
-            if editingPerson.attachments.isEmpty {
-                Text(L10n.tr("Файлы не прикреплены"))
-                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
-                    .padding(.bottom, 8)
-            } else {
+            if !editingPerson.attachments.isEmpty {
                 ForEach(editingPerson.attachments) { att in
                     attachmentEditRow(att)
                 }
@@ -828,11 +751,7 @@ struct EditPersonView: View {
         VStack(alignment: .leading, spacing: 0) {
             SectionHeader(title: L10n.tr("Ссылки"))
 
-            if editingPerson.links.isEmpty {
-                Text(L10n.tr("Ссылки не добавлены"))
-                    .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
-                    .padding(.bottom, 8)
-            } else {
+            if !editingPerson.links.isEmpty {
                 ForEach(Array(editingPerson.links.enumerated()), id: \.element.id) { index, link in
                     // Two stacked fields per row read as one block otherwise — the rule
                     // marks where one link ends and the next begins.
@@ -1235,7 +1154,7 @@ private struct UnionDraftEditor: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(partnerNames).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("\(union.childrenIds.count) детей · \(union.citations.count) ссылок"))
+                    Text("\(L10n.count(union.childrenIds.count, .child)) · \(L10n.count(union.citations.count, .citation))")
                         .font(SepiaType.micro).foregroundStyle(SepiaTheme.inkSoft)
                 }
                 Spacer()
@@ -1254,18 +1173,24 @@ private struct UnionDraftEditor: View {
             UnionEventDraftEditor(kind: .separation, union: union, attachments: subject.attachments)
             UnionEventDraftEditor(kind: .divorce, union: union, attachments: subject.attachments)
 
-            SepiaFieldLabel(L10n.tr("ДЕТИ И ТИП РОДИТЕЛЬСТВА"), isDecorative: false)
+            SepiaFieldLabel(L10n.tr("Дети"), isDecorative: false)
             ForEach(union.childrenIds, id: \.self) { childID in
                 HStack {
                     Text(
                         tree.person(byId: childID)?.displayName(language: .current)
-                            ?? L10n.tr("Неизвестная персона")
+                            ?? L10n.tr("Неизвестный человек")
                     )
                     .font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
                     Spacer()
-                    Picker(L10n.tr("Тип"), selection: parentageBinding(childID: childID)) {
-                        ForEach(ParentageKind.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
-                    }.pickerStyle(.menu).frame(width: SepiaTheme.scaled(150))
+                    VStack(alignment: .leading, spacing: 4) {
+                        Picker(L10n.tr("Тип связи"), selection: parentageBinding(childID: childID)) {
+                            ForEach(ParentageKind.allCases.filter { $0 != .uncertain }, id: \.rawValue) {
+                                Text($0.displayName).tag($0)
+                            }
+                        }.pickerStyle(.menu)
+                        Toggle(L10n.tr("Предполагаемая связь"), isOn: uncertaintyBinding(childID: childID))
+                            .toggleStyle(.checkbox)
+                    }.frame(width: SepiaTheme.scaled(200))
                     Button(role: .destructive) {
                         union.childrenIds.removeAll { $0 == childID }
                         tree.parentLinks.removeAll { $0.unionID == union.id && $0.childID == childID }
@@ -1330,6 +1255,7 @@ private struct UnionDraftEditor: View {
                     union.partner1Id = subject.id
                     union.partner2Id = partnerID
                 }
+                tree.reconcileParentLinks()
             }
         )
     }
@@ -1337,13 +1263,32 @@ private struct UnionDraftEditor: View {
     private func parentageBinding(childID: UUID) -> Binding<ParentageKind> {
         Binding(
             get: {
-                tree.parentLinks.first(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID })?.kind ?? .biological
+                let kind = tree.parentLinks.first(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID })?.kind ?? .biological
+                return kind == .uncertain ? .unspecified : kind
             },
             set: { kind in
                 if let index = tree.parentLinks.firstIndex(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID }) {
+                    let wasUncertain = tree.parentLinks[index].hasUncertainParentage
                     tree.parentLinks[index].kind = kind
+                    tree.parentLinks[index].isUncertain = wasUncertain ? true : nil
                 } else {
                     tree.parentLinks.append(ParentLink(parentID: subject.id, childID: childID, unionID: union.id, kind: kind))
+                }
+            }
+        )
+    }
+
+    private func uncertaintyBinding(childID: UUID) -> Binding<Bool> {
+        Binding(
+            get: {
+                tree.parentLinks.first { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID }?.hasUncertainParentage ?? false
+            },
+            set: { uncertain in
+                if let index = tree.parentLinks.firstIndex(where: { $0.unionID == union.id && $0.parentID == subject.id && $0.childID == childID }) {
+                    if tree.parentLinks[index].kind == .uncertain { tree.parentLinks[index].kind = .unspecified }
+                    tree.parentLinks[index].isUncertain = uncertain ? true : nil
+                } else {
+                    tree.parentLinks.append(ParentLink(parentID: subject.id, childID: childID, unionID: union.id, isUncertain: uncertain ? true : nil))
                 }
             }
         )
@@ -1412,7 +1357,7 @@ private struct UnionEventDraftEditor: View {
                             ))
                         }
                     } label: {
-                        Label(L10n.tr("Медиа (\(mediaIDs.count))"), systemImage: "photo.stack")
+                        Label(L10n.tr("Файлы (\(mediaIDs.count))"), systemImage: "photo.stack")
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.capsule)

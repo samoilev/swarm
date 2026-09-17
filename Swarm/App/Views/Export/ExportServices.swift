@@ -344,7 +344,7 @@ struct PersonCardsPDFExporter {
             return fallback
         }
 
-        section(L10n.tr("Личность"))
+        section(L10n.tr("Основные сведения"))
         field(L10n.tr("Имя"), p.givenNames)
         field(L10n.tr("Отчество"), p.patronymic)
         field(L10n.tr("Фамилия"), p.surname)
@@ -395,7 +395,7 @@ struct PersonCardsPDFExporter {
             field(L10n.tr("Мать"), parents.mother?.displayName(language: .current))
             if !spouses.isEmpty {
                 field(
-                    L10n.tr("Супруг(и)"),
+                    L10n.tr("Супруги"),
                     spouses.map { $0.displayName(language: .current) }.joined(separator: ", ")
                 )
             }
@@ -407,7 +407,7 @@ struct PersonCardsPDFExporter {
             }
             if !siblings.isEmpty {
                 field(
-                    L10n.tr("Братья/сёстры"),
+                    L10n.tr("Братья и сёстры"),
                     siblings.map { $0.displayName(language: .current) }.joined(separator: ", ")
                 )
             }

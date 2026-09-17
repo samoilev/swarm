@@ -13,7 +13,7 @@ public enum RelationKind: String, CaseIterable, Identifiable, Hashable {
         case .parent: L10n.tr("Родитель")
         case .spouse: L10n.tr("Супруг(а)")
         case .child: L10n.tr("Ребёнок")
-        case .sibling: L10n.tr("Брат/сестра")
+        case .sibling: L10n.tr("Брат или сестра")
         }
     }
 

@@ -407,8 +407,8 @@ struct TreeLibraryView: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .menuIndicator(.hidden)
-            .help(L10n.tr("Обслуживание архива"))
-            .accessibilityLabel(L10n.tr("Обслуживание архива"))
+            .help(L10n.tr("Действия с библиотекой"))
+            .accessibilityLabel(L10n.tr("Действия с библиотекой"))
         }
         .sharedBackgroundVisibility(.hidden)
     }
@@ -677,7 +677,7 @@ struct TreeLibraryView: View {
                         .font(SepiaTheme.body(size: 13.5))
                         .foregroundColor(SepiaTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(L10n.tr("Открывать и просматривать можно уже сейчас. Обновление нужно, чтобы сохранять изменения — оно делает резервную копию и не удаляет исходные файлы."))
+                    Text(L10n.tr("Обновите формат, чтобы сохранять изменения. Перед обновлением создаётся резервная копия."))
                         .font(SepiaType.label)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -710,7 +710,6 @@ struct TreeLibraryView: View {
             VStack(spacing: 0) {
                 LiquidGlassPanelHeader(
                     title: L10n.tr("Переименовать дерево"),
-                    subtitle: L10n.tr("Измените название и подзаголовок дерева."),
                     closeDisabled: renameSaving,
                     onClose: {
                         treeToRename = nil

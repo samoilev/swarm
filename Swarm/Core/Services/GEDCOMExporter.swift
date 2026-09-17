@@ -216,7 +216,7 @@ public struct GEDCOMSerializer {
                 switch kind {
                 case .biological, .adoptive, .foster:
                     lines.append("2 PEDI \(kind.gedcomValue)")
-                case .step, .uncertain:
+                case .step, .uncertain, .unspecified:
                     lines.append("2 _PEDI \(kind.gedcomValue)")
                 }
                 for link in links {
@@ -224,6 +224,7 @@ public struct GEDCOMSerializer {
                     lines.append("2 _PLINK @\(parentXref)@")
                     lines.append("3 _FTSID \(link.id.uuidString)")
                     lines.append("3 PEDI \(link.kind.gedcomValue)")
+                    if link.isUncertain == true { lines.append("3 _UNCERTAIN Y") }
                     if let notes = link.notes, !notes.isEmpty {
                         appendValue(3, "NOTE", value: notes, to: &lines)
                     }

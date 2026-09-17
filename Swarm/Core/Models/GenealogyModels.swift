@@ -539,6 +539,7 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
     case foster
     case step
     case uncertain
+    case unspecified
 
     public var displayName: String {
         switch self {
@@ -547,6 +548,7 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
         case .foster: L10n.tr("Опекунская")
         case .step: L10n.tr("Сводная")
         case .uncertain: L10n.tr("Предполагаемая")
+        case .unspecified: L10n.tr("Не указан")
         }
     }
 
@@ -557,6 +559,7 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
         case .foster: "foster"
         case .step: "step"
         case .uncertain: "uncertain"
+        case .unspecified: "unknown"
         }
     }
 
@@ -566,6 +569,7 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
         case "adopted", "adoptive": self = .adoptive
         case "foster": self = .foster
         case "step": self = .step
+        case "unknown": self = .unspecified
         default: self = .uncertain
         }
     }
@@ -575,7 +579,7 @@ public enum ParentageKind: String, Codable, CaseIterable, Hashable, Sendable {
     /// from, so it never earns a word in the label.
     static func unique(_ kinds: [ParentageKind]) -> [ParentageKind] {
         var seen = Set<ParentageKind>()
-        return kinds.filter { $0 != .biological && seen.insert($0).inserted }
+        return kinds.filter { $0 != .biological && $0 != .unspecified && seen.insert($0).inserted }
     }
 }
 
@@ -585,6 +589,10 @@ public struct ParentLink: Identifiable, Codable, Hashable, Sendable {
     public var childID: UUID
     public var unionID: UUID?
     public var kind: ParentageKind
+    /// Separate from relationship type. Nil preserves decoding of older archives.
+    public var isUncertain: Bool?
+
+    public var hasUncertainParentage: Bool { kind == .uncertain || isUncertain == true }
     public var citations: [Citation]
     public var notes: String?
 
@@ -594,6 +602,7 @@ public struct ParentLink: Identifiable, Codable, Hashable, Sendable {
         childID: UUID,
         unionID: UUID? = nil,
         kind: ParentageKind = .biological,
+        isUncertain: Bool? = nil,
         citations: [Citation] = [],
         notes: String? = nil
     ) {
@@ -602,6 +611,7 @@ public struct ParentLink: Identifiable, Codable, Hashable, Sendable {
         self.childID = childID
         self.unionID = unionID
         self.kind = kind
+        self.isUncertain = isUncertain
         self.citations = citations
         self.notes = notes
     }

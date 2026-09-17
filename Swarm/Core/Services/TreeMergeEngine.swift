@@ -63,8 +63,8 @@ public enum TreeMergeError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .wrongDestination: L10n.tr("Предпросмотр слияния относится к другому дереву.")
-        case .snapshotFailed: L10n.tr("Не удалось создать снимок для отката слияния.")
+        case .wrongDestination: L10n.tr("Предпросмотр объединения относится к другому дереву.")
+        case .snapshotFailed: L10n.tr("Не удалось создать резервную копию перед объединением.")
         case let .attachmentMissing(name): L10n.tr("Файл вложения не найден: \(name).")
         }
     }
@@ -245,7 +245,10 @@ public final class TreeMergeEngine {
                 copied.childID = childID
                 copied.unionID = link.unionID.flatMap { unionMap[$0] }
                 copied.citations = remap(copied.citations, sourceMap: sourceMap)
-                if !local.parentLinks.contains(where: { $0.parentID == parentID && $0.childID == childID && $0.kind == copied.kind }) {
+                if let index = local.parentLinks.firstIndex(where: { $0.parentID == parentID && $0.childID == childID && $0.unionID == copied.unionID && $0.kind == copied.kind }) {
+                    // Preserve a recorded doubt without adding a duplicate parent edge.
+                    if copied.hasUncertainParentage { local.parentLinks[index].isUncertain = true }
+                } else {
                     local.parentLinks.append(copied)
                 }
             }

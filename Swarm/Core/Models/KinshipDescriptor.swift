@@ -161,7 +161,7 @@ public struct KinshipFormatter: Sendable {
 
     private func englishParent(sex: Person.Sex, kind: ParentageKind) -> String {
         switch kind {
-        case .biological:
+        case .biological, .unspecified:
             gendered(sex, male: "Father", female: "Mother", neutral: "Parent")
         case .adoptive:
             gendered(sex, male: "Adoptive Father", female: "Adoptive Mother", neutral: "Adoptive Parent")
@@ -176,7 +176,7 @@ public struct KinshipFormatter: Sendable {
 
     private func russianParent(sex: Person.Sex, kind: ParentageKind) -> String {
         switch kind {
-        case .biological:
+        case .biological, .unspecified:
             gendered(sex, male: "Отец", female: "Мать", neutral: "Родитель")
         case .adoptive:
             gendered(sex, male: "Приёмный отец", female: "Приёмная мать", neutral: "Приёмный родитель")
@@ -191,7 +191,7 @@ public struct KinshipFormatter: Sendable {
 
     private func englishChild(sex: Person.Sex, kind: ParentageKind) -> String {
         switch kind {
-        case .biological:
+        case .biological, .unspecified:
             gendered(sex, male: "Son", female: "Daughter", neutral: "Child")
         case .adoptive:
             gendered(sex, male: "Adoptive Son", female: "Adoptive Daughter", neutral: "Adoptive Child")
@@ -206,7 +206,7 @@ public struct KinshipFormatter: Sendable {
 
     private func russianChild(sex: Person.Sex, kind: ParentageKind) -> String {
         switch kind {
-        case .biological:
+        case .biological, .unspecified:
             gendered(sex, male: "Сын", female: "Дочь", neutral: "Ребёнок")
         case .adoptive:
             gendered(sex, male: "Приёмный сын", female: "Приёмная дочь", neutral: "Приёмный ребёнок")
@@ -236,7 +236,7 @@ public struct KinshipFormatter: Sendable {
     private func russianSibling(sex: Person.Sex, kind: KinshipDescriptor.SiblingKind) -> String {
         switch kind {
         case .full:
-            gendered(sex, male: "Брат", female: "Сестра", neutral: "Брат/сестра")
+            gendered(sex, male: "Брат", female: "Сестра", neutral: "Брат или сестра")
         case .paternalHalf:
             gendered(sex, male: "Единокровный брат", female: "Единокровная сестра", neutral: "Неполнородный брат/сестра")
         case .maternalHalf:
@@ -284,7 +284,7 @@ public struct KinshipFormatter: Sendable {
                 neutral: "Пра-прародитель"
             )
         default:
-            "\(generation)-й предок"
+            "Предок в \(generation)-м поколении"
         }
     }
 
@@ -311,7 +311,7 @@ public struct KinshipFormatter: Sendable {
         case 4:
             gendered(sex, male: "Праправнук", female: "Праправнучка", neutral: "Праправнук/праправнучка")
         default:
-            "\(generation)-й потомок"
+            "Потомок в \(generation)-м поколении"
         }
     }
 
@@ -443,7 +443,7 @@ public struct KinshipFormatter: Sendable {
             return "\(adjective) \(noun)".capitalizingFirstLetter
         }
         let directionText = direction == .younger ? "младше" : "старше"
-        return "\(adjective.capitalizingFirstLetter) родственник (\(directionText) на \(removed) поколения)"
+        return "\(adjective.capitalizingFirstLetter) родственник (\(directionText) на \(L10n.count(removed, .generation, language: .russian)))"
     }
 
     private func russianCousinAdjective(degree: Int, sex: Person.Sex) -> String {
@@ -498,11 +498,11 @@ public struct KinshipFormatter: Sendable {
         kind: ParentageKind,
         language: AppLanguage
     ) -> String {
-        guard kind != .biological else { return base }
+        guard kind != .biological, kind != .unspecified else { return base }
         switch language {
         case .english:
             let suffix = switch kind {
-            case .biological: ""
+            case .biological, .unspecified: ""
             case .adoptive: "through adoption"
             case .foster: "through foster care"
             case .step: "through a step-family connection"
@@ -511,7 +511,7 @@ public struct KinshipFormatter: Sendable {
             return "\(base) \(suffix)"
         case .russian:
             let suffix = switch kind {
-            case .biological: ""
+            case .biological, .unspecified: ""
             case .adoptive: "по приёмной линии"
             case .foster: "по опекунской линии"
             case .step: "по неродной линии"

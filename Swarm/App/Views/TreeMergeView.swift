@@ -20,7 +20,7 @@ struct TreeMergeView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(L10n.tr("Объединение деревьев")).font(SepiaType.display).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("Добавить людей и факты из другого GEDCOM в «\(localTree.name)», не создавая дубликатов."))
+                    Text(L10n.tr("Добавить людей и сведения из другого дерева в «\(localTree.name)»."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 560, alignment: .leading)
@@ -43,7 +43,7 @@ struct TreeMergeView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         summary(preview)
                         mergeSection(
-                            L10n.tr("Точно один и тот же человек"),
+                            L10n.tr("Совпадения по идентификатору"),
                             count: preview.automaticMatches.count,
                             explanation: L10n.tr("Опознаны по идентификатору, записанному в самом файле. Объединятся автоматически.")
                         ) {
@@ -77,11 +77,6 @@ struct TreeMergeView: View {
                 VStack(spacing: 14) {
                     Image(systemName: "arrow.triangle.merge").font(SepiaTheme.icon(size: 44)).foregroundStyle(SepiaTheme.inkSoft)
                     Text(L10n.tr("Выберите файл для объединения")).font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("Если родственник прислал своё дерево или вы выгрузили его из другого сервиса, объединение перенесёт недостающих людей, даты и источники в ваш архив. Совпадающие персоны сольются в одну, а не задвоятся."))
-                        .font(SepiaTheme.body(size: 12.5)).foregroundStyle(SepiaTheme.inkSoft)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .frame(maxWidth: 460)
                     Text(L10n.tr("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     Button(L10n.tr("Выбрать файл…")) { showImporter = true }
@@ -92,6 +87,11 @@ struct TreeMergeView: View {
                 Spacer()
             }
 
+            if preview != nil {
+                Text(L10n.tr("Перед объединением создаётся резервная копия"))
+                    .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
+                    .padding(.horizontal, 16).padding(.bottom, 8)
+            }
             Divider().overlay(SepiaTheme.toolbarLine)
             LiquidGlassActionRow {
                 Button(L10n.tr("Отмена"), action: close)
@@ -100,7 +100,7 @@ struct TreeMergeView: View {
                     .keyboardShortcut(.cancelAction)
                 Spacer()
                 if preview != nil {
-                    Button(L10n.tr("Применить с резервной копией")) { applyMerge() }
+                    Button(L10n.tr("Объединить")) { applyMerge() }
                         .buttonStyle(.glassProminent)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
@@ -115,7 +115,7 @@ struct TreeMergeView: View {
             if case let .success(url) = result { loadPreview(url) }
             if case let .failure(error) = result { errorMessage = error.localizedDescription }
         }
-        .alert(L10n.tr("Слияние не выполнено"), isPresented: Binding(
+        .alert(L10n.tr("Не удалось объединить деревья"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
         )) { Button("OK", role: .cancel) {} } message: { Text(errorMessage ?? "") }
         .tracksUnsavedDraft()
@@ -124,10 +124,10 @@ struct TreeMergeView: View {
 
     private func summary(_ preview: MergePreview) -> some View {
         HStack(spacing: 28) {
-            metric(L10n.tr("Входящих персон"), preview.incomingTree.people.count)
-            metric(L10n.tr("Надёжных совпадений"), preview.automaticMatches.count)
-            metric(L10n.tr("Предложений"), preview.heuristicSuggestions.count)
-            metric(L10n.tr("Новых персон"), preview.incomingOnlyPersonIDs.count)
+            metric(L10n.tr("Людей в файле"), preview.incomingTree.people.count)
+            metric(L10n.tr("По идентификатору"), preview.automaticMatches.count)
+            metric(L10n.tr("Возможных совпадений"), preview.heuristicSuggestions.count)
+            metric(L10n.tr("Новых людей"), preview.incomingOnlyPersonIDs.count)
             Spacer()
         }
     }
@@ -184,9 +184,9 @@ struct TreeMergeView: View {
                     preview = value
                 }
             )) {
-                Text(L10n.tr("Локальное")).tag(MergeFactChoice.local)
-                Text(L10n.tr("Входящее")).tag(MergeFactChoice.incoming)
-                Text(L10n.tr("Оба")).tag(MergeFactChoice.both)
+                Text(L10n.tr("Из этого дерева")).tag(MergeFactChoice.local)
+                Text(L10n.tr("Из файла")).tag(MergeFactChoice.incoming)
+                Text(L10n.tr("Оба варианта")).tag(MergeFactChoice.both)
             }.pickerStyle(.segmented).frame(width: SepiaTheme.scaled(260))
         }.padding(10).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 7))
     }

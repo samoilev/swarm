@@ -36,7 +36,7 @@ public struct RelationshipCalculator {
 
         if let edge = idx.parentEdges(of: personA.id).first(where: { $0.parentID == personB.id }) {
             return make(
-                .parent(sex: personB.sex, kind: edge.kind),
+                edge.qualifying(.parent(sex: personB.sex, kind: edge.kind)),
                 path: [personA.id, personB.id],
                 description: parentageDescription(edge.kind, language: language),
                 formatter: formatter
@@ -44,7 +44,7 @@ public struct RelationshipCalculator {
         }
         if let edge = idx.parentEdges(of: personB.id).first(where: { $0.parentID == personA.id }) {
             return make(
-                .child(sex: personB.sex, kind: edge.kind),
+                edge.qualifying(.child(sex: personB.sex, kind: edge.kind)),
                 path: [personA.id, personB.id],
                 description: parentageDescription(edge.kind, language: language),
                 formatter: formatter
@@ -211,7 +211,7 @@ public struct RelationshipCalculator {
             let (current, path) = queue.removeFirst()
             for edge in idx.parentEdges(of: current) {
                 let parentage = ParentageKind.unique(
-                    path.parentage + (edge.kind == .biological ? [] : [edge.kind])
+                    path.parentage + edge.qualifiers
                 )
                 let candidate = AncestorPath(depth: path.depth + 1, parentage: parentage)
                 if let existing = result[edge.parentID],
@@ -380,6 +380,7 @@ public struct RelationshipCalculator {
         case .foster: L10n.tr("Опекунская", language: language)
         case .step: L10n.tr("Сводная", language: language)
         case .uncertain: L10n.tr("Предполагаемая", language: language)
+        case .unspecified: L10n.tr("Тип связи не указан", language: language)
         }
     }
 }

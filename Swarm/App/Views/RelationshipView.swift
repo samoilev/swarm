@@ -16,7 +16,7 @@ struct RelationshipView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text(L10n.tr("СВЯЗЬ МЕЖДУ РОДСТВЕННИКАМИ"))
+                Text(L10n.tr("Родство"))
                     .font(SepiaType.label)
                     .tracking(1.5)
                     .foregroundColor(SepiaTheme.accent2)
@@ -56,7 +56,7 @@ struct RelationshipView: View {
                 Button {
                     calculateRelationship()
                 } label: {
-                    Label(L10n.tr("Определить связь"), systemImage: "arrow.triangle.branch")
+                    Label(L10n.tr("Определить родство"), systemImage: "arrow.triangle.branch")
                 }
                 .buttonStyle(.glassProminent)
                 .buttonBorderShape(.capsule)

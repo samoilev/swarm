@@ -95,13 +95,13 @@ struct SwarmApp: App {
             // soon as the window is narrow, the interface large or the labels long. A menu
             // item is reachable at every one of those.
             CommandGroup(replacing: .importExport) {
-                Button(L10n.tr("Экспорт карточек в PDF или GEDCOM")) {
+                Button(L10n.tr("Экспорт…")) {
                     NotificationCenter.default.post(name: .exportRequested, object: nil)
                 }
                 .keyboardShortcut("e")
             }
             CommandGroup(after: .textEditing) {
-                Button(L10n.tr("Найти персону")) {
+                Button(L10n.tr("Найти человека")) {
                     NotificationCenter.default.post(name: .findPersonRequested, object: nil)
                 }
                 .keyboardShortcut("f")

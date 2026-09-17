@@ -18,8 +18,8 @@ struct PeopleWorkspaceView: View {
         var displayName: String {
             switch self {
             case .name: L10n.tr("По имени")
-            case .birth: L10n.tr("По рождению")
-            case .death: L10n.tr("По смерти")
+            case .birth: L10n.tr("По дате рождения")
+            case .death: L10n.tr("По дате смерти")
             }
         }
     }
@@ -50,7 +50,7 @@ struct PeopleWorkspaceView: View {
                     Text(L10n.tr("Все места")).tag("")
                     ForEach(Array(Set(index.searchEntries.flatMap(\.places))).sorted(), id: \.self) { Text($0).tag($0) }
                 }.frame(width: 200)
-                Toggle(L10n.tr("Только неполные"), isOn: $missingOnly)
+                Toggle(L10n.tr("С пропусками в данных"), isOn: $missingOnly)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -112,7 +112,7 @@ struct TimelineWorkspaceView: View {
     var body: some View {
         workspaceSurface(title: L10n.tr("Хронология"), count: entries.count) {
             HStack(spacing: 10) {
-                SepiaSearchField(L10n.tr("Персона или место"), text: $query).frame(maxWidth: 300)
+                SepiaSearchField(L10n.tr("Человек или место"), text: $query).frame(maxWidth: 300)
                 Picker(L10n.tr("Событие"), selection: $kind) {
                     Text(L10n.tr("Все события")).tag(nil as GenealogyEvent.Kind?)
                     ForEach(GenealogyEvent.Kind.allCases, id: \.self) { Text(eventName($0)).tag($0 as GenealogyEvent.Kind?) }
@@ -247,7 +247,7 @@ struct ReviewWorkspaceView: View {
             HStack {
                 Toggle(L10n.tr("Только ошибки"), isOn: $errorsOnly)
                 Spacer()
-                Text(L10n.tr("Ошибки блокируют только новые или ухудшенные изменения."))
+                Text(L10n.tr("Сохранение недоступно, если правка добавляет ошибки или усугубляет существующие."))
                     .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
             }
         } content: {
@@ -279,7 +279,7 @@ struct ReviewWorkspaceView: View {
                 Image(systemName: issue.severity == .error ? "xmark.octagon.fill" : "exclamationmark.triangle.fill")
                     .foregroundStyle(issue.severity == .error ? SepiaTheme.danger : SepiaTheme.accent2)
                 VStack(alignment: .leading, spacing: 3) {
-                    HStack { Text(issue.title).font(SepiaType.bodyLarge); if issue.isBlocking { Text(L10n.tr("БЛОКИРУЕТ")).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.danger) } }
+                    HStack { Text(issue.title).font(SepiaType.bodyLarge); if issue.isBlocking { Text(L10n.tr("Мешает сохранению")).font(SepiaTheme.ui(size: 9)).foregroundStyle(SepiaTheme.danger) } }
                     Text(issue.message).font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     if let field = issue.field {
                         Text(L10n.tr("Открыть поле: \(field)")).font(SepiaType.micro).foregroundStyle(SepiaTheme.accent2)

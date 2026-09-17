@@ -25,7 +25,7 @@ public struct RelationshipPathFinder {
             return PathResult(
                 path: [person1Id],
                 ids: [person1Id],
-                labels: [person1Id: L10n.tr("Я")],
+                labels: [person1Id: L10n.tr("Выбранный человек")],
                 connections: []
             )
         }

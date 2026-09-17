@@ -31,7 +31,7 @@ struct ExportView: View {
                 GlassEffectContainer(spacing: 10) {
                     VStack(spacing: 10) {
                         Button { exportPDF(selected: false) } label: {
-                            exportButtonLabel(L10n.tr("PDF — всё дерево"), systemImage: "tree")
+                            exportButtonLabel(L10n.tr("PDF — всё дерево"), systemImage: "tree", detail: L10n.tr("Схема дерева и карточки людей с фотографиями и вложениями"))
                         }
                         .buttonStyle(.glassProminent)
                         .buttonBorderShape(.capsule)
@@ -48,7 +48,7 @@ struct ExportView: View {
                         .disabled(selectedIds.isEmpty)
 
                         Button { exportVerifiedTree() } label: {
-                            exportButtonLabel(L10n.tr("Проверенный GEDCOM-архив"), systemImage: "archivebox")
+                            exportButtonLabel(L10n.tr("GEDCOM с файлами"), systemImage: "archivebox", detail: L10n.tr("Файл дерева, фотографии и вложения в отдельной папке"))
                         }
                         .buttonStyle(.glass)
                         .buttonBorderShape(.capsule)
@@ -56,11 +56,6 @@ struct ExportView: View {
                     }
                 }
 
-                Text(L10n.tr("PDF начинается со схемы дерева (повёрнутой на 90°), затем по странице-карточке на каждого человека по алфавиту, с фото и вложениями. «Выделенная часть» — только выбранные на схеме люди. Архив GEDCOM сохраняет и проверяет файл дерева, портреты и вложения в отдельной папке."))
-                    .font(SepiaTheme.body(size: 11.5))
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .lineSpacing(2)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(14)
         }
@@ -91,19 +86,28 @@ struct ExportView: View {
         )
     }
 
-    private func exportButtonLabel(_ title: String, systemImage: String) -> some View {
+    private func exportButtonLabel(_ title: String, systemImage: String, detail: String? = nil) -> some View {
         HStack(spacing: 10) {
             Image(systemName: systemImage)
                 .font(SepiaTheme.icon(size: 13, weight: .semibold))
                 .frame(width: 20)
-            Text(title)
-                .font(SepiaTheme.ui(size: 12.5))
-                .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                if let detail {
+                    Text(detail)
+                        .font(SepiaType.micro)
+                        .lineLimit(nil)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .font(SepiaTheme.ui(size: 12.5))
+            .fontWeight(.semibold)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 8)
-        .frame(height: 36)
+        .frame(minHeight: detail == nil ? 36 : 60)
     }
 
     private var fileSlug: String {
@@ -113,7 +117,7 @@ struct ExportView: View {
     private func exportPDF(selected: Bool) {
         let ids: Set<UUID>? = selected ? selectedIds : nil
         guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
-            exportError = L10n.tr("Не удалось создать PDF: нет персон для экспорта.")
+            exportError = L10n.tr("Не удалось создать PDF: в дереве нет людей.")
             return
         }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)

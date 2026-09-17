@@ -69,7 +69,7 @@ struct MapPrivacySettingsView: View {
             ),
             titleVisibility: .visible
         ) {
-            Button(L10n.tr("Изменить и потерять правки"), role: .destructive) {
+            Button(L10n.tr("Изменить без сохранения"), role: .destructive) {
                 if let pendingScale { applyScale(pendingScale) }
                 pendingScale = nil
             }

@@ -860,7 +860,7 @@ private struct TreeContentLayer: View, Equatable {
                     }
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(node.person.accessibilityDescription)
-                    .accessibilityHint(L10n.tr("Выбрать персону"))
+                    .accessibilityHint(L10n.tr("Выбрать человека"))
                     .accessibilityAddTraits((isPrimary || isSecondary) ? [.isButton, .isSelected] : .isButton)
                     .accessibilityAction { onSelect(node.person, false) }
                 }
@@ -918,7 +918,7 @@ private struct TreeContentLayer: View, Equatable {
             onSelect(node.person, NSEvent.modifierFlags.contains(.command))
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(L10n.tr("Большое дерево: \(layout.nodes.count) персон"))
+        .accessibilityLabel(L10n.tr("Дерево: \(L10n.count(layout.nodes.count, .person))"))
     }
 }
 

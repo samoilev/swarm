@@ -211,15 +211,15 @@ struct InspectorPanel: View {
                 .buttonBorderShape(.capsule)
                 .foregroundStyle(SepiaTheme.accent2)
                 .controlSize(.small)
-                .help(L10n.tr("Вернуться к предыдущей персоне"))
-                .accessibilityLabel(L10n.tr("Назад к предыдущей персоне"))
+                .help(L10n.tr("Вернуться к предыдущему человеку"))
+                .accessibilityLabel(L10n.tr("Назад к предыдущему человеку"))
                 .transition(.opacity.combined(with: .move(edge: .leading)))
             }
 
             Spacer(minLength: 8)
         }
         // Empty unless a relative link has been walked: a card that is already showing
-        // the person's name and face does not also need a caption saying "Персона".
+        // the person's name and face does not also need a caption saying "Человек".
         // The row stays because the two circles float above it — the height is the
         // space they need, and without it the whole header rides up under them.
         .frame(minHeight: 24)
@@ -472,7 +472,7 @@ struct InspectorPanel: View {
                     HStack(spacing: 6) {
                         Image(systemName: "trash")
                             .font(SepiaTheme.icon(size: 11, weight: .semibold))
-                        Text(L10n.tr("Удалить персону"))
+                        Text(L10n.tr("Удалить человека"))
                             .font(SepiaType.control)
                             .fontWeight(.semibold)
                     }
@@ -483,8 +483,8 @@ struct InspectorPanel: View {
                 }
                 .buttonStyle(.glass)
                 .buttonBorderShape(.capsule)
-                .help(L10n.tr("Удалить персону"))
-                .accessibilityLabel(L10n.tr("Удалить персону"))
+                .help(L10n.tr("Удалить человека"))
+                .accessibilityLabel(L10n.tr("Удалить человека"))
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.top, 20)
@@ -506,7 +506,7 @@ struct InspectorPanel: View {
     }
 
     private func identitySection(_ p: Person) -> some View {
-        fieldSection(L10n.tr("Личность"), [
+        fieldSection(L10n.tr("Основные сведения"), [
             (L10n.tr("ИМЕНА"), p.givenNames),
             (L10n.tr("ОТЧЕСТВО"), p.patronymic ?? ""),
             (L10n.tr("ФАМИЛИЯ"), p.surname),
@@ -752,7 +752,7 @@ struct InspectorPanel: View {
                 ForEach(spouses, id: \.id) { s in relRow(L10n.tr("Супруг"), s) }
                 ForEach(children, id: \.id) { c in relRow(L10n.tr("Ребёнок"), c) }
                 ForEach(siblings, id: \.id) { s in
-                    relRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат/сестра"), s)
+                    relRow(s.sex == .male ? L10n.tr("Брат") : s.sex == .female ? L10n.tr("Сестра") : L10n.tr("Брат или сестра"), s)
                 }
             }
         }

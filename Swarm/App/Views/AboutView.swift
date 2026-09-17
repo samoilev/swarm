@@ -36,13 +36,6 @@ struct AboutView: View {
                     .frame(width: 56, height: 1)
                     .padding(.vertical, 20)
 
-                Text(L10n.tr("Создавайте, исследуйте и сохраняйте историю своей семьи."))
-                    .font(SepiaType.body)
-                    .foregroundStyle(SepiaTheme.ink)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(3)
-                    .frame(maxWidth: 300)
-
                 Link(destination: URL(string: "https://github.com/samoilev/swarm")!) {
                     Label {
                         Text(L10n.tr("Исходный код на GitHub"))

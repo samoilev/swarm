@@ -91,7 +91,7 @@ struct OnboardingView: View {
 
     @ToolbarContentBuilder private var onboardingToolbar: some ToolbarContent {
         ToolbarItem(placement: .navigation) {
-            SepiaWordmark(label: L10n.tr("Новая запись"))
+            SepiaWordmark(label: L10n.tr("Новое дерево"))
         }
         .sharedBackgroundVisibility(.hidden)
 
@@ -109,20 +109,9 @@ struct OnboardingView: View {
 
     private func stepHeadline(_ step: Step) -> String {
         switch step {
-        case .record: L10n.tr("Назовите запись")
-        case .relative: L10n.tr("Кто ещё?")
+        case .record: L10n.tr("Назовите дерево")
+        case .relative: L10n.tr("Добавьте родственника")
         case .done: trimmed(treeName)
-        }
-    }
-
-    private func stepDeck(_ step: Step) -> String {
-        switch step {
-        case .record:
-            L10n.tr("Один файл GEDCOM, одна папка, на этом Mac. Название можно изменить в любой момент.")
-        case .relative:
-            L10n.tr("Дерево начинается со связи. Выберите, кем приходится второй человек — или пропустите и добавьте родственников позже.")
-        case .done:
-            L10n.tr("Записано, проверено и сверено с диском. Дерево откроется на первом человеке.")
         }
     }
 
@@ -149,11 +138,6 @@ struct OnboardingView: View {
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
                     .accessibilityAddTraits(.isHeader)
-                Text(stepDeck(step))
-                    .font(SepiaType.bodyLarge)
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .frame(maxWidth: 440, alignment: .leading)
             }
             .padding(.top, 10)
 
@@ -194,7 +178,7 @@ struct OnboardingView: View {
             Spacer(minLength: 12)
 
             if step == .relative, role != nil {
-                Button(L10n.tr("Пропустить родственника")) {
+                Button(L10n.tr("Пропустить")) {
                     withMotion { role = nil }
                 }
                 .buttonStyle(.plain)
@@ -243,7 +227,7 @@ struct OnboardingView: View {
     private var recordStep: some View {
         VStack(alignment: .leading, spacing: 18) {
             SepiaTextField(
-                label: L10n.tr("НАЗВАНИЕ СЕМЬИ"),
+                label: L10n.tr("Название дерева"),
                 text: $treeName,
                 placeholder: L10n.tr("напр. Семья Ивановых"),
                 height: 46, radius: 12, fontSize: 17
@@ -253,7 +237,7 @@ struct OnboardingView: View {
             validationMessage(for: .treeName)
 
             SepiaTextField(
-                label: L10n.tr("ПОДЗАГОЛОВОК (необяз.)"),
+                label: L10n.tr("Подзаголовок (необязательно)"),
                 text: $subtitle,
                 placeholder: L10n.tr("напр. Потомки Ивана и Марии"),
                 height: 46, radius: 12, fontSize: 17
@@ -268,15 +252,15 @@ struct OnboardingView: View {
                 givenNames: $givenNames,
                 surnameFocus: .surname,
                 givenFocus: .givenNames,
-                givenPlaceholder: L10n.tr("напр. Иван")
+                givenPlaceholder: ""
             )
             // Half width, so the name block reads as one two-column group instead of a
             // full-width field that looks more important than the given name.
             HStack(alignment: .top, spacing: 14) {
                 SepiaTextField(
-                    label: language == .english ? L10n.tr("ОТЧЕСТВО (необяз.)") : L10n.tr("ОТЧЕСТВО"),
+                    label: language == .english ? L10n.tr("Отчество (необязательно)") : L10n.tr("ОТЧЕСТВО"),
                     text: $patronymic,
-                    placeholder: L10n.tr("напр. Петрович"),
+                    placeholder: "",
                     height: 46, radius: 12, fontSize: 17
                 )
                 .focused($focusedField, equals: .patronymic)
@@ -285,10 +269,6 @@ struct OnboardingView: View {
             }
             validationMessage(for: .surname)
 
-            Text(L10n.tr("Даты, места и фотографии добавите в карточке человека — там для них есть всё."))
-                .font(SepiaType.control)
-                .foregroundColor(SepiaTheme.inkSoft)
-                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: 460, alignment: .leading)
         .onAppear { focusedField = .treeName }
@@ -312,21 +292,10 @@ struct OnboardingView: View {
                     givenNames: $relativeGivenNames,
                     surnameFocus: .relativeSurname,
                     givenFocus: .relativeGivenNames,
-                    givenPlaceholder: role.givenNameExample
+                    givenPlaceholder: ""
                 )
+                .help(role.inheritsSurname ? L10n.tr("Фамилия заполнена автоматически") : "")
                 validationMessage(for: .relativeGivenNames)
-
-                if role.inheritsSurname {
-                    Text(L10n.tr("Фамилия подставлена от «\(firstPersonName)» — на этой стороне родства она обычно общая. Измените, если это не так."))
-                        .font(SepiaTheme.ui(size: 12.5))
-                        .foregroundColor(SepiaTheme.inkSoft)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            } else {
-                Text(L10n.tr("Можно пропустить: нажмите «Создать дерево», родственников добавите позже."))
-                    .font(SepiaTheme.ui(size: 12.5))
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: 460, alignment: .leading)
@@ -335,45 +304,18 @@ struct OnboardingView: View {
 
     // MARK: - Step 3: what was written
 
-    /// Not a congratulation. A receipt: the two paths that now exist on disk, so the
-    /// reader knows where their family record lives before they ever open it.
     private var doneStep: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            receiptLine("\(trimmed(treeName))/\(trimmed(treeName)).ged")
-            receiptLine("Media/ · Attachments/ · .Swarm/History/")
-        }
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel(L10n.tr("Записано на диск"))
-    }
-
-    private func receiptLine(_ text: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
-            Image(systemName: "checkmark")
-                .font(SepiaTheme.icon(size: 11, weight: .bold))
-                .foregroundColor(SepiaTheme.pinBirth)
-                .accessibilityHidden(true)
-            Text(text)
-                .font(SepiaTheme.icon(size: 12, design: .monospaced))
-                .foregroundColor(SepiaTheme.inkSoft)
-                .textSelection(.enabled)
-        }
+        Label(L10n.tr("Дерево создано"), systemImage: "checkmark.circle")
+            .font(SepiaType.bodyLarge)
+            .foregroundStyle(SepiaTheme.pinBirth)
     }
 
     // MARK: - The card, drawn as it fills in
 
     private var previewColumn: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            SepiaTrackedLabel(L10n.tr("Как она будет выглядеть в библиотеке"), size: 10.5)
-
-            previewCard
-
-            Text(L10n.tr("Карточка берёт форму у самого дерева — ничей портрет не подменяет собой всю семью."))
-                .font(SepiaType.control)
-                .foregroundColor(SepiaTheme.inkSoft)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: 400)
-        .frame(maxHeight: .infinity, alignment: .center)
+        previewCard
+            .frame(maxWidth: 400)
+            .frame(maxHeight: .infinity, alignment: .center)
     }
 
     private var previewCard: some View {
@@ -491,9 +433,9 @@ struct OnboardingView: View {
         HStack(alignment: .top, spacing: 14) {
             if language == .english {
                 nameField(L10n.tr("ИМЯ"), givenNames, givenPlaceholder, givenFocus)
-                nameField(L10n.tr("ФАМИЛИЯ"), surname, L10n.tr("напр. Иванов"), surnameFocus)
+                nameField(L10n.tr("ФАМИЛИЯ"), surname, "", surnameFocus)
             } else {
-                nameField(L10n.tr("ФАМИЛИЯ"), surname, L10n.tr("напр. Иванов"), surnameFocus)
+                nameField(L10n.tr("ФАМИЛИЯ"), surname, "", surnameFocus)
                 nameField(L10n.tr("ИМЯ"), givenNames, givenPlaceholder, givenFocus)
             }
         }
@@ -609,7 +551,7 @@ struct OnboardingView: View {
                     .foregroundColor(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
-                Text(L10n.tr("Введённое сохранено — можно попробовать ещё раз."))
+                Text(L10n.tr("Введённые данные остались в форме. Попробуйте ещё раз."))
                     .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
@@ -651,7 +593,7 @@ struct OnboardingView: View {
         invalidField = nil
         invalidMessage = nil
         if trimmed(treeName).isEmpty {
-            return fail(.treeName, L10n.tr("Назовите дерево — под этим именем оно появится в архиве."))
+            return fail(.treeName, L10n.tr("Введите название дерева."))
         }
         if trimmed(surname).isEmpty, trimmed(givenNames).isEmpty {
             return fail(.surname, L10n.tr("Впишите имя или фамилию первого человека."))

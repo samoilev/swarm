@@ -569,6 +569,7 @@ public struct GEDCOMParser {
         struct Evidence {
             var id: UUID?
             var kind: ParentageKind
+            var isUncertain: Bool?
             var citations: [Citation]
             var notes: String?
         }
@@ -590,12 +591,13 @@ public struct GEDCOMParser {
                 for linkBranch in branches(in: branch, atLevel: 2) {
                     guard let linkLine = linkBranch.first.flatMap(parseLine), linkLine.tag == "_PLINK",
                           let parentXref = linkLine.pointer, let parentID = indiUUIDs[parentXref] else { continue }
-                    var parsed = Evidence(id: nil, kind: kind, citations: [], notes: nil)
+                    var parsed = Evidence(id: nil, kind: kind, isUncertain: nil, citations: [], notes: nil)
                     for child in branches(in: linkBranch, atLevel: 3) {
                         guard let childLine = child.first.flatMap(parseLine) else { continue }
                         switch childLine.tag {
                         case "_FTSID": parsed.id = UUID(uuidString: childLine.value.trimmingCharacters(in: .whitespaces))
                         case "PEDI", "_PEDI": parsed.kind = ParentageKind(gedcomValue: childLine.value)
+                        case "_UNCERTAIN": parsed.isUncertain = childLine.value == "Y"
                         case "NOTE": parsed.notes = joinedText(branch: child)
                         case "SOUR":
                             if let pointer = childLine.pointer, let sourceID = sourceUUIDs[pointer] {
@@ -623,6 +625,7 @@ public struct GEDCOMParser {
                         childID: childID,
                         unionID: unionID,
                         kind: parsed?.kind ?? kind,
+                        isUncertain: parsed?.isUncertain,
                         citations: parsed?.citations ?? [],
                         notes: parsed?.notes
                     ))

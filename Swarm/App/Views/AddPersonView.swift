@@ -73,16 +73,16 @@ struct AddPersonView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
-                        SectionHeader(title: L10n.tr("Личность"))
+                        SectionHeader(title: L10n.tr("Основные сведения"))
                         HStack(spacing: 12) {
                             if AppLanguage.current == .english {
-                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО (необяз.)"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: "")
+                                SepiaTextField(label: L10n.tr("Отчество (необязательно)"), text: $patronymic, placeholder: "")
                             } else {
-                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: L10n.tr("напр. Иванов"))
-                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: L10n.tr("напр. Иван"))
-                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: L10n.tr("напр. Петрович"))
+                                SepiaTextField(label: L10n.tr("ФАМИЛИЯ"), text: $surname, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ИМЯ"), text: $givenNames, placeholder: "")
+                                SepiaTextField(label: L10n.tr("ОТЧЕСТВО"), text: $patronymic, placeholder: "")
                             }
                         }.padding(.bottom, 12)
 
@@ -152,7 +152,7 @@ struct AddPersonView: View {
                         SepiaNotesField(
                             label: L10n.tr("ЗАМЕТКИ"),
                             text: $notes,
-                            placeholder: L10n.tr("Свободный текст…"),
+                            placeholder: "",
                             identifier: "person.notes"
                         ).padding(.bottom, 12)
 
@@ -212,7 +212,7 @@ struct AddPersonView: View {
             }
         }
         .frame(width: 540, height: 680)
-        .alert(L10n.tr("Не удалось добавить персону"), isPresented: Binding(
+        .alert(L10n.tr("Не удалось добавить человека"), isPresented: Binding(
             get: { saveError != nil },
             set: { if !$0 { saveError = nil } }
         )) {

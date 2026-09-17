@@ -61,7 +61,7 @@ public enum TreeValidator {
         let unionIDs = Set(tree.unions.map(\.id))
         let sourceIDs = Set(tree.sourceRecords.map(\.id))
 
-        addDuplicateIDs(tree.people.map(\.id), kind: "person", title: L10n.tr("Повтор идентификатора персоны"), to: &issues)
+        addDuplicateIDs(tree.people.map(\.id), kind: "person", title: L10n.tr("Повтор идентификатора человека"), to: &issues)
         addDuplicateIDs(tree.unions.map(\.id), kind: "union", title: L10n.tr("Повтор идентификатора семьи"), to: &issues)
         addDuplicateIDs(tree.sourceRecords.map(\.id), kind: "source", title: L10n.tr("Повтор идентификатора источника"), to: &issues)
         addSimilarSources(tree.sourceRecords, into: &issues)
@@ -71,8 +71,8 @@ public enum TreeValidator {
                 issues.append(error(
                     id: "union.\(union.id).dangling-partner.\(partner)",
                     code: "relationship.dangling-person",
-                    title: L10n.tr("Не найдена персона"),
-                    message: L10n.tr("Семейная связь ссылается на отсутствующую персону."),
+                    title: L10n.tr("Человек не найден"),
+                    message: L10n.tr("Семейная связь ссылается на отсутствующего человека."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -92,7 +92,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).self-partner",
                     code: "relationship.self-link",
                     title: L10n.tr("Связь с самим собой"),
-                    message: L10n.tr("Одна персона не может занимать обе позиции партнёров."),
+                    message: L10n.tr("Один человек не может занимать обе позиции партнёров."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -102,7 +102,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).self-parent.\(child)",
                     code: "relationship.self-link",
                     title: L10n.tr("Связь с самим собой"),
-                    message: L10n.tr("Персона не может быть собственным родителем."),
+                    message: L10n.tr("Человек не может быть собственным родителем."),
                     personID: child,
                     unionID: union.id,
                     field: "children"
@@ -116,7 +116,7 @@ public enum TreeValidator {
                     id: "parent-link.\(link.id).self",
                     code: "relationship.self-link",
                     title: L10n.tr("Связь с самим собой"),
-                    message: L10n.tr("Персона не может быть собственным родителем."),
+                    message: L10n.tr("Человек не может быть собственным родителем."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -140,7 +140,7 @@ public enum TreeValidator {
                 id: "relationship.cycle.\(signature)",
                 code: "relationship.ancestry-cycle",
                 title: L10n.tr("Цикл предков"),
-                message: L10n.tr("Цепочка родителей возвращается к исходной персоне."),
+                message: L10n.tr("Цепочка родителей возвращается к исходному человеку."),
                 personID: cycle.first,
                 field: "parentage"
             ))
@@ -153,7 +153,7 @@ public enum TreeValidator {
                     id: "person.\(person.id).identity.missing-name",
                     code: "identity.missing-name",
                     title: L10n.tr("Не указано имя"),
-                    message: L10n.tr("У персоны не указаны ни имя, ни фамилия."),
+                    message: L10n.tr("У человека не указаны ни имя, ни фамилия."),
                     personID: person.id,
                     field: "name"
                 ))
@@ -179,7 +179,7 @@ public enum TreeValidator {
                     id: "person.\(person.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Ссылка доказательства указывает на отсутствующий источник."),
+                    message: L10n.tr("Источник, на который ссылается запись, не найден."),
                     personID: person.id,
                     field: "citations"
                 ))
@@ -232,7 +232,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Ссылка доказательства союза указывает на отсутствующий источник."),
+                    message: L10n.tr("Источник, на который ссылается семейная связь, не найден."),
                     unionID: union.id,
                     field: "citations"
                 ))
@@ -245,7 +245,7 @@ public enum TreeValidator {
                     id: "parent-link.\(link.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Ссылка доказательства родства указывает на отсутствующий источник."),
+                    message: L10n.tr("Источник, на который ссылается родственная связь, не найден."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -259,7 +259,7 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "gedcom.pointer.\(pointer)",
                     code: "gedcom.unresolved-pointer",
-                    title: L10n.tr("Неразрешённая ссылка GEDCOM"),
+                    title: L10n.tr("Ссылка GEDCOM на отсутствующую запись"),
                     message: L10n.tr("Не найдена запись @\(pointer)@.")
                 ))
             }
@@ -275,7 +275,7 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "gedcom.media.missing.\(path)",
                     code: "file.missing",
-                    title: L10n.tr("Медиа GEDCOM не найдено"),
+                    title: L10n.tr("Файл из GEDCOM не найден"),
                     message: L10n.tr("Импортированный файл ссылается на отсутствующий путь «\(path)».")
                 ))
             }

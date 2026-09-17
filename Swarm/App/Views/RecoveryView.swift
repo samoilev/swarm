@@ -46,17 +46,17 @@ struct RecoveryView: View {
                             group(
                                 .deletedFile,
                                 title: L10n.tr("Удалённые файлы"),
-                                explanation: L10n.tr("Фотографии и документы, убранные из карточек. Доступны 30 дней, затем удаляются.")
+                                explanation: L10n.tr("Фотографии и документы из карточек. Хранятся 30 дней после удаления.")
                             )
                             group(
                                 .migrationBackup,
-                                title: L10n.tr("Полные копии архива"),
-                                explanation: L10n.tr("Снимок всего дерева перед крупной операцией — обновлением формата, слиянием. Хранятся бессрочно.")
+                                title: L10n.tr("Резервные копии"),
+                                explanation: L10n.tr("Дерево со всеми файлами перед обновлением формата, объединением или восстановлением. Хранятся бессрочно.")
                             )
                             group(
                                 .archivedTree,
                                 title: L10n.tr("Архивированные деревья"),
-                                explanation: L10n.tr("Деревья, убранные из библиотеки вместе с файлами. Можно вернуть обратно.")
+                                explanation: L10n.tr("Деревья со всеми файлами, убранные из библиотеки. Хранятся до восстановления.")
                             )
                         }
                     }
@@ -96,7 +96,6 @@ struct RecoveryView: View {
     private var header: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Восстановление"),
-            subtitle: L10n.tr("Удалённые файлы, полные копии архива и убранные деревья. Прошлые версии дерева — на его карточке, в «Предыдущих версиях»."),
             minimumHeight: 68,
             closeLabel: L10n.tr("Закрыть восстановление"),
             closeDisabled: isWorking,
@@ -106,12 +105,12 @@ struct RecoveryView: View {
 
     private var treePicker: some View {
         LiquidGlassActionRow {
-            Label(L10n.tr("Архив"), systemImage: "tree")
+            Label(L10n.tr("Дерево"), systemImage: "tree")
                 .font(SepiaType.control)
                 .foregroundStyle(SepiaTheme.ink)
 
-            Picker(L10n.tr("Архив"), selection: $selectedTreeID) {
-                Text(L10n.tr("Все архивы"))
+            Picker(L10n.tr("Дерево"), selection: $selectedTreeID) {
+                Text(L10n.tr("Все деревья"))
                     .tag(nil as UUID?)
                 ForEach(store.trees, id: \.id) {
                     Text($0.name)
@@ -131,13 +130,8 @@ struct RecoveryView: View {
         VStack(spacing: 8) {
             Image(systemName: "trash.slash")
                 .font(SepiaTheme.icon(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
-            Text(selectedTree == nil ? L10n.tr("Выберите архив") : L10n.tr("Пока нечего восстанавливать"))
+            Text(L10n.tr("Нет файлов или копий для восстановления"))
                 .font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
-            Text(selectedTree == nil
-                ? L10n.tr("Выберите дерево выше, чтобы увидеть его удалённые файлы и копии.")
-                : L10n.tr("Копии появятся сами, когда вы начнёте сохранять изменения и удалять файлы."))
-                .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
-                .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
@@ -149,7 +143,7 @@ struct RecoveryView: View {
         if !store.pendingMigrations.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 sectionTitle(L10n.tr("Обновление формата"), count: store.pendingMigrations.count)
-                Text(L10n.tr("Эти файлы записаны в старом формате. Они открываются и читаются, но сохранить в них изменения нельзя, пока формат не обновлён."))
+                Text(L10n.tr("Обновите формат дерева, чтобы сохранять изменения. Просмотр доступен без обновления."))
                     .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -184,7 +178,7 @@ struct RecoveryView: View {
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                         .disabled(isWorking)
-                    Text(L10n.tr("Перед обновлением создаётся полная резервная копия. Исходные файлы не удаляются — они переезжают в раздел копий ниже."))
+                    Text(L10n.tr("Исходные файлы сохранятся в разделе «Резервные копии»."))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -254,14 +248,14 @@ struct RecoveryView: View {
                 get: { restoreTargets[item.id] },
                 set: { restoreTargets[item.id] = $0 }
             )) {
-                Text(L10n.tr("Выберите персону…")).tag(nil as UUID?)
+                Text(L10n.tr("Выберите человека…")).tag(nil as UUID?)
                 ForEach(tree.people.sorted(by: { $0.sortName(language: .current) < $1.sortName(language: .current) }), id: \.id) {
                     Text($0.displayName(language: .current)).tag($0.id as UUID?)
                 }
             }
             .labelsHidden()
             .frame(width: 210)
-            .accessibilityLabel(L10n.tr("Вернуть файл в карточку персоны"))
+            .accessibilityLabel(L10n.tr("Вернуть файл в карточку человека"))
         }
     }
 
@@ -297,7 +291,7 @@ struct RecoveryView: View {
                 case .migrationBackup:
                     guard let tree = selectedTree else { return }
                     _ = try await store.restoreFullBackup(item, to: tree)
-                    statusMessage = L10n.tr("Архив восстановлен из копии «\(item.displayTitle)».")
+                    statusMessage = L10n.tr("Дерево восстановлено из копии «\(item.displayTitle)».")
                 case .archivedTree:
                     let restored = try store.restoreArchivedTree(item)
                     statusMessage = L10n.tr("«\(restored.name)» снова в библиотеке.")
@@ -312,7 +306,7 @@ struct RecoveryView: View {
         Task { @MainActor in
             do {
                 let receipts = try store.performPendingMigrations()
-                statusMessage = L10n.tr("Формат обновлён. Обновлено файлов: \(receipts.count). Резервные копии — в разделе «Полные копии архива».")
+                statusMessage = L10n.tr("Формат обновлён. Обновлено файлов: \(receipts.count). Резервные копии доступны ниже.")
                 if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
                 refresh()
             } catch { errorMessage = error.localizedDescription }

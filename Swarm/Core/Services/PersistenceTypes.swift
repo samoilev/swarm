@@ -89,9 +89,9 @@ public struct RecoveryItem: Identifiable, Hashable, Sendable {
             return L10n.tr("Сохранение")
         case .migrationBackup:
             if displayName.hasSuffix("pre-v2") { return L10n.tr("Перед обновлением формата") }
-            if displayName.hasSuffix("pre-merge") { return L10n.tr("Перед слиянием") }
+            if displayName.hasSuffix("pre-merge") { return L10n.tr("Перед объединением") }
             if displayName.hasSuffix("pre-restore") { return L10n.tr("Перед восстановлением") }
-            return L10n.tr("Полная копия архива")
+            return L10n.tr("Резервная копия")
         case .archivedTree:
             return displayName
         }
@@ -149,7 +149,7 @@ public enum TreeStoreError: LocalizedError {
         case let .verificationFailed(path):
             L10n.tr("Проверка записанного файла не пройдена: \(path).")
         case let .commitFailed(reason):
-            L10n.tr("Не удалось завершить безопасное сохранение: \(reason).")
+            L10n.tr("Не удалось сохранить: \(reason).")
         case .invalidImport:
             L10n.tr("GEDCOM содержит ошибки, блокирующие импорт.")
         case let .validationFailed(issues):
@@ -157,7 +157,7 @@ public enum TreeStoreError: LocalizedError {
         case .recoveryItemMissing:
             L10n.tr("Элемент восстановления больше не существует.")
         case .migrationRequired:
-            L10n.tr("Перед сохранением требуется безопасная миграция старого формата.")
+            L10n.tr("Чтобы сохранять изменения, обновите формат дерева в разделе «Восстановление».")
         case let .noGEDCOMInFolder(folder):
             L10n.tr("В папке «\(folder)» нет файла GEDCOM.")
         case let .ambiguousGEDCOMInFolder(folder):

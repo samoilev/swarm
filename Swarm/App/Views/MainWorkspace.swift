@@ -327,29 +327,27 @@ struct MainWorkspace: View {
                 AddPersonView(tree: tree, store: store) { newPerson in
                     selectedPerson = newPerson
                     workspaceIndex.update(person: newPerson, in: tree)
-                    showToast(L10n.tr("Добавлен: \(newPerson.displayName(language: .current))"))
                 }
             }
             .sheet(item: $editingPerson) { person in
                 EditPersonView(person: person, tree: tree, store: store, onSaved: { saved in
                     workspaceIndex.update(person: saved, in: tree)
-                    showToast(L10n.tr("Сохранено: \(saved.displayName(language: .current))"))
                 })
             }
             .sheet(isPresented: $showMerge) {
                 TreeMergeView(localTree: tree, store: store) {
                     workspaceIndex.rebuild(tree: tree)
-                    showToast(L10n.tr("Слияние проверено и сохранено"))
+                    showToast(L10n.tr("Деревья объединены"))
                 }
             }
             .sheet(isPresented: $showVersions) { versionHistorySheet }
             .sheet(isPresented: $showRecovery) { RecoveryView(store: store, initialTreeID: tree.id) }
-            .alert(L10n.tr("Удалить персону?"), isPresented: $showDeleteConfirm) {
+            .alert(L10n.tr("Удалить человека?"), isPresented: $showDeleteConfirm) {
                 Button(L10n.tr("Отмена"), role: .cancel) { personToDelete = nil }
                 Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
             } message: {
                 if let p = personToDelete {
-                    Text(L10n.tr("«\(p.displayName(language: .current))» будет удалена из дерева, а все её связи разорваны. Действие можно отменить сразу после удаления (⌘Z)."))
+                    Text(L10n.tr("Карточка «\(p.displayName(language: .current))» и её связи будут удалены из дерева. Удаление можно отменить: ⌘Z."))
                 }
             }
             .alert(L10n.tr("Не удалось сохранить"), isPresented: $showSaveError) {
@@ -481,11 +479,8 @@ struct MainWorkspace: View {
             Text(L10n.tr("В дереве пока никого нет"))
                 .font(SepiaTheme.body(size: 18))
                 .foregroundColor(SepiaTheme.ink)
-            Text(L10n.tr("Добавьте первого человека, чтобы начать родословную"))
-                .font(SepiaTheme.body(size: 14))
-                .foregroundColor(SepiaTheme.inkSoft)
             Button { showAddSheet = true } label: {
-                Label(L10n.tr("Добавить первую персону"), systemImage: "plus")
+                Label(L10n.tr("Добавить человека"), systemImage: "plus")
             }
             .buttonStyle(SepiaButtonStyle(isActive: true))
             .padding(.top, 4)
@@ -504,11 +499,6 @@ struct MainWorkspace: View {
                 Text(L10n.tr("В дереве пока один человек"))
                     .font(SepiaTheme.body(size: 14.5))
                     .foregroundColor(SepiaTheme.ink)
-                Text(L10n.tr("Добавьте родственника — тогда появятся связи, родство и круговая диаграмма."))
-                    .font(SepiaTheme.ui(size: 11.5))
-                    .foregroundColor(SepiaTheme.inkSoft)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
                 Button { showAddSheet = true } label: {
                     Label(L10n.tr("Добавить родственника"), systemImage: "person.badge.plus")
                 }
@@ -588,8 +578,8 @@ struct MainWorkspace: View {
                         .foregroundColor(SepiaTheme.inkSoft)
                 }
                 .buttonStyle(.plain)
-                .help(L10n.tr("Сбросить второго человека"))
-                .accessibilityLabel(L10n.tr("Сбросить второго человека"))
+                .help(L10n.tr("Снять выбор"))
+                .accessibilityLabel(L10n.tr("Снять выбор"))
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
@@ -612,7 +602,7 @@ struct MainWorkspace: View {
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass").font(SepiaTheme.icon(size: 12)).foregroundColor(SepiaTheme.inkSoft)
-                    TextField(L10n.tr("Найти персону…"), text: $searchQuery)
+                    TextField(L10n.tr("Найти человека…"), text: $searchQuery)
                         .textFieldStyle(.plain)
                         .font(SepiaTheme.body(size: 14))
                         .foregroundColor(SepiaTheme.ink)
@@ -919,8 +909,8 @@ struct MainWorkspace: View {
             }
             .buttonStyle(.glassProminent)
             .tint(SepiaTheme.accent)
-            .help(L10n.tr("Добавить новую персону в дерево"))
-            .accessibilityLabel(L10n.tr("Добавить новую персону в дерево"))
+            .help(L10n.tr("Добавить человека в дерево"))
+            .accessibilityLabel(L10n.tr("Добавить человека в дерево"))
 
             Button { showExportModal = true } label: {
                 Image(systemName: "square.and.arrow.up")
@@ -928,8 +918,8 @@ struct MainWorkspace: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .tint(SepiaTheme.ink)
-            .help(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
-            .accessibilityLabel(L10n.tr("Экспорт карточек в PDF или GEDCOM"))
+            .help(L10n.tr("Экспорт…"))
+            .accessibilityLabel(L10n.tr("Экспорт…"))
         }
         .sharedBackgroundVisibility(.hidden)
     }
@@ -992,7 +982,7 @@ struct MainWorkspace: View {
                 Divider()
             }
             Button { showExportModal = true } label: {
-                Label(L10n.tr("Экспорт карточек в PDF или GEDCOM"), systemImage: "square.and.arrow.up")
+                Label(L10n.tr("Экспорт…"), systemImage: "square.and.arrow.up")
             }
 
             if viewMode == .tree {
@@ -1174,7 +1164,7 @@ struct MainWorkspace: View {
                 .disabled(fanLevels >= 8)
                 .help(L10n.tr("Больше поколений"))
                 .accessibilityLabel(L10n.tr("Больше поколений"))
-            Text(L10n.tr("ур."))
+            Text(L10n.tr("поколений"))
                 .font(SepiaType.micro)
                 .foregroundColor(SepiaTheme.inkSoft)
         }
@@ -1250,7 +1240,7 @@ struct MainWorkspace: View {
             Label(L10n.tr("Обновить расположение дерева"), systemImage: "arrow.triangle.2.circlepath")
         }
         Button { showMerge = true } label: {
-            Label(L10n.tr("Слить с локальным GEDCOM"), systemImage: "arrow.triangle.merge")
+            Label(L10n.tr("Объединить с другим деревом…"), systemImage: "arrow.triangle.merge")
         }
         Button { showVersions = true } label: {
             Label(L10n.tr("Предыдущие версии"), systemImage: "clock.arrow.circlepath")
@@ -1349,7 +1339,7 @@ struct MainWorkspace: View {
                 _ = try await store.saveTree(tree)
                 workspaceIndex.rebuild(tree: tree)
                 undo.commit(tree)
-                showToast(L10n.tr("Удалён: \(name)"))
+                showToast(L10n.tr("Карточка «\(name)» удалена"))
             } catch {
                 undo.cancel(tree)
                 reconcileSelectionAfterRestore()

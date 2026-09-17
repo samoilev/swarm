@@ -34,7 +34,7 @@ struct ImportPreviewView: View {
             Divider().overlay(SepiaTheme.toolbarLine)
 
             HStack(spacing: 28) {
-                metric(L10n.tr("Персон"), result.tree.people.count)
+                metric(L10n.tr("Людей"), result.tree.people.count)
                 metric(L10n.tr("Союзов"), result.tree.unions.count)
                 metric(L10n.tr("Источников"), result.tree.sourceRecords.count)
                 metric(L10n.tr("Ошибок"), result.report.errors.count)
@@ -51,16 +51,16 @@ struct ImportPreviewView: View {
                         diagnosticRow(diagnostic)
                     }
                     if !result.report.preservedUnsupportedTags.isEmpty {
-                        reportRow(L10n.tr("Сохранено без редактирования"), result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
+                        reportRow(L10n.tr("Данные без поддержки редактирования"), result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
                     }
                     if !result.report.unresolvedPointers.isEmpty {
-                        reportRow(L10n.tr("Неразрешённые ссылки"), result.report.unresolvedPointers.sorted().joined(separator: ", "), icon: "link.badge.plus")
+                        reportRow(L10n.tr("Ссылки на отсутствующие записи"), result.report.unresolvedPointers.sorted().joined(separator: ", "), icon: "link.badge.plus")
                     }
                     if !result.report.missingMedia.isEmpty {
-                        reportRow(L10n.tr("Не найдены медиа"), result.report.missingMedia.sorted().joined(separator: ", "), icon: "photo.badge.exclamationmark")
+                        reportRow(L10n.tr("Не найдены файлы"), result.report.missingMedia.sorted().joined(separator: ", "), icon: "photo.badge.exclamationmark")
                     }
                     if result.report.diagnostics.isEmpty, !needsConfirmation {
-                        reportRow(L10n.tr("Проверка пройдена"), L10n.tr("Структура читается, ссылки разрешены."), icon: "checkmark.seal.fill")
+                        reportRow(L10n.tr("Проверка пройдена"), L10n.tr("Ошибок не найдено."), icon: "checkmark.seal.fill")
                     }
                 }.padding(18)
             }
@@ -76,7 +76,7 @@ struct ImportPreviewView: View {
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
                 Spacer()
-                Button(L10n.tr("Импортировать проверенную копию"), action: onImport)
+                Button(L10n.tr("Импортировать"), action: onImport)
                     .buttonStyle(.glassProminent)
                     .buttonBorderShape(.capsule)
                     .tint(SepiaTheme.accent)
