@@ -65,6 +65,14 @@ struct LocalizationTests {
         #expect(L10n.count(2, .event, language: .russian) == "2 события")
         #expect(L10n.count(5, .event, language: .russian) == "5 событий")
         #expect(L10n.count(21, .generation, language: .russian) == "21 поколение")
+        #expect(L10n.count(1, .attachment, language: .russian) == "1 вложение")
+        #expect(L10n.count(3, .attachment, language: .russian) == "3 вложения")
+        #expect(L10n.count(12, .attachment, language: .russian) == "12 вложений")
+        #expect(L10n.count(1, .attachment, language: .english) == "1 attachment")
+        // "фото" does not decline, so the export summary reads correctly at any count.
+        #expect(L10n.count(1, .photo, language: .russian) == "1 фото")
+        #expect(L10n.count(96, .photo, language: .russian) == "96 фото")
+        #expect(L10n.count(96, .photo, language: .english) == "96 photos")
     }
 
     @Test func appDatesUseTheSelectedLanguageInsteadOfTheMacLocale() throws {

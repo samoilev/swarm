@@ -327,6 +327,7 @@
 "Экспорт" = "Export";
 "PDF — всё дерево" = "PDF — entire tree";
 "PDF — выделенная часть" = "PDF — selection";
+"Выделите ветвь на холсте ⌘-кликом" = "Select a branch on the canvas with ⌘-click";
 "GEDCOM с файлами" = "GEDCOM with files";
 "Выделенная часть дерева" = "Selected part of the tree";
 "Не удалось сохранить файл" = "Couldn’t save file";
@@ -767,8 +768,8 @@
 "Нет файлов или копий для восстановления" = "No files or backups to restore";
 "Дерево восстановлено из копии «%@»." = "The tree was restored from “%@”.";
 "Формат обновлён. Обновлено файлов: %@. Резервные копии доступны ниже." = "Format updated. Files updated: %@. Backups are available below.";
-"Схема дерева и карточки людей с фотографиями и вложениями" = "Tree diagram and profiles with photos and attachments";
-"Файл дерева, фотографии и вложения в отдельной папке" = "Tree file, photos, and attachments in a separate folder";
+"Схема дерева и карточки людей" = "Tree diagram and profile cards";
+"Дерево, фотографии и вложения в папке" = "Tree, photos, and attachments in a folder";
 "Тип связи" = "Relationship type";
 "Предполагаемая связь" = "Uncertain relationship";
 "Добавить людей и сведения из другого дерева в «%@»." = "Add people and information from another tree to “%@”.";

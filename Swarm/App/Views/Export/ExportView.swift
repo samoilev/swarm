@@ -18,48 +18,67 @@ struct ExportView: View {
     @State private var exportError: String?
 
     var body: some View {
-        ZStack {
-            ZStack {
-                Rectangle().fill(.regularMaterial)
-                SepiaTheme.paper.opacity(0.9)
-            }
-            .ignoresSafeArea()
+        VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
+            exportHeader
 
-            VStack(alignment: .leading, spacing: 20) {
-                exportHeader
-
-                GlassEffectContainer(spacing: 10) {
-                    VStack(spacing: 10) {
-                        Button { exportPDF(selected: false) } label: {
-                            exportButtonLabel(L10n.tr("PDF — всё дерево"), systemImage: "tree", detail: L10n.tr("Схема дерева и карточки людей с фотографиями и вложениями"))
-                        }
-                        .buttonStyle(.glassProminent)
-                        .buttonBorderShape(.capsule)
-                        .tint(SepiaTheme.accent)
-                        .controlSize(.large)
-                        .disabled(tree.people.isEmpty)
-
-                        Button { exportPDF(selected: true) } label: {
-                            exportButtonLabel(L10n.tr("PDF — выделенная часть"), systemImage: "scope")
-                        }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.capsule)
-                        .controlSize(.large)
-                        .disabled(selectedIds.isEmpty)
-
-                        Button { exportVerifiedTree() } label: {
-                            exportButtonLabel(L10n.tr("GEDCOM с файлами"), systemImage: "archivebox", detail: L10n.tr("Файл дерева, фотографии и вложения в отдельной папке"))
-                        }
-                        .buttonStyle(.glass)
-                        .buttonBorderShape(.capsule)
-                        .controlSize(.large)
+            GlassEffectContainer(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
+                VStack(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
+                    Button { exportPDF(selected: false) } label: {
+                        exportRowLabel(
+                            title: L10n.tr("PDF — всё дерево"),
+                            detail: L10n.tr("Схема дерева и карточки людей"),
+                            systemImage: "tree",
+                            style: .primary
+                        )
                     }
-                }
+                    // `.glass` tinted, not `.glassProminent`: the two render the same
+                    // accent fill, but the prominent variant carries slightly different
+                    // chrome metrics, which left this row a point or two taller than the
+                    // two below it. One style for all three rows, one row pitch.
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
+                    .tint(SepiaTheme.accent)
+                    .disabled(tree.people.isEmpty)
 
+                    // Disabled rather than hidden or replaced by a card: the row keeps
+                    // the geometry of the two live ones, and `.glass` dims it so lightly
+                    // that the sentence explaining how to unlock it stays readable.
+                    Button { exportPDF(selected: true) } label: {
+                        exportRowLabel(
+                            title: L10n.tr("PDF — выделенная часть"),
+                            detail: selectedIds.isEmpty
+                                ? L10n.tr("Выделите ветвь на холсте ⌘-кликом")
+                                : L10n.count(selectedIds.count, .person),
+                            systemImage: "scope",
+                            style: selectedIds.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
+                        )
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
+                    .disabled(selectedIds.isEmpty)
+
+                    Button { exportVerifiedTree() } label: {
+                        exportRowLabel(
+                            title: L10n.tr("GEDCOM с файлами"),
+                            detail: L10n.tr("Дерево, фотографии и вложения в папке"),
+                            systemImage: "archivebox",
+                            style: .secondary(SepiaTheme.accent2)
+                        )
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
+                }
             }
-            .padding(14)
+
+            contentsSummary
         }
-        .frame(width: 420, height: 390)
+        .padding(SepiaTheme.scaled(SepiaLayout.l))
+        // Width scales with the interface setting like every other panel; the height is
+        // the content's own, so a longer translation or a larger step grows the sheet
+        // instead of clipping inside a frame written for 100% Russian.
+        .frame(width: SepiaTheme.scaledPanel(420, axis: .horizontal))
+        .fixedSize(horizontal: false, vertical: true)
+        .background(LiquidGlassPanelBackground())
         .fileExporter(
             isPresented: $showExporter,
             document: exportDoc,
@@ -81,33 +100,122 @@ struct ExportView: View {
     private var exportHeader: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Экспорт"),
-            subtitle: "\(tree.name.isEmpty ? L10n.tr("Дерево") : tree.name) · \(L10n.count(tree.people.count, .person))",
+            // The counts moved to the footer, where they describe what lands on disk;
+            // repeating the person count here made the same number appear twice.
+            subtitle: tree.name.isEmpty ? L10n.tr("Дерево") : tree.name,
             onClose: { dismiss() }
         )
     }
 
-    private func exportButtonLabel(_ title: String, systemImage: String, detail: String? = nil) -> some View {
-        HStack(spacing: 10) {
+    /// What the export will actually contain. Metadata only — `hasPhoto` and the
+    /// attachment list both answer without touching the disk, so opening the panel
+    /// never walks the media folder.
+    private var contentsSummary: some View {
+        VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.s)) {
+            Rectangle()
+                .fill(SepiaTheme.cardRule)
+                .frame(height: 1)
+                .accessibilityHidden(true)
+
+            Text(summaryLine)
+                .font(SepiaType.micro)
+                .foregroundStyle(SepiaTheme.inkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var summaryLine: String {
+        var parts = [L10n.count(tree.people.count, .person)]
+        let photos = tree.people.reduce(into: 0) { $0 += $1.hasPhoto ? 1 : 0 }
+        let attachments = tree.people.reduce(into: 0) { $0 += $1.attachments.count }
+        if photos > 0 { parts.append(L10n.count(photos, .photo)) }
+        if attachments > 0 { parts.append(L10n.count(attachments, .attachment)) }
+        return parts.joined(separator: " · ")
+    }
+
+    /// How one row is coloured. Three states rather than a flag, so the row that cannot
+    /// be used right now says so in its own colours rather than relying on the system's
+    /// dimming alone, which `.glass` applies very lightly.
+    private enum RowStyle {
+        /// The recommended export: a filled row, white on accent.
+        case primary
+        /// An available export, tinted by format.
+        case secondary(Color)
+        /// Shown but not offered — nothing to export yet, and the row says what to do.
+        case unavailable
+
+        var chipTint: Color {
+            switch self {
+            case .primary: .white
+            case .secondary(let colour): colour
+            case .unavailable: SepiaTheme.inkSoft
+            }
+        }
+
+        var chipFill: Color {
+            switch self {
+            case .primary: Color.white.opacity(0.18)
+            case .secondary(let colour): colour.opacity(0.12)
+            case .unavailable: SepiaTheme.ink.opacity(0.06)
+            }
+        }
+
+        var titleColour: Color {
+            switch self {
+            case .primary: .white
+            case .secondary: SepiaTheme.ink
+            case .unavailable: SepiaTheme.inkSoft
+            }
+        }
+
+        /// Both weights clear AA on the surface they sit on: 0.9 white over `accent`,
+        /// and `inkSoft` over the glass rows.
+        var detailColour: Color {
+            switch self {
+            case .primary: Color.white.opacity(0.9)
+            case .secondary, .unavailable: SepiaTheme.inkSoft
+            }
+        }
+    }
+
+    private func exportRowLabel(
+        title: String,
+        detail: String,
+        systemImage: String,
+        style: RowStyle
+    ) -> some View {
+        HStack(spacing: SepiaTheme.scaled(SepiaLayout.m)) {
             Image(systemName: systemImage)
                 .font(SepiaTheme.icon(size: 13, weight: .semibold))
-                .frame(width: 20)
-            VStack(alignment: .leading, spacing: 4) {
+                .foregroundStyle(style.chipTint)
+                .frame(width: SepiaTheme.scaled(30), height: SepiaTheme.scaled(30))
+                .background(
+                    RoundedRectangle(cornerRadius: SepiaLayout.Radius.field, style: .continuous)
+                        .fill(style.chipFill)
+                )
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.xs)) {
                 Text(title)
-                if let detail {
-                    Text(detail)
-                        .font(SepiaType.micro)
-                        .lineLimit(nil)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                    .font(SepiaType.control)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(style.titleColour)
+                Text(detail)
+                    .font(SepiaType.micro)
+                    .foregroundStyle(style.detailColour)
             }
-            .font(SepiaTheme.ui(size: 12.5))
-            .fontWeight(.semibold)
-            Spacer(minLength: 0)
+            // A button label is one line by default, which truncated the description
+            // mid-word. Two lines and no truncation: the copy fits one line in both
+            // languages, and a longer translation wraps instead of disappearing.
+            .lineLimit(2)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 8)
-        .frame(minHeight: detail == nil ? 36 : 60)
+        .padding(SepiaTheme.scaled(SepiaLayout.s))
+        // A minimum rather than a height: the row grows for a translation that wraps.
+        .frame(maxWidth: .infinity, minHeight: SepiaTheme.scaled(56), alignment: .leading)
     }
 
     private var fileSlug: String {

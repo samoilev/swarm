@@ -71,6 +71,8 @@ public enum L10n {
         case step
         case child
         case citation
+        case photo
+        case attachment
     }
 
     public struct Key: ExpressibleByStringLiteral, ExpressibleByStringInterpolation {
@@ -134,6 +136,8 @@ public enum L10n {
             case .step: value == 1 ? "step" : "steps"
             case .child: value == 1 ? "child" : "children"
             case .citation: value == 1 ? "citation" : "citations"
+            case .photo: value == 1 ? "photo" : "photos"
+            case .attachment: value == 1 ? "attachment" : "attachments"
             }
             return "\(value) \(noun)"
         case .russian:
@@ -146,6 +150,9 @@ public enum L10n {
             case .step: ("шаг", "шага", "шагов")
             case .child: ("ребёнок", "ребёнка", "детей")
             case .citation: ("ссылка на источник", "ссылки на источники", "ссылок на источники")
+            // "фото" is indeclinable, so all three forms are the same word.
+            case .photo: ("фото", "фото", "фото")
+            case .attachment: ("вложение", "вложения", "вложений")
             }
             let absolute = abs(value)
             let lastTwo = absolute % 100
