@@ -137,8 +137,8 @@ struct RelationshipTests {
         let f = Fixture()
         #expect(name(from: "me", to: "father", in: f, language: .english) == "Father")
         #expect(name(from: "me", to: "sister", in: f, language: .english) == "Sister")
-        #expect(name(from: "me", to: "halfBro", in: f, language: .english) == "Paternal Half-brother")
-        #expect(name(from: "me", to: "cousin", in: f, language: .english) == "First Cousin")
+        #expect(name(from: "me", to: "halfBro", in: f, language: .english) == "Paternal half-brother")
+        #expect(name(from: "me", to: "cousin", in: f, language: .english) == "First cousin")
         #expect(name(from: "me", to: "wifeFather", in: f, language: .english) == "Father-in-law")
         #expect(name(from: "father", to: "wife", in: f, language: .english) == "Daughter-in-law")
         #expect(KinshipFormatter(language: .english).label(
@@ -171,8 +171,8 @@ struct RelationshipTests {
         let calculator = RelationshipCalculator(tree: tree)
         let younger = calculator.relationship(from: subject, to: cousin, language: .english)
         let older = calculator.relationship(from: cousin, to: subject, language: .english)
-        #expect(younger?.name == "First Cousin Twice Removed")
-        #expect(older?.name == "First Cousin Twice Removed")
+        #expect(younger?.name == "First cousin twice removed")
+        #expect(older?.name == "First cousin twice removed")
         #expect(younger?.descriptor == .cousin(
             degree: 1,
             removed: 2,
@@ -205,7 +205,7 @@ struct RelationshipTests {
         }
 
         let ordinals = ["First", "Second", "Third", "Fourth"]
-        let removals = ["Once", "Twice", "Three Times"]
+        let removals = ["once", "twice", "three times"]
         for degree in 1 ... 4 {
             for removed in 1 ... 3 {
                 for direction in [
@@ -220,7 +220,7 @@ struct RelationshipTests {
                     )
                     #expect(
                         english.label(for: descriptor)
-                            == "\(ordinals[degree - 1]) Cousin \(removals[removed - 1]) Removed"
+                            == "\(ordinals[degree - 1]) cousin \(removals[removed - 1]) removed"
                     )
                     #expect(!russian.label(for: descriptor).isEmpty)
                 }
@@ -233,8 +233,8 @@ struct RelationshipTests {
             (.biological, "Grandmother"),
             (.adoptive, "Grandmother through adoption"),
             (.foster, "Grandmother through foster care"),
-            (.step, "Grandmother through a step-family connection"),
-            (.uncertain, "Grandmother through uncertain parentage"),
+            (.step, "Grandmother through a stepfamily relationship"),
+            (.uncertain, "Grandmother (uncertain)"),
         ]
 
         for (kind, label) in expected {

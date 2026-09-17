@@ -76,7 +76,7 @@ public struct KinshipFormatter: Sendable {
     private func englishLabel(for descriptor: KinshipDescriptor) -> String {
         switch descriptor {
         case .samePerson:
-            "Same Person"
+            "Same person"
         case let .spouse(sex):
             gendered(sex, male: "Husband", female: "Wife", neutral: "Spouse")
         case let .parent(sex, kind):
@@ -110,9 +110,9 @@ public struct KinshipFormatter: Sendable {
         case .relative:
             "Relative"
         case .distantRelative:
-            "Distant Relative"
+            "Distant relative"
         case .unconnected:
-            "No Relationship Found"
+            "No relationship found"
         }
     }
 
@@ -164,13 +164,13 @@ public struct KinshipFormatter: Sendable {
         case .biological, .unspecified:
             gendered(sex, male: "Father", female: "Mother", neutral: "Parent")
         case .adoptive:
-            gendered(sex, male: "Adoptive Father", female: "Adoptive Mother", neutral: "Adoptive Parent")
+            gendered(sex, male: "Adoptive father", female: "Adoptive mother", neutral: "Adoptive parent")
         case .foster:
-            gendered(sex, male: "Foster Father", female: "Foster Mother", neutral: "Foster Parent")
+            gendered(sex, male: "Foster father", female: "Foster mother", neutral: "Foster parent")
         case .step:
             gendered(sex, male: "Stepfather", female: "Stepmother", neutral: "Step-parent")
         case .uncertain:
-            gendered(sex, male: "Uncertain Father", female: "Uncertain Mother", neutral: "Uncertain Parent")
+            gendered(sex, male: "Father (uncertain)", female: "Mother (uncertain)", neutral: "Parent (uncertain)")
         }
     }
 
@@ -194,13 +194,13 @@ public struct KinshipFormatter: Sendable {
         case .biological, .unspecified:
             gendered(sex, male: "Son", female: "Daughter", neutral: "Child")
         case .adoptive:
-            gendered(sex, male: "Adoptive Son", female: "Adoptive Daughter", neutral: "Adoptive Child")
+            gendered(sex, male: "Adoptive son", female: "Adoptive daughter", neutral: "Adoptive child")
         case .foster:
-            "Foster Child"
+            "Foster child"
         case .step:
             gendered(sex, male: "Stepson", female: "Stepdaughter", neutral: "Stepchild")
         case .uncertain:
-            gendered(sex, male: "Uncertain Son", female: "Uncertain Daughter", neutral: "Uncertain Child")
+            gendered(sex, male: "Son (uncertain)", female: "Daughter (uncertain)", neutral: "Child (uncertain)")
         }
     }
 
@@ -225,9 +225,9 @@ public struct KinshipFormatter: Sendable {
         case .full:
             return base
         case .paternalHalf:
-            return "Paternal Half-\(base.lowercased())"
+            return "Paternal half-\(base.lowercased())"
         case .maternalHalf:
-            return "Maternal Half-\(base.lowercased())"
+            return "Maternal half-\(base.lowercased())"
         case .halfUnknown:
             return "Half-\(base.lowercased())"
         }
@@ -252,9 +252,11 @@ public struct KinshipFormatter: Sendable {
             gendered(sex, male: "Father", female: "Mother", neutral: "Parent")
         case 2:
             gendered(sex, male: "Grandfather", female: "Grandmother", neutral: "Grandparent")
-        default:
-            String(repeating: "Great-", count: max(1, generation - 2))
+        case 3, 4:
+            "Great-" + String(repeating: "great-", count: generation - 3)
                 + gendered(sex, male: "grandfather", female: "grandmother", neutral: "grandparent")
+        default:
+            "Ancestor, \(generation) generations back"
         }
     }
 
@@ -294,9 +296,11 @@ public struct KinshipFormatter: Sendable {
             gendered(sex, male: "Son", female: "Daughter", neutral: "Child")
         case 2:
             gendered(sex, male: "Grandson", female: "Granddaughter", neutral: "Grandchild")
-        default:
-            String(repeating: "Great-", count: max(1, generation - 2))
+        case 3, 4:
+            "Great-" + String(repeating: "great-", count: generation - 3)
                 + gendered(sex, male: "grandson", female: "granddaughter", neutral: "grandchild")
+        default:
+            "Descendant, \(generation) generations down"
         }
     }
 
@@ -368,7 +372,7 @@ public struct KinshipFormatter: Sendable {
     }
 
     private func englishAuntOrUncle(greats: Int, sex: Person.Sex) -> String {
-        let prefix = greats == 0 ? "" : String(repeating: "Great-", count: greats)
+        let prefix = greats == 0 ? "" : "Great-" + String(repeating: "great-", count: max(0, greats - 1))
         return prefix + gendered(sex, male: "uncle", female: "aunt", neutral: "aunt or uncle")
             .capitalizingFirstLetter
     }
@@ -385,7 +389,7 @@ public struct KinshipFormatter: Sendable {
     }
 
     private func englishNieceOrNephew(greats: Int, sex: Person.Sex) -> String {
-        let prefix = greats == 0 ? "" : String(repeating: "Great-", count: greats)
+        let prefix = greats == 0 ? "" : "Great-" + String(repeating: "great-", count: max(0, greats - 1))
         return prefix + gendered(sex, male: "nephew", female: "niece", neutral: "niece or nephew")
             .capitalizingFirstLetter
     }
@@ -409,15 +413,15 @@ public struct KinshipFormatter: Sendable {
         case 4: "Fourth"
         default: Self.englishOrdinal(max(1, degree))
         }
-        let base = "\(ordinal) Cousin"
+        let base = "\(ordinal) cousin"
         guard removed > 0 else { return base }
         let removal = switch removed {
-        case 1: "Once"
-        case 2: "Twice"
-        case 3: "Three Times"
-        default: "\(removed) Times"
+        case 1: "once"
+        case 2: "twice"
+        case 3: "three times"
+        default: "\(removed) times"
         }
-        return "\(base) \(removal) Removed"
+        return "\(base) \(removal) removed"
     }
 
     private func russianCousin(
@@ -505,8 +509,8 @@ public struct KinshipFormatter: Sendable {
             case .biological, .unspecified: ""
             case .adoptive: "through adoption"
             case .foster: "through foster care"
-            case .step: "through a step-family connection"
-            case .uncertain: "through uncertain parentage"
+            case .step: "through a stepfamily relationship"
+            case .uncertain: "(uncertain)"
             }
             return "\(base) \(suffix)"
         case .russian:

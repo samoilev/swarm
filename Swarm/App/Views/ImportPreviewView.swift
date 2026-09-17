@@ -60,7 +60,7 @@ struct ImportPreviewView: View {
                         reportRow(L10n.tr("Не найдены файлы"), result.report.missingMedia.sorted().joined(separator: ", "), icon: "photo.badge.exclamationmark")
                     }
                     if result.report.diagnostics.isEmpty, !needsConfirmation {
-                        reportRow(L10n.tr("Проверка пройдена"), L10n.tr("Ошибок не найдено."), icon: "checkmark.seal.fill")
+                        reportRow(L10n.tr("Ошибок не найдено."), "", icon: "checkmark.seal.fill")
                     }
                 }.padding(18)
             }
@@ -108,7 +108,9 @@ struct ImportPreviewView: View {
             Image(systemName: icon).foregroundStyle(SepiaTheme.accent2).frame(width: 22)
             VStack(alignment: .leading, spacing: 3) {
                 Text(title).font(SepiaTheme.body(size: 14)).foregroundStyle(SepiaTheme.ink)
-                Text(message).font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft).textSelection(.enabled)
+                if !message.isEmpty {
+                    Text(message).font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft).textSelection(.enabled)
+                }
             }
             Spacer()
         }.padding(12).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 8))

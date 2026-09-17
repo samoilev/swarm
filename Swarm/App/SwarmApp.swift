@@ -107,15 +107,15 @@ struct SwarmApp: App {
                 .keyboardShortcut("f")
             }
             CommandGroup(after: .toolbar) {
-                Button(L10n.tr("Увеличить масштаб")) {
+                Button(language == .english ? "Zoom In" : L10n.tr("Увеличить масштаб")) {
                     NotificationCenter.default.post(name: .zoomInRequested, object: nil)
                 }
                 .keyboardShortcut("+")
-                Button(L10n.tr("Уменьшить масштаб")) {
+                Button(language == .english ? "Zoom Out" : L10n.tr("Уменьшить масштаб")) {
                     NotificationCenter.default.post(name: .zoomOutRequested, object: nil)
                 }
                 .keyboardShortcut("-")
-                Button(L10n.tr("По размеру экрана")) {
+                Button(language == .english ? "Fit to Screen" : L10n.tr("По размеру экрана")) {
                     NotificationCenter.default.post(name: .zoomFitRequested, object: nil)
                 }
                 .keyboardShortcut("0")

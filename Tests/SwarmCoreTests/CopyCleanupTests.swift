@@ -15,6 +15,15 @@ struct CopyCleanupTests {
         #expect(formatter.label(for: .inLaw(.brotherHusbandsSide)) == "Деверь")
     }
 
+    @Test func englishKinshipStaysReadableAcrossGenerationsAndUncertainty() {
+        let formatter = KinshipFormatter(language: .english)
+        #expect(formatter.label(for: .ancestor(generation: 4, sex: .male)) == "Great-great-grandfather")
+        #expect(formatter.label(for: .ancestor(generation: 5, sex: .unknown)) == "Ancestor, 5 generations back")
+        #expect(formatter.label(for: .descendant(generation: 6, sex: .unknown)) == "Descendant, 6 generations down")
+        #expect(formatter.label(for: .parent(sex: .male, kind: .uncertain)) == "Father (uncertain)")
+        #expect(formatter.label(for: .qualified(base: .parent(sex: .female, kind: .adoptive), kind: .uncertain)) == "Adoptive mother (uncertain)")
+    }
+
     @Test func uncertaintySurvivesGEDCOMAndJSONWithoutLosingRelationshipType() throws {
         let parent = Person(givenNames: "Parent", sex: .male)
         let child = Person(givenNames: "Child")

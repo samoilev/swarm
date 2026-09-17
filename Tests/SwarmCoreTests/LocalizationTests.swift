@@ -6,9 +6,9 @@ struct LocalizationTests {
     @Test func translatesStaticAndInterpolatedCopy() {
         let name = "Anna"
 
-        #expect(L10n.tr("Новое дерево", language: .english) == "New Tree")
-        #expect(L10n.tr("Добавлен: \(name)", language: .english) == "Added: Anna")
-        #expect(L10n.tr("Добавлен: \(name)", language: .russian) == "Добавлен: Anna")
+        #expect(L10n.tr("Новое дерево", language: .english) == "New tree")
+        #expect(L10n.tr("Дерево: \(name)", language: .english) == "Tree: Anna")
+        #expect(L10n.tr("Дерево: \(name)", language: .russian) == "Дерево: Anna")
     }
 
     @Test func sexReadsAsAFullWordInBothLanguages() {
@@ -21,7 +21,7 @@ struct LocalizationTests {
     @Test func swarmBrandAndMigrationCopyAreBilingual() {
         #expect(L10n.tr("Swarm", language: .russian) == "Swarm")
         #expect(L10n.tr("Swarm", language: .english) == "Swarm")
-        #expect(L10n.tr("Проверка старого хранилища", language: .english) == "Check Previous Storage")
+        #expect(L10n.tr("Проверка старого хранилища", language: .english) == "Check previous storage")
     }
 
     @Test func migratesLegacyLanguagePreferenceOnlyWhenCurrentIsUnset() throws {
@@ -86,7 +86,7 @@ struct LocalizationTests {
     }
 
     @Test func translatesGeneratedKinshipCopy() {
-        #expect(L10n.dynamic("Двоюродная сестра", language: .english) == "First Cousin")
+        #expect(L10n.dynamic("Двоюродная сестра", language: .english) == "First cousin")
         #expect(L10n.dynamic("5-й предок", language: .english) == "5th-generation ancestor")
         #expect(L10n.dynamic("4-юродный племянник", language: .english) == "3rd cousin once removed")
     }

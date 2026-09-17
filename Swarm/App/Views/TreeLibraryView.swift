@@ -648,12 +648,6 @@ struct TreeLibraryView: View {
             Text(L10n.tr("Ничего не найдено"))
                 .font(SepiaTheme.body(size: 16))
                 .foregroundColor(SepiaTheme.ink)
-            Text(L10n.tr("Ни одно дерево не совпадает с «\(filterText)» по названию или фамилии."))
-                .font(SepiaType.body)
-                .foregroundColor(SepiaTheme.ink)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: 380)
             Button(L10n.tr("Очистить фильтр")) { filterText = "" }
                 .buttonStyle(SepiaButtonStyle())
                 .padding(.top, 4)
