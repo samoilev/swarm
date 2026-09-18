@@ -47,7 +47,7 @@ struct ExportView: View {
                         exportRowLabel(
                             title: L10n.tr("PDF — выделенная часть"),
                             detail: selectedIds.isEmpty
-                                ? L10n.tr("Выделите ветвь на холсте ⌘-кликом")
+                                ? L10n.tr("Выделите ветвь на схеме, удерживая ⌘.")
                                 : L10n.count(selectedIds.count, .person),
                             systemImage: "scope",
                             style: selectedIds.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
@@ -60,7 +60,7 @@ struct ExportView: View {
                     Button { exportVerifiedTree() } label: {
                         exportRowLabel(
                             title: L10n.tr("GEDCOM с файлами"),
-                            detail: L10n.tr("Дерево, фотографии и вложения в папке"),
+                            detail: L10n.tr("Папка с деревом, фотографиями и вложениями"),
                             systemImage: "archivebox",
                             style: .secondary(SepiaTheme.accent2)
                         )
@@ -225,7 +225,7 @@ struct ExportView: View {
     private func exportPDF(selected: Bool) {
         let ids: Set<UUID>? = selected ? selectedIds : nil
         guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
-            exportError = L10n.tr("Не удалось создать PDF: в дереве нет людей.")
+            exportError = L10n.tr("Чтобы создать PDF, сначала добавьте людей в дерево.")
             return
         }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)

@@ -18,8 +18,8 @@ public enum MapProviderSetting: String, Codable, CaseIterable, Identifiable, Sen
 
     public var summary: String {
         switch self {
-        case .appleMaps: L10n.tr("Подробная. Нужен интернет.")
-        case .offlineVector: L10n.tr("Контуры стран. Без интернета.")
+        case .appleMaps: L10n.tr("Онлайн-карта.")
+        case .offlineVector: L10n.tr("Карта без интернета.")
         }
     }
 }

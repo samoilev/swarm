@@ -117,7 +117,7 @@ struct TreeLibraryView: View {
     /// Shown on both import buttons: the file dialog gives no sign that a folder is a
     /// valid choice, and it is the only choice that brings the media along.
     private static var importHint: String {
-        L10n.tr("Выберите файл GEDCOM или папку архива целиком — тогда фотографии и вложения перенесутся вместе с деревом")
+        L10n.tr("Выберите файл GEDCOM. Чтобы перенести дерево вместе с фотографиями и вложениями, выберите всю папку архива.")
     }
 
     @Environment(TreeStore.self) private var store
@@ -233,7 +233,7 @@ struct TreeLibraryView: View {
                 }
                 treeToDelete = nil
             }
-            Button(L10n.tr("Экспортировать копию и удалить…")) {
+            Button(L10n.tr("Сохранить копию и удалить дерево…")) {
                 treeToExport = treeToDelete
                 treeToDelete = nil
                 // Defer so the dialog finishes dismissing before the open panel appears.
@@ -241,7 +241,7 @@ struct TreeLibraryView: View {
             }
             Button(L10n.tr("Отмена"), role: .cancel) { treeToDelete = nil }
         } message: {
-            Text(L10n.tr("Выберите, что сделать с файлом GEDCOM и фотографиями этого дерева."))
+            Text(L10n.tr("Что сделать с файлом GEDCOM и фотографиями при удалении дерева?"))
         }
         .sheet(isPresented: Binding(
             get: { treeToRename != nil },
@@ -266,7 +266,7 @@ struct TreeLibraryView: View {
                     do {
                         let receipt = try await store.exportTree(tree, to: directory)
                         guard store.deleteTree(tree) else {
-                            throw TreeStoreError.commitFailed(reason: store.lastSaveError ?? L10n.tr("Экспорт проверен, но исходное дерево не перемещено в Корзину."))
+                            throw TreeStoreError.commitFailed(reason: store.lastSaveError ?? L10n.tr("Копия экспортирована и проверена, но исходное дерево не удалось переместить в Корзину."))
                         }
                         NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
                     } catch {
@@ -607,7 +607,7 @@ struct TreeLibraryView: View {
                 Text(L10n.tr("Здесь будут ваши деревья"))
                     .font(SepiaTheme.display(size: 30))
                     .foregroundColor(SepiaTheme.ink)
-                Text(L10n.tr("Каждое дерево — это отдельный файл GEDCOM с фотографиями, который остаётся на этом Mac."))
+                Text(L10n.tr("Каждое дерево хранится на этом Mac: файл GEDCOM, фотографии и вложения."))
                     .font(SepiaType.bodyLarge)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
@@ -643,10 +643,10 @@ struct TreeLibraryView: View {
             .padding(.top, 26)
 
             VStack(spacing: 4) {
-                Text(L10n.tr("Понимает файлы из Ancestry, Gramps и MyHeritage."))
+                Text(L10n.tr("Открывает файлы из Ancestry, Gramps и MyHeritage."))
                 // Choosing the folder is what carries the photos and attachments across,
                 // and nothing in the file dialog says so.
-                Text(L10n.tr("Можно выбрать и папку архива целиком — вместе с фотографиями и вложениями."))
+                Text(L10n.tr("Чтобы перенести фотографии и вложения, выберите всю папку архива."))
             }
             .font(SepiaType.control)
             .foregroundColor(SepiaTheme.inkSoft)
@@ -690,7 +690,7 @@ struct TreeLibraryView: View {
                         .font(SepiaTheme.body(size: 13.5))
                         .foregroundColor(SepiaTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(L10n.tr("Обновите формат, чтобы сохранять изменения. Перед обновлением создаётся резервная копия."))
+                    Text(L10n.tr("Обновите формат дерева, чтобы сохранять изменения. Сначала будет создана резервная копия."))
                         .font(SepiaType.label)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
@@ -713,7 +713,7 @@ struct TreeLibraryView: View {
         case 1, 2: names.joined(separator: ", ")
         default: L10n.tr("\(names.prefix(2).joined(separator: ", ")) и ещё \(names.count - 2)")
         }
-        return L10n.tr("\(subject) — в старом формате хранения")
+        return L10n.tr("\(subject) — старый формат")
     }
 
     private var renameSheet: some View {

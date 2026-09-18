@@ -108,9 +108,9 @@ struct OfflineVectorMapView: View {
                     VStack(spacing: 8) {
                         Image(systemName: "mappin.slash")
                             .font(SepiaTheme.icon(size: 28))
-                        Text(L10n.tr("Нет мест с координатами"))
+                        Text(L10n.tr("Пока нет мест с координатами"))
                             .font(SepiaTheme.body(size: 14))
-                        Text(L10n.tr("Выберите место из справочника или укажите координаты вручную"))
+                        Text(L10n.tr("Выберите место из списка или введите координаты вручную."))
                             .font(SepiaType.label)
                     }
                     .foregroundColor(SepiaTheme.inkSoft)

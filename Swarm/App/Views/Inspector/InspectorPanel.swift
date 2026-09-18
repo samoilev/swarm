@@ -211,8 +211,8 @@ struct InspectorPanel: View {
                 .buttonBorderShape(.capsule)
                 .foregroundStyle(SepiaTheme.accent2)
                 .controlSize(.small)
-                .help(L10n.tr("Вернуться к предыдущему человеку"))
-                .accessibilityLabel(L10n.tr("Назад к предыдущему человеку"))
+                .help(L10n.tr("Вернуться к предыдущей карточке"))
+                .accessibilityLabel(L10n.tr("К предыдущей карточке"))
                 .transition(.opacity.combined(with: .move(edge: .leading)))
             }
 

@@ -60,7 +60,7 @@ public struct RelationshipCalculator {
             return make(
                 .stepParent(sex: personB.sex),
                 path: [personA.id, personB.id],
-                description: L10n.tr("Производная связь через союз с родителем", language: language),
+                description: L10n.tr("Партнёр одного из родителей", language: language),
                 formatter: formatter
             )
         }
@@ -69,7 +69,7 @@ public struct RelationshipCalculator {
             return make(
                 .unconnected,
                 path: [],
-                description: L10n.tr("Эти люди не связаны в дереве", language: language),
+                description: L10n.tr("В дереве нет связи между этими людьми", language: language),
                 formatter: formatter
             )
         }

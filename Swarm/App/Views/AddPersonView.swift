@@ -125,7 +125,7 @@ struct AddPersonView: View {
                             selectedBirthPlace = $0
                             prefillCoords(for: $0, into: $birthCoords)
                         }.padding(.bottom, 8).zIndex(1)
-                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
+                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 12)
 
                         SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
@@ -143,12 +143,12 @@ struct AddPersonView: View {
                                 selectedDeathPlace = $0
                                 prefillCoords(for: $0, into: $deathCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 8)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 8)
                             PlacePickerField(label: L10n.tr("МЕСТО ЗАХОРОНЕНИЯ"), text: $burialPlace, placeholder: "—") {
                                 selectedBurialPlace = $0
                                 prefillCoords(for: $0, into: $burialCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 12)
                         }
 
                         SectionHeader(title: L10n.tr("Жизнь"))
@@ -163,7 +163,7 @@ struct AddPersonView: View {
 
                         SectionHeader(title: L10n.tr("Родственные связи"))
                         if tree.people.isEmpty {
-                            Text(L10n.tr("Добавьте людей в дерево, чтобы создавать связи"))
+                            Text(L10n.tr("Сначала добавьте людей, затем укажите, кем они приходятся друг другу."))
                                 .font(SepiaType.body).foregroundColor(SepiaTheme.inkSoft)
                         } else {
                             ForEach($pendingRels) { $rel in
@@ -232,11 +232,11 @@ struct AddPersonView: View {
         let parsedDeath = isLiving ? nil : parsedDate(text: deathDate, end: deathDateEnd, qualifier: deathQualifier)
         guard birthDate.isEmpty || parsedBirth != nil,
               isLiving || deathDate.isEmpty || parsedDeath != nil else {
-            saveError = L10n.tr("Исправьте некорректные даты перед сохранением.")
+            saveError = L10n.tr("Проверьте даты перед сохранением.")
             return
         }
         guard validCoordinateText(birthCoords), validCoordinateText(deathCoords), validCoordinateText(burialCoords) else {
-            saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
+            saveError = L10n.tr("Введите широту и долготу через запятую. Широта: от −90 до 90, долгота: от −180 до 180.")
             return
         }
         // Capture the rollback copy up front and fail loudly: mutating the live tree

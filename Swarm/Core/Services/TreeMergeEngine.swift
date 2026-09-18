@@ -63,7 +63,7 @@ public enum TreeMergeError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .wrongDestination: L10n.tr("Предпросмотр объединения относится к другому дереву.")
+        case .wrongDestination: L10n.tr("Этот список изменений подготовлен для другого дерева.")
         case .snapshotFailed: L10n.tr("Не удалось создать резервную копию перед объединением.")
         case let .attachmentMissing(name): L10n.tr("Файл вложения не найден: \(name).")
         }
@@ -108,7 +108,7 @@ public final class TreeMergeEngine {
                     localPersonID: localPerson.id,
                     incomingPersonID: candidate.id,
                     kind: .sharedTreeXref,
-                    reasons: [L10n.tr("совпадает xref в одном _TREEID")]
+                    reasons: [L10n.tr("совпадают идентификаторы записи (xref) и дерева (_TREEID)")]
                 ))
                 matchedLocal.insert(localPerson.id)
                 matchedIncoming.insert(candidate.id)

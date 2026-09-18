@@ -75,7 +75,7 @@ struct MapPrivacySettingsView: View {
             }
             Button(L10n.tr("Отмена"), role: .cancel) { pendingScale = nil }
         } message: {
-            Text(L10n.tr("В открытой карточке есть несохранённые изменения. Смена размера закроет карточку — изменения пропадут."))
+            Text(L10n.tr("В карточке есть несохранённые изменения. Если изменить размер интерфейса, карточка закроется и эти изменения пропадут."))
         }
     }
 
@@ -146,8 +146,8 @@ struct MapPrivacySettingsView: View {
 
     private var privacySummary: String {
         currentProvider == .offlineVector
-            ? L10n.tr("Ничего не уходит с этого Mac.")
-            : L10n.tr("Apple видит, какой участок карты открыт.")
+            ? L10n.tr("Все данные — на этом Mac.")
+            : L10n.tr("Apple видит просматриваемый участок.")
     }
 
     private var currentProvider: MapProviderSetting {

@@ -158,7 +158,7 @@ final class SwarmUITests: XCTestCase {
             NSPredicate(format: "label BEGINSWITH %@", "Apple Maps")
         ).firstMatch
         XCTAssertTrue(apple.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Apple видит, какой участок карты открыт."].exists)
+        XCTAssertTrue(app.staticTexts["Онлайн-карта. Apple видит просматриваемый участок."].exists)
         XCTAssertFalse(app.alerts.firstMatch.exists)
     }
 
@@ -177,7 +177,7 @@ final class SwarmUITests: XCTestCase {
         name.click(); name.typeKey("a", modifierFlags: .command); name.typeText("Пётр")
         app.buttons["Сохранить"].click()
         XCTAssertTrue(app.staticTexts["Иванов Пётр"].waitForExistence(timeout: 5))
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
 
         let cardMenu = app.menuButtons["library.treeActions"].firstMatch
         XCTAssertTrue(cardMenu.waitForExistence(timeout: 10), "The card actions menu is not reachable")
@@ -206,7 +206,7 @@ final class SwarmUITests: XCTestCase {
     /// the revisions group must not come back.
     func testRecoveryNoLongerListsVersions() {
         createInitialTree()
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
         openRecoveryWorkspace()
         XCTAssertTrue(app.staticTexts["Восстановление"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["Вернуть эту версию"].exists, "Recovery is listing versions again")
@@ -261,7 +261,7 @@ final class SwarmUITests: XCTestCase {
 
     func testArchivedTreeAppearsInRecovery() {
         createInitialTree()
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
         app.menuButtons["library.treeActions"].click()
         app.menuItems["Удалить…"].click()
         let archive = app.windows.buttons["Архивировать (оставить файлы)"].firstMatch
@@ -278,7 +278,7 @@ final class SwarmUITests: XCTestCase {
 
     func testTreeCardAndActionsAreSeparateAccessibleControls() {
         createInitialTree()
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
 
         let card = app.buttons.matching(NSPredicate(format: "label CONTAINS 'UI Test'")).firstMatch
         XCTAssertTrue(card.waitForExistence(timeout: 3))
@@ -290,7 +290,7 @@ final class SwarmUITests: XCTestCase {
 
     func testBlankRenameExplainsHowToRecover() {
         createInitialTree()
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
         app.menuButtons["library.treeActions"].click()
         app.menuItems["Переименовать…"].click()
 
@@ -307,10 +307,10 @@ final class SwarmUITests: XCTestCase {
 
     func testVerifiedExportAndDeleteLeavesImportableBundle() throws {
         createInitialTree()
-        app.buttons["Вернуться к списку деревьев"].click()
+        app.buttons["К списку деревьев"].click()
         app.menuButtons["library.treeActions"].click()
         app.menuItems["Удалить…"].click()
-        app.windows.buttons["Экспортировать копию и удалить…"].firstMatch.click()
+        app.windows.buttons["Сохранить копию и удалить дерево…"].firstMatch.click()
 
         let exportFolder = storageURL.appendingPathComponent("Exports", isDirectory: true)
         try FileManager.default.createDirectory(at: exportFolder, withIntermediateDirectories: true)

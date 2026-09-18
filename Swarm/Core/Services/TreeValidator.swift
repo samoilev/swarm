@@ -72,7 +72,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).dangling-partner.\(partner)",
                     code: "relationship.dangling-person",
                     title: L10n.tr("Человек не найден"),
-                    message: L10n.tr("Семейная связь ссылается на отсутствующего человека."),
+                    message: L10n.tr("В семейной связи указан человек, которого нет в дереве."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -82,7 +82,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).dangling-child.\(child)",
                     code: "relationship.dangling-person",
                     title: L10n.tr("Не найден ребёнок"),
-                    message: L10n.tr("Семейная запись ссылается на отсутствующего ребёнка."),
+                    message: L10n.tr("В записи о семье указан ребёнок, которого нет в дереве."),
                     unionID: union.id,
                     field: "children"
                 ))
@@ -92,7 +92,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).self-partner",
                     code: "relationship.self-link",
                     title: L10n.tr("Связь с самим собой"),
-                    message: L10n.tr("Один человек не может занимать обе позиции партнёров."),
+                    message: L10n.tr("Один человек указан как оба партнёра."),
                     unionID: union.id,
                     field: "partners"
                 ))
@@ -127,7 +127,7 @@ public enum TreeValidator {
                     id: "parent-link.\(link.id).dangling",
                     code: "relationship.dangling-person",
                     title: L10n.tr("Неполная родительская связь"),
-                    message: L10n.tr("Один из участников родительской связи отсутствует."),
+                    message: L10n.tr("В связи между родителем и ребёнком указан человек, которого нет в дереве."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -140,7 +140,7 @@ public enum TreeValidator {
                 id: "relationship.cycle.\(signature)",
                 code: "relationship.ancestry-cycle",
                 title: L10n.tr("Цикл предков"),
-                message: L10n.tr("Цепочка родителей возвращается к исходному человеку."),
+                message: L10n.tr("В цепочке родственных связей человек оказался собственным предком."),
                 personID: cycle.first,
                 field: "parentage"
             ))
@@ -153,7 +153,7 @@ public enum TreeValidator {
                     id: "person.\(person.id).identity.missing-name",
                     code: "identity.missing-name",
                     title: L10n.tr("Не указано имя"),
-                    message: L10n.tr("У человека не указаны ни имя, ни фамилия."),
+                    message: L10n.tr("Не указаны имя и фамилия."),
                     personID: person.id,
                     field: "name"
                 ))
@@ -179,7 +179,7 @@ public enum TreeValidator {
                     id: "person.\(person.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Источник, на который ссылается запись, не найден."),
+                    message: L10n.tr("Не найден источник, указанный в записи."),
                     personID: person.id,
                     field: "citations"
                 ))
@@ -192,7 +192,7 @@ public enum TreeValidator {
                             id: "person.\(person.id).portrait.missing",
                             code: "file.missing",
                             title: L10n.tr("Портрет не найден"),
-                            message: L10n.tr("Файл портрета «\(photo)» отсутствует на диске."),
+                            message: L10n.tr("Не найден файл портрета «\(photo)»."),
                             personID: person.id,
                             field: "portrait"
                         ))
@@ -205,7 +205,7 @@ public enum TreeValidator {
                             id: "person.\(person.id).attachment.\(attachment.id).missing",
                             code: "file.missing",
                             title: L10n.tr("Файл не найден"),
-                            message: L10n.tr("Вложение «\(attachment.originalName)» отсутствует на диске."),
+                            message: L10n.tr("Не найден файл вложения «\(attachment.originalName)»."),
                             personID: person.id,
                             field: "attachments"
                         ))
@@ -232,7 +232,7 @@ public enum TreeValidator {
                     id: "union.\(union.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Источник, на который ссылается семейная связь, не найден."),
+                    message: L10n.tr("Не найден источник, указанный в семейной связи."),
                     unionID: union.id,
                     field: "citations"
                 ))
@@ -245,7 +245,7 @@ public enum TreeValidator {
                     id: "parent-link.\(link.id).citation.\(citation.id).missing-source",
                     code: "citation.missing-source",
                     title: L10n.tr("Источник не найден"),
-                    message: L10n.tr("Источник, на который ссылается родственная связь, не найден."),
+                    message: L10n.tr("Не найден источник, указанный в родственной связи."),
                     personID: link.childID,
                     field: "parentage"
                 ))
@@ -259,7 +259,7 @@ public enum TreeValidator {
                 issues.append(warning(
                     id: "gedcom.pointer.\(pointer)",
                     code: "gedcom.unresolved-pointer",
-                    title: L10n.tr("Ссылка GEDCOM на отсутствующую запись"),
+                    title: L10n.tr("В GEDCOM есть ссылка на запись, которой нет в файле"),
                     message: L10n.tr("Не найдена запись @\(pointer)@.")
                 ))
             }
@@ -268,15 +268,15 @@ public enum TreeValidator {
                     id: "gedcom.unsupported.\(tag)",
                     code: "gedcom.preserved-unsupported",
                     title: L10n.tr("Неподдерживаемая структура сохранена"),
-                    message: L10n.tr("Тег \(tag) не редактируется, но будет сохранён при экспорте.")
+                    message: L10n.tr("Тег \(tag) нельзя редактировать в Swarm. При экспорте он сохранится.")
                 ))
             }
             for path in report.missingMedia {
                 issues.append(warning(
                     id: "gedcom.media.missing.\(path)",
                     code: "file.missing",
-                    title: L10n.tr("Файл из GEDCOM не найден"),
-                    message: L10n.tr("Импортированный файл ссылается на отсутствующий путь «\(path)».")
+                    title: L10n.tr("Не найден файл, указанный в GEDCOM"),
+                    message: L10n.tr("Не найден файл, указанный при импорте: «\(path)».")
                 ))
             }
         }
@@ -311,7 +311,7 @@ public enum TreeValidator {
                 id: "id.duplicate.\(kind).\(id).occurrence.\(counts[id, default: 0])",
                 code: "identity.duplicate",
                 title: title,
-                message: L10n.tr("Идентификатор \(id.uuidString) используется более одного раза.")
+                message: L10n.tr("Идентификатор \(id.uuidString) повторяется.")
             ))
         }
     }
@@ -346,7 +346,7 @@ public enum TreeValidator {
                 id: "\(owner).event.\(event.id).invalid-date.\(date.rawValue)",
                 code: "date.invalid",
                 title: L10n.tr("Некорректная дата"),
-                message: L10n.tr("Дата «\(date.rawValue)» не соответствует календарю или диапазону."),
+                message: L10n.tr("Проверьте дату «\(date.rawValue)»: такой даты не существует или неверно указан диапазон."),
                 personID: personID,
                 unionID: unionID,
                 field: event.kind.rawValue
@@ -370,7 +370,7 @@ public enum TreeValidator {
                 id: "\(owner).event.\(event.id).invalid-coordinate.\(latitude).\(longitude)",
                 code: "place.invalid-coordinate",
                 title: L10n.tr("Некорректные координаты"),
-                message: L10n.tr("Широта должна быть от −90 до 90, долгота — от −180 до 180."),
+                message: L10n.tr("Широта: от −90 до 90. Долгота: от −180 до 180."),
                 personID: personID,
                 unionID: unionID,
                 field: event.kind.rawValue
@@ -395,7 +395,7 @@ public enum TreeValidator {
                 id: "person.\(person.id).chronology.age-over-125",
                 code: "chronology.unusual-lifespan",
                 title: L10n.tr("Необычная продолжительность жизни"),
-                message: L10n.tr("Разница между годами рождения и смерти превышает 125 лет."),
+                message: L10n.tr("По указанным годам рождения и смерти возраст превышает 125 лет."),
                 personID: person.id,
                 field: "death"
             ))
@@ -432,7 +432,7 @@ public enum TreeValidator {
                         id: "union.\(union.id).chronology.marriage-before-birth.\(partner.id)",
                         code: "chronology.marriage-before-birth",
                         title: L10n.tr("Хронология требует проверки"),
-                        message: L10n.tr("Год брака раньше года рождения одного из супругов."),
+                        message: L10n.tr("Указанный год брака раньше года рождения одного из супругов."),
                         personID: partner.id,
                         unionID: union.id,
                         field: "marriage"

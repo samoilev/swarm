@@ -347,7 +347,7 @@ struct MainWorkspace: View {
                 Button(L10n.tr("Удалить"), role: .destructive) { deletePerson() }
             } message: {
                 if let p = personToDelete {
-                    Text(L10n.tr("Карточка «\(p.displayName(language: .current))» и её связи будут удалены из дерева. Удаление можно отменить: ⌘Z."))
+                    Text(L10n.tr("Карточка «\(p.displayName(language: .current))» и все её связи будут удалены из дерева. Чтобы отменить удаление, нажмите ⌘Z."))
                 }
             }
             .alert(L10n.tr("Не удалось сохранить"), isPresented: $showSaveError) {
@@ -476,7 +476,7 @@ struct MainWorkspace: View {
             Image(systemName: "person.2.badge.plus")
                 .font(SepiaTheme.icon(size: 46))
                 .foregroundColor(SepiaTheme.inkSoft)
-            Text(L10n.tr("В дереве пока никого нет"))
+            Text(L10n.tr("Добавьте первого человека"))
                 .font(SepiaTheme.body(size: 18))
                 .foregroundColor(SepiaTheme.ink)
             Button { showAddSheet = true } label: {
@@ -531,7 +531,7 @@ struct MainWorkspace: View {
                 Image(systemName: "hand.point.up.left")
                     .font(SepiaTheme.icon(size: 12))
                     .foregroundColor(SepiaTheme.accent2)
-                Text(L10n.tr("⌘-щелчок по второму человеку покажет, кем они приходятся друг другу"))
+                Text(L10n.tr("Нажмите на другого человека, удерживая ⌘, чтобы узнать, кем они приходятся друг другу."))
                     .font(SepiaTheme.body(size: 12.5))
                     .foregroundColor(SepiaTheme.ink)
                 Button { dualSelectHintSeen = true } label: {
@@ -829,8 +829,8 @@ struct MainWorkspace: View {
             .buttonStyle(.glass)
             .buttonBorderShape(.circle)
             .foregroundStyle(SepiaTheme.ink)
-            .help(L10n.tr("Вернуться к списку деревьев"))
-            .accessibilityLabel(L10n.tr("Вернуться к списку деревьев"))
+            .help(L10n.tr("К списку деревьев"))
+            .accessibilityLabel(L10n.tr("К списку деревьев"))
         }
         .sharedBackgroundVisibility(.hidden)
 
@@ -909,8 +909,8 @@ struct MainWorkspace: View {
             }
             .buttonStyle(.glassProminent)
             .tint(SepiaTheme.accent)
-            .help(L10n.tr("Добавить человека в дерево"))
-            .accessibilityLabel(L10n.tr("Добавить человека в дерево"))
+            .help(L10n.tr("Добавить человека"))
+            .accessibilityLabel(L10n.tr("Добавить человека"))
 
             Button { showExportModal = true } label: {
                 Image(systemName: "square.and.arrow.up")
@@ -972,7 +972,7 @@ struct MainWorkspace: View {
                     Label(L10n.tr("Увеличить масштаб"), systemImage: "plus.magnifyingglass")
                 }
                 Button { fitRequest += 1 } label: {
-                    Label(L10n.tr("Центрировать и вписать дерево"), systemImage: "arrow.up.left.and.arrow.down.right")
+                    Label(L10n.tr("Показать дерево целиком"), systemImage: "arrow.up.left.and.arrow.down.right")
                 }
             }
 
@@ -1001,8 +1001,8 @@ struct MainWorkspace: View {
         }
         .menuIndicator(.hidden)
         .fixedSize()
-        .help(L10n.tr("Показать скрытые элементы панели инструментов"))
-        .accessibilityLabel(L10n.tr("Показать скрытые элементы панели инструментов"))
+        .help(L10n.tr("Показать остальные инструменты"))
+        .accessibilityLabel(L10n.tr("Показать остальные инструменты"))
     }
 
     private var titleBlock: some View {
@@ -1131,7 +1131,7 @@ struct MainWorkspace: View {
         .buttonStyle(WorkspaceToolbarIconButtonStyle(isActive: mapFocusScope != .everyone))
         .help(Self.mapFocusLabel(mapFocusScope))
         .accessibilityLabel(Self.mapFocusLabel(mapFocusScope))
-        .accessibilityHint(L10n.tr("Переключить, кого карта показывает целиком"))
+        .accessibilityHint(L10n.tr("Переключает карту между одним человеком, его ветвью и всем деревом."))
     }
 
     private static func mapFocusLabel(_ scope: MapFocus.Scope) -> String {
@@ -1208,8 +1208,8 @@ struct MainWorkspace: View {
                 .accessibilityLabel(L10n.tr("Увеличить масштаб"))
             Button { fitRequest += 1 } label: { Image(systemName: "arrow.up.left.and.arrow.down.right") }
                 .buttonStyle(WorkspaceToolbarIconButtonStyle())
-                .help(L10n.tr("Центрировать и вписать дерево"))
-                .accessibilityLabel(L10n.tr("Центрировать и вписать дерево"))
+                .help(L10n.tr("Показать дерево целиком"))
+                .accessibilityLabel(L10n.tr("Показать дерево целиком"))
             treeFunctionsMenu
         }
     }

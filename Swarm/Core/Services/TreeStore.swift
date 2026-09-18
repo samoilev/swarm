@@ -141,7 +141,7 @@ public final class TreeStore {
             try FileManager.default.createDirectory(at: appFolder, withIntermediateDirectories: true)
         } catch {
             self.storageFolder = appFolder
-            lastLoadError = L10n.tr("Не удалось открыть папку хранилища: \(error.localizedDescription)")
+            lastLoadError = L10n.tr("Не удалось открыть папку с данными: \(error.localizedDescription)")
             return
         }
         self.storageFolder = appFolder
@@ -160,11 +160,11 @@ public final class TreeStore {
         if currentExists, legacyExists {
             let metadataConflict = migrateLegacyMetadataFolders(in: current, fileManager: fm)
             var warning = L10n.tr(
-                "Найдены папки данных Swarm и предыдущей версии. Чтобы ничего не перезаписать, Swarm использует новую папку, а старую оставил без изменений."
+                "На этом Mac есть две папки с данными: Swarm и предыдущей версии. Swarm использует новую папку. Старая папка осталась без изменений."
             )
             if metadataConflict {
                 warning += "\n\n" + L10n.tr(
-                    "Некоторые старые папки истории также оставлены без изменений, потому что рядом уже есть папки Swarm."
+                    "Часть старых папок истории тоже оставлена без изменений: папки Swarm с такими именами уже существуют."
                 )
             }
             return DefaultStoragePreparation(folder: current, warning: warning, warningURL: legacy)
@@ -177,7 +177,7 @@ public final class TreeStore {
                 return DefaultStoragePreparation(
                     folder: legacy,
                     warning: L10n.tr(
-                        "Не удалось перенести папку данных в Swarm. Предыдущая папка используется без изменений: \(error.localizedDescription)"
+                        "Не удалось перенести данные в папку Swarm. Приложение продолжит использовать прежнюю папку: \(error.localizedDescription)"
                     ),
                     warningURL: legacy
                 )
@@ -187,7 +187,7 @@ public final class TreeStore {
         let metadataConflict = migrateLegacyMetadataFolders(in: current, fileManager: fm)
         let warning = metadataConflict
             ? L10n.tr(
-                "Некоторые старые папки истории оставлены без изменений, потому что рядом уже есть папки Swarm."
+                "Часть старых папок истории оставлена без изменений: папки Swarm с такими именами уже существуют."
             )
             : nil
         return DefaultStoragePreparation(
@@ -346,9 +346,9 @@ public final class TreeStore {
             lastLoadError = nil
         } else {
             let list = failedFolders.map { "• \($0)" }.joined(separator: "\n")
-            lastLoadError = L10n.tr("Эти файлы не удалось прочитать:\n\(list)\n\n")
-                + L10n.tr("Они лежат в папке архивов и не изменены. ")
-                + L10n.tr("Откройте «Показать в Finder», чтобы посмотреть или скопировать их.")
+            lastLoadError = L10n.tr("Не удалось прочитать файлы:\n\(list)\n\n")
+                + L10n.tr("Файлы остались в папке архивов без изменений. ")
+                + L10n.tr("Нажмите «Показать в Finder», чтобы посмотреть или скопировать файлы.")
         }
 
         // `contentsOfDirectory` returns whatever order the filesystem hands back, which
@@ -498,7 +498,7 @@ public final class TreeStore {
             // the displayed save time has to stay where it was. The snapshot carries it.
             tree.updatedAt = before.updatedAt
         } else {
-            lastSaveError = L10n.tr("Восстановление прервано, и вернуть прежнее состояние в памяти не удалось. Файлы на диске не изменились — перезапустите приложение.")
+            lastSaveError = L10n.tr("Не удалось завершить восстановление. Файлы на диске не изменились. Перезапустите приложение, чтобы открыть их снова.")
         }
     }
 
@@ -517,7 +517,7 @@ public final class TreeStore {
         do {
             try FileManager.default.moveItem(at: destination, to: originalArchiveURL)
         } catch {
-            lastLoadError = L10n.tr("Архив не удалось подключить; его папка сохранена: \(destination.path)")
+            lastLoadError = L10n.tr("Не удалось подключить архив. Его папка осталась на месте: \(destination.path)")
         }
         load()
         throw TreeStoreError.treeFolderMissing
@@ -1007,7 +1007,7 @@ public final class TreeStore {
         do {
             try fm.removeItem(at: rollback)
         } catch {
-            warnings.append(L10n.tr("Старая резервная папка не удалена: \(rollback.lastPathComponent)"))
+            warnings.append(L10n.tr("Не удалось удалить старую папку резервной копии: \(rollback.lastPathComponent)"))
         }
     }
 
@@ -1083,7 +1083,7 @@ public final class TreeStore {
     /// Rename a tree's title and subtitle, then persist to its .ged file.
     public func renameTreeVerified(_ tree: FamilyTree, name: String, subtitle: String?) async throws -> SaveReceipt {
         let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: L10n.tr("Название не может быть пустым.")) }
+        guard !trimmedName.isEmpty else { throw TreeStoreError.commitFailed(reason: L10n.tr("Введите название.")) }
         let previousName = tree.name
         let previousSubtitle = tree.subtitle
         tree.name = trimmedName
@@ -1114,7 +1114,7 @@ public final class TreeStore {
             trees.removeAll { $0.id == tree.id }
             diagramCache.removeValue(forKey: tree.id)
         } catch {
-            lastSaveError = L10n.tr("Не удалось архивировать «\(tree.name)»: \(error.localizedDescription)")
+            lastSaveError = L10n.tr("Не удалось переместить «\(tree.name)» в архив: \(error.localizedDescription)")
             return nil
         }
         return dest
@@ -1229,7 +1229,7 @@ public final class TreeStore {
                         id: "import.sibling-unreadable.\(name)",
                         severity: .warning,
                         message: L10n.tr(
-                            "Папку «\(name)» рядом с файлом прочитать не удалось, дерево импортируется без неё. Выберите папку архива целиком, чтобы macOS дала доступ к вложенным файлам: \(error.localizedDescription)"
+                            "Нет доступа к папке «\(name)» рядом с файлом. Дерево будет импортировано без файлов из неё. Чтобы добавить их, выберите всю папку архива. Подробнее: \(error.localizedDescription)"
                         )
                     ))
                 }
@@ -1273,7 +1273,7 @@ public final class TreeStore {
             result.report.diagnostics.append(ImportDiagnostic(
                 id: "import.duplicate-tree-id",
                 severity: .warning,
-                message: L10n.tr("Идентификатор уже существовал в библиотеке; импортированной копии назначен новый.")
+                message: L10n.tr("Дерево с таким идентификатором уже есть в библиотеке. Импортированной копии присвоен новый идентификатор.")
             ))
         }
         let importedIssues = TreeValidator.validate(tree)
@@ -1282,7 +1282,7 @@ public final class TreeStore {
             result.report.diagnostics.append(ImportDiagnostic(
                 id: "import.validation.\(issue.id)",
                 severity: .warning,
-                message: L10n.tr("Импортированная проблема сохранена для проверки: \(issue.message)")
+                message: L10n.tr("В импортированных данных есть ошибка. Она сохранена для проверки: \(issue.message)")
             ))
         }
         tree.importReport = result.report

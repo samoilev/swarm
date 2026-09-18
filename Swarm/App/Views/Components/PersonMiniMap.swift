@@ -54,7 +54,7 @@ struct ApplePersonMiniMap: View {
                 .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(SepiaTheme.cardLine, lineWidth: 1))
                 .overlay(alignment: .topLeading) { legend }
             } else if resolved {
-                placeholder(text: L10n.tr("Не удалось определить место на карте"))
+                placeholder(text: L10n.tr("Не удалось найти место на карте"))
             } else {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8).fill(SepiaTheme.cardBg)

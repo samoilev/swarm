@@ -164,7 +164,7 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         for (index, raw) in rawLines.enumerated() {
             let node = try parseLine(raw, lineNumber: index + 1)
             if index == 0, node.level != 0 {
-                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Первая запись должна иметь уровень 0"))
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Первая запись GEDCOM должна начинаться с уровня 0."))
             }
             if index > 0, node.level > previousLevel + 1 {
                 throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Пропущен уровень вложенности"))
@@ -177,7 +177,7 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         var records: [GEDCOMNode] = []
         while index < flat.count {
             guard flat[index].level == 0 else {
-                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Строка вне записи уровня 0"))
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Строка GEDCOM не относится ни к одной записи уровня 0."))
             }
             records.append(buildNode(from: flat, index: &index))
         }
@@ -315,11 +315,11 @@ public enum GEDCOMCodecError: LocalizedError, Equatable {
         case .emptyDocument:
             L10n.tr("GEDCOM-файл пуст.")
         case let .invalidLine(line, _):
-            L10n.tr("Некорректная строка GEDCOM: \(line).")
+            L10n.tr("Ошибка в строке GEDCOM: \(line).")
         case let .invalidStructure(line, reason):
-            L10n.tr("Некорректная структура GEDCOM в строке \(line): \(reason).")
+            L10n.tr("Ошибка в структуре GEDCOM, строка \(line): \(reason).")
         case .missingHeader:
-            L10n.tr("В GEDCOM-файле отсутствует запись HEAD.")
+            L10n.tr("В файле GEDCOM нет заголовка HEAD.")
         }
     }
 }
@@ -465,7 +465,7 @@ public enum GEDCOMCodec {
             diagnostics.append(ImportDiagnostic(
                 id: "gedcom.missing-trailer",
                 severity: .warning,
-                message: L10n.tr("В файле отсутствует завершающая запись TRLR; данные сохранены.")
+                message: L10n.tr("В файле нет завершающей записи TRLR. Данные сохранены.")
             ))
         }
 
@@ -492,7 +492,7 @@ public enum GEDCOMCodec {
                 diagnostics.append(ImportDiagnostic(
                     id: "gedcom.living-death-conflict.\(record.xref ?? record.id.uuidString)",
                     severity: .warning,
-                    message: L10n.tr("Запись одновременно помечена как живая и содержит сведения о смерти; исходные данные сохранены для проверки."),
+                    message: L10n.tr("Человек отмечен как живой, но в записи есть сведения о смерти. Данные сохранены, чтобы вы могли их проверить."),
                     recordXref: record.xref
                 ))
             }

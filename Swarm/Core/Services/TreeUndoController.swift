@@ -54,7 +54,7 @@ public final class TreeUndoController {
             sessionBase = try Self.encoder.encode(tree)
         } catch {
             sessionBase = nil
-            lastError = L10n.tr("Отмена (⌘Z) недоступна для этого изменения.")
+            lastError = L10n.tr("Это изменение нельзя отменить с помощью ⌘Z.")
         }
     }
 
@@ -111,7 +111,7 @@ public final class TreeUndoController {
         do {
             return try Self.decoder.decode(FamilyTree.self, from: data)
         } catch {
-            lastError = L10n.tr("Не удалось отменить: снимок изменения повреждён.")
+            lastError = L10n.tr("Не удалось отменить изменение: данные для отмены повреждены.")
             return nil
         }
     }

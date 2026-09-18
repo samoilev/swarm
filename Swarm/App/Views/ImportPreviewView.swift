@@ -17,8 +17,8 @@ struct ImportPreviewView: View {
 
     private var acknowledgementLabel: String {
         result.report.errors.isEmpty
-            ? L10n.tr("Я понимаю предупреждения; сохранённые структуры останутся в GEDCOM")
-            : L10n.tr("Я понимаю: в файле есть ошибки. Их можно исправить в «Проверке» после импорта.")
+            ? L10n.tr("Продолжить с этими предупреждениями. Данные, которые нельзя редактировать в Swarm, сохранятся в GEDCOM.")
+            : L10n.tr("Продолжить импорт с ошибками. Их можно исправить позже в разделе «Проверка».")
     }
 
     var body: some View {
@@ -26,7 +26,7 @@ struct ImportPreviewView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(L10n.tr("Предпросмотр импорта")).font(SepiaType.display).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("Исходный файл будет сохранён как original-import.ged"))
+                    Text(L10n.tr("Копия исходного файла сохранится под именем original-import.ged."))
                         .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)
                 }
                 Spacer()
@@ -51,7 +51,7 @@ struct ImportPreviewView: View {
                         diagnosticRow(diagnostic)
                     }
                     if !result.report.preservedUnsupportedTags.isEmpty {
-                        reportRow(L10n.tr("Данные без поддержки редактирования"), result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
+                        reportRow(L10n.tr("Данные, которые нельзя редактировать"), result.report.preservedUnsupportedTags.sorted().joined(separator: ", "), icon: "shippingbox")
                     }
                     if !result.report.unresolvedPointers.isEmpty {
                         reportRow(L10n.tr("Ссылки на отсутствующие записи"), result.report.unresolvedPointers.sorted().joined(separator: ", "), icon: "link.badge.plus")

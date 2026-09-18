@@ -239,7 +239,7 @@ struct OnboardingView: View {
             SepiaTextField(
                 label: L10n.tr("Подзаголовок (необязательно)"),
                 text: $subtitle,
-                placeholder: L10n.tr("напр. Потомки Ивана и Марии"),
+                placeholder: L10n.tr("Например, потомки Ивана и Марии"),
                 height: 46, radius: 12, fontSize: 17
             )
             .focused($focusedField, equals: .subtitle)
@@ -551,7 +551,7 @@ struct OnboardingView: View {
                     .foregroundColor(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
-                Text(L10n.tr("Введённые данные остались в форме. Попробуйте ещё раз."))
+                Text(L10n.tr("Всё, что вы ввели, осталось в форме. Попробуйте ещё раз."))
                     .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
@@ -596,7 +596,7 @@ struct OnboardingView: View {
             return fail(.treeName, L10n.tr("Введите название дерева."))
         }
         if trimmed(surname).isEmpty, trimmed(givenNames).isEmpty {
-            return fail(.surname, L10n.tr("Впишите имя или фамилию первого человека."))
+            return fail(.surname, L10n.tr("Введите имя или фамилию первого человека."))
         }
         return true
     }
@@ -615,7 +615,7 @@ struct OnboardingView: View {
             return
         }
         if role != nil, trimmed(relativeSurname).isEmpty, trimmed(relativeGivenNames).isEmpty {
-            _ = fail(.relativeGivenNames, L10n.tr("Впишите имя родственника или снимите выбор роли."))
+            _ = fail(.relativeGivenNames, L10n.tr("Введите имя родственника или отмените выбор родства."))
             return
         }
 

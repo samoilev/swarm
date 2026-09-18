@@ -214,8 +214,8 @@ struct SepiaNotesField: View {
                     .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
                     .accessibilityIdentifier(identifier.map { "\($0).overflow" } ?? "")
-                    .accessibilityLabel(L10n.tr("Заметка очень длинная. Текст сохранён полностью."))
-                    .help(L10n.tr("Заметка очень длинная. Текст сохранён полностью."))
+                    .accessibilityLabel(L10n.tr("Длинная заметка. Весь текст сохранён."))
+                    .help(L10n.tr("Длинная заметка. Весь текст сохранён."))
             }
         }
     }
@@ -292,7 +292,7 @@ struct SepiaDateField: View {
                 }
             }
             if !text.isEmpty, !isValidDate {
-                Text(L10n.tr("Введите существующую дату или полный диапазон: ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ"))
+                Text(L10n.tr("Проверьте дату. Используйте формат ДД.ММ.ГГГГ, ММ.ГГГГ или ГГГГ. Для диапазона укажите начало и конец."))
                     .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.danger)
                     .fixedSize(horizontal: false, vertical: true)

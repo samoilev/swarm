@@ -112,9 +112,9 @@ public struct PendingMigration: Identifiable, Hashable, Sendable {
 
         public var label: String {
             switch self {
-            case .treeFolder: L10n.tr("Обновление до текущего формата папки")
-            case .legacyFile: L10n.tr("Отдельный файл GEDCOM старого формата")
-            case .legacyJSON: L10n.tr("Старая база trees.json")
+            case .treeFolder: L10n.tr("Обновление формата папки дерева")
+            case .legacyFile: L10n.tr("Файл GEDCOM в старом формате")
+            case .legacyJSON: L10n.tr("Старая база данных trees.json")
             }
         }
     }
@@ -147,21 +147,21 @@ public enum TreeStoreError: LocalizedError {
         case .treeFolderMissing:
             L10n.tr("Папка дерева не найдена.")
         case let .verificationFailed(path):
-            L10n.tr("Проверка записанного файла не пройдена: \(path).")
+            L10n.tr("В сохранённом файле обнаружена ошибка: \(path).")
         case let .commitFailed(reason):
             L10n.tr("Не удалось сохранить: \(reason).")
         case .invalidImport:
-            L10n.tr("GEDCOM содержит ошибки, блокирующие импорт.")
+            L10n.tr("Из-за ошибок в GEDCOM этот файл нельзя импортировать.")
         case let .validationFailed(issues):
             L10n.tr("Сохранение заблокировано: \(issues.first?.message ?? L10n.tr("обнаружена ошибка данных")).")
         case .recoveryItemMissing:
-            L10n.tr("Элемент восстановления больше не существует.")
+            L10n.tr("Этот файл или копия больше не доступны для восстановления.")
         case .migrationRequired:
-            L10n.tr("Чтобы сохранять изменения, обновите формат дерева в разделе «Восстановление».")
+            L10n.tr("Чтобы сохранять изменения, откройте «Восстановление» и обновите формат дерева.")
         case let .noGEDCOMInFolder(folder):
             L10n.tr("В папке «\(folder)» нет файла GEDCOM.")
         case let .ambiguousGEDCOMInFolder(folder):
-            L10n.tr("В папке «\(folder)» несколько файлов GEDCOM. Выберите нужный файл, а не папку.")
+            L10n.tr("В папке «\(folder)» несколько файлов GEDCOM. Выберите тот, который хотите открыть.")
         }
     }
 }

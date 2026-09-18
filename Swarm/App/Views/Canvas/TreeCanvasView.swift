@@ -991,7 +991,7 @@ private struct TreeMinimap: View {
                 .strokeBorder(SepiaTheme.cardLine.opacity(0.42), lineWidth: 1)
         }
         .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        .help(L10n.tr("Обзор дерева — нажмите, чтобы перейти"))
+        .help(L10n.tr("Нажмите на обзорную схему, чтобы перейти к этой части дерева."))
         .accessibilityHidden(true)
     }
 }

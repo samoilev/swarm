@@ -33,7 +33,7 @@ struct PhotoCropView: View {
                             .font(SepiaTheme.display(size: 18))
                             .fontWeight(.semibold)
                             .foregroundColor(SepiaTheme.ink)
-                        Text(L10n.tr("Перемещайте рамку и меняйте её размер за углы"))
+                        Text(L10n.tr("Перетащите рамку. Чтобы изменить её размер, потяните за угол."))
                             .font(SepiaTheme.body(size: 11))
                             .foregroundColor(SepiaTheme.inkSoft)
                     }

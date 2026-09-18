@@ -56,7 +56,7 @@ struct VersionHistoryView: View {
         .onAppear { refresh() }
         .task(id: items.map(\.id)) { await loadSummaries() }
         .confirmationDialog(
-            L10n.tr("Вернуть версию от \(pendingRestore.map { formattedTimestamp($0.createdAt) } ?? "")?"),
+            L10n.tr("Восстановить версию от \(pendingRestore.map { formattedTimestamp($0.createdAt) } ?? "")?"),
             isPresented: Binding(
                 get: { pendingRestore != nil },
                 set: { if !$0 { pendingRestore = nil } }
@@ -69,7 +69,7 @@ struct VersionHistoryView: View {
             }
             Button(L10n.tr("Отмена"), role: .cancel) { pendingRestore = nil }
         } message: {
-            Text(L10n.tr("Текущая версия сохранится в истории. Вы сможете восстановить её позже."))
+            Text(L10n.tr("Текущая версия останется в истории. К ней можно будет вернуться."))
         }
         .alert(L10n.tr("Не удалось восстановить"), isPresented: Binding(
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
@@ -81,7 +81,7 @@ struct VersionHistoryView: View {
     private var header: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Предыдущие версии"),
-            subtitle: L10n.tr("Хранятся последние 50 версий дерева. Фотографии и вложения в них не входят."),
+            subtitle: L10n.tr("Здесь хранятся последние 50 версий дерева без фотографий и вложений."),
             minimumHeight: 68,
             closeLabel: L10n.tr("Закрыть предыдущие версии"),
             closeDisabled: isWorking,
@@ -108,7 +108,7 @@ struct VersionHistoryView: View {
                 // A revision is GEDCOM text only; files removed since then come back from
                 // the 30-day trash instead. Naming both halves in that order stops the
                 // sentence reading as "the files are gone, and also they are kept".
-                Text(L10n.tr("Удалённые фотографии и вложения доступны в разделе «Восстановление» в течение 30 дней."))
+                Text(L10n.tr("Удалённые фотографии и вложения можно вернуть через раздел «Восстановление» в течение 30 дней после удаления."))
                     .font(SepiaTheme.ui(size: 10.5))
                     .foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
@@ -141,9 +141,9 @@ struct VersionHistoryView: View {
         VStack(spacing: 8) {
             Image(systemName: "clock.arrow.circlepath")
                 .font(.system(size: 32)).foregroundStyle(SepiaTheme.inkSoft.opacity(0.6))
-            Text(L10n.tr("Пока нет предыдущих версий"))
+            Text(L10n.tr("Предыдущих версий пока нет"))
                 .font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
-            Text(L10n.tr("Версия записывается при каждом сохранении. Первая появится после следующей правки."))
+            Text(L10n.tr("При каждом сохранении создаётся версия дерева. Первая появится после следующего изменения."))
                 .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                 .multilineTextAlignment(.center)
         }
@@ -162,7 +162,7 @@ struct VersionHistoryView: View {
             Image(systemName: "checkmark.circle")
                 .foregroundStyle(SepiaTheme.accent2).frame(width: 24)
             VStack(alignment: .leading, spacing: 3) {
-                Text(L10n.tr("Сейчас · сохранено в \(AppLanguage.current.formatted(tree.updatedAt, dateStyle: .none, timeStyle: .short))"))
+                Text(L10n.tr("Текущая версия · сохранено в \(AppLanguage.current.formatted(tree.updatedAt, dateStyle: .none, timeStyle: .short))"))
                     .font(SepiaTheme.body(size: 14)).foregroundStyle(SepiaTheme.ink)
                 Text(counts)
                     .font(SepiaTheme.ui(size: 10.5)).foregroundStyle(SepiaTheme.inkSoft)

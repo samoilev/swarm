@@ -50,7 +50,7 @@ struct PeopleWorkspaceView: View {
                     Text(L10n.tr("Все места")).tag("")
                     ForEach(Array(Set(index.searchEntries.flatMap(\.places))).sorted(), id: \.self) { Text($0).tag($0) }
                 }.frame(width: 200)
-                Toggle(L10n.tr("С пропусками в данных"), isOn: $missingOnly)
+                Toggle(L10n.tr("Не хватает данных"), isOn: $missingOnly)
             }
         } content: {
             LazyVStack(spacing: 0) {
@@ -247,7 +247,7 @@ struct ReviewWorkspaceView: View {
             HStack {
                 Toggle(L10n.tr("Только ошибки"), isOn: $errorsOnly)
                 Spacer()
-                Text(L10n.tr("Сохранение недоступно, если правка добавляет ошибки или усугубляет существующие."))
+                Text(L10n.tr("Сохранить изменения можно, только если они не добавляют новых ошибок и не усугубляют прежние."))
                     .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
             }
         } content: {

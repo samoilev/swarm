@@ -205,7 +205,7 @@ struct EditPersonView: View {
                             selectedBirthPlace = $0
                             prefillCoords(for: $0, into: $birthCoords)
                         }.padding(.bottom, 8).zIndex(1)
-                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
+                        SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $birthCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 12)
 
                         SectionHeader(title: L10n.tr("Смерть и погребение"))
                         Toggle(isOn: $isLiving) {
@@ -223,12 +223,12 @@ struct EditPersonView: View {
                                 selectedDeathPlace = $0
                                 prefillCoords(for: $0, into: $deathCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 8)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ"), text: $deathCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 8)
                             PlacePickerField(label: L10n.tr("МЕСТО ЗАХОРОНЕНИЯ"), text: $burialPlace, placeholder: "—") {
                                 selectedBurialPlace = $0
                                 prefillCoords(for: $0, into: $burialCoords)
                             }.padding(.bottom, 8).zIndex(1)
-                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("напр. 55.7558, 37.6173")).padding(.bottom, 12)
+                            SepiaTextField(label: L10n.tr("КООРДИНАТЫ МОГИЛЫ"), text: $burialCoords, placeholder: L10n.tr("Например, 55.7558, 37.6173")).padding(.bottom, 12)
                         }
 
                         SectionHeader(title: L10n.tr("Жизнь"))
@@ -274,7 +274,7 @@ struct EditPersonView: View {
         .alert(L10n.tr("Не удалось открыть редактор"), isPresented: $sessionLoadFailed) {
             Button("OK", role: .cancel) { cancelEditing() }
         } message: {
-            Text(L10n.tr("Не удалось подготовить черновик. Данные не изменены — попробуйте ещё раз."))
+            Text(L10n.tr("Не удалось открыть карточку для редактирования. Данные не изменились. Попробуйте ещё раз."))
         }
         .sheet(isPresented: Binding(get: { cropSource != nil }, set: { if !$0 { cropSource = nil } })) {
             if let img = cropSource {
@@ -465,7 +465,7 @@ struct EditPersonView: View {
                 SepiaTextField(
                     label: L10n.tr("ВИД ЗАПИСИ"),
                     text: draftBinding(\.detail),
-                    placeholder: L10n.tr("напр. запись о рождении"),
+                    placeholder: L10n.tr("Например, запись о рождении"),
                     identifier: "source.kind"
                 )
             }
@@ -473,7 +473,7 @@ struct EditPersonView: View {
             SepiaNotesField(
                 label: L10n.tr("РАСШИФРОВКА"),
                 text: draftBinding(\.transcription),
-                placeholder: L10n.tr("Точная запись из источника…"),
+                placeholder: L10n.tr("Цитата из источника…"),
                 identifier: "source.transcription"
             )
             SepiaNotesField(
@@ -906,7 +906,7 @@ struct EditPersonView: View {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         guard let img = NSImage(contentsOf: url) else {
-            saveError = L10n.tr("Не удалось открыть файл изображения.")
+            saveError = L10n.tr("Не удалось открыть изображение.")
             return
         }
         cropSource = img
@@ -999,7 +999,7 @@ struct EditPersonView: View {
         let deathCoordinatesAccepted = isLiving || deathCoords == originalDeathCoords || validCoordinateText(deathCoords)
         let burialCoordinatesAccepted = isLiving || burialCoords == originalBurialCoords || validCoordinateText(burialCoords)
         guard birthCoordinatesAccepted, deathCoordinatesAccepted, burialCoordinatesAccepted else {
-            saveError = L10n.tr("Координаты должны иметь формат «широта, долгота» и находиться в допустимом диапазоне.")
+            saveError = L10n.tr("Введите широту и долготу через запятую. Широта: от −90 до 90, долгота: от −180 до 180.")
             return
         }
         let parsedBirthDate = parsedDate(text: birthDate, end: birthDateEnd, qualifier: birthQualifier, original: originalBirthDate)
@@ -1010,7 +1010,7 @@ struct EditPersonView: View {
             original: originalDeathDate
         )
         if (!birthDate.isEmpty && parsedBirthDate == nil) || (!isLiving && !deathDate.isEmpty && parsedDeathDate == nil) {
-            saveError = L10n.tr("Исправьте некорректные даты перед сохранением.")
+            saveError = L10n.tr("Проверьте даты перед сохранением.")
             return
         }
         // The add sheet refuses a nameless person; the editor must too, or an
@@ -1207,7 +1207,7 @@ private struct UnionDraftEditor: View {
                     }
                     .buttonStyle(.glass)
                     .buttonBorderShape(.circle)
-                    .help(L10n.tr("Удалить ребёнка из союза"))
+                    .help(L10n.tr("Убрать ребёнка из этого союза"))
                 }
             }
             HStack {

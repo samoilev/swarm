@@ -20,7 +20,7 @@ struct TreeMergeView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(L10n.tr("Объединение деревьев")).font(SepiaType.display).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("Добавить людей и сведения из другого дерева в «\(localTree.name)»."))
+                    Text(L10n.tr("Люди и сведения из другого дерева добавятся в «\(localTree.name)»."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: 560, alignment: .leading)
@@ -45,17 +45,17 @@ struct TreeMergeView: View {
                         mergeSection(
                             L10n.tr("Совпадения по идентификатору"),
                             count: preview.automaticMatches.count,
-                            explanation: L10n.tr("Опознаны по идентификатору, записанному в самом файле. Объединятся автоматически.")
+                            explanation: L10n.tr("У этих записей совпадают идентификаторы в файле. Они объединятся автоматически.")
                         ) {
                             ForEach(preview.automaticMatches) { match in matchRow(match, selected: true, toggle: nil) }
                         }
                         mergeSection(
-                            L10n.tr("Возможно, один и тот же человек"),
+                            L10n.tr("Возможно, это один человек"),
                             count: preview.heuristicSuggestions.count,
-                            explanation: L10n.tr("Совпали имя, год рождения и ещё один факт. Отметьте тех, кого считаете одним человеком; остальные добавятся как новые.")
+                            explanation: L10n.tr("Совпали имя, год рождения и ещё один факт. Отметьте записи об одном и том же человеке, чтобы объединить их. Остальные люди добавятся отдельно.")
                         ) {
                             if preview.heuristicSuggestions.isEmpty {
-                                Text(L10n.tr("Похожих людей не нашлось.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
+                                Text(L10n.tr("Похожих людей не найдено.")).font(SepiaTheme.body(size: 12)).foregroundStyle(SepiaTheme.inkSoft)
                             }
                             ForEach(preview.heuristicSuggestions) { match in
                                 matchRow(match, selected: preview.acceptedHeuristicMatchIDs.contains(match.id)) {
@@ -66,7 +66,7 @@ struct TreeMergeView: View {
                         mergeSection(
                             L10n.tr("Расхождения в фактах"),
                             count: preview.conflicts.count,
-                            explanation: L10n.tr("Один и тот же факт записан по-разному в двух деревьях. Выберите, что оставить.")
+                            explanation: L10n.tr("В двух деревьях указаны разные сведения об одном факте. Выберите, какие оставить.")
                         ) {
                             ForEach(preview.conflicts.indices, id: \.self) { index in conflictRow(index) }
                         }
@@ -77,7 +77,7 @@ struct TreeMergeView: View {
                 VStack(spacing: 14) {
                     Image(systemName: "arrow.triangle.merge").font(SepiaTheme.icon(size: 44)).foregroundStyle(SepiaTheme.inkSoft)
                     Text(L10n.tr("Выберите файл для объединения")).font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
-                    Text(L10n.tr("Сначала вы увидите предпросмотр — до вашего подтверждения дерево не меняется."))
+                    Text(L10n.tr("Сначала проверьте, что будет добавлено. Дерево изменится только после вашего подтверждения."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     Button(L10n.tr("Выбрать файл…")) { showImporter = true }
                         .buttonStyle(.glassProminent)
@@ -88,7 +88,7 @@ struct TreeMergeView: View {
             }
 
             if preview != nil {
-                Text(L10n.tr("Перед объединением создаётся резервная копия"))
+                Text(L10n.tr("Перед объединением будет создана резервная копия."))
                     .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .padding(.horizontal, 16).padding(.bottom, 8)
             }

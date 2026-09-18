@@ -247,10 +247,10 @@ struct ContentView: View {
             (nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
         if denied {
             return L10n.tr(
-                "Нет доступа к этому файлу. Выберите папку архива целиком — тогда macOS разрешит прочитать и фотографии с вложениями рядом с ним.\n\n\(error.localizedDescription)"
+                "Нет доступа к файлу. Выберите всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n\(error.localizedDescription)"
             )
         }
-        return L10n.tr("Файл повреждён или имеет неподдерживаемый формат.\n\n\(error.localizedDescription)")
+        return L10n.tr("Файл повреждён или Swarm не поддерживает его формат.\n\n\(error.localizedDescription)")
     }
 
     private func commitImportPreview() {

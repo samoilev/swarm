@@ -23,6 +23,9 @@ docs/e2e-post-3.3.1-execution-report.md
 # Impeccable critique snapshots / notes — local only
 .impeccable/
 
+# Local copy and translation reviews
+docs/reviews/
+
 # Local agent tooling and instructions — not part of the published project
 .claude/
 AGENTS.md
