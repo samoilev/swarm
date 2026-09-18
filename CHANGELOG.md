@@ -11,6 +11,17 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.2] — 2026-09-18
+
+### Fixed
+
+- Interface copy reads as written rather than translated, in both languages. The pass
+  covers the workspace and its toolbars, the library, onboarding, recovery, the merge and
+  version-history sheets, validator messages and the strings the persistence layer
+  surfaces — the places where a machine-like phrasing had survived. The map privacy text
+  is shorter, and formatting that the layout depends on is preserved, so nothing that had
+  been fitted to a row grew out of it.
+
 ## [3.5.1] — 2026-09-17
 
 ### Fixed
@@ -1001,7 +1012,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.1...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.2...HEAD
+[3.5.2]: https://github.com/samoilev/swarm/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/samoilev/swarm/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/samoilev/swarm/compare/v3.4.0...v3.5.0
 [3.4.0]: https://github.com/samoilev/swarm/compare/v3.3.1...v3.4.0
