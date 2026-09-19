@@ -11,6 +11,48 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.3] — 2026-09-19
+
+Swarm runs on **macOS 15 or later**, on Intel as well as Apple silicon. The floor was
+macOS 26 and the build was arm64-only, which locked out every Intel Mac and every machine
+not yet updated. The DMG ships universal now.
+
+Liquid Glass is unaffected on macOS 26 and later. The system picks the new look from the
+SDK a binary was linked against, not from its deployment target — separate fields in the
+load command — which was verified by pixel-diffing the library, the workspace toolbar and
+the add-relative sheet against 3.5.2 on macOS 27: zero differing pixels.
+
+### Changed
+
+- All 117 macOS 26 call sites moved behind shims in one file, the only place allowed to
+  name a 26-only symbol, with a lint step on the free Ubuntu CI job keeping them there.
+  Below 26 the fallbacks reuse the app's own button style rather than stock AppKit
+  controls, which would read as a second design system beside the sepia ones in the same
+  rows.
+- The DMG script stops hardcoding the products path, which SwiftPM had already moved, and
+  pins the linked SDK and minimum OS explicitly. Without that pin the current default
+  build system writes the SDK field as the deployment target, which would silently drop
+  every macOS 26 user into the old look with nothing in the pipeline noticing. The script
+  now fails on a non-universal binary or a linked SDK below 26.0, and publishing is gated
+  on smoke-testing the built DMG on both an Intel and an Apple-silicon macOS 15 runner.
+- The README drops its universal-binary badge; the badge row already carries the macOS
+  floor, and the architecture is covered in the Install section in prose.
+
+### Fixed
+
+- The trailing toolbar cluster is back below macOS 26. The flexible spacer resolved to
+  nothing there, on the reasoning that a primary-action item right-aligns by itself and
+  that a spacer in a toolbar item collapses. Neither holds: the library's search, sort,
+  import and new-tree controls all packed against the wordmark on the leading edge.
+  Onboarding's toolbar had the same spacer and the same problem.
+- Circular fallback buttons take the toolbar's control size below macOS 26. The glass
+  button style supplies control metrics on 26 and later, so the home and share buttons
+  rendered full size there despite framing no label, while below 26 both collapsed to the
+  size of their 12pt glyph. Circles now take a minimum 30×30 square — a minimum rather
+  than a fixed frame, so the 34pt panel close buttons keep their own size.
+- The duplicate-suggestion row had been rendering a blank icon: the symbol it asked for
+  does not exist on any macOS.
+
 ## [3.5.2] — 2026-09-18
 
 ### Fixed
@@ -1012,7 +1054,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.2...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.3...HEAD
+[3.5.3]: https://github.com/samoilev/swarm/compare/v3.5.2...v3.5.3
 [3.5.2]: https://github.com/samoilev/swarm/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/samoilev/swarm/compare/v3.5.0...v3.5.1
 [3.5.0]: https://github.com/samoilev/swarm/compare/v3.4.0...v3.5.0
