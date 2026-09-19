@@ -428,22 +428,30 @@ extension View {
 struct SepiaButtonStyle: ButtonStyle {
     var isActive: Bool = false
     var shape = SepiaShape(kind: .rounded(7))
-    /// `nil` leaves the label's own frame alone. Circular icon buttons already set an
-    /// explicit square frame; forcing the 30pt bar height on top of it makes an oval.
+    /// `nil` leaves the label's own frame alone, for the circular case below.
     var height: CGFloat? = 30
     var horizontalPadding: CGFloat = 10
+    /// Circular buttons size to a square and only ever *grow* to it. A bare glyph gets
+    /// the toolbar's 30pt control size; a call site that already frames its label larger
+    /// (the 34pt panel close buttons) keeps its own size instead of being squashed.
+    var minSquare: CGFloat?
 
-    /// The style behind `sepiaGlassButton(_:)`, which has to match `.sepiaGlassButton(.circle)`
-    /// under a `.buttonBorderShape(.circle)`/`.capsule` that the glass style honours and
-    /// a plain `ButtonStyle` does not see.
+    /// The style behind `sepiaGlassButton(_:)`, which has to stand in for the macOS 26
+    /// glass button style under a `.buttonBorderShape(.circle)`/`.capsule` that the glass
+    /// style honours and a plain `ButtonStyle` does not see.
     static func forShape(_ kind: SepiaShape.Kind, isActive: Bool = false) -> SepiaButtonStyle {
         switch kind {
         case .circle:
+            // 30pt matches WorkspaceToolbarIconChrome, the app's own circular toolbar
+            // control. `.buttonStyle(.glass)` supplies these metrics itself on macOS 26;
+            // a plain ButtonStyle gets nothing, so an unframed glyph renders as a button
+            // the size of the glyph.
             SepiaButtonStyle(
                 isActive: isActive,
                 shape: SepiaShape(kind: .circle),
                 height: nil,
-                horizontalPadding: 0
+                horizontalPadding: 0,
+                minSquare: 30
             )
         case .capsule:
             SepiaButtonStyle(isActive: isActive, shape: SepiaShape(kind: .capsule))
@@ -468,7 +476,9 @@ struct SepiaButtonStyle: ButtonStyle {
 
     @ViewBuilder
     private func sized(_ label: some View) -> some View {
-        if let height {
+        if let minSquare {
+            label.frame(minWidth: minSquare, minHeight: minSquare)
+        } else if let height {
             label.frame(height: height)
         } else {
             label
