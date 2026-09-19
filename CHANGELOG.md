@@ -11,6 +11,20 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.4] — 2026-09-19
+
+### Fixed
+
+- Toolbar items no longer carry the grouped background they ask to hide. The shim added
+  with the macOS 15 support work was an extension on the `ToolbarContent` protocol taking
+  an already-built item as `Self`, and SwiftUI declares that modifier on both
+  `ToolbarContent` and `CustomizableToolbarContent`, so through a generic `Self` it never
+  attached. The items now come in as a closure and are built inside the availability
+  branch, so the modifier applies to a concrete toolbar item. Invisible against the sepia
+  toolbar in the light appearance, which is why the screenshots and pixel-diffs taken
+  while developing it all passed; in the dark appearance it is a pale pill behind the
+  wordmark and the workspace title, which is how 3.5.3 shipped.
+
 ## [3.5.3] — 2026-09-19
 
 Swarm runs on **macOS 15 or later**, on Intel as well as Apple silicon. The floor was
@@ -1054,7 +1068,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.3...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.4...HEAD
+[3.5.4]: https://github.com/samoilev/swarm/compare/v3.5.3...v3.5.4
 [3.5.3]: https://github.com/samoilev/swarm/compare/v3.5.2...v3.5.3
 [3.5.2]: https://github.com/samoilev/swarm/compare/v3.5.1...v3.5.2
 [3.5.1]: https://github.com/samoilev/swarm/compare/v3.5.0...v3.5.1
