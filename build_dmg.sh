@@ -8,7 +8,32 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="Swarm"
 BUNDLE_ID="com.samoilev.swarm"
 VERSION="$(cat "$(cd "$(dirname "$0")" && pwd)/VERSION" 2>/dev/null || echo "1.5.0")"
-BUILD_DIR="$PROJECT_DIR/.build/arm64-apple-macosx/release"
+
+# Single source of truth for the floor: Package.swift. LSMinimumSystemVersion below
+# reads the same value, so the manifest and the bundle cannot drift apart.
+MIN_OS="$(sed -n 's/.*platforms: \[\.macOS("\([0-9.]*\)")\].*/\1/p' "$PROJECT_DIR/Package.swift")"
+SDK_VERSION="$(xcrun --show-sdk-version)"
+
+# Two things this has to get right, neither of them the default.
+#
+# 1. Universal. `--arch` twice cross-compiles the Intel slice from an Apple silicon
+#    machine; no extra toolchain needed.
+# 2. The recorded SDK version. macOS gates Liquid Glass on the SDK a binary was LINKED
+#    against (LC_BUILD_VERSION `sdk`), which is a different field from the deployment
+#    target (`minos`). SwiftPM's current default build system writes `sdk` = the
+#    deployment target, which would silently drop every macOS 26 user into the old
+#    look. `-platform_version` pins both fields explicitly and works under either
+#    build system, so this does not depend on which SwiftPM is installed.
+BUILD_FLAGS=(
+    -c release
+    --arch arm64 --arch x86_64
+    -Xlinker -platform_version -Xlinker macos -Xlinker "$MIN_OS" -Xlinker "$SDK_VERSION"
+)
+
+# Derived, never hardcoded: the products path moved between SwiftPM build systems
+# (.build/arm64-apple-macosx/release -> .build/out/Products/Release). The same flags
+# must be passed here as to the build itself or the path comes back wrong.
+BUILD_DIR="$(swift build "${BUILD_FLAGS[@]}" --show-bin-path)"
 BINARY="$BUILD_DIR/Swarm"
 # Two SwiftPM resource bundles after the SwarmCore split:
 #   - App bundle: AppIcon.icns (loaded via Bundle.module in the app target)
@@ -19,10 +44,10 @@ ICON_SRC="$PROJECT_DIR/Swarm/App/Resources/AppIcon.icns"
 DMG_DIR="$PROJECT_DIR/dist"
 APP_BUNDLE="$DMG_DIR/$APP_NAME.app"
 
-echo "=== Building release binary ==="
+echo "=== Building universal release binary (arm64 + x86_64) ==="
 cd "$PROJECT_DIR"
 ./Scripts/run-tests.sh
-swift build -c release
+swift build "${BUILD_FLAGS[@]}"
 
 echo "=== Creating .app bundle ==="
 rm -rf "$DMG_DIR"
@@ -62,7 +87,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>LSMinimumSystemVersion</key>
-    <string>26.0</string>
+    <string>${MIN_OS}</string>
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.lifestyle</string>
     <key>NSHighResolutionCapable</key>
@@ -125,7 +150,25 @@ echo "=== Verifying app bundle ==="
 test -x "$APP_BUNDLE/Contents/MacOS/Swarm"
 plutil -lint "$APP_BUNDLE/Contents/Info.plist"
 codesign --verify --deep --strict "$APP_BUNDLE"
-echo "Architecture: $(lipo -archs "$APP_BUNDLE/Contents/MacOS/Swarm")"
+# Assertions, not echoes: both of these have already been wrong once, and neither
+# failure is visible until a user on the wrong machine opens the app.
+archs="$(lipo -archs "$APP_BUNDLE/Contents/MacOS/Swarm" | tr ' ' '\n' | sort | tr '\n' ' ')"
+if [ "$archs" != "arm64 x86_64 " ]; then
+    echo "Expected a universal arm64+x86_64 binary, got: $archs" >&2
+    exit 1
+fi
+
+# Built against an SDK older than 26 means no Liquid Glass for anyone, on any OS, and
+# nothing else in the pipeline would notice.
+linked_sdk="$(otool -l "$APP_BUNDLE/Contents/MacOS/Swarm" \
+    | awk '/LC_BUILD_VERSION/{f=1} f&&/^ *sdk/{print $2; exit}')"
+if [ "$(printf '%s\n26.0\n' "$linked_sdk" | sort -V | head -1)" != "26.0" ]; then
+    echo "Linked against SDK $linked_sdk; macOS 26 needs an SDK >= 26.0 for Liquid Glass." >&2
+    exit 1
+fi
+
+echo "Architecture: $archs"
+echo "Deployment target: $MIN_OS, linked SDK: $linked_sdk"
 echo "Signing: $(codesign -dv --verbose=2 "$APP_BUNDLE" 2>&1 | grep -E 'Signature|Authority|TeamIdentifier' | tr '\n' ' ')"
 
 # Create DMG

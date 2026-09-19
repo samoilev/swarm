@@ -295,7 +295,7 @@ struct ReviewWorkspaceView: View {
         let first = tree.person(byId: suggestion.firstPersonID)
         let second = tree.person(byId: suggestion.secondPersonID)
         return HStack(spacing: 12) {
-            Image(systemName: "person.2.badge.questionmark").foregroundStyle(SepiaTheme.accent2)
+            Image(systemName: "person.2.square.stack").foregroundStyle(SepiaTheme.accent2)
             VStack(alignment: .leading, spacing: 3) {
                 Text(L10n.tr("Возможный дубликат")).font(SepiaType.bodyLarge).foregroundStyle(SepiaTheme.ink)
                 Text(

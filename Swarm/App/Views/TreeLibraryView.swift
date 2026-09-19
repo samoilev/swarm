@@ -345,22 +345,22 @@ struct TreeLibraryView: View {
         ToolbarItem(placement: .navigation) {
             SepiaWordmark(label: L10n.tr("Библиотека"))
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
 
-        ToolbarSpacer(.flexible)
+        sepiaToolbarSpacer(.flexible)
 
         if showsFilter {
             ToolbarItem(placement: .automatic) {
                 filterField()
             }
-            .sharedBackgroundVisibility(.hidden)
+            .sepiaSharedBackground(.hidden)
         }
 
         if trees.count > 1 {
             ToolbarItem(placement: .automatic) {
                 sortMenu
             }
-            .sharedBackgroundVisibility(.hidden)
+            .sepiaSharedBackground(.hidden)
         }
 
         ToolbarItemGroup(placement: .primaryAction) {
@@ -378,7 +378,7 @@ struct TreeLibraryView: View {
                         .foregroundColor(SepiaTheme.ink)
                         .frame(width: Self.controlHeight, height: Self.controlHeight)
                         .contentShape(Capsule())
-                        .glassEffect(.regular.interactive(), in: Capsule())
+                        .sepiaGlass(.regular.interactive(), in: Capsule())
                 }
                 .buttonStyle(.plain)
                 .help(Self.importHint)
@@ -396,7 +396,7 @@ struct TreeLibraryView: View {
                         .padding(.horizontal, SepiaTheme.scaled(14))
                         .frame(height: Self.controlHeight)
                         .contentShape(Capsule())
-                        .glassEffect(.regular.tint(SepiaTheme.accent).interactive(), in: Capsule())
+                        .sepiaGlass(.tinted(SepiaTheme.accent).interactive(), in: Capsule())
                 }
                 .buttonStyle(.plain)
             }
@@ -414,7 +414,7 @@ struct TreeLibraryView: View {
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: Self.controlHeight, height: Self.controlHeight)
                     .contentShape(Circle())
-                    .glassEffect(.regular.interactive(), in: Circle())
+                    .sepiaGlass(.regular.interactive(), in: Circle())
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
@@ -422,7 +422,7 @@ struct TreeLibraryView: View {
             .help(L10n.tr("Действия с библиотекой"))
             .accessibilityLabel(L10n.tr("Действия с библиотекой"))
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
     }
 
     /// Every control in this bar is drawn to one height, and that height scales with the
@@ -459,7 +459,7 @@ struct TreeLibraryView: View {
         .fixedSize()
         .padding(.horizontal, SepiaTheme.scaled(12))
         .frame(height: Self.controlHeight)
-        .glassEffect(.regular, in: Capsule())
+        .sepiaGlass(.regular, in: Capsule())
         .help(L10n.tr("Порядок деревьев"))
         .accessibilityLabel(L10n.tr("Порядок деревьев"))
     }
@@ -490,7 +490,7 @@ struct TreeLibraryView: View {
         }
         .padding(.horizontal, SepiaTheme.scaled(12))
         .frame(width: width, height: Self.controlHeight)
-        .glassEffect(.regular, in: Capsule())
+        .sepiaGlass(.regular, in: Capsule())
         .sepiaMotion(SepiaMotion.state, value: filterText.isEmpty)
     }
 
@@ -615,7 +615,7 @@ struct TreeLibraryView: View {
                     .frame(maxWidth: 440)
             }
 
-            GlassEffectContainer(spacing: 10) {
+            SepiaGlassGroup(spacing: 10) {
                 HStack(spacing: 10) {
                     Button(action: onCreate) {
                         Label(L10n.tr("Новое дерево"), systemImage: "plus")
@@ -624,7 +624,7 @@ struct TreeLibraryView: View {
                             .frame(height: 40)
                             .padding(.horizontal, 8)
                     }
-                    .buttonStyle(.glassProminent)
+                    .sepiaGlassProminentButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .tint(SepiaTheme.accent)
 
@@ -635,7 +635,7 @@ struct TreeLibraryView: View {
                             .frame(height: 40)
                             .padding(.horizontal, 8)
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .help(Self.importHint)
                 }
@@ -780,7 +780,7 @@ struct TreeLibraryView: View {
                         treeToRename = nil
                         renameValidationMessage = nil
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
                     .disabled(renameSaving)
@@ -799,7 +799,7 @@ struct TreeLibraryView: View {
                             }
                         }
                     }
-                    .buttonStyle(.glassProminent)
+                    .sepiaGlassProminentButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .tint(SepiaTheme.accent)
                     .keyboardShortcut(.defaultAction)
@@ -898,8 +898,8 @@ struct TreeCardView: View {
                 // Tinted toward white: over a paper-coloured pane, untinted glass lands
                 // within a few percent of the background and the grid stops reading as
                 // cards at all.
-                .glassEffect(
-                    .regular.tint(.white.opacity(0.34)),
+                .sepiaGlass(
+                    .tinted(.white.opacity(0.34)),
                     in: RoundedRectangle(cornerRadius: 16, style: .continuous)
                 )
                 .overlay(

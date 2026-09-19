@@ -5,7 +5,8 @@
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.2-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.2" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
-  <img src="https://img.shields.io/badge/macOS-26%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 26 or later" />
+  <img src="https://img.shields.io/badge/macOS-15%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 15 or later" />
+  <img src="https://img.shields.io/badge/universal-arm64%20%2B%20x86__64-555555?style=flat&logo=apple&logoColor=white" alt="Universal binary" />
   <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
 </div>
@@ -36,7 +37,9 @@ arrive in. Native macOS, Swift, no third-party packages.
 ## Install
 
 Download the DMG from the [latest release](https://github.com/samoilev/swarm/releases/latest).
-Requires macOS 26 or later on Apple silicon.
+Requires macOS 15 or later. The DMG is a universal binary, so it runs natively on
+both Apple silicon and Intel Macs. On macOS 26 and later the interface is drawn in
+Liquid Glass; on 15 through 25 it falls back to the app's own sepia controls.
 
 The build is not yet signed with an Apple Developer ID, so macOS will block the first
 open; allow it under System Settings ▸ Privacy & Security ▸ Open Anyway. To verify the
@@ -117,6 +120,28 @@ swift run -c release Swarm
 The manifest is `swift-tools-version: 5.9`, so the package builds in Swift 5 language
 mode with strict concurrency checking turned on for the core module. A current Swift 6
 toolchain — the one in Xcode 26 — is what it is built and tested against.
+
+Swarm runs on macOS 15 but has to be *built* against the macOS 26 SDK or newer. macOS
+picks the Liquid Glass look from the SDK a binary was linked against — the `sdk` field
+of `LC_BUILD_VERSION` — and not from its deployment target, which is the separate
+`minos` field.
+
+The plain `swift build` above does not get this right on its own: SwiftPM's current
+build system records `sdk` as the deployment target, so a locally built Swarm reports
+`minos 15.0, sdk 15.0` and renders without Liquid Glass even on macOS 26. That is a
+local-development wart, not a shipping one — `build_dmg.sh` pins both fields explicitly
+and fails the build if the linked SDK is below 26.0. To check any binary:
+
+```sh
+otool -l .build/out/Products/Release/Swarm | grep -A4 LC_BUILD_VERSION
+```
+
+To get the shipping look from a local build, pass the same flags the release script does:
+
+```sh
+swift build -c release \
+  -Xlinker -platform_version -Xlinker macos -Xlinker 15.0 -Xlinker "$(xcrun --show-sdk-version)"
+```
 
 `swift build` alone gives you a debug build. Fine for development, slower on large trees.
 You can also open the package folder in Xcode (`File ▸ Open…`). To develop against a

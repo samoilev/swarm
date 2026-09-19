@@ -5,8 +5,10 @@ let package = Package(
     name: "Swarm",
     defaultLocalization: "ru",
     // String form keeps the manifest compatible with the existing Swift tools 5.9
-    // declaration while targeting the macOS 26 SDK/runtime.
-    platforms: [.macOS("26.0")],
+    // declaration while floor-ing the app at macOS 15. The SDK it is BUILT against stays
+    // 26+ (see Swarm/App/Theme/SepiaGlass.swift) — that, not this, is what keeps Liquid
+    // Glass on for macOS 26 users.
+    platforms: [.macOS("15.0")],
     targets: [
         // Pure domain logic (Models + Services): no SwiftUI dependency, so it can be
         // unit-tested independently of the app's views.

@@ -41,8 +41,8 @@ struct PhotoCropView: View {
                 }
                 .padding(.horizontal, 16)
                 .frame(height: 54)
-                .glassEffect(
-                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
+                .sepiaGlass(
+                    .tinted(SepiaTheme.toolbarBg.opacity(0.22)),
                     in: RoundedRectangle(cornerRadius: 18, style: .continuous)
                 )
                 .padding(12)
@@ -91,10 +91,10 @@ struct PhotoCropView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .padding(.horizontal, 12)
 
-                GlassEffectContainer(spacing: 10) {
+                SepiaGlassGroup(spacing: 10) {
                     HStack {
                         Button(L10n.tr("Отмена")) { onCancel() }
-                            .buttonStyle(.glass)
+                            .sepiaGlassButton(.capsule)
                             .buttonBorderShape(.capsule)
                         Spacer()
                         // If cropping fails (degenerate frame, no CGImage), confirm with
@@ -102,7 +102,7 @@ struct PhotoCropView: View {
                         Button { onConfirm(cropped() ?? image) } label: {
                             Label(L10n.tr("Готово"), systemImage: "checkmark")
                         }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                     }

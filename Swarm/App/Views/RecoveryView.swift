@@ -70,8 +70,8 @@ struct RecoveryView: View {
                         .foregroundStyle(SepiaTheme.accent2)
                         .padding(.horizontal, 14)
                         .frame(minHeight: 34)
-                        .glassEffect(
-                            .regular.tint(SepiaTheme.toolbarBg.opacity(0.2)),
+                        .sepiaGlass(
+                            .tinted(SepiaTheme.toolbarBg.opacity(0.2)),
                             in: Capsule()
                         )
                         .padding(.horizontal, 20)
@@ -160,7 +160,7 @@ struct RecoveryView: View {
                         }
                         Spacer()
                         Button(L10n.tr("Показать в Finder")) { reveal(migration.url) }
-                            .buttonStyle(.glass)
+                            .sepiaGlassButton(.capsule)
                             .buttonBorderShape(.capsule)
                     }
                     .padding(12)
@@ -174,7 +174,7 @@ struct RecoveryView: View {
 
                 HStack(spacing: 10) {
                     Button(L10n.tr("Обновить всё (\(store.pendingMigrations.count))")) { runMigrations() }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                         .disabled(isWorking)
@@ -221,7 +221,7 @@ struct RecoveryView: View {
             Spacer()
             if item.kind == .deletedFile { personPicker(for: item) }
             Button(actionLabel(item.kind)) { restore(item) }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .disabled(isWorking || (item.kind == .deletedFile && restoreTargets[item.id] == nil))

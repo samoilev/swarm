@@ -57,7 +57,7 @@ struct LanguageChooserView: View {
                     .foregroundStyle(SepiaTheme.inkSoft)
                     .multilineTextAlignment(.center)
 
-                GlassEffectContainer(spacing: 12) {
+                SepiaGlassGroup(spacing: 12) {
                     HStack(spacing: 12) {
                         languageButton(.russian)
                         languageButton(.english)
@@ -70,8 +70,8 @@ struct LanguageChooserView: View {
             .padding(.horizontal, 48)
             .padding(.bottom, 40)
             .frame(width: 560)
-            .glassEffect(
-                .regular.tint(SepiaTheme.paper.opacity(0.66)),
+            .sepiaGlass(
+                .tinted(SepiaTheme.paper.opacity(0.66)),
                 in: RoundedRectangle(cornerRadius: 26, style: .continuous)
             )
             .shadow(color: SepiaTheme.ink.opacity(0.34), radius: 35, y: 20)
@@ -80,7 +80,7 @@ struct LanguageChooserView: View {
         // asks anything.
         .toolbar {
             ToolbarItem(placement: .navigation) { SepiaWordmark() }
-                .sharedBackgroundVisibility(.hidden)
+                .sepiaSharedBackground(.hidden)
         }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)
@@ -101,7 +101,7 @@ struct LanguageChooserView: View {
                 .foregroundStyle(SepiaTheme.ink)
                 .frame(width: 170, height: 46)
         }
-        .buttonStyle(.glass)
+        .sepiaGlassButton(.capsule)
         .buttonBorderShape(.capsule)
         .focusable()
         .focused($focusedLanguage, equals: language)
@@ -126,7 +126,7 @@ struct HelpView: View {
                 Spacer()
                 LanguageSwitchControl()
                 Button(L10n.tr("Закрыть")) { dismiss() }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
             }

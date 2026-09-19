@@ -32,7 +32,7 @@ struct TreeMergeView: View {
                         .foregroundStyle(SepiaTheme.ink)
                         .frame(width: 30, height: 30)
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.circle)
                 .buttonBorderShape(.circle)
                 .accessibilityLabel(L10n.tr("Закрыть"))
             }.padding(20)
@@ -80,7 +80,7 @@ struct TreeMergeView: View {
                     Text(L10n.tr("Сначала проверьте, что будет добавлено. Дерево изменится только после вашего подтверждения."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     Button(L10n.tr("Выбрать файл…")) { showImporter = true }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                 }
@@ -95,13 +95,13 @@ struct TreeMergeView: View {
             Divider().overlay(SepiaTheme.toolbarLine)
             LiquidGlassActionRow {
                 Button(L10n.tr("Отмена"), action: close)
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
                 Spacer()
                 if preview != nil {
                     Button(L10n.tr("Объединить")) { applyMerge() }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                         .keyboardShortcut(.defaultAction)

@@ -93,18 +93,18 @@ struct OnboardingView: View {
         ToolbarItem(placement: .navigation) {
             SepiaWordmark(label: L10n.tr("Новое дерево"))
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
 
-        ToolbarSpacer(.flexible)
+        sepiaToolbarSpacer(.flexible)
 
         ToolbarItem(placement: .primaryAction) {
             Button(L10n.tr("Вернуться к библиотеке")) { onCancel() }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .keyboardShortcut(.cancelAction)
                 .disabled(isSaving)
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
     }
 
     private func stepHeadline(_ step: Step) -> String {
@@ -170,7 +170,7 @@ struct OnboardingView: View {
         HStack(spacing: 10) {
             if step == .relative {
                 Button(L10n.tr("Назад")) { goBack() }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .disabled(isSaving)
             }
@@ -205,7 +205,7 @@ struct OnboardingView: View {
                 .frame(height: 38)
                 .padding(.horizontal, 10)
             }
-            .buttonStyle(.glassProminent)
+            .sepiaGlassProminentButton(.capsule)
             .buttonBorderShape(.capsule)
             .tint(SepiaTheme.accent)
             .keyboardShortcut(.defaultAction)
@@ -278,7 +278,7 @@ struct OnboardingView: View {
 
     private var relativeStep: some View {
         VStack(alignment: .leading, spacing: 18) {
-            GlassEffectContainer(spacing: 9) {
+            SepiaGlassGroup(spacing: 9) {
                 HStack(spacing: 9) {
                     ForEach(FirstRelative.allCases) { candidate in
                         relativeRoleButton(candidate)
@@ -369,7 +369,7 @@ struct OnboardingView: View {
             .padding(.bottom, 16)
         }
         .frame(height: 226)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .sepiaGlass(.regular, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
                 .strokeBorder(.white.opacity(0.62), lineWidth: 1)
@@ -471,13 +471,13 @@ struct OnboardingView: View {
 
         if role == candidate {
             Button { select(candidate) } label: { label }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .accessibilityAddTraits(.isSelected)
         } else {
             Button { select(candidate) } label: { label.foregroundStyle(SepiaTheme.ink) }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
         }
     }

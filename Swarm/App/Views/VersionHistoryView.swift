@@ -97,8 +97,8 @@ struct VersionHistoryView: View {
                     .foregroundStyle(SepiaTheme.accent2)
                     .padding(.horizontal, 14)
                     .frame(minHeight: 34)
-                    .glassEffect(
-                        .regular.tint(SepiaTheme.toolbarBg.opacity(0.2)),
+                    .sepiaGlass(
+                        .tinted(SepiaTheme.toolbarBg.opacity(0.2)),
                         in: Capsule()
                     )
                     .accessibilityElement(children: .combine)
@@ -119,7 +119,7 @@ struct VersionHistoryView: View {
                     dismiss()
                     onOpenRecovery()
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .disabled(isWorking)
                 .fixedSize()
@@ -191,7 +191,7 @@ struct VersionHistoryView: View {
             }
             Spacer()
             Button(L10n.tr("Вернуть эту версию")) { pendingRestore = item }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .disabled(isWorking)

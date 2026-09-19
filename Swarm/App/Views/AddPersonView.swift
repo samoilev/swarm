@@ -189,7 +189,7 @@ struct AddPersonView: View {
                             Button { pendingRels.append(PendingRelation()) } label: {
                                 Label(L10n.tr("Добавить связь"), systemImage: "plus")
                             }
-                            .buttonStyle(.glass)
+                            .sepiaGlassButton(.capsule)
                             .buttonBorderShape(.capsule)
                             .padding(.top, 4)
                         }
@@ -201,12 +201,12 @@ struct AddPersonView: View {
 
                 LiquidGlassActionRow {
                     Button(L10n.tr("Отмена")) { dismiss() }
-                        .buttonStyle(.glass)
+                        .sepiaGlassButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .keyboardShortcut(.cancelAction)
                     Spacer()
                     Button(L10n.tr("Добавить")) { addPerson() }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                         .keyboardShortcut(.defaultAction)

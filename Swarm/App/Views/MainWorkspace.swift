@@ -742,7 +742,7 @@ struct MainWorkspace: View {
         .padding(.horizontal, 11)
         .padding(.vertical, 7)
         .background(SepiaTheme.paper.opacity(0.58), in: Capsule())
-        .glassEffect(.regular.interactive(), in: Capsule())
+        .sepiaGlass(.regular.interactive(), in: Capsule())
         .contentShape(Capsule())
         .padding(12)
     }
@@ -826,18 +826,18 @@ struct MainWorkspace: View {
                 Image(systemName: "house.fill")
                     .font(SepiaTheme.icon(size: 12, weight: .semibold))
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .foregroundStyle(SepiaTheme.ink)
             .help(L10n.tr("К списку деревьев"))
             .accessibilityLabel(L10n.tr("К списку деревьев"))
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
 
         ToolbarItem(placement: .navigation) {
             titleBlock
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
 
         // Principal, not automatic: the tree controls belong to the canvas, not to the
         // record on the left or the actions on the right, and principal is the only
@@ -847,20 +847,20 @@ struct MainWorkspace: View {
             viewModeControls
                 .padding(.horizontal, 3)
         }
-        .sharedBackgroundVisibility(.visible)
+        .sepiaSharedBackground(.visible)
 
         // The overflow sits beside the controls it stands in for, not across the bar
         // next to the save clock — it is the tail of this group, not a trailing action.
         if usesCompactToolbar {
-            ToolbarSpacer(.fixed, placement: .principal)
+            sepiaToolbarSpacer(.fixed, placement: .principal)
             ToolbarItem(placement: .principal) {
                 compactToolbarOverflow
             }
-            .sharedBackgroundVisibility(.hidden)
+            .sepiaSharedBackground(.hidden)
         }
 
         if !usesCompactToolbar, viewMode == .tree {
-            ToolbarSpacer(.fixed, placement: .principal)
+            sepiaToolbarSpacer(.fixed, placement: .principal)
             ToolbarItemGroup(placement: .principal) {
                 HStack(spacing: 4) {
                     directionControls
@@ -868,30 +868,30 @@ struct MainWorkspace: View {
                 }
                 .padding(.horizontal, 3)
             }
-            .sharedBackgroundVisibility(.visible)
+            .sepiaSharedBackground(.visible)
         } else if !usesCompactToolbar, viewMode == .fan {
-            ToolbarSpacer(.fixed, placement: .principal)
+            sepiaToolbarSpacer(.fixed, placement: .principal)
             ToolbarItemGroup(placement: .principal) {
                 fanLevelControls
                     .padding(.horizontal, 3)
             }
-            .sharedBackgroundVisibility(.visible)
+            .sepiaSharedBackground(.visible)
         } else if !usesCompactToolbar, viewMode == .map {
-            ToolbarSpacer(.fixed, placement: .principal)
+            sepiaToolbarSpacer(.fixed, placement: .principal)
             ToolbarItemGroup(placement: .principal) {
                 mapFocusControl
                     .padding(.horizontal, 3)
             }
-            .sharedBackgroundVisibility(.visible)
+            .sepiaSharedBackground(.visible)
         }
 
         if !usesCompactToolbar, [.tree, .fan, .map].contains(viewMode) {
-            ToolbarSpacer(.fixed, placement: .principal)
+            sepiaToolbarSpacer(.fixed, placement: .principal)
             ToolbarItemGroup(placement: .principal) {
                 zoomControls
                     .padding(.horizontal, 3)
             }
-            .sharedBackgroundVisibility(.visible)
+            .sepiaSharedBackground(.visible)
         }
 
         // Save clock rides in the trailing group rather than as its own item: the
@@ -907,7 +907,7 @@ struct MainWorkspace: View {
                 }
                 .fixedSize()
             }
-            .buttonStyle(.glassProminent)
+            .sepiaGlassProminentButton()
             .tint(SepiaTheme.accent)
             .help(L10n.tr("Добавить человека"))
             .accessibilityLabel(L10n.tr("Добавить человека"))
@@ -915,13 +915,13 @@ struct MainWorkspace: View {
             Button { showExportModal = true } label: {
                 Image(systemName: "square.and.arrow.up")
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .tint(SepiaTheme.ink)
             .help(L10n.tr("Экспорт…"))
             .accessibilityLabel(L10n.tr("Экспорт…"))
         }
-        .sharedBackgroundVisibility(.hidden)
+        .sepiaSharedBackground(.hidden)
     }
 
     private var compactToolbarOverflow: some View {
@@ -997,7 +997,7 @@ struct MainWorkspace: View {
                 // are 34 tall, and a 30pt circle read as a different class of control.
                 .frame(width: 34, height: 34)
                 .contentShape(Circle())
-                .glassEffect(.regular.interactive(), in: Circle())
+                .sepiaGlass(.regular.interactive(), in: Circle())
         }
         .menuIndicator(.hidden)
         .fixedSize()

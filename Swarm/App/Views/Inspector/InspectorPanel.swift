@@ -207,7 +207,7 @@ struct InspectorPanel: View {
                         Text(L10n.tr("Назад")).font(SepiaType.label)
                     }
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .foregroundStyle(SepiaTheme.accent2)
                 .controlSize(.small)
@@ -235,7 +235,7 @@ struct InspectorPanel: View {
     /// the nav row used to hand it, so the card looks untouched until it is scrolled.
     private func pinnedActions(_ person: Person) -> some View {
         let name = person.displayNameLines(language: .current)
-        return GlassEffectContainer(spacing: 8) {
+        return SepiaGlassGroup(spacing: 8) {
             HStack(spacing: 8) {
                 // The name the header was carrying, taken up only once the header has
                 // taken it away. A bar repeating a name that is still on screen is the
@@ -277,7 +277,7 @@ struct InspectorPanel: View {
                             .font(SepiaTheme.icon(size: 10.5, weight: .semibold))
                             .frame(width: 24, height: 24)
                     }
-                    .buttonStyle(.glassProminent)
+                    .sepiaGlassProminentButton(.circle)
                     .buttonBorderShape(.circle)
                     .controlSize(.small)
                     .tint(SepiaTheme.accent)
@@ -291,7 +291,7 @@ struct InspectorPanel: View {
                         .foregroundStyle(SepiaTheme.ink)
                         .frame(width: 24, height: 24)
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.circle)
                 .buttonBorderShape(.circle)
                 .controlSize(.small)
                 .help(L10n.tr("Закрыть карточку"))
@@ -481,7 +481,7 @@ struct InspectorPanel: View {
                     .padding(.horizontal, 12)
                     .frame(height: 28)
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .help(L10n.tr("Удалить человека"))
                 .accessibilityLabel(L10n.tr("Удалить человека"))
@@ -860,7 +860,7 @@ struct PortraitPreview: View {
                 }
                 Spacer(minLength: 8)
                 Button(L10n.tr("Закрыть")) { onClose() }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
             }
@@ -940,7 +940,7 @@ struct PortraitPreview: View {
                 .font(SepiaTheme.icon(size: 13, weight: .semibold))
                 .frame(width: 36, height: 36)
         }
-        .buttonStyle(.glass)
+        .sepiaGlassButton(.circle)
         .buttonBorderShape(.circle)
         .keyboardShortcut(delta < 0 ? .leftArrow : .rightArrow, modifiers: [])
         .help(title)

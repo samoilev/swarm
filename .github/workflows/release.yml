@@ -12,8 +12,8 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: Build DMG and publish release
+  build:
+    name: Build DMG
     runs-on: macos-26
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -62,6 +62,81 @@ jobs:
             exit 1
           fi
 
+      # Handed to the back-deployment jobs below rather than published straight away:
+      # the DMG now has to run on macOS 15 and on Intel before it is allowed out.
+      - name: Upload the DMG for the back-deployment jobs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dmg
+          path: dist/Swarm-*.dmg*
+          retention-days: 1
+          if-no-files-found: error
+
+  # The whole point of the macOS 15 floor and the universal binary. Everything before
+  # this job is a compile-time claim; this is the only step that actually runs the
+  # shipped bits on an older OS and on Intel. `macos-15-intel` is also the only x86_64
+  # coverage in the project — `swift test` only ever exercises the host slice.
+  back-deploy:
+    name: Smoke-test on ${{ matrix.runner }}
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Download the DMG
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dmg
+
+      - name: Launch the app from the DMG
+        run: |
+          set -euo pipefail
+          dmg="$(ls Swarm-*.dmg)"
+          hdiutil attach "$dmg" -nobrowse -quiet -mountpoint "$RUNNER_TEMP/mnt"
+          cp -R "$RUNNER_TEMP/mnt/Swarm.app" "$RUNNER_TEMP/Swarm.app"
+          hdiutil detach "$RUNNER_TEMP/mnt" -quiet
+
+          bin="$RUNNER_TEMP/Swarm.app/Contents/MacOS/Swarm"
+          echo "Runner arch: $(uname -m)"
+          echo "Binary slices: $(lipo -archs "$bin")"
+          lipo -archs "$bin" | grep -q "$(uname -m)" \
+            || { echo "::error::No $(uname -m) slice in the shipped binary." >&2; exit 1; }
+
+          "$bin" > "$RUNNER_TEMP/app.log" 2>&1 &
+          pid=$!
+          sleep 15
+          # Still alive after 15s is the pass condition: a missing symbol on an older
+          # OS kills the process at launch, long before this.
+          if ! kill -0 "$pid" 2>/dev/null; then
+            echo "--- app output ---"; cat "$RUNNER_TEMP/app.log" || true
+            echo "::error::The app exited on $(sw_vers -productVersion) / $(uname -m)." >&2
+            exit 1
+          fi
+          kill "$pid" 2>/dev/null || true
+
+          echo "--- app output ---"; cat "$RUNNER_TEMP/app.log" || true
+          if grep -qiE "could not load resource bundle|Fatal error|dyld\[|Symbol not found" \
+              "$RUNNER_TEMP/app.log"; then
+            echo "::error::Launch errors on $(sw_vers -productVersion) / $(uname -m)." >&2
+            exit 1
+          fi
+
+  # Ubuntu on purpose: this job only runs `gh`, and macOS runners bill at 10x.
+  publish:
+    name: Publish release
+    needs: [build, back-deploy]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Download the DMG
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dmg
+          path: dist
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -79,7 +154,8 @@ jobs:
             echo "& Security ▸ Open Anyway**. You only need to do this once. (Right-click ▸ Open no"
             echo "longer works for an unsigned app on current macOS.)"
             echo
-            echo "Apple silicon only, macOS 26 or later. Prefer to build it yourself? See the"
+            echo "Universal binary (Apple silicon and Intel), macOS 15 or later. On macOS 26 and later"
+            echo "the interface is drawn in Liquid Glass. Prefer to build it yourself? See the"
             echo "[README](https://github.com/${GITHUB_REPOSITORY}#build-and-run)."
             echo
             echo "## Verify the download"

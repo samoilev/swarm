@@ -103,7 +103,7 @@ struct PlacePickerField: View {
             SepiaTheme.cardBg.opacity(0.88),
             in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )
-        .glassEffect(
+        .sepiaGlass(
             .regular.interactive(),
             in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )

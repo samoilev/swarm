@@ -170,7 +170,7 @@ struct EditPersonView: View {
                                 HStack(spacing: 6) {
                                     ForEach([Person.Sex.male, .female], id: \.rawValue) { option in
                                         Button(option.displayName) { sex = (sex == option) ? .unknown : option }
-                                            .buttonStyle(.glass)
+                                            .sepiaGlassButton(.capsule)
                                             .buttonBorderShape(.capsule)
                                             .tint(sex == option ? SepiaTheme.accent : nil)
                                             .foregroundStyle(sex == option ? Color.white : SepiaTheme.ink)
@@ -295,10 +295,10 @@ struct EditPersonView: View {
     }
 
     private var editorFooter: some View {
-        GlassEffectContainer(spacing: 10) {
+        SepiaGlassGroup(spacing: 10) {
             HStack(spacing: 10) {
                 Button(L10n.tr("Отмена")) { cancelEditing() }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
 
@@ -307,7 +307,7 @@ struct EditPersonView: View {
                 Button { savePerson() } label: {
                     Label(L10n.tr("Сохранить"), systemImage: "checkmark")
                 }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 // ⌘↩ rather than plain Return: this sheet is mostly text fields, and
@@ -326,7 +326,7 @@ struct EditPersonView: View {
             Image(systemName: isHomePerson ? "house.fill" : "house")
                 .frame(width: 34, height: 34)
         }
-        .buttonStyle(.glass)
+        .sepiaGlassButton(.circle)
         .buttonBorderShape(.circle)
         .tint(isHomePerson ? SepiaTheme.accent : nil)
         .accessibilityLabel(L10n.tr("Открывать дерево с этого человека"))
@@ -363,7 +363,7 @@ struct EditPersonView: View {
                 Button { sourceDraft = SourceDraft() } label: {
                     Label(L10n.tr("Добавить источник"), systemImage: "plus")
                 }
-                .buttonStyle(.glass)
+                .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .padding(.top, 4)
             }
@@ -410,7 +410,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Изменить источник"))
             .accessibilityLabel(L10n.tr("Изменить источник"))
@@ -423,7 +423,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .disabled(openable == nil)
             .help(L10n.tr("Открыть ссылку в браузере"))
@@ -435,7 +435,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить источник"))
             .accessibilityLabel(L10n.tr("Удалить источник"))
@@ -485,13 +485,13 @@ struct EditPersonView: View {
 
             HStack(spacing: 10) {
                 Button(L10n.tr("Отмена")) { sourceDraft = nil }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
 
                 Button { commitSourceDraft() } label: {
                     Label(L10n.tr("Сохранить источник"), systemImage: "checkmark")
                 }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .disabled((sourceDraft?.trimmedTitle.isEmpty ?? true) || draftDuplicatesAnEntry)
@@ -607,7 +607,7 @@ struct EditPersonView: View {
                 Button { addRelationship() } label: {
                     Label(L10n.tr("Связать"), systemImage: "link.badge.plus")
                 }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .padding(.top, 4)
@@ -636,7 +636,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить связь"))
         }
@@ -708,7 +708,7 @@ struct EditPersonView: View {
             Button { showAttachmentImporter = true } label: {
                 Label(L10n.tr("Прикрепить файл"), systemImage: "paperclip")
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.capsule)
             .buttonBorderShape(.capsule)
             .padding(.top, 4)
             .padding(.bottom, 12)
@@ -745,7 +745,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить файл"))
         }
@@ -768,7 +768,7 @@ struct EditPersonView: View {
             Button { editingPerson.links.append(WebLink()) } label: {
                 Label(L10n.tr("Добавить ссылку"), systemImage: "link.badge.plus")
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.capsule)
             .buttonBorderShape(.capsule)
             .padding(.top, 4)
             .padding(.bottom, 12)
@@ -790,7 +790,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.ink)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .disabled(link.openableURL == nil)
             .help(L10n.tr("Открыть ссылку в браузере"))
@@ -801,7 +801,7 @@ struct EditPersonView: View {
                     .foregroundColor(SepiaTheme.danger)
                     .frame(width: 26, height: 26)
             }
-            .buttonStyle(.glass)
+            .sepiaGlassButton(.circle)
             .buttonBorderShape(.circle)
             .help(L10n.tr("Удалить ссылку"))
         }
@@ -878,7 +878,7 @@ struct EditPersonView: View {
                     } label: {
                         Label(L10n.tr("Выбрать фото"), systemImage: "photo.on.rectangle")
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .fileImporter(isPresented: $showPhotoImporter, allowedContentTypes: [.image]) { result in
                         if case .success(let url) = result { beginPhotoSelection(from: url) }
@@ -891,7 +891,7 @@ struct EditPersonView: View {
                             Label(L10n.tr("Удалить"), systemImage: "trash")
                                 .foregroundColor(SepiaTheme.danger)
                         }
-                        .buttonStyle(.glass)
+                        .sepiaGlassButton(.capsule)
                         .buttonBorderShape(.capsule)
                     }
                 }
@@ -1205,7 +1205,7 @@ private struct UnionDraftEditor: View {
                             .foregroundStyle(SepiaTheme.danger)
                             .frame(width: 26, height: 26)
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.circle)
                     .buttonBorderShape(.circle)
                     .help(L10n.tr("Убрать ребёнка из этого союза"))
                 }
@@ -1220,7 +1220,7 @@ private struct UnionDraftEditor: View {
                 Button { addChild() } label: {
                     Label(L10n.tr("Добавить"), systemImage: "plus")
                 }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .disabled(childToAdd == nil)
@@ -1364,7 +1364,7 @@ private struct UnionEventDraftEditor: View {
                     } label: {
                         Label(L10n.tr("Файлы (\(mediaIDs.count))"), systemImage: "photo.stack")
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                 }
             }

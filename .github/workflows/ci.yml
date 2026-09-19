@@ -102,3 +102,19 @@ jobs:
 
       - name: Check formatting
         run: ./swiftformat-bin/swiftformat --lint .
+
+      # The app floors at macOS 15 but is built against the 26 SDK, so every macOS 26
+      # API has to sit behind an availability check. All of those live in one file.
+      # Text-only, so it runs here on Ubuntu at 1x rather than on a 10x macOS runner.
+      #
+      # This is a containment check, not a crash guard: with the deployment target at
+      # 15.0 the compiler already rejects an unguarded 26-only symbol. What it stops is
+      # the guards spreading back out to 116 call sites, which is what made the app
+      # hard to back-deploy in the first place.
+      - name: Liquid Glass stays behind one shim
+        run: |
+          if grep -rn --include='*.swift' --exclude='SepiaGlass.swift' \
+              -E '\.glassEffect\(|GlassEffectContainer|buttonStyle\(\.glass|\.sharedBackgroundVisibility\(|[^a]ToolbarSpacer\(|#available\(macOS' Swarm/; then
+            echo "::error::macOS 26 API outside Swarm/App/Theme/SepiaGlass.swift (see the shims there)." >&2
+            exit 1
+          fi

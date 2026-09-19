@@ -260,12 +260,52 @@ extension Color {
     }
 }
 
+/// The outline of a sepia control, as one insettable shape instead of three.
+///
+/// `SepiaControlSurface` needs the same shape for its border, its clip and its hit
+/// area, and `strokeBorder` needs the shape to be insettable — so a `RoundedRectangle`
+/// / `Capsule` / `Circle` union has to be a single concrete type, not an `AnyShape`
+/// (which is not insettable) or a generic parameter (which every caller would then
+/// have to spell out).
+struct SepiaShape: InsettableShape {
+    enum Kind: Equatable {
+        case rounded(CGFloat)
+        case capsule
+        case circle
+    }
+
+    var kind: Kind
+    var inset: CGFloat = 0
+
+    func path(in rect: CGRect) -> Path {
+        let inner = rect.insetBy(dx: inset, dy: inset)
+        switch kind {
+        case let .rounded(radius):
+            // The radius shrinks with the inset, otherwise a stroked corner bows away
+            // from the fill it is supposed to trace.
+            return RoundedRectangle(cornerRadius: max(0, radius - inset), style: .continuous)
+                .path(in: inner)
+        case .capsule:
+            return Capsule().path(in: inner)
+        case .circle:
+            return Circle().path(in: inner)
+        }
+    }
+
+    func inset(by amount: CGFloat) -> SepiaShape {
+        var copy = self
+        copy.inset += amount
+        return copy
+    }
+}
+
 /// Shared hover/press/disabled behaviour for the sepia controls. `ButtonStyle` cannot
 /// hold `@State`, so the styles below wrap their label in this view.
 private struct SepiaControlSurface<Label: View>: View {
     let label: Label
     let isPressed: Bool
     let isActive: Bool
+    var shape = SepiaShape(kind: .rounded(7))
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -285,9 +325,9 @@ private struct SepiaControlSurface<Label: View>: View {
         label
             .foregroundColor(isActive ? .white : SepiaTheme.ink)
             .background(fill)
-            .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(stroke, lineWidth: 1))
-            .clipShape(RoundedRectangle(cornerRadius: 7))
-            .contentShape(RoundedRectangle(cornerRadius: 7))
+            .overlay(shape.strokeBorder(stroke, lineWidth: 1))
+            .clipShape(shape)
+            .contentShape(shape)
             // Disabled is a real state, not just a dimmer: the fill flattens toward the
             // page so a disabled control reads as part of the paper rather than as a
             // button the user simply failed to hit.
@@ -387,16 +427,51 @@ extension View {
 
 struct SepiaButtonStyle: ButtonStyle {
     var isActive: Bool = false
+    var shape = SepiaShape(kind: .rounded(7))
+    /// `nil` leaves the label's own frame alone. Circular icon buttons already set an
+    /// explicit square frame; forcing the 30pt bar height on top of it makes an oval.
+    var height: CGFloat? = 30
+    var horizontalPadding: CGFloat = 10
+
+    /// The style behind `sepiaGlassButton(_:)`, which has to match `.sepiaGlassButton(.circle)`
+    /// under a `.buttonBorderShape(.circle)`/`.capsule` that the glass style honours and
+    /// a plain `ButtonStyle` does not see.
+    static func forShape(_ kind: SepiaShape.Kind, isActive: Bool = false) -> SepiaButtonStyle {
+        switch kind {
+        case .circle:
+            SepiaButtonStyle(
+                isActive: isActive,
+                shape: SepiaShape(kind: .circle),
+                height: nil,
+                horizontalPadding: 0
+            )
+        case .capsule:
+            SepiaButtonStyle(isActive: isActive, shape: SepiaShape(kind: .capsule))
+        case let .rounded(radius):
+            SepiaButtonStyle(isActive: isActive, shape: SepiaShape(kind: .rounded(radius)))
+        }
+    }
 
     func makeBody(configuration: Configuration) -> some View {
         SepiaControlSurface(
-            label: configuration.label
-                .font(SepiaType.control)
-                .fontWeight(.semibold)
-                .padding(.horizontal, 10)
-                .frame(height: 30),
+            label: sized(
+                configuration.label
+                    .font(SepiaType.control)
+                    .fontWeight(.semibold)
+                    .padding(.horizontal, horizontalPadding)
+            ),
             isPressed: configuration.isPressed,
-            isActive: isActive
+            isActive: isActive,
+            shape: shape
         )
+    }
+
+    @ViewBuilder
+    private func sized(_ label: some View) -> some View {
+        if let height {
+            label.frame(height: height)
+        } else {
+            label
+        }
     }
 }

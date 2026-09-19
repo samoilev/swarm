@@ -58,7 +58,7 @@ struct RelationshipView: View {
                 } label: {
                     Label(L10n.tr("Определить родство"), systemImage: "arrow.triangle.branch")
                 }
-                .buttonStyle(.glassProminent)
+                .sepiaGlassProminentButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .tint(SepiaTheme.accent)
                 .disabled(personA == nil || personB == nil)

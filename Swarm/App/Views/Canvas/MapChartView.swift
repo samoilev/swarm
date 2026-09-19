@@ -160,7 +160,7 @@ struct MapChartView: View {
             // a row narrow enough to sit over the map.
             VStack(spacing: 8) {
                 Button(L10n.tr("Загрузить снова")) { retry() }
-                    .buttonStyle(.glassProminent)
+                    .sepiaGlassProminentButton()
                     .tint(SepiaTheme.accent)
                     .accessibilityIdentifier("map.retry")
                 if provider == .appleMaps {
@@ -169,7 +169,7 @@ struct MapChartView: View {
                     Button(L10n.tr("Перейти на офлайн-карту")) {
                         providerRaw = MapProviderSetting.offlineVector.rawValue
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton()
                     .accessibilityIdentifier("map.useOfflineMap")
                 }
             }

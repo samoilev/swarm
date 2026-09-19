@@ -47,7 +47,7 @@ struct AboutView: View {
                 .foregroundStyle(SepiaTheme.accent)
                 .padding(.top, 14)
 
-                GlassEffectContainer(spacing: 10) {
+                SepiaGlassGroup(spacing: 10) {
                     HStack(spacing: 10) {
                         Button {
                             showHelp()
@@ -58,7 +58,7 @@ struct AboutView: View {
                                 Image(systemName: "questionmark.circle")
                             }
                         }
-                        .buttonStyle(.glass)
+                        .sepiaGlassButton(.capsule)
                         .buttonBorderShape(.capsule)
 
                         Button {
@@ -66,7 +66,7 @@ struct AboutView: View {
                         } label: {
                             Text(L10n.tr("Закрыть"))
                         }
-                        .buttonStyle(.glassProminent)
+                        .sepiaGlassProminentButton(.capsule)
                         .buttonBorderShape(.capsule)
                         .tint(SepiaTheme.accent)
                         .keyboardShortcut(.cancelAction)

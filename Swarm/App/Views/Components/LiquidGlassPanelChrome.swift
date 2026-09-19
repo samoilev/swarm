@@ -137,7 +137,7 @@ struct LiquidGlassPanelHeader: View {
     var onClose: (() -> Void)?
 
     var body: some View {
-        GlassEffectContainer(spacing: 10) {
+        SepiaGlassGroup(spacing: 10) {
             HStack(spacing: 10) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
@@ -157,8 +157,8 @@ struct LiquidGlassPanelHeader: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .frame(minHeight: minimumHeight)
-                .glassEffect(
-                    .regular.tint(SepiaTheme.toolbarBg.opacity(0.22)),
+                .sepiaGlass(
+                    .tinted(SepiaTheme.toolbarBg.opacity(0.22)),
                     in: RoundedRectangle(cornerRadius: 18, style: .continuous)
                 )
 
@@ -169,7 +169,7 @@ struct LiquidGlassPanelHeader: View {
                             .foregroundStyle(SepiaTheme.ink)
                             .frame(width: 34, height: 34)
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.circle)
                     .buttonBorderShape(.circle)
                     .disabled(closeDisabled)
                     .help(closeLabel)
@@ -184,7 +184,7 @@ struct LiquidGlassActionRow<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        GlassEffectContainer(spacing: 10) {
+        SepiaGlassGroup(spacing: 10) {
             HStack(spacing: 10) {
                 content
             }

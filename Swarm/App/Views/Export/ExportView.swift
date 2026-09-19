@@ -21,7 +21,7 @@ struct ExportView: View {
         VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
             exportHeader
 
-            GlassEffectContainer(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
+            SepiaGlassGroup(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
                 VStack(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
                     Button { exportPDF(selected: false) } label: {
                         exportRowLabel(
@@ -35,7 +35,7 @@ struct ExportView: View {
                     // accent fill, but the prominent variant carries slightly different
                     // chrome metrics, which left this row a point or two taller than the
                     // two below it. One style for all three rows, one row pitch.
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
                     .tint(SepiaTheme.accent)
                     .disabled(tree.people.isEmpty)
@@ -53,7 +53,7 @@ struct ExportView: View {
                             style: selectedIds.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
                         )
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
                     .disabled(selectedIds.isEmpty)
 
@@ -65,7 +65,7 @@ struct ExportView: View {
                             style: .secondary(SepiaTheme.accent2)
                         )
                     }
-                    .buttonStyle(.glass)
+                    .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
                 }
             }

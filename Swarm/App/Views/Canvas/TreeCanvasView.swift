@@ -982,7 +982,7 @@ private struct TreeMinimap: View {
             SepiaTheme.paper.opacity(0.58),
             in: RoundedRectangle(cornerRadius: 14, style: .continuous)
         )
-        .glassEffect(
+        .sepiaGlass(
             .regular.interactive(),
             in: RoundedRectangle(cornerRadius: 14, style: .continuous)
         )
