@@ -6,7 +6,6 @@
   <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.2-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.2" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-15%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 15 or later" />
-  <img src="https://img.shields.io/badge/universal-arm64%20%2B%20x86__64-555555?style=flat&logo=apple&logoColor=white" alt="Universal binary" />
   <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
   <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
 </div>
