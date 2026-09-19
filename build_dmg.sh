@@ -22,12 +22,19 @@ SDK_VERSION="$(xcrun --show-sdk-version)"
 #    against (LC_BUILD_VERSION `sdk`), which is a different field from the deployment
 #    target (`minos`). SwiftPM's current default build system writes `sdk` = the
 #    deployment target, which would silently drop every macOS 26 user into the old
-#    look. `-platform_version` pins both fields explicitly and works under either
-#    build system, so this does not depend on which SwiftPM is installed.
+#    look. `-platform_version` pins both fields explicitly.
+#
+#    It goes through `-Xclang-linker` in clang's own `-Wl,` syntax, not as bare
+#    `-Xlinker -platform_version`. The Swift Build engine in the Xcode 26 toolchain
+#    hands linker arguments to the clang driver with the `-Xlinker` prefixes stripped,
+#    so clang saw `-platform_version` as one of its own flags and failed the 3.5.3
+#    release build with "unknown argument". Written this way clang recognises the
+#    flag and forwards it to ld under either build system.
 BUILD_FLAGS=(
     -c release
     --arch arm64 --arch x86_64
-    -Xlinker -platform_version -Xlinker macos -Xlinker "$MIN_OS" -Xlinker "$SDK_VERSION"
+    -Xswiftc -Xclang-linker
+    -Xswiftc "-Wl,-platform_version,macos,$MIN_OS,$SDK_VERSION"
 )
 
 # Derived, never hardcoded: the products path moved between SwiftPM build systems
