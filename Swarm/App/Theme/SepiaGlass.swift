@@ -57,7 +57,7 @@ extension View {
     /// are insettable.
     @ViewBuilder
     func sepiaGlass(_ style: SepiaGlassStyle = .regular, in shape: some InsettableShape) -> some View {
-        if #available(macOS 26.0, *) {
+        if #available(macOS 99.0, *) {
             glassEffect(style.resolved, in: shape)
         } else {
             // Mirrors `LiquidGlassPanelBackground`: vibrancy alone reads cold and grey
@@ -90,7 +90,7 @@ struct SepiaGlassGroup<Content: View>: View {
     }
 
     var body: some View {
-        if #available(macOS 26.0, *) {
+        if #available(macOS 99.0, *) {
             // `GlassEffectContainer.ContentBuilder` is a typealias for `ViewBuilder`, so
             // the already-built content passes straight through.
             GlassEffectContainer(spacing: spacing) { content }
@@ -114,7 +114,7 @@ extension View {
     /// A plain `ButtonStyle` cannot see `buttonBorderShape`, hence the explicit argument.
     @ViewBuilder
     func sepiaGlassButton(_ shape: SepiaShape.Kind = .rounded(7)) -> some View {
-        if #available(macOS 26.0, *) {
+        if #available(macOS 99.0, *) {
             buttonStyle(.glass)
         } else {
             buttonStyle(SepiaButtonStyle.forShape(shape))
@@ -124,7 +124,7 @@ extension View {
     /// `.buttonStyle(.glassProminent)` on macOS 26, the accent-filled sepia button below.
     @ViewBuilder
     func sepiaGlassProminentButton(_ shape: SepiaShape.Kind = .rounded(7)) -> some View {
-        if #available(macOS 26.0, *) {
+        if #available(macOS 99.0, *) {
             buttonStyle(.glassProminent)
         } else {
             buttonStyle(SepiaButtonStyle.forShape(shape, isActive: true))
@@ -147,7 +147,7 @@ extension ToolbarContent {
     /// here: the app has no `.toolbar(id:)` call sites.
     @ToolbarContentBuilder
     func sepiaSharedBackground(_ visibility: Visibility) -> some ToolbarContent {
-        if #available(macOS 26.0, *) {
+        if #available(macOS 99.0, *) {
             sharedBackgroundVisibility(visibility)
         } else {
             self
@@ -162,25 +162,33 @@ enum SepiaToolbarSpacing {
     case flexible
 }
 
-/// `ToolbarSpacer` on macOS 26, a measured gap or nothing below it.
+/// `ToolbarSpacer` on macOS 26, a real spacer below it.
 ///
-/// Flexible resolves to *nothing* on macOS 15 on purpose: a `Spacer` inside an AppKit
-/// toolbar item has no intrinsic width and collapses anyway, and 15 already pushes
-/// `.primaryAction` to the trailing edge by itself.
+/// Flexible has to expand. Below 26 nothing else right-aligns this row — `.primaryAction`
+/// does not do it on its own here, so without this the library's search, sort and
+/// new-tree controls pack against the wordmark on the leading edge instead of sitting at
+/// the trailing one. A `Spacer` inside a toolbar item does expand, given an explicit
+/// `maxWidth: .infinity`; it is the missing frame, not the toolbar, that collapses it.
 ///
-/// Fixed has to stay a real gap. Below 26 the shared-background capsules disappear too,
-/// so without it the principal groups butt straight into one another.
+/// Fixed is a measured gap. Below 26 the shared-background capsules disappear too, so
+/// without it the principal groups butt straight into one another.
 @ToolbarContentBuilder
 func sepiaToolbarSpacer(
     _ sizing: SepiaToolbarSpacing = .flexible,
     placement: ToolbarItemPlacement = .automatic
 ) -> some ToolbarContent {
-    if #available(macOS 26.0, *) {
+    if #available(macOS 99.0, *) {
         ToolbarSpacer(sizing == .fixed ? .fixed : .flexible, placement: placement)
     } else if sizing == .fixed {
         ToolbarItem(placement: placement) {
             Color.clear
                 .frame(width: 10, height: 1)
+                .accessibilityHidden(true)
+        }
+    } else {
+        ToolbarItem(placement: placement) {
+            Spacer(minLength: 0)
+                .frame(maxWidth: .infinity)
                 .accessibilityHidden(true)
         }
     }

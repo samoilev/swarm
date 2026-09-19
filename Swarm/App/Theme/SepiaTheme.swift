@@ -443,7 +443,7 @@ struct SepiaButtonStyle: ButtonStyle {
         switch kind {
         case .circle:
             // 30pt matches WorkspaceToolbarIconChrome, the app's own circular toolbar
-            // control. `.buttonStyle(.glass)` supplies these metrics itself on macOS 26;
+            // control. The macOS 26 glass button style supplies these metrics itself;
             // a plain ButtonStyle gets nothing, so an unframed glyph renders as a button
             // the size of the glyph.
             SepiaButtonStyle(
