@@ -90,21 +90,19 @@ struct OnboardingView: View {
     // MARK: - Chrome
 
     @ToolbarContentBuilder private var onboardingToolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
+        sepiaToolbarItem(placement: .navigation, sharedBackground: .hidden) {
             SepiaWordmark(label: L10n.tr("Новое дерево"))
         }
-        .sepiaSharedBackground(.hidden)
 
         sepiaToolbarSpacer(.flexible)
 
-        ToolbarItem(placement: .primaryAction) {
+        sepiaToolbarItem(placement: .primaryAction, sharedBackground: .hidden) {
             Button(L10n.tr("Вернуться к библиотеке")) { onCancel() }
                 .sepiaGlassButton(.capsule)
                 .buttonBorderShape(.capsule)
                 .keyboardShortcut(.cancelAction)
                 .disabled(isSaving)
         }
-        .sepiaSharedBackground(.hidden)
     }
 
     private func stepHeadline(_ step: Step) -> String {

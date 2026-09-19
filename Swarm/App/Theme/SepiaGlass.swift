@@ -134,24 +134,44 @@ extension View {
 
 // MARK: - Toolbar
 
-extension ToolbarContent {
-    /// `sharedBackgroundVisibility` on macOS 26, a no-op below it.
-    ///
-    /// The extension is on `ToolbarContent` because that is where SwiftUI declares the
-    /// modifier — it is *not* a member of `ToolbarItem` or `ToolbarItemGroup`, despite
-    /// reading like one at the call site. Inside this extension `Self` is only known to
-    /// conform to `ToolbarContent`, so the `CustomizableToolbarContent` overload never
-    /// becomes ambiguous.
-    ///
-    /// The return type drops any `CustomizableToolbarContent` conformance. Harmless
-    /// here: the app has no `.toolbar(id:)` call sites.
-    @ToolbarContentBuilder
-    func sepiaSharedBackground(_ visibility: Visibility) -> some ToolbarContent {
-        if #available(macOS 99.0, *) {
-            sharedBackgroundVisibility(visibility)
-        } else {
-            self
-        }
+/// A toolbar item that opts out of (or into) the macOS 26 grouped item background.
+///
+/// The item is built *inside* the availability branch on purpose. An earlier version of
+/// this shim was an extension on the `ToolbarContent` protocol that took an
+/// already-constructed item as `Self` — and it silently did nothing. SwiftUI declares
+/// the modifier on both `ToolbarContent` and `CustomizableToolbarContent`; reached
+/// through a generic `Self` it does not attach to the concrete item, so every item kept
+/// its background. Nothing caught it because that background is all but invisible
+/// against the sepia toolbar in the light appearance — in Dark mode it renders as a
+/// pale pill behind the wordmark and the workspace title.
+///
+/// Applying it to a concrete `ToolbarItem` here is what makes it take effect.
+@ToolbarContentBuilder
+func sepiaToolbarItem(
+    placement: ToolbarItemPlacement = .automatic,
+    sharedBackground: Visibility,
+    @ViewBuilder content: () -> some View
+) -> some ToolbarContent {
+    if #available(macOS 26.0, *) {
+        ToolbarItem(placement: placement, content: content)
+            .sharedBackgroundVisibility(sharedBackground)
+    } else {
+        ToolbarItem(placement: placement, content: content)
+    }
+}
+
+/// `ToolbarItemGroup` counterpart of `sepiaToolbarItem`, for the same reason.
+@ToolbarContentBuilder
+func sepiaToolbarItemGroup(
+    placement: ToolbarItemPlacement = .automatic,
+    sharedBackground: Visibility,
+    @ViewBuilder content: () -> some View
+) -> some ToolbarContent {
+    if #available(macOS 26.0, *) {
+        ToolbarItemGroup(placement: placement, content: content)
+            .sharedBackgroundVisibility(sharedBackground)
+    } else {
+        ToolbarItemGroup(placement: placement, content: content)
     }
 }
 

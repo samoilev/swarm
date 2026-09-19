@@ -79,8 +79,7 @@ struct LanguageChooserView: View {
         // Lights and the wordmark, and nothing else: the app introduces itself before it
         // asks anything.
         .toolbar {
-            ToolbarItem(placement: .navigation) { SepiaWordmark() }
-                .sepiaSharedBackground(.hidden)
+            sepiaToolbarItem(placement: .navigation, sharedBackground: .hidden) { SepiaWordmark() }
         }
         .toolbarBackground(SepiaTheme.toolbarBg, for: .windowToolbar)
         .toolbarBackgroundVisibility(.visible, for: .windowToolbar)

@@ -821,7 +821,7 @@ struct MainWorkspace: View {
 
     @ToolbarContentBuilder
     private var workspaceToolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
+        sepiaToolbarItem(placement: .navigation, sharedBackground: .hidden) {
             Button(action: onBack) {
                 Image(systemName: "house.fill")
                     .font(SepiaTheme.icon(size: 12, weight: .semibold))
@@ -832,71 +832,63 @@ struct MainWorkspace: View {
             .help(L10n.tr("К списку деревьев"))
             .accessibilityLabel(L10n.tr("К списку деревьев"))
         }
-        .sepiaSharedBackground(.hidden)
 
-        ToolbarItem(placement: .navigation) {
+        sepiaToolbarItem(placement: .navigation, sharedBackground: .hidden) {
             titleBlock
         }
-        .sepiaSharedBackground(.hidden)
 
         // Principal, not automatic: the tree controls belong to the canvas, not to the
         // record on the left or the actions on the right, and principal is the only
         // placement macOS centres in the bar. Flexible spacers around an automatic group
         // collapse to nothing here.
-        ToolbarItemGroup(placement: .principal) {
+        sepiaToolbarItemGroup(placement: .principal, sharedBackground: .visible) {
             viewModeControls
                 .padding(.horizontal, 3)
         }
-        .sepiaSharedBackground(.visible)
 
         // The overflow sits beside the controls it stands in for, not across the bar
         // next to the save clock — it is the tail of this group, not a trailing action.
         if usesCompactToolbar {
             sepiaToolbarSpacer(.fixed, placement: .principal)
-            ToolbarItem(placement: .principal) {
+            sepiaToolbarItem(placement: .principal, sharedBackground: .hidden) {
                 compactToolbarOverflow
             }
-            .sepiaSharedBackground(.hidden)
         }
 
         if !usesCompactToolbar, viewMode == .tree {
             sepiaToolbarSpacer(.fixed, placement: .principal)
-            ToolbarItemGroup(placement: .principal) {
+            sepiaToolbarItemGroup(placement: .principal, sharedBackground: .visible) {
                 HStack(spacing: 4) {
                     directionControls
                     photosControl
                 }
                 .padding(.horizontal, 3)
             }
-            .sepiaSharedBackground(.visible)
         } else if !usesCompactToolbar, viewMode == .fan {
             sepiaToolbarSpacer(.fixed, placement: .principal)
-            ToolbarItemGroup(placement: .principal) {
+            sepiaToolbarItemGroup(placement: .principal, sharedBackground: .visible) {
                 fanLevelControls
                     .padding(.horizontal, 3)
             }
-            .sepiaSharedBackground(.visible)
         } else if !usesCompactToolbar, viewMode == .map {
             sepiaToolbarSpacer(.fixed, placement: .principal)
-            ToolbarItemGroup(placement: .principal) {
+            sepiaToolbarItemGroup(placement: .principal, sharedBackground: .visible) {
                 mapFocusControl
                     .padding(.horizontal, 3)
             }
-            .sepiaSharedBackground(.visible)
         }
 
         if !usesCompactToolbar, [.tree, .fan, .map].contains(viewMode) {
             sepiaToolbarSpacer(.fixed, placement: .principal)
-            ToolbarItemGroup(placement: .principal) {
+            sepiaToolbarItemGroup(placement: .principal, sharedBackground: .visible) {
                 zoomControls
                     .padding(.horizontal, 3)
             }
-            .sepiaSharedBackground(.visible)
         }
 
         // Save clock rides in the trailing group rather than as its own item: the
         // builder tops out at ten children and the compact overflow now claims one.
-        ToolbarItemGroup(placement: .primaryAction) {
+        sepiaToolbarItemGroup(placement: .primaryAction, sharedBackground: .hidden) {
             savedStatus
                 .padding(.trailing, 6)
 
@@ -921,7 +913,6 @@ struct MainWorkspace: View {
             .help(L10n.tr("Экспорт…"))
             .accessibilityLabel(L10n.tr("Экспорт…"))
         }
-        .sepiaSharedBackground(.hidden)
     }
 
     private var compactToolbarOverflow: some View {

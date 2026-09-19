@@ -342,28 +342,25 @@ struct TreeLibraryView: View {
     /// float its own title in the content area below a stock title bar, which made one
     /// window look like two applications.
     @ToolbarContentBuilder private var libraryToolbar: some ToolbarContent {
-        ToolbarItem(placement: .navigation) {
+        sepiaToolbarItem(placement: .navigation, sharedBackground: .hidden) {
             SepiaWordmark(label: L10n.tr("Библиотека"))
         }
-        .sepiaSharedBackground(.hidden)
 
         sepiaToolbarSpacer(.flexible)
 
         if showsFilter {
-            ToolbarItem(placement: .automatic) {
+            sepiaToolbarItem(placement: .automatic, sharedBackground: .hidden) {
                 filterField()
             }
-            .sepiaSharedBackground(.hidden)
         }
 
         if trees.count > 1 {
-            ToolbarItem(placement: .automatic) {
+            sepiaToolbarItem(placement: .automatic, sharedBackground: .hidden) {
                 sortMenu
             }
-            .sepiaSharedBackground(.hidden)
         }
 
-        ToolbarItemGroup(placement: .primaryAction) {
+        sepiaToolbarItemGroup(placement: .primaryAction, sharedBackground: .hidden) {
             // On an empty library these two live in the empty state itself, 300pt below.
             // Showing them twice on one screen is noise, not reinforcement.
             if !trees.isEmpty {
@@ -422,7 +419,6 @@ struct TreeLibraryView: View {
             .help(L10n.tr("Действия с библиотекой"))
             .accessibilityLabel(L10n.tr("Действия с библиотекой"))
         }
-        .sepiaSharedBackground(.hidden)
     }
 
     /// Every control in this bar is drawn to one height, and that height scales with the
