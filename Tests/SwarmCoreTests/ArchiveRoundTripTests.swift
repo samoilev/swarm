@@ -78,6 +78,71 @@ struct ArchiveRoundTripTests {
         #expect(try store.resolveImportSource(resolved) == resolved)
     }
 
+    @Test func preservedFamilyAndForeignRecordFilesSurviveSaveAndExport() async throws {
+        let source = try Temp()
+        let library = try Temp()
+        let exports = try Temp()
+        let destination = try Temp()
+        let fm = FileManager.default
+        let files = ["Attachments/family.txt": record, "Media/group.jpg": portrait]
+        for (path, bytes) in files {
+            let url = source.url.appendingPathComponent(path)
+            try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try bytes.write(to: url)
+        }
+        let gedcom = source.url.appendingPathComponent("family.ged")
+        try """
+        0 HEAD
+        1 _NAME Family archive
+        0 @I1@ INDI
+        1 NAME Anna /Example/
+        1 FAMS @F1@
+        0 @F1@ FAM
+        1 WIFE @I1@
+        1 _ATTC
+        2 FILE Attachments/family.txt
+        0 @O1@ OBJE
+        1 FILE Media/group.jpg
+        0 TRLR
+        """.write(to: gedcom, atomically: true, encoding: .utf8)
+
+        let store = TreeStore(storageFolder: library.url)
+        let staged = try store.prepareImportPreview(from: gedcom)
+        let imported: ImportResult = try await store.importGEDCOM(from: staged)
+        let firstExport = try await store.exportTree(imported.tree, to: exports.url)
+        for (path, bytes) in files {
+            #expect(try Data(contentsOf: firstExport.finalURL.appendingPathComponent(path)) == bytes)
+        }
+
+        // Older builds moved these still-referenced files to Trash. Saving must also
+        // recover those bytes, while they remain inside the recovery window.
+        let treeFolder = library.url.appendingPathComponent("Family archive")
+        let trash = treeFolder.appendingPathComponent(".Swarm/Trash")
+        try fm.createDirectory(at: trash, withIntermediateDirectories: true)
+        for path in files.keys {
+            let parts = path.split(separator: "/")
+            try fm.moveItem(
+                at: treeFolder.appendingPathComponent(path),
+                to: trash.appendingPathComponent("9999999999999--\(parts[0])--\(parts[1])")
+            )
+        }
+        let reopened = TreeStore(storageFolder: library.url)
+        let tree = try #require(reopened.trees.first)
+        tree.people.first?.givenNames = "Anna edited"
+        _ = try await reopened.saveTree(tree)
+        let exported = try await reopened.exportTree(tree, to: exports.url)
+        let otherStore = TreeStore(storageFolder: destination.url)
+        let otherSource = try otherStore.resolveImportSource(exported.finalURL)
+        let otherStaged = try otherStore.prepareImportPreview(from: otherSource)
+        let roundTrip: ImportResult = try await otherStore.importGEDCOM(from: otherStaged)
+        let finalExport = try await otherStore.exportTree(roundTrip.tree, to: exports.url)
+        #expect(roundTrip.tree.people.first?.givenNames == "Anna edited")
+        for (path, bytes) in files {
+            #expect(try Data(contentsOf: finalExport.finalURL.appendingPathComponent(path)) == bytes)
+        }
+        #expect(!roundTrip.report.diagnostics.contains { $0.id.hasPrefix("gedcom.missing-media") })
+    }
+
     @Test func folderWithoutUsableGEDCOMIsReportedPlainly() throws {
         let fm = FileManager.default
         let temp = try Temp()

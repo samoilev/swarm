@@ -667,8 +667,9 @@ public final class TreeStore {
             }
         }
 
-        try restoreReferencedFilesFromTrash(tree: tree, in: staging)
         let serialized = try GEDCOMCodec.serialize(tree: tree, document: tree.gedcomDocument)
+        let referencedFiles = referencedFileNames(in: serialized.gedcom)
+        try restoreReferencedFilesFromTrash(tree: tree, referencedFiles: referencedFiles, in: staging)
         let stagedGEDCOM = staging.appendingPathComponent("\(target.lastPathComponent).ged")
         try inject(.gedcomWrite)
         try serialized.gedcom.write(to: stagedGEDCOM, atomically: true, encoding: .utf8)
@@ -688,6 +689,7 @@ public final class TreeStore {
         try moveUnreferencedFilesToTrash(
             tree: tree,
             serializedPhotos: serialized.photos,
+            referencedFiles: referencedFiles,
             originalAttachmentNames: previousAttachmentNames,
             in: staging
         )
@@ -843,9 +845,42 @@ public final class TreeStore {
         }
     }
 
-    private func restoreReferencedFilesFromTrash(tree: FamilyTree, in staging: URL) throws {
+    /// Foreign records and family-level attachments survive in GEDCOM even when the
+    /// person model cannot edit them. Their files must survive the same transaction.
+    /// Read the final serialization so deleting a modeled attachment still trashes it.
+    private struct ReferencedFileNames {
+        var media = Set<String>()
+        var attachments = Set<String>()
+    }
+
+    private func referencedFileNames(in gedcom: String) -> ReferencedFileNames {
+        var names = ReferencedFileNames()
+        for line in gedcom.split(whereSeparator: \.isNewline) where line.contains(" FILE ") {
+            guard let node = GEDCOMNode(rawLine: String(line)), node.tag == "FILE" else { continue }
+            let parts = node.value.replacingOccurrences(of: "\\", with: "/").split(separator: "/")
+            // Keep only single path components: imported paths must never let Trash
+            // recovery write outside the active Media/ or Attachments/ directory.
+            guard let last = parts.last, last != ".", last != ".." else { continue }
+            let name = String(last)
+            if parts.first?.caseInsensitiveCompare(Substring(Self.attachmentsName)) == .orderedSame {
+                names.attachments.insert(name)
+            } else {
+                // GEDCOM commonly stores portraits as bare filenames. Import resolves
+                // every other FILE path's basename against Media/ before Attachments/.
+                names.media.insert(name)
+            }
+        }
+        return names
+    }
+
+    private func restoreReferencedFilesFromTrash(
+        tree: FamilyTree,
+        referencedFiles: ReferencedFileNames,
+        in staging: URL
+    ) throws {
         let attachmentNames = Set(tree.people.flatMap(\.attachments).map(\.storedName))
-        let photoNames = Set(tree.people.compactMap(\.photoFilename))
+            .union(referencedFiles.attachments)
+        let photoNames = Set(tree.people.compactMap(\.photoFilename)).union(referencedFiles.media)
         try restore(names: attachmentNames, category: Self.attachmentsName, in: staging)
         try restore(names: photoNames, category: Self.mediaName, in: staging)
     }
@@ -872,12 +907,15 @@ public final class TreeStore {
     private func moveUnreferencedFilesToTrash(
         tree: FamilyTree,
         serializedPhotos: [GEDCOMSerializer.Photo],
+        referencedFiles: ReferencedFileNames,
         originalAttachmentNames: @escaping () -> [String: String],
         in staging: URL
     ) throws {
         let attachmentNames = Set(tree.people.flatMap(\.attachments).map(\.storedName))
+            .union(referencedFiles.attachments)
         let photoNames = Set(tree.people.compactMap(\.photoFilename))
             .union(serializedPhotos.map(\.filename))
+            .union(referencedFiles.media)
         try moveUnreferenced(
             in: Self.attachmentsName,
             expected: attachmentNames,

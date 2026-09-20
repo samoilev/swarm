@@ -3,7 +3,7 @@
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.5-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.5" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.6-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.6" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-15%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 15 or later" />
   <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
@@ -40,13 +40,31 @@ Requires macOS 15 or later. The DMG is a universal binary, so it runs natively o
 both Apple silicon and Intel Macs. On macOS 26 and later the interface is drawn in
 Liquid Glass; on 15 through 25 it falls back to the app's own sepia controls.
 
-The build is not yet signed with an Apple Developer ID, so macOS will block the first
-open; allow it under System Settings ▸ Privacy & Security ▸ Open Anyway. To verify the
-download, put the release's `.sha256` file next to the DMG and run:
+Open the DMG and drag **Swarm** to **Applications**. The build is not yet signed with
+an Apple Developer ID or notarized, so macOS blocks the first launch. Open Swarm once,
+then go to **System Settings ▸ Privacy & Security ▸ Open Anyway** and confirm opening
+Swarm. You only need to do this once; leave your Mac's other security settings enabled.
+
+To verify the download, put the release's `.sha256` file next to the DMG and run:
 
 ```sh
-shasum -a 256 -c Swarm-3.5.5.dmg.sha256
+shasum -a 256 -c Swarm-3.5.6.dmg.sha256
 ```
+
+### Try the Curie family
+
+No family data needed. [Download the example ZIP](https://github.com/samoilev/swarm/releases/latest/download/Swarm-Curie-Example.zip)
+and double-click it to unpack it.
+
+1. Open Swarm and choose **English**.
+2. Click **Import GEDCOM** and select the unpacked **curie-joliot folder**, so the
+   portraits and attachments come along too.
+3. The preview lists two country names without map coordinates. Check **Continue
+   with these warnings**, then click **Import**. The family tree opens automatically.
+4. Select Marie Curie to explore her relatives, or try the fan chart and PDF export.
+
+Swarm imports a separate copy; the downloaded example stays unchanged. Image credits
+and licenses are included in the ZIP.
 
 ## Features
 
@@ -76,10 +94,10 @@ shasum -a 256 -c Swarm-3.5.5.dmg.sha256
 - **Hard to lose a tree.** Trees live in `~/Library/Application Support/Swarm/`, one
   folder per tree. Swarm checksums every save and swaps it into place only once it
   verifies, keeps the last 50 revisions, and holds deleted items in Trash for 30 days.
-- **Nothing leaves the Mac.** Place lookup runs against a bundled index of 476,958
-  bilingual GeoNames places, so searching for a village sends nothing anywhere. The map
-  is the one optional network path: the default provider draws tiles through MapKit, and
-  switching Settings ▸ Map to **Offline Map** (`offlineVector`) removes even that.
+- **Your family-tree files stay on your Mac.** Place lookup runs against a bundled
+  index of 476,958 bilingual GeoNames places, without sending searches anywhere.
+  Optional Apple Maps uses a network connection, and Apple may receive the viewed
+  region. Choose **Offline Map** in Settings to use maps without that connection.
 
 ## How Swarm compares
 
@@ -103,9 +121,9 @@ trees to open, screenshot and attach to a bug report. Credits are in
 
 To import one, click **Import GEDCOM** in the tree library and select the tree's
 **folder**, `Examples/tudor-succession/`, not the `.ged` inside it. Choosing the folder
-is what lets Swarm pick up the `Media/` and `Attachments/` beside the GEDCOM. Then click
-**Import Verified Copy** in the preview. Swarm only ever reads the `Examples/` folder, so
-you can import the same tree as often as you like.
+is what lets Swarm pick up the `Media/` and `Attachments/` beside the GEDCOM. Review any
+warnings, acknowledge them if prompted, and click **Import**. Swarm only reads the
+`Examples/` folder, so you can import the same tree as often as you like.
 
 ## Build and run
 

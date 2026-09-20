@@ -137,6 +137,9 @@ jobs:
           name: dmg
           path: dist
 
+      - name: Package the example family
+        run: python3 Scripts/package-example.py
+
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -158,6 +161,15 @@ jobs:
             echo "the interface is drawn in Liquid Glass. Prefer to build it yourself? See the"
             echo "[README](https://github.com/${GITHUB_REPOSITORY}#build-and-run)."
             echo
+            echo "## Try the Curie family"
+            echo
+            echo "[Download the example ZIP](https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/Swarm-Curie-Example.zip) and unpack it."
+            echo "Open Swarm, choose **English**, click **Import GEDCOM**, and select the unpacked"
+            echo "**curie-joliot folder** to include its portraits and attachments. The preview"
+            echo "lists two country names without map coordinates. Check **Continue with these"
+            echo "warnings**, then click **Import**. The tree opens automatically. Swarm imports"
+            echo "a separate copy, so you can explore without changing the downloaded example."
+            echo
             echo "## Verify the download"
             echo
             echo '```sh'
@@ -168,4 +180,5 @@ jobs:
             --title "Swarm ${version}" \
             --notes-file release-notes.md \
             "dist/Swarm-${version}.dmg" \
-            "dist/Swarm-${version}.dmg.sha256"
+            "dist/Swarm-${version}.dmg.sha256" \
+            "dist/Swarm-Curie-Example.zip"

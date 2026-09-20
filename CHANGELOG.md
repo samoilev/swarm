@@ -11,6 +11,24 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.6] — 2026-09-20
+
+### Fixed
+
+- Saving an imported tree no longer moves files referenced only by family-level or
+  foreign GEDCOM records into Swarm's recovery Trash. This affected the two family
+  attachments in the bundled Curie example: the GEDCOM reference survived, but an
+  archive exported after editing the tree omitted the files. Saving now derives the
+  complete active-file set from the final lossless GEDCOM and recovers files misplaced
+  by affected versions when they are still within the 30-day recovery window.
+
+### Changed
+
+- Releases now include a ready-to-import Curie family ZIP, with image credits and
+  licenses, so Swarm can be tried without supplying personal family data.
+- Installation instructions explain the unsigned first launch more clearly, and the
+  README states precisely when Apple Maps may use a network connection.
+
 ## [3.5.5] — 2026-09-20
 
 **Liquid Glass is back on macOS 26 and later.** It was absent from 3.5.3 and 3.5.4
@@ -1095,7 +1113,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.5...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.6...HEAD
+[3.5.6]: https://github.com/samoilev/swarm/compare/v3.5.5...v3.5.6
 [3.5.5]: https://github.com/samoilev/swarm/compare/v3.5.4...v3.5.5
 [3.5.4]: https://github.com/samoilev/swarm/compare/v3.5.3...v3.5.4
 [3.5.3]: https://github.com/samoilev/swarm/compare/v3.5.2...v3.5.3
