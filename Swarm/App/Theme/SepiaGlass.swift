@@ -57,7 +57,7 @@ extension View {
     /// are insettable.
     @ViewBuilder
     func sepiaGlass(_ style: SepiaGlassStyle = .regular, in shape: some InsettableShape) -> some View {
-        if #available(macOS 99.0, *) {
+        if #available(macOS 26.0, *) {
             glassEffect(style.resolved, in: shape)
         } else {
             // Mirrors `LiquidGlassPanelBackground`: vibrancy alone reads cold and grey
@@ -90,7 +90,7 @@ struct SepiaGlassGroup<Content: View>: View {
     }
 
     var body: some View {
-        if #available(macOS 99.0, *) {
+        if #available(macOS 26.0, *) {
             // `GlassEffectContainer.ContentBuilder` is a typealias for `ViewBuilder`, so
             // the already-built content passes straight through.
             GlassEffectContainer(spacing: spacing) { content }
@@ -114,7 +114,7 @@ extension View {
     /// A plain `ButtonStyle` cannot see `buttonBorderShape`, hence the explicit argument.
     @ViewBuilder
     func sepiaGlassButton(_ shape: SepiaShape.Kind = .rounded(7)) -> some View {
-        if #available(macOS 99.0, *) {
+        if #available(macOS 26.0, *) {
             buttonStyle(.glass)
         } else {
             buttonStyle(SepiaButtonStyle.forShape(shape))
@@ -124,7 +124,7 @@ extension View {
     /// `.buttonStyle(.glassProminent)` on macOS 26, the accent-filled sepia button below.
     @ViewBuilder
     func sepiaGlassProminentButton(_ shape: SepiaShape.Kind = .rounded(7)) -> some View {
-        if #available(macOS 99.0, *) {
+        if #available(macOS 26.0, *) {
             buttonStyle(.glassProminent)
         } else {
             buttonStyle(SepiaButtonStyle.forShape(shape, isActive: true))
@@ -136,16 +136,10 @@ extension View {
 
 /// A toolbar item that opts out of (or into) the macOS 26 grouped item background.
 ///
-/// The item is built *inside* the availability branch on purpose. An earlier version of
-/// this shim was an extension on the `ToolbarContent` protocol that took an
-/// already-constructed item as `Self` — and it silently did nothing. SwiftUI declares
-/// the modifier on both `ToolbarContent` and `CustomizableToolbarContent`; reached
-/// through a generic `Self` it does not attach to the concrete item, so every item kept
-/// its background. Nothing caught it because that background is all but invisible
-/// against the sepia toolbar in the light appearance — in Dark mode it renders as a
-/// pale pill behind the wordmark and the workspace title.
-///
-/// Applying it to a concrete `ToolbarItem` here is what makes it take effect.
+/// The item is built *inside* the availability branch so the modifier is applied to a
+/// concrete `ToolbarItem` rather than to a generic `Self` in a protocol extension.
+/// Either form works; this one needs no reasoning about which of SwiftUI's two
+/// declarations of the modifier a generic context resolves to.
 @ToolbarContentBuilder
 func sepiaToolbarItem(
     placement: ToolbarItemPlacement = .automatic,
@@ -197,7 +191,7 @@ func sepiaToolbarSpacer(
     _ sizing: SepiaToolbarSpacing = .flexible,
     placement: ToolbarItemPlacement = .automatic
 ) -> some ToolbarContent {
-    if #available(macOS 99.0, *) {
+    if #available(macOS 26.0, *) {
         ToolbarSpacer(sizing == .fixed ? .fixed : .flexible, placement: placement)
     } else if sizing == .fixed {
         ToolbarItem(placement: placement) {

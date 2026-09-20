@@ -111,6 +111,21 @@ jobs:
       # 15.0 the compiler already rejects an unguarded 26-only symbol. What it stops is
       # the guards spreading back out to 116 call sites, which is what made the app
       # hard to back-deploy in the first place.
+      # 3.5.3 and 3.5.4 both shipped with every guard in the shim file reading
+      # `macOS 99.0` — a local hack for previewing the fallback path that was committed
+      # by mistake. 99 is never true, so the whole app silently ran its macOS 15
+      # rendering on every machine. Nothing caught it: it builds, the tests pass, the
+      # formatter is happy, and the containment check below excludes this very file.
+      # The shim is the one place allowed to spell an availability check, so the one
+      # version it may name is the real floor.
+      - name: The shim's availability guards are real
+        run: |
+          if grep -nE '(if|guard) #available\(macOS' Swarm/App/Theme/SepiaGlass.swift \
+              | grep -v '#available(macOS 26\.0, \*)'; then
+            echo "::error::SepiaGlass.swift has an availability guard that is not macOS 26.0 (a preview hack?)." >&2
+            exit 1
+          fi
+
       - name: Liquid Glass stays behind one shim
         run: |
           if grep -rn --include='*.swift' --exclude='SepiaGlass.swift' \
