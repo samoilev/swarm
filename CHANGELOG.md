@@ -11,6 +11,33 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.5] — 2026-09-20
+
+**Liquid Glass is back on macOS 26 and later.** It was absent from 3.5.3 and 3.5.4
+entirely: every availability guard in the glass shim read `#available(macOS 99.0, *)`,
+left behind by a script used to preview the macOS 15 fallback while the platform-support
+work was in progress. 99 is never true, so every machine ran the fallback rendering — no
+glass effects, no glass buttons, no shared-background control — whatever version of macOS
+it was on.
+
+### Fixed
+
+- All six remaining guards in the shim are back to `macOS 26.0`. The 3.5.4 fix had
+  restored two of them, which is why the dark-appearance pill behind the wordmark went
+  away while the glass itself did not come back.
+- CI now fails on any guard in that file that is not `macOS 26.0`. Nothing else could have
+  caught this: the app builds, the tests pass, the formatter is satisfied, and the lint
+  that keeps 26-only symbols contained excludes this very file by design.
+
+### Note on the 3.5.4 entry
+
+The cause given for the toolbar background in 3.5.4 — a modifier reaching a generic `Self`
+through a protocol extension — was wrong, and so was the comment that shipped with it. The
+test that appeared to confirm it differed from the failing code only in spelling `26.0`
+rather than `99.0`. The comment is corrected in the source. The closure-based shim
+introduced there stays, because it is sound on its own terms, not because the previous
+form was broken.
+
 ## [3.5.4] — 2026-09-19
 
 ### Fixed
@@ -1068,7 +1095,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.4...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.5...HEAD
+[3.5.5]: https://github.com/samoilev/swarm/compare/v3.5.4...v3.5.5
 [3.5.4]: https://github.com/samoilev/swarm/compare/v3.5.3...v3.5.4
 [3.5.3]: https://github.com/samoilev/swarm/compare/v3.5.2...v3.5.3
 [3.5.2]: https://github.com/samoilev/swarm/compare/v3.5.1...v3.5.2
