@@ -20,6 +20,13 @@ arrive in. Native macOS, Swift, no third-party packages.
 
 ## Quick look
 
+<div align="center">
+  <a href="docs/swarm-walkthrough.mp4"><img src="docs/swarm-walkthrough.gif" width="800" alt="A 14-second walkthrough of Swarm's tree, person profile, ancestor fan and export views" /></a>
+  <br />
+  <a href="docs/swarm-walkthrough.mp4">Watch the 14-second walkthrough as MP4</a>
+</div>
+<br />
+
 <img src="docs/screenshots/tree.png" width="100%" alt="A tree with every card labelled by its relationship to Marie Skłodowska-Curie" />
 
 <table>
