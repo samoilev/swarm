@@ -442,7 +442,7 @@ final class SwarmEnglishUITests: XCTestCase {
     }
 
     func testEnglishCoreJourneyAndWorkspaceParity() {
-        app.buttons["New Tree"].click()
+        app.buttons["New tree"].click()
         let title = app.textFields["FAMILY NAME"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click(); title.typeText("Smith Archive")
