@@ -162,7 +162,9 @@ private struct AboutCommands: Commands {
             Button {
                 openWindow(id: SwarmApp.aboutWindowID)
             } label: {
-                Text(L10n.tr("О Swarm"))
+                // The Mac's language, not Swarm's: the items AppKit puts around this one
+                // — Services, Hide Swarm, Quit Swarm — are localized by the system.
+                Text(L10n.tr("О Swarm", language: AppLanguage.system()))
             }
         }
     }

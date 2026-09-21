@@ -24,6 +24,14 @@ struct LocalizationTests {
         #expect(L10n.tr("Проверка старого хранилища", language: .english) == "Check previous storage")
     }
 
+    @Test func systemLanguageFollowsTheMacAndFallsBackToEnglish() {
+        #expect(AppLanguage.system(preferredLanguages: ["ru-RU", "en-GB"]) == .russian)
+        #expect(AppLanguage.system(preferredLanguages: ["en-GB", "ru-GB"]) == .english)
+        #expect(AppLanguage.system(preferredLanguages: ["fr-FR"]) == .english)
+        #expect(AppLanguage.system(preferredLanguages: []) == .english)
+        #expect(L10n.tr("О Swarm", language: AppLanguage.system(preferredLanguages: ["en-GB"])) == "About Swarm")
+    }
+
     @Test func migratesLegacyLanguagePreferenceOnlyWhenCurrentIsUnset() throws {
         let currentName = "swarm-current-\(UUID().uuidString)"
         let legacyName = "swarm-legacy-\(UUID().uuidString)"

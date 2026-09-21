@@ -32,6 +32,18 @@ public enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
         return formatter.string(from: date)
     }
 
+    /// The Mac's own interface language, resolved to one Swarm speaks.
+    ///
+    /// Used where Swarm's text sits inside a menu AppKit also writes into: the App
+    /// menu's Hide/Quit items follow the Mac, not the language chosen in Swarm, so an
+    /// "О Swarm" above an English "Quit Swarm" reads as a bug rather than a setting.
+    public static func system(preferredLanguages: [String] = Locale.preferredLanguages) -> AppLanguage {
+        let codes = preferredLanguages.compactMap { Locale(identifier: $0).language.languageCode?.identifier }
+        // English for every Mac that isn't Russian: a French reader is better served by
+        // the language they are more likely to share with the rest of the menu.
+        return codes.first == russian.rawValue ? .russian : .english
+    }
+
     public static var current: AppLanguage {
         guard let rawValue = UserDefaults.standard.string(forKey: storageKey) else { return .default }
         return AppLanguage(rawValue: rawValue) ?? .default
