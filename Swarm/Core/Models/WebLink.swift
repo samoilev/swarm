@@ -25,6 +25,20 @@ public struct WebLink: Identifiable, Codable, Hashable {
         return host.hasPrefix("www.") ? String(host.dropFirst(4)) : host
     }
 
+    /// The genealogy site this address belongs to, when it is one Swarm recognizes.
+    public var site: GenealogySite? { GenealogySite.match(url: Self.normalize(url)) }
+
+    /// The person identifier inside the address, e.g. FamilySearch's `LZDP-6M9`.
+    public var externalID: String? { site?.extractID(from: Self.normalize(url)) }
+
+    /// The line under the title: "FamilySearch · LZDP-6M9" where the address is a
+    /// recognized person page, the bare host otherwise.
+    public var displaySubtitle: String {
+        guard let site else { return displayHost }
+        guard let externalID else { return site.name }
+        return "\(site.name) · \(externalID)"
+    }
+
     /// Only http(s) and mailto are handed to the system. An imported GEDCOM is untrusted
     /// input, and `file://` or a custom scheme would let it launch something local.
     public var openableURL: URL? {
@@ -35,11 +49,17 @@ public struct WebLink: Identifiable, Codable, Hashable {
     }
 
     /// Trims and prefixes a bare "example.com/x" with https so it opens as typed.
+    ///
+    /// A bare person identifier pasted on its own — a FamilySearch `LZDP-6M9` — expands
+    /// to that site's person page instead; without this it became `https://LZDP-6M9`,
+    /// which opens nothing. Idempotent either way: what comes back holds a scheme, so a
+    /// second pass returns it unchanged.
     public static func normalize(_ raw: String) -> String {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, !trimmed.contains("://"), !trimmed.lowercased().hasPrefix("mailto:") else {
             return trimmed
         }
+        if let match = GenealogySite.matchingBareID(trimmed) { return match.site.url(for: match.id) }
         return "https://" + trimmed
     }
 

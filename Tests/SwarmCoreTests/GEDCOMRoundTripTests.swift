@@ -175,6 +175,25 @@ struct GEDCOMRoundTripTests {
         #expect(!child.unknownBranches.contains { $0.contains { $0.contains("WWW") } })
     }
 
+    /// Recognizing a site is derived from the address, so it must survive a round trip
+    /// without the codec learning anything new — and without the link being written twice.
+    @Test func recognizedSiteLinksSurviveARoundTrip() throws {
+        let tree = makeTree()
+        let child = try #require(tree.people.first { $0.givenNames == "Пётр" })
+        child.links = [WebLink(url: "LZDP-6M9", title: "Профиль")]
+        child.links[0].url = WebLink.normalize(child.links[0].url)
+
+        let gedcom = GEDCOMSerializer.serialize(tree: tree).gedcom
+        #expect(gedcom.contains("1 WWW https://www.familysearch.org/tree/person/details/LZDP-6M9"))
+
+        let reparsed = try #require(roundTrip(tree).people.first { $0.givenNames == "Пётр" })
+        #expect(reparsed.links.count == 1)
+        #expect(reparsed.links[0].site?.id == "familysearch")
+        #expect(reparsed.links[0].externalID == "LZDP-6M9")
+        #expect(reparsed.links[0].displaySubtitle == "FamilySearch · LZDP-6M9")
+        #expect(!reparsed.unknownBranches.contains { $0.contains { $0.contains("WWW") } })
+    }
+
     // MARK: - Interop & robustness
 
     /// Coordinates written by other tools (standard MAP/LATI/LONG, southern/western

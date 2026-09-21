@@ -132,6 +132,85 @@ struct CoreModelTests {
         #expect(WebLink(url: "javascript:alert(1)").openableURL == nil)
         #expect(WebLink(url: "").openableURL == nil)
         #expect(WebLink(url: "mailto:archive@example.org").openableURL != nil)
+        // A bare identifier must not become a scheme-less host that opens nothing.
+        #expect(WebLink(url: "javascript:LZDP-6M9").openableURL == nil)
+    }
+
+    // MARK: - Genealogy sites
+
+    @Test func bareFamilySearchIdentifierExpandsToItsPersonPage() {
+        let expanded = WebLink.normalize("  LZDP-6M9  ")
+        #expect(expanded == "https://www.familysearch.org/tree/person/details/LZDP-6M9")
+        // Idempotent: the expansion carries a scheme, so a second pass leaves it alone.
+        #expect(WebLink.normalize(expanded) == expanded)
+
+        let link = WebLink(url: "LZDP-6M9")
+        #expect(link.site?.id == "familysearch")
+        #expect(link.externalID == "LZDP-6M9")
+        #expect(link.displaySubtitle == "FamilySearch · LZDP-6M9")
+        #expect(link.openableURL?.absoluteString == expanded)
+    }
+
+    @Test(arguments: [
+        ("https://www.familysearch.org/tree/person/details/LZDP-6M9", "familysearch", "LZDP-6M9"),
+        ("https://www.wikitree.com/wiki/Sidorov-123", "wikitree", "Sidorov-123"),
+        ("https://www.findagrave.com/memorial/12345/ivan-sidorov", "findagrave", "12345"),
+        ("https://www.geni.com/people/Ivan-Sidorov/6000000012345678901", "geni", "6000000012345678901"),
+        ("https://www.myheritage.com/person-1_123456_789012/ivan", "myheritage", "1_123456_789012"),
+    ])
+    func recognizesPersonPagesOfEachKnownSite(url: String, siteID: String, identifier: String) {
+        let link = WebLink(url: url)
+        #expect(link.site?.id == siteID)
+        #expect(link.externalID == identifier)
+    }
+
+    @Test func recognizesGeneanetByHostWithoutClaimingAnIdentifier() {
+        // Geneanet addresses a person with query pairs, so there is no id to show.
+        let link = WebLink(url: "https://gw.geneanet.org/someuser?p=jean&n=dupont")
+        #expect(link.site?.id == "geneanet")
+        #expect(link.externalID == nil)
+        #expect(link.displaySubtitle == "Geneanet")
+    }
+
+    @Test func unrecognizedAddressesFallBackToTheirHost() {
+        let link = WebLink(url: "https://www.prlib.ru/item/42")
+        #expect(link.site == nil)
+        #expect(link.displaySubtitle == "prlib.ru")
+    }
+
+    @Test func anAmbiguousBareIdentifierIsLeftAsTyped() {
+        // "WXYZ-123" reads as both a FamilySearch PID and a WikiTree id. Filing it under
+        // the wrong archive silently is worse than not expanding it at all.
+        #expect(GenealogySite.matchingBareID("WXYZ-123") == nil)
+        #expect(WebLink.normalize("WXYZ-123") == "https://WXYZ-123")
+        // Each shape on its own still resolves.
+        #expect(GenealogySite.matchingBareID("LZDP-6M9")?.site.id == "familysearch")
+        #expect(GenealogySite.matchingBareID("Saint-Exupery-12")?.site.id == "wikitree")
+        #expect(GenealogySite.matchingBareID("не идентификатор") == nil)
+    }
+
+    // MARK: - External identifiers carried in from other programs
+
+    @Test func readsExternalIdentifiersOutOfPreservedBranches() {
+        let ids = GenealogySite.externalIDs(in: [
+            ["1 _APID 1,0000::42"],
+            ["1 _UID foreign-uid-must-remain-foreign"],
+            ["1 _FSFTID LZDP-6M9"],
+            ["1 EXID Q7186", "2 TYPE https://www.wikitree.com/wiki/"],
+            ["1 CHAN", "2 DATE 1 JAN 2020"],
+        ])
+        #expect(ids.map(\.label) == ["Ancestry", "UID", "FamilySearch", "WikiTree"])
+        // Ancestry's _APID names a citation, not a person page — nothing to open.
+        #expect(ids[0].url == nil)
+        #expect(ids[1].url == nil)
+        #expect(ids[2].url?.absoluteString == "https://www.familysearch.org/tree/person/details/LZDP-6M9")
+        #expect(ids[3].url?.absoluteString == "https://www.wikitree.com/wiki/Q7186")
+    }
+
+    @Test func externalIdentifierAuthoritiesCannotSmuggleInAnUnsafeScheme() {
+        let ids = GenealogySite.externalIDs(in: [["1 EXID passwd", "2 TYPE file:///etc/"]])
+        #expect(ids.count == 1)
+        #expect(ids[0].url == nil)
     }
 
     // MARK: - Source records

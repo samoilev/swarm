@@ -11,6 +11,21 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Added
+
+- Person links recognize the genealogy site they point at. A link to FamilySearch,
+  WikiTree, Find a Grave, Geni, MyHeritage or Geneanet now reads as the site's name and
+  the person's identifier there — "FamilySearch · LZDP-6M9" — instead of a bare host, and
+  the link editor names the recognized site while the address is still being typed.
+- A FamilySearch person identifier can be pasted on its own. Entering `LZDP-6M9` in a
+  link's address field fills in that person's page; previously it was stored verbatim as
+  `https://LZDP-6M9`, which opened nothing.
+- Identifiers that other programs stamp on a person — Ancestry's `_APID`, `_UID`, `RFN`,
+  `AFN`, `REFN`, `RIN`, `_FSFTID` and GEDCOM 7 `EXID` — appear in the inspector under
+  External identifiers. Swarm already preserved these on import and export but had no way
+  to show them. They stay read-only, and those where the identifier alone names a page
+  open in a browser.
+
 ## [3.5.6] — 2026-09-20
 
 ### Fixed

@@ -130,6 +130,7 @@ struct InspectorPanel: View {
                     mapSection(person)
                     lifeSection(person)
                     sourcesSection(person)
+                    externalIDsSection(person)
                     attachmentsSection(person)
                     linksSection(person)
                     relationshipsSection(person)
@@ -674,6 +675,30 @@ struct InspectorPanel: View {
         .contentShape(Rectangle())
     }
 
+    /// Identifiers other programs stamped on this person and Swarm preserved. Read-only:
+    /// they live in the file's own branches, and Swarm has no say in what they mean.
+    @ViewBuilder
+    private func externalIDsSection(_ p: Person) -> some View {
+        let ids = GenealogySite.externalIDs(in: p.unknownBranches)
+        if !ids.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                SectionHeader(title: L10n.tr("Внешние идентификаторы"))
+                ForEach(ids) { entry in
+                    if let url = entry.url {
+                        Button { NSWorkspace.shared.open(url) } label: {
+                            FieldRow(label: entry.label, value: entry.value)
+                                .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .help(L10n.tr("Открыть ссылку в браузере"))
+                    } else {
+                        FieldRow(label: entry.label, value: entry.value)
+                    }
+                }
+            }
+        }
+    }
+
     @ViewBuilder
     private func linksSection(_ p: Person) -> some View {
         if !p.links.isEmpty {
@@ -694,7 +719,7 @@ struct InspectorPanel: View {
                                     .font(SepiaType.body)
                                     .foregroundColor(SepiaTheme.ink)
                                     .lineLimit(1).truncationMode(.middle)
-                                Text(link.displayHost)
+                                Text(link.displaySubtitle)
                                     .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5))
                                     .foregroundColor(SepiaTheme.inkSoft)
                                     .lineLimit(1).truncationMode(.middle)

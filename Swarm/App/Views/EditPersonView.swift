@@ -779,7 +779,14 @@ struct EditPersonView: View {
         HStack(alignment: .bottom, spacing: 8) {
             VStack(alignment: .leading, spacing: 6) {
                 SepiaTextField(label: L10n.tr("НАЗВАНИЕ"), text: linkBinding(index, \.title), placeholder: "—")
-                SepiaTextField(label: L10n.tr("АДРЕС"), text: linkBinding(index, \.url), placeholder: "https://…")
+                SepiaTextField(label: L10n.tr("АДРЕС"), text: linkBinding(index, \.url), placeholder: "https://… / LZDP-6M9")
+                // Says which archive was recognized before the row is saved, so a
+                // mistyped identifier is caught while it is still on screen.
+                if let site = link.site {
+                    Text(L10n.tr("Запись на сайте") + " " + site.name)
+                        .font(SepiaTheme.ui(size: 9.5)).tracking(SepiaType.tracking(9.5))
+                        .foregroundColor(SepiaTheme.inkSoft)
+                }
             }
 
             Button {
