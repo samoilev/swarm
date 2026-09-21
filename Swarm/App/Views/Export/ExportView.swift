@@ -16,6 +16,9 @@ struct ExportView: View {
     @State private var exportName = ""
     @State private var showExporter = false
     @State private var exportError: String?
+    /// Off by default: an export carries everything unless this particular one is
+    /// asked to hold the living back.
+    @State private var hideLivingPII = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
@@ -67,6 +70,8 @@ struct ExportView: View {
                     }
                     .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
+
+                    privacyToggle
                 }
             }
 
@@ -97,6 +102,30 @@ struct ExportView: View {
         }
     }
 
+    /// Applies to whichever of the three exports is used next. Deliberately per-export
+    /// and unremembered: who a file is going to is what decides this, not a preference.
+    private var privacyToggle: some View {
+        VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.xs)) {
+            Toggle(isOn: $hideLivingPII) {
+                Text(L10n.tr("Скрыть данные живых людей"))
+                    .font(SepiaType.control)
+                    .foregroundStyle(SepiaTheme.ink)
+            }
+            .toggleStyle(.checkbox)
+            .disabled(livingCount == 0)
+
+            Text(livingCount == 0
+                ? L10n.tr("В дереве нет живых людей.")
+                : L10n.tr("Имена, даты, места, заметки, фото и файлы живых людей не попадут в файл. Связи сохранятся."))
+                .font(SepiaType.micro)
+                .foregroundStyle(SepiaTheme.inkSoft)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var exportHeader: some View {
         LiquidGlassPanelHeader(
             title: L10n.tr("Экспорт"),
@@ -125,12 +154,20 @@ struct ExportView: View {
         }
     }
 
+    private var livingCount: Int { tree.livingPeopleCount }
+
     private var summaryLine: String {
-        var parts = [L10n.count(tree.people.count, .person)]
-        let photos = tree.people.reduce(into: 0) { $0 += $1.hasPhoto ? 1 : 0 }
-        let attachments = tree.people.reduce(into: 0) { $0 += $1.attachments.count }
+        // Counted against what actually lands on disk, so the footer stops promising
+        // photos and files that the privacy toggle has just removed.
+        let people = hideLivingPII ? tree.people.filter { !$0.isLiving } : tree.people
+        var parts = [L10n.count(people.count, .person)]
+        let photos = people.reduce(into: 0) { $0 += $1.hasPhoto ? 1 : 0 }
+        let attachments = people.reduce(into: 0) { $0 += $1.attachments.count }
         if photos > 0 { parts.append(L10n.count(photos, .photo)) }
         if attachments > 0 { parts.append(L10n.count(attachments, .attachment)) }
+        if hideLivingPII, livingCount > 0 {
+            parts.append(L10n.tr("скрыто: \(L10n.count(livingCount, .person))"))
+        }
         return parts.joined(separator: " · ")
     }
 
@@ -224,12 +261,18 @@ struct ExportView: View {
 
     private func exportPDF(selected: Bool) {
         let ids: Set<UUID>? = selected ? selectedIds : nil
-        guard let data = PersonCardsPDFExporter.render(tree: tree, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
+        // The renderer knows nothing about privacy — it draws whatever tree it is given,
+        // so the redacted names reach the cards, the relatives named on *other* people's
+        // cards and the poster alike. The attachments folder is still the real tree's:
+        // the redaction removed the references, not the files.
+        let source = hideLivingPII ? tree.redactingLivingPeople() : tree
+        guard let data = PersonCardsPDFExporter.render(tree: source, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
             exportError = L10n.tr("Чтобы создать PDF, сначала добавьте людей в дерево.")
             return
         }
         exportDoc = RenderedFileDocument(data: data, type: .pdf)
-        exportName = selected ? "\(fileSlug)-selection.pdf" : "\(fileSlug)-tree.pdf"
+        let suffix = hideLivingPII ? "-private" : ""
+        exportName = selected ? "\(fileSlug)-selection\(suffix).pdf" : "\(fileSlug)-tree\(suffix).pdf"
         showExporter = true
     }
 
@@ -244,7 +287,11 @@ struct ExportView: View {
             guard r == .OK, let directory = panel.url else { return }
             Task { @MainActor in
                 do {
-                    let receipt = try await store.exportTree(tree, to: directory)
+                    let receipt = try await store.exportTree(
+                        tree,
+                        to: directory,
+                        hidingLivingPeople: hideLivingPII
+                    )
                     NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
                     dismiss()
                 } catch {

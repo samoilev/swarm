@@ -1049,7 +1049,14 @@ public final class TreeStore {
         }
     }
 
-    private func copyDirectoryContents(from source: URL, to destination: URL) throws {
+    /// `keepingOnly` filters the files copied at this level by name; nil copies them all.
+    /// Sub-folders are still walked whole — the media and attachment folders the filter
+    /// is used on are flat.
+    private func copyDirectoryContents(
+        from source: URL,
+        to destination: URL,
+        keepingOnly: Set<String>? = nil
+    ) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: destination, withIntermediateDirectories: true)
         for item in try fm.contentsOfDirectory(at: source, includingPropertiesForKeys: [.isDirectoryKey]) {
@@ -1058,6 +1065,7 @@ public final class TreeStore {
             if isDirectory {
                 try copyDirectoryContents(from: item, to: target)
             } else {
+                if let keepingOnly, !keepingOnly.contains(item.lastPathComponent) { continue }
                 if fm.fileExists(atPath: target.path) { try fm.removeItem(at: target) }
                 try fm.copyItem(at: item, to: target)
             }
@@ -1161,11 +1169,22 @@ public final class TreeStore {
     /// Export a faithful copy of a tree (.ged + photos + attachments) into a `<name>/`
     /// bundle inside the chosen directory, so it can be re-imported later. Does not
     /// remove the tree — the caller decides whether to follow with `deleteTree`.
-    public func exportTree(_ tree: FamilyTree, to directory: URL) async throws -> SaveReceipt {
-        try exportTreeVerified(tree, toDirectory: directory)
+    ///
+    /// `hidingLivingPeople` exports `tree.redactingLivingPeople()` instead, and carries
+    /// only the files the redacted tree still references.
+    public func exportTree(
+        _ tree: FamilyTree,
+        to directory: URL,
+        hidingLivingPeople: Bool = false
+    ) async throws -> SaveReceipt {
+        try exportTreeVerified(tree, toDirectory: directory, hidingLivingPeople: hidingLivingPeople)
     }
 
-    private func exportTreeVerified(_ tree: FamilyTree, toDirectory directory: URL) throws -> SaveReceipt {
+    private func exportTreeVerified(
+        _ tree: FamilyTree,
+        toDirectory directory: URL,
+        hidingLivingPeople: Bool
+    ) throws -> SaveReceipt {
         let fm = FileManager.default
         guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
         let name = sanitizedFileName(tree.name)
@@ -1179,25 +1198,41 @@ public final class TreeStore {
         // The committed GEDCOM and active file folders are copied without private
         // revision history or deleted-file Trash.
         let gedDest = staging.appendingPathComponent("\(bundle.lastPathComponent).ged")
-        if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path) {
+        // A privacy export is re-serialized from the redacted tree even when a committed
+        // .ged is sitting right there: copying that file is a byte-for-byte copy of the
+        // data the export exists to remove. `document: nil` for the same reason — the
+        // imported syntax tree carries foreign records through untouched.
+        let exported = hidingLivingPeople ? tree.redactingLivingPeople() : tree
+        if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path), !hidingLivingPeople {
             try inject(.exportCopy)
             try fm.copyItem(at: gedSrc, to: gedDest)
         } else {
-            let result = try GEDCOMCodec.serialize(tree: tree, document: tree.gedcomDocument)
+            let result = try GEDCOMCodec.serialize(
+                tree: exported,
+                document: hidingLivingPeople ? nil : tree.gedcomDocument
+            )
             try result.gedcom.write(to: gedDest, atomically: true, encoding: .utf8)
             try writePhotos(result.photos, to: staging.appendingPathComponent(Self.mediaName))
         }
 
+        // In a privacy export only the files the redacted tree still names travel; a
+        // living person's portrait and attachments are their personal data as much as
+        // their birth date is. nil ⇒ copy the folder whole, as before.
+        let keptFiles: [String: Set<String>]? = hidingLivingPeople ? [
+            Self.mediaName: Set(exported.people.compactMap(\.photoFilename)),
+            Self.attachmentsName: Set(exported.people.flatMap(\.attachments).map(\.storedName)),
+        ] : nil
         for sub in [Self.mediaName, Self.attachmentsName] {
             let src = srcFolder.appendingPathComponent(sub, isDirectory: true)
             if fm.fileExists(atPath: src.path) {
                 let destination = staging.appendingPathComponent(sub, isDirectory: true)
-                if fm.fileExists(atPath: destination.path) { try copyDirectoryContents(from: src, to: destination) }
-                else { try fm.copyItem(at: src, to: destination) }
+                try copyDirectoryContents(from: src, to: destination, keepingOnly: keptFiles?[sub])
             }
         }
+        // The untouched import is the pre-redaction file itself, so a privacy export
+        // must not carry it.
         let original = srcFolder.appendingPathComponent(Self.originalImportName)
-        if fm.fileExists(atPath: original.path) {
+        if fm.fileExists(atPath: original.path), !hidingLivingPeople {
             try fm.copyItem(at: original, to: staging.appendingPathComponent(Self.originalImportName))
         }
         let exportHashes = try hashes(in: staging, includeRecoveryData: false)

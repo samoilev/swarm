@@ -330,6 +330,11 @@
 "PDF — выделенная часть" = "PDF — selection";
 "Выделите ветвь на схеме, удерживая ⌘." = "Hold ⌘ and click to select a branch on the canvas.";
 "GEDCOM с файлами" = "GEDCOM with files";
+"Скрыть данные живых людей" = "Hide living people’s details";
+"Имена, даты, места, заметки, фото и файлы живых людей не попадут в файл. Связи сохранятся." = "Names, dates, places, notes, photos and files of living people are left out. Relationships are kept.";
+"В дереве нет живых людей." = "No one in this tree is marked as living.";
+"скрыто: %@" = "%@ hidden";
+"Живой человек" = "Living";
 "Выделенная часть дерева" = "Selected part of the tree";
 "Не удалось сохранить файл" = "Couldn’t save file";
 "Копия экспортирована и проверена, но исходное дерево не удалось переместить в Корзину." = "The copy was exported and checked, but the original tree couldn’t be moved to the Trash.";
