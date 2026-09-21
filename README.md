@@ -3,7 +3,7 @@
   <br />
   <br />
   <a href="https://github.com/samoilev/swarm/actions/workflows/ci.yml"><img src="https://github.com/samoilev/swarm/actions/workflows/ci.yml/badge.svg" alt="CI status" /></a>
-  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.6-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.6" /></a>
+  <a href="https://github.com/samoilev/swarm/releases/latest"><img src="https://img.shields.io/badge/release-3.5.7-2DA44E?style=flat&logo=github&logoColor=white" alt="Latest release 3.5.7" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-15%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 15 or later" />
   <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
@@ -48,7 +48,7 @@ Swarm. You only need to do this once; leave your Mac's other security settings e
 To verify the download, put the release's `.sha256` file next to the DMG and run:
 
 ```sh
-shasum -a 256 -c Swarm-3.5.6.dmg.sha256
+shasum -a 256 -c Swarm-3.5.7.dmg.sha256
 ```
 
 ### Try the Curie family

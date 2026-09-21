@@ -11,20 +11,76 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.5.7] — 2026-09-21
+
 ### Added
 
+- Exporting can hold back living people's data. Sharing a tree used to mean sharing
+  everyone in it: an exported GEDCOM or PDF carried living relatives' names, birth dates
+  and places, notes, occupations, portraits and attached documents, with nothing short of
+  editing the file afterwards to stop it. A checkbox on the export sheet covers all three
+  exports — both PDFs and the GEDCOM archive. It is off by default and remembered nowhere,
+  because who a file is going to is what decides it, not a preference.
+
+  A living person keeps their id, xref, sex and surname, so unions, parent links and the
+  family pointers still resolve and the tree keeps its shape; everything else goes,
+  including the preserved foreign GEDCOM branches, which can hold any of the fields being
+  removed. A marriage date and place are dropped when either partner is living. Redaction
+  builds a copy through one function on the tree, so neither the serializer nor the PDF
+  renderer learns about privacy and the save path is untouched.
+
+  Three routes by which the archive export would otherwise have leaked past the redacted
+  copy are closed: it no longer copies the committed `.ged` byte for byte, only the media
+  and attachments the redacted tree still names travel, and `original-import.ged` — which
+  is the pre-redaction file itself — stays behind.
 - Person links recognize the genealogy site they point at. A link to FamilySearch,
   WikiTree, Find a Grave, Geni, MyHeritage or Geneanet now reads as the site's name and
   the person's identifier there — "FamilySearch · LZDP-6M9" — instead of a bare host, and
   the link editor names the recognized site while the address is still being typed.
 - A FamilySearch person identifier can be pasted on its own. Entering `LZDP-6M9` in a
   link's address field fills in that person's page; previously it was stored verbatim as
-  `https://LZDP-6M9`, which opened nothing.
+  `https://LZDP-6M9`, which opened nothing. A bare identifier that two sites could claim
+  is left as typed rather than filed under the wrong archive.
 - Identifiers that other programs stamp on a person — Ancestry's `_APID`, `_UID`, `RFN`,
   `AFN`, `REFN`, `RIN`, `_FSFTID` and GEDCOM 7 `EXID` — appear in the inspector under
   External identifiers. Swarm already preserved these on import and export but had no way
   to show them. They stay read-only, and those where the identifier alone names a page
   open in a browser.
+
+### Changed
+
+- The privacy checkbox on the export sheet loses the paragraph beneath it, which restated
+  the footer's counts and broke the rhythm of the three export rows above. It gains a
+  little room above and below instead, so it reads as its own control rather than a fourth
+  row.
+- Merge coverage extended to large overlapping trees through preview, merge, save and
+  reparse, including conflict choices, rollback, ambiguous matches and idempotency, plus
+  checks that merging the shipped examples preserves relationships and media.
+
+### Fixed
+
+- Importing a file with two source records whose titles match once trimmed — “Register”
+  and “ Register ”, or the same title written twice — no longer kills the app. The legacy
+  source migration built its index assuming titles were unique, so a repeat trapped
+  partway through saving: the import died after the GEDCOM had been read and the reader
+  got a crash report rather than an error. Titles are user text, so duplicates are input
+  rather than a programmer error; the first record wins, the duplicates stay, and the
+  validator goes on reporting them as possible duplicates. Reported against 3.5.6, and
+  reproducible on any machine from the file alone.
+- Merging survives ambiguous matches. Accepting two suggestions for one incoming person
+  fed duplicate keys to a dictionary built for unique ones and trapped mid-merge; the
+  engine keeps the first pairing now, and the sheet drops an accepted suggestion that
+  shares either side of a newly accepted one.
+- Matched people no longer lose their sex, living state, links, legacy sources and
+  preserved GEDCOM branches, and unions and parent links matched by signature take on what
+  the incoming record carries.
+- Conflicts are raised for every candidate pair rather than for automatic matches only, so
+  an accepted heuristic match no longer silently takes the default choice on each field.
+  Detection compares by content, since two heuristically matched records never share an
+  id and would otherwise conflict on everything.
+- The App menu's About item follows the Mac's language. Its neighbours — Services, Hide
+  and Quit — are written by AppKit and do, so “О Swarm” above an English “Quit Swarm” read
+  as a bug rather than as Swarm's own interface-language setting.
 
 ## [3.5.6] — 2026-09-20
 
@@ -1128,7 +1184,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.6...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.7...HEAD
+[3.5.7]: https://github.com/samoilev/swarm/compare/v3.5.6...v3.5.7
 [3.5.6]: https://github.com/samoilev/swarm/compare/v3.5.5...v3.5.6
 [3.5.5]: https://github.com/samoilev/swarm/compare/v3.5.4...v3.5.5
 [3.5.4]: https://github.com/samoilev/swarm/compare/v3.5.3...v3.5.4
