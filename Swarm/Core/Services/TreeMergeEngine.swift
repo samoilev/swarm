@@ -54,6 +54,17 @@ public struct MergePreview {
         self.conflicts = conflicts
         self.incomingOnlyPersonIDs = incomingOnlyPersonIDs
     }
+
+    /// The conflicts that actually apply: those belonging to an automatic match or to
+    /// a suggestion the user accepted. Conflicts are generated for every candidate
+    /// pair up front, so accepting a suggestion reviews its facts instead of taking
+    /// the defaults, but an unaccepted pair must not clutter the sheet.
+    public var activeConflicts: [MergeConflict] {
+        let applied = Set(automaticMatches.map(\.id)).union(acceptedHeuristicMatchIDs)
+        return conflicts.filter {
+            applied.contains("\($0.localPersonID.uuidString):\($0.incomingPersonID.uuidString)")
+        }
+    }
 }
 
 public enum TreeMergeError: LocalizedError {
@@ -149,8 +160,13 @@ public final class TreeMergeEngine {
             }
         }
 
+        // Conflicts are generated for suggested pairs as well as automatic ones, so a
+        // suggestion the user accepts is reviewed rather than silently taking the
+        // defaults. Entries for pairs that stay unaccepted are inert: `mergePerson`
+        // only reads the choices of the pair it is applying, and the sheet lists
+        // `activeConflicts`.
         var conflicts: [MergeConflict] = []
-        for match in automatic {
+        for match in automatic + suggestions {
             guard let left = local.person(byId: match.localPersonID),
                   let right = incoming.person(byId: match.incomingPersonID) else { continue }
             conflicts += factConflicts(local: left, incoming: right)
@@ -178,7 +194,11 @@ public final class TreeMergeEngine {
             var matches = preview.automaticMatches
             matches += preview.heuristicSuggestions.filter { preview.acceptedHeuristicMatchIDs.contains($0.id) }
             let incoming = preview.incomingTree
-            var personMap = Dictionary(uniqueKeysWithValues: matches.map { ($0.incomingPersonID, $0.localPersonID) })
+            // Two accepted suggestions can name the same incoming person (identical
+            // name and birth year on two local records). Keep the first pairing
+            // instead of trapping on a duplicate key halfway through the merge.
+            var personMap: [UUID: UUID] = [:]
+            matches = matches.filter { personMap.updateValue($0.localPersonID, forKey: $0.incomingPersonID) == nil }
             let sourceMap = mergeSources(from: incoming, into: local)
             var attachmentIDMap: [String: String] = [:]
 
@@ -229,6 +249,7 @@ public final class TreeMergeEngine {
                 remapMediaIDs(in: copied, attachmentIDMap: attachmentIDMap)
                 let signature = unionSignature(copied)
                 if let existing = local.unions.first(where: { unionSignature($0) == signature }) {
+                    mergeUnion(copied, into: existing)
                     unionMap[incomingUnion.id] = existing.id
                 } else if !existingUnionSignatures.contains(signature) {
                     local.unions.append(copied)
@@ -248,6 +269,12 @@ public final class TreeMergeEngine {
                 if let index = local.parentLinks.firstIndex(where: { $0.parentID == parentID && $0.childID == childID && $0.unionID == copied.unionID && $0.kind == copied.kind }) {
                     // Preserve a recorded doubt without adding a duplicate parent edge.
                     if copied.hasUncertainParentage { local.parentLinks[index].isUncertain = true }
+                    local.parentLinks[index].citations = choose(
+                        local.parentLinks[index].citations,
+                        copied.citations,
+                        choice: .both
+                    )
+                    if local.parentLinks[index].notes?.isEmpty != false { local.parentLinks[index].notes = copied.notes }
                 } else {
                     local.parentLinks.append(copied)
                 }
@@ -343,15 +370,21 @@ public final class TreeMergeEngine {
         return !leftNames.intersection(rightNames).isEmpty
     }
 
+    /// Compared by content, not by `Hashable`: these records carry a UUID, so two
+    /// people matched heuristically never share one and every field would otherwise
+    /// be reported as a conflict even when both files say exactly the same thing.
     private func factConflicts(local: Person, incoming: Person) -> [MergeConflict] {
+        func differs(_ left: [some ContentIdentifiable], _ right: [some ContentIdentifiable]) -> Bool {
+            !left.isEmpty && !right.isEmpty && Set(left.map(\.contentKey)) != Set(right.map(\.contentKey))
+        }
         var result: [MergeConflict] = []
-        if Set(local.names) != Set(incoming.names), !local.names.isEmpty, !incoming.names.isEmpty {
+        if differs(local.names, incoming.names) {
             result.append(conflict("names", local: local, incoming: incoming))
         }
-        if Set(local.events) != Set(incoming.events), !local.events.isEmpty, !incoming.events.isEmpty {
+        if differs(local.events, incoming.events) {
             result.append(conflict("events", local: local, incoming: incoming))
         }
-        if Set(local.citations) != Set(incoming.citations), !local.citations.isEmpty, !incoming.citations.isEmpty {
+        if differs(local.citations, incoming.citations) {
             result.append(conflict("citations", local: local, incoming: incoming))
         }
         return result
@@ -412,6 +445,29 @@ public final class TreeMergeEngine {
             return copy
         }
         if local.notes?.isEmpty != false { local.notes = incoming.notes }
+
+        // Fields outside the conflict list still have to survive the merge: dropping
+        // them silently loses data the incoming file is the only holder of.
+        if local.sex == .unknown { local.sex = incoming.sex }
+        // A death recorded in either file settles the question; only two files that
+        // both believe the person is alive leave them living.
+        local.isLiving = local.isLiving && incoming.isLiving
+        var seenLinks = Set(local.links.map { WebLink.normalize($0.url) })
+        local.links += incoming.links.filter { seenLinks.insert(WebLink.normalize($0.url)).inserted }
+        local.sources += incoming.sources.filter { !local.sources.contains($0) }
+        local.unknownBranches += incoming.unknownBranches.filter { !local.unknownBranches.contains($0) }
+        for (tag, lines) in incoming.eventExtras where local.eventExtras[tag] == nil {
+            local.eventExtras[tag] = lines
+        }
+    }
+
+    /// Absorbs an incoming union into the local one it matched by partners and
+    /// children. `incoming` is already a clone with its sources and media remapped.
+    private func mergeUnion(_ incoming: Union, into local: Union) {
+        local.events = choose(local.events, incoming.events, choice: .both)
+        local.citations = choose(local.citations, incoming.citations, choice: .both)
+        local.unknownBranches += incoming.unknownBranches.filter { !local.unknownBranches.contains($0) }
+        if local.marriageExtras.isEmpty { local.marriageExtras = incoming.marriageExtras }
     }
 
     /// De-duplicates by content, not by `Hashable`: these records carry a UUID, so

@@ -25,11 +25,11 @@ struct TreeMergeIntegrationTests {
     @Test func largeOverlappingTreesMergeSaveAndReparse() async throws {
         let temp = try Temp()
         let store = TreeStore(storageFolder: temp.url)
-        let local = makeGenerationalTree(name: "Local", range: 0 ..< 1_500)
+        let local = makeGenerationalTree(name: "Local", range: 0 ..< 1500)
         let sharedIDs = Dictionary(uniqueKeysWithValues: local.people.enumerated().map { ($0.offset, $0.element.id) })
         let incoming = makeGenerationalTree(
             name: "Incoming",
-            range: 750 ..< 2_250,
+            range: 750 ..< 2250,
             sharedIDs: sharedIDs,
             noteEvery: 127
         )
@@ -45,17 +45,18 @@ struct TreeMergeIntegrationTests {
         _ = try await engine.apply(preview, to: local)
         let elapsed = Date().timeIntervalSince(started)
 
-        #expect(local.people.count == 2_250)
+        #expect(local.people.count == 2250)
         #expect(local.unions.count == 750)
-        #expect(local.parentLinks.count == 1_500)
+        #expect(local.parentLinks.count == 1500)
         #expect(local.sourceRecords.count == 2)
         #expect(TreeValidator.validate(local).allSatisfy { !$0.isBlocking })
-        #expect(local.person(byId: sharedIDs[762]!)?.notes == "Incoming note 762")
+        let sharedID = try #require(sharedIDs[762])
+        #expect(local.person(byId: sharedID)?.notes == "Incoming note 762")
 
         let reparsed = try GEDCOMCodec.parse(store.gedFileURL(for: local)).tree
-        #expect(reparsed.people.count == 2_250)
+        #expect(reparsed.people.count == 2250)
         #expect(reparsed.unions.count == 750)
-        #expect(reparsed.parentLinks.count == 1_500)
+        #expect(reparsed.parentLinks.count == 1500)
         #expect(TreeValidator.validate(reparsed).allSatisfy { !$0.isBlocking })
 
         // This is intentionally generous for debug/CI machines. Its job is to catch
@@ -260,6 +261,139 @@ struct TreeMergeIntegrationTests {
         #expect(TreeValidator.validate(reparsed, context: .init(
             acceptedBaselineIssueIDs: reparsed.acceptedBaselineIssueIDs
         )).allSatisfy { !$0.isBlocking })
+    }
+
+    /// The ambiguity above, with the user accepting both suggestions. One incoming
+    /// person cannot be two local people, so the merge keeps the first pairing
+    /// instead of trapping on a duplicate key after mutating the tree.
+    @Test func acceptingBothAmbiguousSuggestionsMergesOnceInsteadOfTrapping() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let local = FamilyTree(name: "Local")
+        let first = Person(givenNames: "John", surname: "Smith", birthDate: "1900", birthPlace: "York")
+        let second = Person(givenNames: "John", surname: "Smith", birthDate: "1900", birthPlace: "York")
+        local.people = [first, second]
+        try await store.addTreeVerified(local)
+
+        let incoming = FamilyTree(name: "Incoming")
+        incoming.people = [Person(
+            givenNames: "John", surname: "Smith", birthDate: "1900", birthPlace: "York", notes: "Incoming"
+        )]
+        let engine = TreeMergeEngine(store: store)
+        var preview = engine.preview(local: local, incoming: incoming)
+        #expect(preview.heuristicSuggestions.count == 2)
+        preview.acceptedHeuristicMatchIDs = Set(preview.heuristicSuggestions.map(\.id))
+
+        _ = try await engine.apply(preview, to: local)
+        #expect(local.people.count == 2)
+        #expect(local.people.count { $0.notes == "Incoming" } == 1)
+
+        let reparsed = try GEDCOMCodec.parse(store.gedFileURL(for: local)).tree
+        #expect(reparsed.people.count == 2)
+    }
+
+    /// Everything outside the conflict list has to survive a match too: the fields
+    /// merged people used to drop, plus the metadata of a union and a parent link
+    /// that already existed locally.
+    @Test func matchedRecordsAbsorbIncomingMetadata() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let local = FamilyTree(name: "Local")
+        let father = Person(givenNames: "Pyotr", surname: "Ivanov", sex: .unknown, birthDate: "1850")
+        let mother = Person(givenNames: "Maria", surname: "Ivanova", sex: .female, birthDate: "1855")
+        let child = Person(givenNames: "Ivan", surname: "Ivanov", sex: .male, birthDate: "1880")
+        let localUnion = Union(partner1Id: father.id, partner2Id: mother.id, childrenIds: [child.id])
+        local.people = [father, mother, child]
+        local.unions = [localUnion]
+        local.parentLinks = [
+            ParentLink(parentID: father.id, childID: child.id, unionID: localUnion.id),
+            ParentLink(parentID: mother.id, childID: child.id, unionID: localUnion.id),
+        ]
+        try await store.addTreeVerified(local)
+
+        let source = SourceRecord(title: "Parish register")
+        let incoming = FamilyTree(name: "Incoming")
+        incoming.sourceRecords = [source]
+        let incomingFather = Person(givenNames: "Pyotr", surname: "Ivanov", sex: .male, birthDate: "1850")
+        incomingFather.id = father.id
+        incomingFather.isLiving = false
+        incomingFather.links = [WebLink(url: "https://www.familysearch.org/ark:/61903/1:1:XXXX", title: "Record")]
+        incomingFather.unknownBranches = [["1 _MILT Imperial Guard"]]
+        incomingFather.eventExtras = ["BIRT": ["2 NOTE Registered late"]]
+        let incomingMother = try clone(mother)
+        let incomingChild = try clone(child)
+        let incomingUnion = Union(
+            partner1Id: father.id,
+            partner2Id: mother.id,
+            marriageDate: "1879",
+            marriagePlace: "Tver",
+            childrenIds: [child.id]
+        )
+        incomingUnion.citations = [Citation(sourceID: source.id, page: "u. 4")]
+        incoming.people = [incomingFather, incomingMother, incomingChild]
+        incoming.unions = [incomingUnion]
+        incoming.parentLinks = [ParentLink(
+            parentID: father.id,
+            childID: child.id,
+            unionID: incomingUnion.id,
+            citations: [Citation(sourceID: source.id, page: "p. 9")],
+            notes: "Baptism entry"
+        )]
+
+        let engine = TreeMergeEngine(store: store)
+        _ = try await engine.apply(engine.preview(local: local, incoming: incoming), to: local)
+
+        let merged = try #require(local.person(byId: father.id))
+        #expect(merged.sex == .male)
+        #expect(merged.isLiving == false)
+        #expect(merged.links.count == 1)
+        #expect(merged.unknownBranches == [["1 _MILT Imperial Guard"]])
+        #expect(merged.eventExtras["BIRT"] == ["2 NOTE Registered late"])
+
+        #expect(local.unions.count == 1)
+        let union = try #require(local.unions.first)
+        #expect(union.marriageDate == "1879")
+        #expect(union.marriagePlace == "Tver")
+        #expect(union.citations.count == 1)
+
+        #expect(local.parentLinks.count == 2)
+        let link = try #require(local.parentLinks.first { $0.parentID == father.id })
+        #expect(link.citations.map(\.page) == ["p. 9"])
+        #expect(link.notes == "Baptism entry")
+    }
+
+    /// An accepted suggestion is reviewed like an automatic match: its conflicts are
+    /// offered before the merge instead of silently defaulting to "keep both".
+    @Test func acceptedSuggestionsCarryReviewableConflicts() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let local = FamilyTree(name: "Local")
+        let left = Person(givenNames: "Anna", surname: "Petrova", birthDate: "1900", birthPlace: "Tver")
+        local.people = [left]
+        try await store.addTreeVerified(local)
+
+        let incoming = FamilyTree(name: "Incoming")
+        let right = Person(
+            givenNames: "Anna", surname: "Petrova", birthDate: "1900", birthPlace: "Tver", deathDate: "1971"
+        )
+        incoming.people = [right]
+
+        let engine = TreeMergeEngine(store: store)
+        var preview = engine.preview(local: local, incoming: incoming)
+        let suggestion = try #require(preview.heuristicSuggestions.first)
+        #expect(preview.conflicts.contains { $0.field == "events" })
+        // Nothing is offered for review while the suggestion is unaccepted.
+        #expect(preview.activeConflicts.isEmpty)
+
+        preview.acceptedHeuristicMatchIDs = [suggestion.id]
+        #expect(preview.activeConflicts.map(\.field) == ["events"])
+        for index in preview.conflicts.indices where preview.conflicts[index].field == "events" {
+            preview.conflicts[index].choice = .local
+        }
+
+        _ = try await engine.apply(preview, to: local)
+        #expect(local.people.count == 1)
+        #expect(local.people.first?.deathDate == nil)
     }
 
     private func makeGenerationalTree(

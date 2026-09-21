@@ -65,10 +65,10 @@ struct TreeMergeView: View {
                         }
                         mergeSection(
                             L10n.tr("Расхождения в фактах"),
-                            count: preview.conflicts.count,
+                            count: preview.activeConflicts.count,
                             explanation: L10n.tr("В двух деревьях указаны разные сведения об одном факте. Выберите, какие оставить.")
                         ) {
-                            ForEach(preview.conflicts.indices, id: \.self) { index in conflictRow(index) }
+                            ForEach(preview.activeConflicts) { conflict in conflictRow(conflict) }
                         }
                     }.padding(20)
                 }
@@ -172,14 +172,15 @@ struct TreeMergeView: View {
         }.padding(10).background(SepiaTheme.cardBg).clipShape(RoundedRectangle(cornerRadius: 7))
     }
 
-    private func conflictRow(_ index: Int) -> some View {
+    private func conflictRow(_ conflict: MergeConflict) -> some View {
         HStack {
-            Text(preview?.conflicts[index].field ?? L10n.tr("Факт")).font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
+            Text(conflict.field).font(SepiaType.body).foregroundStyle(SepiaTheme.ink)
             Spacer()
             Picker(L10n.tr("Выбор"), selection: Binding(
-                get: { preview?.conflicts[index].choice ?? .both },
+                get: { preview?.conflicts.first(where: { $0.id == conflict.id })?.choice ?? .both },
                 set: { choice in
-                    guard var value = preview, value.conflicts.indices.contains(index) else { return }
+                    guard var value = preview,
+                          let index = value.conflicts.firstIndex(where: { $0.id == conflict.id }) else { return }
                     value.conflicts[index].choice = choice
                     preview = value
                 }
@@ -193,8 +194,19 @@ struct TreeMergeView: View {
 
     private func toggleSuggestion(_ id: String) {
         guard var value = preview else { return }
-        if value.acceptedHeuristicMatchIDs.contains(id) { value.acceptedHeuristicMatchIDs.remove(id) }
-        else { value.acceptedHeuristicMatchIDs.insert(id) }
+        if value.acceptedHeuristicMatchIDs.contains(id) {
+            value.acceptedHeuristicMatchIDs.remove(id)
+        } else {
+            // A record can only be the same person as one other record, so accepting a
+            // suggestion drops any accepted one that shares either side of the pair.
+            if let match = value.heuristicSuggestions.first(where: { $0.id == id }) {
+                value.acceptedHeuristicMatchIDs.subtract(value.heuristicSuggestions.filter {
+                    $0.id != id
+                        && ($0.incomingPersonID == match.incomingPersonID || $0.localPersonID == match.localPersonID)
+                }.map(\.id))
+            }
+            value.acceptedHeuristicMatchIDs.insert(id)
+        }
         preview = value
     }
 
