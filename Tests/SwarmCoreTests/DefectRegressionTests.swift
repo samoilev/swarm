@@ -628,4 +628,21 @@ struct DefectRegressionTests {
         #expect(tree.updatedAt == savedAt)
         #expect(try Data(contentsOf: gedcom) == bytesBefore)
     }
+
+    /// A GEDCOM holding two `SOUR` records with the same title used to trap in
+    /// `Dictionary(uniqueKeysWithValues:)` and kill the app mid-import.
+    @Test func migrateLegacySourcesSurvivesDuplicateSourceTitles() {
+        let tree = FamilyTree(name: "Duplicates")
+        let first = SourceRecord(title: "Register")
+        tree.sourceRecords = [first, SourceRecord(title: " Register ")]
+        let person = Person(givenNames: "Иван")
+        person.sources = ["Register"]
+        tree.people = [person]
+
+        tree.migrateLegacySources()
+
+        #expect(tree.sourceRecords.count == 2)
+        #expect(person.sources.isEmpty)
+        #expect(person.citations.map(\.sourceID) == [first.id])
+    }
 }

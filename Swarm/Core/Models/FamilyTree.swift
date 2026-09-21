@@ -357,7 +357,11 @@ public final class FamilyTree: Identifiable, Codable {
     /// Migrate old person-level source strings into shared records using exact trimmed
     /// equality only. The legacy text is kept until the compatibility UI is removed.
     public func migrateLegacySources() {
-        var byTitle = Dictionary(uniqueKeysWithValues: sourceRecords.map { ($0.title.trimmingCharacters(in: .whitespacesAndNewlines), $0.id) })
+        // Two `SOUR` records can carry the same title; keep the first and never trap.
+        var byTitle = Dictionary(
+            sourceRecords.map { ($0.title.trimmingCharacters(in: .whitespacesAndNewlines), $0.id) },
+            uniquingKeysWith: { first, _ in first }
+        )
         for person in people {
             let legacySources = person.sources
             for raw in legacySources {
