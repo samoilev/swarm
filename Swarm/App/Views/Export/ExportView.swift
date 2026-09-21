@@ -104,25 +104,20 @@ struct ExportView: View {
 
     /// Applies to whichever of the three exports is used next. Deliberately per-export
     /// and unremembered: who a file is going to is what decides this, not a preference.
+    /// What it removes is left to the footer's counts rather than spelled out — the
+    /// label carries it, and a paragraph here pushed the three rows off their rhythm.
     private var privacyToggle: some View {
-        VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.xs)) {
-            Toggle(isOn: $hideLivingPII) {
-                Text(L10n.tr("Скрыть данные живых людей"))
-                    .font(SepiaType.control)
-                    .foregroundStyle(SepiaTheme.ink)
-            }
-            .toggleStyle(.checkbox)
-            .disabled(livingCount == 0)
-
-            Text(livingCount == 0
-                ? L10n.tr("В дереве нет живых людей.")
-                : L10n.tr("Имена, даты, места, заметки, фото и файлы живых людей не попадут в файл. Связи сохранятся."))
-                .font(SepiaType.micro)
-                .foregroundStyle(SepiaTheme.inkSoft)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        Toggle(isOn: $hideLivingPII) {
+            Text(L10n.tr("Скрыть данные живых людей"))
+                .font(SepiaType.control)
+                .foregroundStyle(SepiaTheme.ink)
         }
+        .toggleStyle(.checkbox)
+        .disabled(livingCount == 0)
         .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
+        // On top of the group's own spacing, so the checkbox reads as its own thing
+        // rather than a fourth row crowding the buttons above it.
+        .padding(.vertical, SepiaTheme.scaled(SepiaLayout.xs))
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
