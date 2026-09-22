@@ -2,6 +2,16 @@ import Foundation
 
 enum GEDCOMTextDecoder {
     static func decode(_ data: Data) -> String {
+        var text = decodeBytes(data)
+        // A byte-order mark is not part of the first line. GEDCOM 7 says a file should
+        // open with one, and leaving it attached makes `0 HEAD` unreadable: the level
+        // token becomes "\u{FEFF}0", which is not an integer, so the strict parser
+        // rejects the whole file and the tolerant one drops its header.
+        if text.first == "\u{FEFF}" { text.removeFirst() }
+        return text
+    }
+
+    private static func decodeBytes(_ data: Data) -> String {
         let bytes = [UInt8](data.prefix(512))
         if bytes.starts(with: [0xFF, 0xFE]) || bytes.starts(with: [0xFE, 0xFF]),
            let text = String(data: data, encoding: .utf16) {
@@ -27,6 +37,16 @@ enum GEDCOMTextDecoder {
         if let text = String(data: data, encoding: .windowsCP1251) { return text }
         return String(decoding: data, as: UTF8.self)
     }
+}
+
+/// Which FamilySearch GEDCOM specification a file speaks. Swarm reads both; the
+/// writer is told which one to emit (see `GEDCOMSerializer.Options`).
+public enum GEDCOMVersion: String, Codable, Sendable, CaseIterable {
+    case v551 = "5.5.1"
+    case v70 = "7.0.18"
+
+    /// What `2 VERS` carries. 7.0 wants the full patch version; 5.5.1 has no patches.
+    public var headerValue: String { rawValue }
 }
 
 // MARK: - Lossless GEDCOM syntax tree
@@ -107,10 +127,16 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
             value = ""
         } else {
             pointer = nil
-            // A doubled delimiter is how the serializer escapes text shaped like a
-            // pointer. Undo it so the value reads back exactly as it was typed.
-            let escaped = tail.count >= 4 && tail.hasPrefix("@@") && tail.hasSuffix("@@")
-            value = escaped ? String(tail.dropFirst().dropLast()) : tail
+            // A doubled delimiter is how text shaped like a pointer gets escaped.
+            // 5.5.1 doubles both ends, 7.0 only the leading one; accept either so a
+            // file from any writer reads back exactly as it was typed.
+            if tail.hasPrefix("@@") {
+                var unescaped = String(tail.dropFirst())
+                if unescaped.count >= 3, unescaped.hasSuffix("@@") { unescaped.removeLast() }
+                value = unescaped
+            } else {
+                value = tail
+            }
         }
         self.init(level: level, xref: xref, tag: tag, pointer: pointer, value: value, rawLine: raw)
     }
@@ -149,6 +175,16 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
 
     public var allNodes: [GEDCOMNode] {
         records.flatMap { $0.flattened() }
+    }
+
+    /// The specification version `HEAD.GEDC.VERS` declares. Anything that is not a 7.x
+    /// declaration reads as 5.5.1 — including a HEAD with no GEDC at all, which real
+    /// files do have, and which the rest of the import path already tolerates.
+    public var declaredVersion: GEDCOMVersion {
+        let declared = records.first { $0.tag == "HEAD" }?
+            .children.first { $0.tag == "GEDC" }?
+            .children.first { $0.tag == "VERS" }?.value
+        return declared?.hasPrefix("7.") == true ? .v70 : .v551
     }
 
     public static func parse(_ text: String) throws -> GEDCOMDocument {
@@ -325,14 +361,23 @@ public enum GEDCOMCodecError: LocalizedError, Equatable {
 }
 
 public enum GEDCOMCodec {
+    /// Tags a reader is expected to meet. This drives the "preserved unsupported tag"
+    /// line in the import report and nothing else — every tag, listed or not, survives
+    /// a round trip through the preservation branches. Without the 7.0 half, a
+    /// perfectly ordinary 7.0 file imports under a wall of warnings about tags that
+    /// are simply the current standard.
     private static let supportedTags: Set<String> = [
+        // 5.5.1 and shared
         "HEAD", "TRLR", "INDI", "FAM", "SOUR", "SUBM", "REPO", "NOTE", "OBJE",
         "NAME", "GIVN", "SURN", "NPFX", "NSFX", "NICK", "TYPE", "SEX", "BIRT",
         "DEAT", "BURI", "OCCU", "EDUC", "RESI", "IMMI", "MARR", "DIV", "HUSB",
         "WIFE", "CHIL", "FAMS", "FAMC", "PEDI", "DATE", "PLAC", "MAP", "LATI",
         "LONG", "FILE", "FORM", "TITL", "AUTH", "PUBL", "REPO", "CALN", "PAGE",
         "DATA", "TEXT", "QUAY", "CONT", "CONC", "CHAN", "RIN", "GEDC", "CHAR",
-        "VERS", "CORP", "ADDR", "PHON", "EMAIL", "FAX", "WWW",
+        "VERS", "CORP", "ADDR", "PHON", "EMAIL", "FAX", "WWW", "TIME",
+        // GEDCOM 7.0 additions Swarm preserves but does not model
+        "SNOTE", "SCHMA", "TAG", "TRAN", "CREA", "EXID", "UID", "SDATE", "ASSO",
+        "ROLE", "PHRASE", "MEDI", "INIL", "NO", "MIME", "LANG", "DEST", "COPR",
     ]
 
     /// `baseURL` is what `FILE` paths resolve against. It defaults to the file's own
@@ -375,9 +420,21 @@ public enum GEDCOMCodec {
         return try project(document: document, text: text, baseURL: baseURL)
     }
 
-    public static func serialize(tree: FamilyTree, document: GEDCOMDocument? = nil) throws -> SerializedTree {
-        let result = GEDCOMSerializer.serialize(tree: tree)
-        guard let document else { return SerializedTree(gedcom: result.gedcom, photos: result.photos) }
+    public static func serialize(
+        tree: FamilyTree,
+        document: GEDCOMDocument? = nil,
+        options: GEDCOMSerializer.Options = GEDCOMSerializer.Options()
+    ) throws -> SerializedTree {
+        let result = GEDCOMSerializer.serialize(tree: tree, options: options)
+        // Patching splices canonical records into the *imported* syntax tree and keeps
+        // every foreign record byte-for-byte. Those bytes are written in the version
+        // the file arrived in, so reusing them while emitting a different one would
+        // produce a file that declares one specification and contains another.
+        // Converting therefore always serializes from the model alone — the same route
+        // the privacy export already takes.
+        guard let document, options.version == tree.sourceVersion else {
+            return SerializedTree(gedcom: result.gedcom, photos: result.photos)
+        }
         let canonical = try GEDCOMDocument.parse(result.gedcom)
         let patched = patchOwnedRecords(in: document, with: canonical)
         return SerializedTree(gedcom: patched.text, photos: result.photos)
@@ -455,6 +512,8 @@ public enum GEDCOMCodec {
         tree.unions = parsed.unions
         tree.unknownRecords = parsed.unknownRecords
         tree.headUnknownBranches = parsed.headUnknownBranches
+        tree.sourceVersion = document.declaredVersion
+        tree.foreignSchemaTags = parsed.schemaTags
         tree.sourceRecords = parsed.sourceRecords
         tree.parentLinks = parsed.parentLinks
         tree.gedcomDocument = document

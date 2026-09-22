@@ -1,6 +1,12 @@
 import Foundation
 
-/// Parses a GEDCOM 5.5.1 file into FamilyTree model objects.
+/// Parses a GEDCOM file — 5.5.1 or 7.0 — into FamilyTree model objects.
+///
+/// The two versions share a grammar, so one walk reads both; the differences that
+/// reach this layer are payload-shaped (`FORM image/jpeg` vs `FORM jpeg`, uppercase
+/// enumerations, `PHRASE` in place of free text inside a `DATE`) and are normalized
+/// at the point each value is read. Which version a file declared is detected by
+/// `GEDCOMDocument.declaredVersion` and only matters when writing it back out.
 ///
 /// Lines are tokenized positionally (`level [@xref@] tag [value|@pointer@]`) and
 /// walked with a level stack, so nested structures (e.g. the standard
@@ -25,6 +31,8 @@ public struct GEDCOMParser {
         public var updatedAt: Date?
         /// Top-level records the parser doesn't model, kept verbatim for re-export.
         public var unknownRecords: [[String]] = []
+        /// `HEAD.SCHMA.TAG` extension declarations a 7.0 file arrived with, tag to URI.
+        public var schemaTags: [String: String] = [:]
     }
 
     /// Level-1 tags the parser fully models inside an INDI record. Anything else at
@@ -32,11 +40,11 @@ public struct GEDCOMParser {
     /// treated as "handled" (regenerated or ignored), so they aren't re-emitted twice.
     private static let modeledIndiTags: Set<String> = [
         "NAME", "SEX", "BIRT", "DEAT", "BURI", "OCCU", "EDUC", "NOTE", "SOUR",
-        "OBJE", "_ATTC", "WWW", "_PATR", "_MARNM", "_FTSID", "FAMS", "FAMC"
+        "OBJE", "_ATTC", "WWW", "_PATR", "_MARNM", "_FTSID", "UID", "FAMS", "FAMC"
     ]
     /// Level-1 tags the parser fully models inside a FAM record.
     private static let modeledFamTags: Set<String> = [
-        "HUSB", "WIFE", "CHIL", "MARR", "DIV", "_PART", "_SEPR", "_STAT", "_FTSID"
+        "HUSB", "WIFE", "CHIL", "MARR", "DIV", "_PART", "_SEPR", "_STAT", "_FTSID", "UID"
     ]
     /// Sub-tags of a modeled event (BIRT/DEAT/BURI/MARR) the parser consumes; anything
     /// else under the event is preserved as an event extra.
@@ -45,7 +53,7 @@ public struct GEDCOMParser {
     private static let modeledRecordTags: Set<String> = ["HEAD", "INDI", "FAM", "TRLR"]
     private static let modeledHeadTags: Set<String> = [
         "_TREEID", "_FTSVER", "_NAME", "_SUBTITLE", "_HOME", "_ROOT",
-        "_CREATED", "_UPDATED",
+        "_CREATED", "_UPDATED", "SCHMA",
     ]
 
     /// ISO-8601 for the `_CREATED`/`_UPDATED` HEAD stamps. GEDCOM's own DATE is
@@ -96,6 +104,7 @@ public struct GEDCOMParser {
         var unknownRecords: [[String]] = []
         var sourceRecords: [SourceRecord] = []
         var headUnknownBranches: [[String]] = []
+        var schemaTags: [String: String] = [:]
 
         for record in records {
             guard let head = parseLine(record[0]) else { continue }
@@ -115,6 +124,7 @@ public struct GEDCOMParser {
                     default: break
                     }
                 }
+                schemaTags = parseSchemaTags(in: record)
                 headUnknownBranches = level1Branches(of: record).filter { branch in
                     guard let line = branch.first.flatMap(parseLine) else { return false }
                     return !modeledHeadTags.contains(line.tag)
@@ -171,13 +181,32 @@ public struct GEDCOMParser {
             headUnknownBranches: headUnknownBranches,
             createdAt: treeCreatedAt,
             updatedAt: treeUpdatedAt,
-            unknownRecords: unknownRecords
+            unknownRecords: unknownRecords,
+            schemaTags: schemaTags
         )
+    }
+
+    /// Read `1 SCHMA` / `2 TAG _X <uri>` out of HEAD. A 7.0 file must declare every
+    /// extension tag it uses; keeping the declarations lets re-export restate the ones
+    /// this app did not author instead of silently dropping them.
+    private static func parseSchemaTags(in record: [String]) -> [String: String] {
+        var tags: [String: String] = [:]
+        var insideSchema = false
+        for raw in record.dropFirst() {
+            guard let line = parseLine(raw) else { continue }
+            if line.level == 1 { insideSchema = line.tag == "SCHMA"; continue }
+            guard insideSchema, line.level == 2, line.tag == "TAG" else { continue }
+            let parts = line.value.split(separator: " ", maxSplits: 1).map(String.init)
+            guard parts.count == 2 else { continue }
+            tags[parts[0]] = parts[1].trimmingCharacters(in: .whitespaces)
+        }
+        return tags
     }
 
     private static func stableUUID(in record: [String]) -> UUID? {
         for branch in level1Branches(of: record) {
-            guard let first = branch.first.flatMap(parseLine), first.tag == "_FTSID" else { continue }
+            guard let first = branch.first.flatMap(parseLine),
+                  first.tag == "_FTSID" || first.tag == "UID" else { continue }
             if let id = UUID(uuidString: first.value.trimmingCharacters(in: .whitespaces)) { return id }
         }
         return nil
@@ -456,7 +485,7 @@ public struct GEDCOMParser {
                     case "married": name.kind = .married
                     case "aka": name.kind = .alsoKnownAs
                     case "religious": name.kind = .religious
-                    case "immigration": name.kind = .immigration
+                    case "immigration", "immigrant": name.kind = .immigration
                     default: name.kind = .other
                     }
                 // A slash is the GEDCOM surname delimiter; it can't survive inside a name
@@ -539,10 +568,10 @@ public struct GEDCOMParser {
                 if head.pointer != nil { rawBranches.append(branch) }
                 else { repository = head.value.isEmpty ? nil : head.value }
             case "CALN": callNumber = head.value
-            case "_URL": url = joinedText(branch: branch)
+            case "_URL", "WWW": url = joinedText(branch: branch)
             case "NOTE": notes = joinedText(branch: branch)
-            case "_FTSID", "CHAN", "RIN":
-                if head.tag != "_FTSID" { rawBranches.append(branch) }
+            case "_FTSID", "UID", "CHAN", "RIN":
+                if head.tag != "_FTSID", head.tag != "UID" { rawBranches.append(branch) }
             default: rawBranches.append(branch)
             }
         }
@@ -595,7 +624,7 @@ public struct GEDCOMParser {
                     for child in branches(in: linkBranch, atLevel: 3) {
                         guard let childLine = child.first.flatMap(parseLine) else { continue }
                         switch childLine.tag {
-                        case "_FTSID": parsed.id = UUID(uuidString: childLine.value.trimmingCharacters(in: .whitespaces))
+                        case "_FTSID", "UID": parsed.id = UUID(uuidString: childLine.value.trimmingCharacters(in: .whitespaces))
                         case "PEDI", "_PEDI": parsed.kind = ParentageKind(gedcomValue: childLine.value)
                         case "_UNCERTAIN": parsed.isUncertain = childLine.value == "Y"
                         case "NOTE": parsed.notes = joinedText(branch: child)
@@ -890,6 +919,14 @@ public struct GEDCOMParser {
                 }
                 if tagAtLevel[1] == "WWW", tagAtLevel[2] == "TITL", tag == "CONC", !links.isEmpty {
                     links[links.count - 1].title += value
+                    break
+                }
+                if tagAtLevel[2] == "DATE", tag == "PHRASE", !value.isEmpty {
+                    switch tagAtLevel[1] ?? "" {
+                    case "BIRT": birthGEDCOMDate?.phrase = value
+                    case "DEAT": deathGEDCOMDate?.phrase = value
+                    default: break
+                    }
                     break
                 }
                 guard tagAtLevel[2] == "PLAC", tag == "_PLACID" else { break }

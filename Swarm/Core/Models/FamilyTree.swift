@@ -92,6 +92,13 @@ public final class FamilyTree: Identifiable, Codable {
     /// Unrecognized level-1 HEAD branches are retained separately because HEAD is an
     /// app-owned record and therefore cannot live in `unknownRecords`.
     public var headUnknownBranches: [[String]] = []
+    /// The specification version this tree was read from, and the one a plain save
+    /// writes back. A 7.0 file must not silently downgrade itself to 5.5.1 the first
+    /// time the app saves it; export is where the user gets to choose a version.
+    public var sourceVersion: GEDCOMVersion = .v551
+    /// Extension tag declarations (`HEAD.SCHMA.TAG`) a 7.0 file arrived with, kept so
+    /// re-export can restate the ones Swarm didn't author.
+    public var foreignSchemaTags: [String: String] = [:]
     /// The ordered syntax tree of the most recently imported/loaded GEDCOM.
     public var gedcomDocument: GEDCOMDocument?
     /// Diagnostics from the most recent import. This is informational after import;
@@ -320,6 +327,8 @@ public final class FamilyTree: Identifiable, Codable {
         sourceRecords = snapshot.sourceRecords
         parentLinks = snapshot.parentLinks
         headUnknownBranches = snapshot.headUnknownBranches
+        sourceVersion = snapshot.sourceVersion
+        foreignSchemaTags = snapshot.foreignSchemaTags
         unknownRecords = snapshot.unknownRecords
         gedcomDocument = snapshot.gedcomDocument
         importReport = snapshot.importReport
@@ -463,7 +472,7 @@ public final class FamilyTree: Identifiable, Codable {
     enum CodingKeys: String, CodingKey {
         case id, name, subtitle, homePersonId, rootUnionId, people, unions, createdAt, updatedAt
         case schemaVersion, sourceRecords, parentLinks, headUnknownBranches, gedcomDocument, importReport, acceptedBaselineIssueIDs
-        case unknownRecords
+        case unknownRecords, sourceVersion, foreignSchemaTags
     }
 
     public required init(from decoder: Decoder) throws {
@@ -479,6 +488,9 @@ public final class FamilyTree: Identifiable, Codable {
         sourceRecords = try c.decodeIfPresent([SourceRecord].self, forKey: .sourceRecords) ?? []
         parentLinks = try c.decodeIfPresent([ParentLink].self, forKey: .parentLinks) ?? []
         headUnknownBranches = try c.decodeIfPresent([[String]].self, forKey: .headUnknownBranches) ?? []
+        // Trees written before Swarm could read 7.0 are all 5.5.1 by construction.
+        sourceVersion = try c.decodeIfPresent(GEDCOMVersion.self, forKey: .sourceVersion) ?? .v551
+        foreignSchemaTags = try c.decodeIfPresent([String: String].self, forKey: .foreignSchemaTags) ?? [:]
         gedcomDocument = try c.decodeIfPresent(GEDCOMDocument.self, forKey: .gedcomDocument)
         importReport = try c.decodeIfPresent(ImportReport.self, forKey: .importReport)
         acceptedBaselineIssueIDs = try c.decodeIfPresent(Set<String>.self, forKey: .acceptedBaselineIssueIDs) ?? []
@@ -500,6 +512,8 @@ public final class FamilyTree: Identifiable, Codable {
         if !sourceRecords.isEmpty { try c.encode(sourceRecords, forKey: .sourceRecords) }
         if !parentLinks.isEmpty { try c.encode(parentLinks, forKey: .parentLinks) }
         if !headUnknownBranches.isEmpty { try c.encode(headUnknownBranches, forKey: .headUnknownBranches) }
+        if sourceVersion != .v551 { try c.encode(sourceVersion, forKey: .sourceVersion) }
+        if !foreignSchemaTags.isEmpty { try c.encode(foreignSchemaTags, forKey: .foreignSchemaTags) }
         try c.encodeIfPresent(gedcomDocument, forKey: .gedcomDocument)
         try c.encodeIfPresent(importReport, forKey: .importReport)
         if !acceptedBaselineIssueIDs.isEmpty { try c.encode(acceptedBaselineIssueIDs, forKey: .acceptedBaselineIssueIDs) }

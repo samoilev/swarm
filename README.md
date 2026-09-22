@@ -7,7 +7,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-3DA639?style=flat&logo=gnu&logoColor=white" alt="GPL-3.0 license" /></a>
   <img src="https://img.shields.io/badge/macOS-15%2B-000000?style=flat&logo=apple&logoColor=white" alt="macOS 15 or later" />
   <img src="https://img.shields.io/badge/Swift-6%20toolchain-F05138?style=flat&logo=swift&logoColor=white" alt="Builds with a Swift 6 toolchain" />
-  <img src="https://img.shields.io/badge/GEDCOM-5.5.1-4B5563?style=flat" alt="GEDCOM 5.5.1" />
+  <img src="https://img.shields.io/badge/GEDCOM-5.5.1%20%7C%207.0-4B5563?style=flat" alt="GEDCOM 5.5.1 and 7.0" />
 </div>
   <br />
 Swarm builds, visualizes and exports family trees, entirely on your Mac. Trees are
@@ -77,10 +77,12 @@ and licenses are included in the ZIP.
 - **English and Russian interfaces**, selected on first launch and switchable without
   restarting. Name order, sorting, examples, dates, plural grammar, Help, and PDF
   presentation follow the selected language.
-- **GEDCOM 5.5.1 import and export** that works with Ancestry, Gramps and MyHeritage,
-  including standard map coordinates. Structures Swarm doesn't model survive
-  import → edit → export unchanged: event-level notes, source records, other programs'
-  custom tags. The original file is kept verbatim as `original-import.ged`.
+- **GEDCOM 5.5.1 and 7.0 import and export** that works with Ancestry, Gramps and
+  MyHeritage, including standard map coordinates. Files are read in whichever version
+  they declare; export writes 7.0 by default and 5.5.1 on request. Structures Swarm
+  doesn't model survive import → edit → export unchanged: event-level notes, source
+  records, other programs' custom tags. The original file is kept verbatim as
+  `original-import.ged`.
 - **Merge someone else's tree into yours.** Swarm combines matching people instead of
   duplicating them, finds the exact matches itself, and only suggests the likely ones. It
   takes a backup first, and any failure rolls back completely.

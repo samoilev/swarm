@@ -1,0 +1,62 @@
+0 HEAD
+1 GEDC
+2 VERS 7.0.18
+1 SOUR OtherApp
+2 NAME Other App
+2 VERS 3.1
+1 DATE 17 FEB 2025
+2 TIME 09:14:00
+1 LANG en-GB
+1 SCHMA
+2 TAG _CUSTOM https://example.com/terms/custom
+0 @I1@ INDI
+1 UID 6E8F2C1A-4B3D-4E7F-9A12-0C5D8B6E1F40
+1 NAME Anna /Vance/
+2 TYPE BIRTH
+2 GIVN Anna
+2 SURN Vance
+2 TRAN אנה /ואנס/
+3 LANG he
+1 SEX F
+1 BIRT
+2 DATE 12 MAR 1901
+3 PHRASE the spring before the move
+2 PLAC Riga, Latvia
+3 MAP
+4 LATI N56.946000
+4 LONG E24.106100
+1 DEAT
+2 DATE 4 JUL 1978
+2 PLAC Lisbon, Portugal
+1 EXID 1234567
+2 TYPE https://gedcom.io/terms/v7/AFN
+1 ASSO @I2@
+2 ROLE WITN
+1 OBJE @O1@
+1 SNOTE @N1@
+1 _CUSTOM kept by the schema above
+1 CREA
+2 DATE 1 JAN 2024
+1 FAMS @F1@
+0 @I2@ INDI
+1 UID 2D7A9E44-1C88-4A55-B0E3-77F1A2C9D3B6
+1 NAME Pyotr /Vance/
+2 GIVN Pyotr
+2 SURN Vance
+1 SEX M
+1 FAMS @F1@
+0 @F1@ FAM
+1 HUSB @I2@
+1 WIFE @I1@
+1 MARR
+2 DATE 9 SEP 1925
+2 PLAC Riga, Latvia
+0 @O1@ OBJE
+1 FILE Media/portrait.jpg
+2 FORM image/jpeg
+3 MEDI PHOTO
+2 TITL Portrait
+0 @N1@ SNOTE A shared note, pointed at from more than one record.
+1 MIME text/plain
+1 LANG en
+0 TRLR

@@ -11,6 +11,25 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Added
+
+- FamilySearch GEDCOM 7.0 support. Swarm read and wrote only GEDCOM 5.5.1, a
+  specification from 1999; files from programs that have moved to 7.0 imported badly,
+  and files Swarm produced looked dated to everything else. Imports now detect which
+  version a file declares and read either one, including 7.0's shared notes, schema
+  declarations, translations, external identifiers and media types. The export sheet
+  has a version choice and writes 7.0 by default.
+
+### Changed
+
+- A tree is saved in the version it was read from, so opening a 7.0 file no longer
+  silently rewrites it as 5.5.1.
+
+### Fixed
+
+- A GEDCOM file that opened with a UTF-8 byte-order mark failed to import: the mark
+  attached itself to the first line, leaving the header unreadable.
+
 ## [3.5.7] — 2026-09-21
 
 ### Added

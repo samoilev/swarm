@@ -331,6 +331,7 @@
 "Выделите ветвь на схеме, удерживая ⌘." = "Hold ⌘ and click to select a branch on the canvas.";
 "GEDCOM с файлами" = "GEDCOM with files";
 "Скрыть данные живых людей" = "Hide living people’s details";
+"Версия" = "Version";
 "скрыто: %@" = "%@ hidden";
 "Живой человек" = "Living";
 "Выделенная часть дерева" = "Selected part of the tree";

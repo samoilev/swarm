@@ -19,6 +19,10 @@ struct ExportView: View {
     /// Off by default: an export carries everything unless this particular one is
     /// asked to hold the living back.
     @State private var hideLivingPII = false
+    /// Which specification the exported .ged is written in. 7.0 is the default because
+    /// it is the current standard and what a file handed to another program should be;
+    /// the tree's own storage is unaffected either way.
+    @State private var exportVersion: GEDCOMVersion = .v70
 
     var body: some View {
         VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
@@ -71,6 +75,7 @@ struct ExportView: View {
                     .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
 
+                    versionPicker
                     privacyToggle
                 }
             }
@@ -106,6 +111,24 @@ struct ExportView: View {
     /// and unremembered: who a file is going to is what decides this, not a preference.
     /// What it removes is left to the footer's counts rather than spelled out — the
     /// label carries it, and a paragraph here pushed the three rows off their rhythm.
+    /// Applies to the GEDCOM bundle only — a PDF has no specification version. Kept
+    /// next to the privacy checkbox because both answer the same question: what shape
+    /// should the file leaving this app have.
+    private var versionPicker: some View {
+        Picker(selection: $exportVersion) {
+            Text(verbatim: "GEDCOM 7.0").tag(GEDCOMVersion.v70)
+            Text(verbatim: "GEDCOM 5.5.1").tag(GEDCOMVersion.v551)
+        } label: {
+            Text(L10n.tr("Версия"))
+                .font(SepiaType.control)
+                .foregroundStyle(SepiaTheme.ink)
+        }
+        .pickerStyle(.menu)
+        .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
+        .padding(.vertical, SepiaTheme.scaled(SepiaLayout.xs))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private var privacyToggle: some View {
         Toggle(isOn: $hideLivingPII) {
             Text(L10n.tr("Скрыть данные живых людей"))
@@ -285,7 +308,8 @@ struct ExportView: View {
                     let receipt = try await store.exportTree(
                         tree,
                         to: directory,
-                        hidingLivingPeople: hideLivingPII
+                        hidingLivingPeople: hideLivingPII,
+                        version: exportVersion
                     )
                     NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
                     dismiss()

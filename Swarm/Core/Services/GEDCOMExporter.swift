@@ -1,8 +1,18 @@
 import Foundation
 
-/// Serializes a FamilyTree to GEDCOM 5.5.1 format.
+/// Serializes a FamilyTree to GEDCOM — 5.5.1 or 7.0.
 /// This is the primary persistence format — each tree is stored as a .ged file.
 public struct GEDCOMSerializer {
+
+    /// What to emit. The default is 5.5.1 because that is what every tree already on
+    /// a user's disk is written in; a plain save must not rewrite a file into another
+    /// specification behind their back. Export is where the version is chosen.
+    public struct Options: Equatable {
+        public var version: GEDCOMVersion
+        public init(version: GEDCOMVersion = .v551) {
+            self.version = version
+        }
+    }
 
     /// A person portrait the GEDCOM references, paired with the filename used in its
     /// `OBJE`/`FILE` line. The caller persists the bytes — serialization stays pure.
@@ -22,7 +32,7 @@ public struct GEDCOMSerializer {
     /// photo bytes are returned in `Result.photos` (referenced by relative filename),
     /// and writing them to a media folder is the caller's responsibility (see
     /// `TreeStore.writePhotos`). Kept pure so it is trivially testable.
-    public static func serialize(tree: FamilyTree) -> Result {
+    public static func serialize(tree: FamilyTree, options: Options = Options()) -> Result {
         let idx = FamilyIndex(tree: tree)
 
         // Xref assignment: reuse the xref an imported record already had (so any
@@ -312,7 +322,8 @@ public struct GEDCOMSerializer {
         }
 
         lines.append("0 TRLR")
-        return Result(gedcom: lines.joined(separator: "\n"), photos: photos)
+        let emitted = options.version == .v70 ? convertedToV7(lines, tree: tree) : lines
+        return Result(gedcom: emitted.joined(separator: "\n"), photos: photos)
     }
 
     // MARK: - Structured records
@@ -592,6 +603,112 @@ public struct GEDCOMSerializer {
             used.insert(x)
         }
         return result
+    }
+
+    // MARK: - GEDCOM 7.0 emission
+
+    /// Swarm extension tags that 7.0 has a real structure for. Everything else keeps
+    /// its underscore and earns a `SCHMA` declaration instead — the two are exclusive,
+    /// and both are driven from here so they cannot drift apart.
+    private static let v7TagEquivalents: [String: String] = [
+        "_URL": "WWW",
+        "_FTSID": "UID",
+    ]
+
+    /// 7.0 requires every extension tag a file uses to be declared against a URI.
+    private static let v7ExtensionNamespace = "https://swarm.app/gedcom/v1/"
+
+    /// Rewrite 5.5.1 output into 7.0.
+    ///
+    /// ponytail: a post-pass over the emitted lines rather than a version flag threaded
+    /// through all 34 `appendValue` call sites. It is exact because every difference
+    /// that reaches this layer is line-local: `CONC` is pure concatenation and so
+    /// merges back losslessly, and the rest is tag and payload substitution. If 7.0
+    /// output ever needs to differ in *structure* — emitting `ASSO`/`ROLE`, say — that
+    /// is the point to give the serializer a real version parameter instead.
+    private static func convertedToV7(_ lines: [String], tree: FamilyTree) -> [String] {
+        // 1. CONC does not exist in 7.0, and 7.0 has no line-length limit: fold every
+        // continuation back into the line it was split from.
+        var merged: [String] = []
+        for raw in lines {
+            if gedcomTag(of: raw) == "CONC", !merged.isEmpty {
+                merged[merged.count - 1] += gedcomValue(of: raw)
+                continue
+            }
+            merged.append(raw)
+        }
+
+        // 2. Line-local substitutions.
+        var out: [String] = []
+        var tagAtLevel: [Int: String] = [:]
+        var extensionTags: Set<String> = []
+        var headInsertionPoint: Int?
+        for raw in merged {
+            guard var node = GEDCOMNode(rawLine: raw) else { out.append(raw); continue }
+            let parent = tagAtLevel[node.level - 1] ?? ""
+            tagAtLevel[node.level] = node.tag
+
+            // The HEAD record ends where the next level-0 record begins; SCHMA has to
+            // land inside it, after everything else HEAD declares.
+            if node.level == 0, headInsertionPoint == nil, !out.isEmpty { headInsertionPoint = out.count }
+
+            // 7.0 is UTF-8 only, so CHAR is gone, and LINEAGE-LINKED is not a 7.0 form.
+            if node.level == 1, node.tag == "CHAR" { continue }
+            if node.level == 2, parent == "GEDC" {
+                if node.tag == "FORM" { continue }
+                if node.tag == "VERS" { node.value = GEDCOMVersion.v70.headerValue }
+            }
+            // 5.5.1 named a format by convention; 7.0 requires an IANA media type.
+            if node.level == 2, parent == "OBJE", node.tag == "FORM" {
+                node.value = v7MediaType(node.value)
+            }
+            if let standard = v7TagEquivalents[node.tag] { node.tag = standard }
+            if node.tag.hasPrefix("_") { extensionTags.insert(node.tag) }
+
+            out.append(renderV7(node))
+        }
+
+        // 3. Declare every extension tag that survived, plus any a foreign 7.0 file
+        // arrived with, so the file is self-describing.
+        guard let insertionPoint = headInsertionPoint else { return out }
+        var schema: [String] = []
+        for tag in extensionTags.sorted() {
+            let uri = tree.foreignSchemaTags[tag] ?? v7ExtensionNamespace + tag.dropFirst()
+            schema.append("2 TAG \(tag) \(uri)")
+        }
+        guard !schema.isEmpty else { return out }
+        out.insert(contentsOf: ["1 SCHMA"] + schema, at: insertionPoint)
+        return out
+    }
+
+    /// Re-emit a tokenized line with 7.0's escaping rule: only a leading "@" is
+    /// doubled, where 5.5.1 doubled the trailing one too.
+    private static func renderV7(_ node: GEDCOMNode) -> String {
+        var tokens = [String(node.level)]
+        if let xref = node.xref { tokens.append("@\(xref)@") }
+        tokens.append(node.tag)
+        if let pointer = node.pointer {
+            tokens.append("@\(pointer)@")
+        } else if !node.value.isEmpty {
+            tokens.append(node.value.hasPrefix("@") ? "@" + node.value : node.value)
+        }
+        return tokens.joined(separator: " ")
+    }
+
+    /// The media type 7.0 wants where 5.5.1 carried a bare format name.
+    private static func v7MediaType(_ form: String) -> String {
+        if form.contains("/") { return form }
+        switch form.lowercased() {
+        case "jpeg", "jpg": return "image/jpeg"
+        case "png": return "image/png"
+        case "gif": return "image/gif"
+        case "tiff", "tif": return "image/tiff"
+        case "bmp": return "image/bmp"
+        case "webp": return "image/webp"
+        case "heic", "heif": return "image/heic"
+        case "pdf": return "application/pdf"
+        default: return "application/octet-stream"
+        }
     }
 
     // MARK: - Line emission (GEDCOM 5.5.1 length limits)

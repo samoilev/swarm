@@ -667,7 +667,11 @@ public final class TreeStore {
             }
         }
 
-        let serialized = try GEDCOMCodec.serialize(tree: tree, document: tree.gedcomDocument)
+        let serialized = try GEDCOMCodec.serialize(
+            tree: tree,
+            document: tree.gedcomDocument,
+            options: .init(version: tree.sourceVersion)
+        )
         let referencedFiles = referencedFileNames(in: serialized.gedcom)
         try restoreReferencedFilesFromTrash(tree: tree, referencedFiles: referencedFiles, in: staging)
         let stagedGEDCOM = staging.appendingPathComponent("\(target.lastPathComponent).ged")
@@ -1174,18 +1178,27 @@ public final class TreeStore {
     ///
     /// `hidingLivingPeople` exports `tree.redactingLivingPeople()` instead, and carries
     /// only the files the redacted tree still references.
+    /// `version: nil` exports the tree in whatever specification it is already stored
+    /// in, which is what a plain "give me a copy" export means.
     public func exportTree(
         _ tree: FamilyTree,
         to directory: URL,
-        hidingLivingPeople: Bool = false
+        hidingLivingPeople: Bool = false,
+        version: GEDCOMVersion? = nil
     ) async throws -> SaveReceipt {
-        try exportTreeVerified(tree, toDirectory: directory, hidingLivingPeople: hidingLivingPeople)
+        try exportTreeVerified(
+            tree,
+            toDirectory: directory,
+            hidingLivingPeople: hidingLivingPeople,
+            version: version ?? tree.sourceVersion
+        )
     }
 
     private func exportTreeVerified(
         _ tree: FamilyTree,
         toDirectory directory: URL,
-        hidingLivingPeople: Bool
+        hidingLivingPeople: Bool,
+        version: GEDCOMVersion
     ) throws -> SaveReceipt {
         let fm = FileManager.default
         guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
@@ -1204,14 +1217,18 @@ public final class TreeStore {
         // .ged is sitting right there: copying that file is a byte-for-byte copy of the
         // data the export exists to remove. `document: nil` for the same reason — the
         // imported syntax tree carries foreign records through untouched.
+        // Exporting into another specification rules out the copy for the same reason:
+        // the committed file is written in the version the tree is stored in.
         let exported = hidingLivingPeople ? tree.redactingLivingPeople() : tree
-        if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path), !hidingLivingPeople {
+        let reserializes = hidingLivingPeople || version != tree.sourceVersion
+        if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path), !reserializes {
             try inject(.exportCopy)
             try fm.copyItem(at: gedSrc, to: gedDest)
         } else {
             let result = try GEDCOMCodec.serialize(
                 tree: exported,
-                document: hidingLivingPeople ? nil : tree.gedcomDocument
+                document: hidingLivingPeople ? nil : tree.gedcomDocument,
+                options: .init(version: version)
             )
             try result.gedcom.write(to: gedDest, atomically: true, encoding: .utf8)
             try writePhotos(result.photos, to: staging.appendingPathComponent(Self.mediaName))
