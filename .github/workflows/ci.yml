@@ -74,9 +74,11 @@ jobs:
     container: swift:6.2
     env:
       # Pin the formatter version so an upstream release with changed default rules
-      # can't fail CI without a code change. Bump this deliberately. The binary is
-      # built from the exact tag, so no reliance on release-asset packaging.
-      SWIFTFORMAT_VERSION: "0.61.1"
+      # can't fail CI without a code change. Bump this deliberately, together with
+      # .swiftformat: the config names rules by version-specific spelling, so an
+      # older binary rejects a config written for a newer one outright. The binary
+      # is built from the exact tag, so no reliance on release-asset packaging.
+      SWIFTFORMAT_VERSION: "0.62.1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 

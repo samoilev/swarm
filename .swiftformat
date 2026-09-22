@@ -3,7 +3,7 @@
 # structural or opinionated rewrites, so the format gate stays low-risk.
 
 --swiftversion 5.9
---exclude .build
+--exclude .build,outputs
 
 # Disable opinionated / structural rules that would churn or alter intent:
 --disable enumNamespaces          # don't flip static-only structs into enums
@@ -17,6 +17,12 @@
 --disable blankLinesAtEndOfScope
 --disable wrapLoopBodies           # don't force inline `for x { … }` onto extra lines
 --disable wrapPropertyBodies       # leave single-line computed properties as written
+# Same policy as the two above, for rules SwiftFormat added in 0.62, which are on
+# by default and would rewrite ~860 single-line bodies across the codebase.
+# Naming them here sets the floor at 0.62: an older binary rejects an unknown rule
+# outright, so this file and SWIFTFORMAT_VERSION in ci.yml move together.
+--disable wrapIfStatementBodies    # leave `if x { return }` on one line
+--disable wrapIfExpressionBodies   # same, for if/switch used as an expression
 
 # Indentation / wrapping
 --indent 4
