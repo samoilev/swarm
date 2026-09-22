@@ -62,6 +62,8 @@ public extension FamilyTree {
         copy.updatedAt = updatedAt
         copy.sourceRecords = sourceRecords
         copy.parentLinks = parentLinks
+        copy.sourceVersion = sourceVersion
+        copy.foreignSchemaTags = foreignSchemaTags
         copy.layoutVersion = layoutVersion
 
         copy.people = people.map { $0.isLiving ? $0.redactedForPrivacy(language: language) : $0 }

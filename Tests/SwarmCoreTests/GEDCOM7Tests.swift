@@ -261,6 +261,13 @@ struct GEDCOM7Tests {
         #expect(saved.contains("2 VERS 7.0.18"))
     }
 
+    /// The redacted copy is the same tree with people removed, so it must agree with
+    /// its source about which specification it is written in.
+    @Test func redactionKeepsTheVersionItsSourceWasReadIn() throws {
+        let tree = try GEDCOMCodec.parse(fixture("gedcom7-features")).tree
+        #expect(tree.redactingLivingPeople().sourceVersion == .v70)
+    }
+
     // MARK: - Escaping
 
     @Test func aValueShapedLikeAPointerSurvivesSevenZeroEscaping() throws {
