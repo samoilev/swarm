@@ -961,6 +961,15 @@ struct TreeCardView: View {
             .padding(.leading, 11)
             .padding(.top, 10)
         }
+        .overlay(alignment: .topTrailing) {
+            SepiaTrackedLabel(
+                "GEDCOM \(tree.sourceVersion.displayName)",
+                size: 9,
+                color: SepiaTheme.inkSoft.opacity(0.75)
+            )
+            .padding(.trailing, 11)
+            .padding(.top, 10)
+        }
         .overlay(alignment: .bottom) {
             Rectangle().fill(.white.opacity(0.5)).frame(height: 1)
         }
@@ -1071,6 +1080,10 @@ struct TreeCardView: View {
         if let subtitle = tree.subtitle, !subtitle.isEmpty { parts.append(subtitle) }
         if !summary.surnamesLine.isEmpty { parts.append(summary.surnamesLine) }
         parts.append(factsLine)
+        // The plate's labels are drawn inside the Button and never reach its accessible
+        // label on their own. Which specification a tree is stored in is the kind of
+        // thing a reader acts on, so it is spelled out here rather than left to sight.
+        parts.append("GEDCOM \(tree.sourceVersion.displayName)")
         return parts.joined(separator: ". ")
     }
 }

@@ -13,6 +13,13 @@ single English record of what changed and when.
 
 ### Added
 
+- New trees are created as GEDCOM 7.0. A tree that has never been saved has no file to
+  protect, so there is nothing to gain from writing it in a 1999 specification. Trees
+  already on disk are untouched and keep saving in whatever version they declare.
+- Each library card shows which GEDCOM version that tree is stored in, opposite the
+  generations label, so a library holding both is readable at a glance. The version is
+  also part of the card's accessibility description.
+
 - FamilySearch GEDCOM 7.0 support. Swarm read and wrote only GEDCOM 5.5.1, a
   specification from 1999; files from programs that have moved to 7.0 imported badly,
   and files Swarm produced looked dated to everything else. Imports now detect which

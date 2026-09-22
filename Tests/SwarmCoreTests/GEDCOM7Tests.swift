@@ -268,6 +268,68 @@ struct GEDCOM7Tests {
         #expect(tree.redactingLivingPeople().sourceVersion == .v70)
     }
 
+    // MARK: - What a new tree is written as
+
+    /// A tree that has never been saved has no file to protect, so it starts current.
+    @Test func aNewlyCreatedTreeIsSevenZero() {
+        #expect(FamilyTree(name: "Fresh").sourceVersion == .v70)
+    }
+
+    @Test func aNewTreeSavedThroughTheStoreLandsOnDiskAsSevenZero() async throws {
+        let root = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("newtree-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = await TreeStore(storageFolder: root)
+        let tree = FamilyTree(name: "Fresh")
+        tree.people = [Person(givenNames: "A", surname: "B", sex: .male, isLiving: false)]
+        _ = try await store.addTreeVerified(tree)
+
+        let text = try await String(contentsOf: store.gedFileURL(for: tree), encoding: .utf8)
+        #expect(text.contains("2 VERS 7.0.18"))
+        #expect(text.contains("1 SCHMA"))
+        #expect(!text.contains("1 CHAR"))
+        #expect(!text.contains(" CONC "))
+    }
+
+    /// The regression that matters most: an existing file is never rewritten into
+    /// another specification just because the app's default moved.
+    @Test func anImportedFiveFiveOneTreeStillSavesAsFiveFiveOne() async throws {
+        let root = URL(fileURLWithPath: NSTemporaryDirectory())
+            .appendingPathComponent("oldtree-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+
+        let store = await TreeStore(storageFolder: root)
+        let imported = try GEDCOMCodec.parse(fixture("gramps-anonymized")).tree
+        #expect(imported.sourceVersion == .v551)
+        _ = try await store.addTreeVerified(imported)
+
+        let text = try await String(contentsOf: store.gedFileURL(for: imported), encoding: .utf8)
+        #expect(text.contains("2 VERS 5.5.1"))
+        #expect(!text.contains("2 VERS 7.0.18"))
+    }
+
+    /// Undo snapshots, rollback snapshots and `deepCopy` all round-trip a tree through
+    /// JSON, and none of them may lose the version it is stored in.
+    @Test func theVersionSurvivesAJSONRoundTrip() throws {
+        let fresh = FamilyTree(name: "Fresh")
+        #expect(try fresh.deepCopy().sourceVersion == .v70)
+
+        let imported = try GEDCOMCodec.parse(fixture("gramps-anonymized")).tree
+        #expect(try imported.deepCopy().sourceVersion == .v551)
+    }
+
+    /// The file needs "7.0.18"; a label wants "7.0". Keeping both honest matters
+    /// because the card and the export picker now read the same property.
+    @Test func displayNameIsNotTheHeaderValue() {
+        #expect(GEDCOMVersion.v70.headerValue == "7.0.18")
+        #expect(GEDCOMVersion.v70.displayName == "7.0")
+        #expect(GEDCOMVersion.v551.headerValue == "5.5.1")
+        #expect(GEDCOMVersion.v551.displayName == "5.5.1")
+    }
+
     // MARK: - Escaping
 
     @Test func aValueShapedLikeAPointerSurvivesSevenZeroEscaping() throws {

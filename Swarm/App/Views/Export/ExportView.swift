@@ -116,8 +116,9 @@ struct ExportView: View {
     /// should the file leaving this app have.
     private var versionPicker: some View {
         Picker(selection: $exportVersion) {
-            Text(verbatim: "GEDCOM 7.0").tag(GEDCOMVersion.v70)
-            Text(verbatim: "GEDCOM 5.5.1").tag(GEDCOMVersion.v551)
+            ForEach([GEDCOMVersion.v70, .v551], id: \.self) { version in
+                Text(verbatim: "GEDCOM \(version.displayName)").tag(version)
+            }
         } label: {
             Text(L10n.tr("Версия"))
                 .font(SepiaType.control)

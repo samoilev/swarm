@@ -47,6 +47,15 @@ public enum GEDCOMVersion: String, Codable, Sendable, CaseIterable {
 
     /// What `2 VERS` carries. 7.0 wants the full patch version; 5.5.1 has no patches.
     public var headerValue: String { rawValue }
+
+    /// What a person should see. The file needs the patch digits `headerValue` carries;
+    /// a label wants the specification the way everyone says it out loud.
+    public var displayName: String {
+        switch self {
+        case .v551: "5.5.1"
+        case .v70: "7.0"
+        }
+    }
 }
 
 // MARK: - Lossless GEDCOM syntax tree

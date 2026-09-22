@@ -259,6 +259,46 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Предпросмотр импорта"].waitForExistence(timeout: 20))
     }
 
+    /// The card's version label is the only thing telling a reader which specification
+    /// a tree is stored in, now that a library can hold both.
+    func testLibraryCardShowsTheGEDCOMVersion() throws {
+        createInitialTree()
+        app.buttons["К списку деревьев"].click()
+        let newCard = app.buttons.containing(
+            NSPredicate(format: "label CONTAINS %@", "GEDCOM 7.0")
+        ).firstMatch
+        XCTAssertTrue(newCard.waitForExistence(timeout: 10), "A new tree's card should say 7.0")
+
+        // A tree written in the older specification must say so rather than inheriting
+        // the app's current default. Seeded directly: the import panel is out of
+        // process and cannot be driven from here.
+        let folder = storageURL.appendingPathComponent("Наследие", isDirectory: true)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        2 FORM LINEAGE-LINKED
+        1 CHAR UTF-8
+        1 _NAME Наследие
+        0 @I1@ INDI
+        1 NAME Анна /Иванова/
+        1 SEX F
+        0 TRLR
+        """.write(to: folder.appendingPathComponent("Наследие.ged"), atomically: true, encoding: .utf8)
+
+        app.terminate()
+        app.launch()
+        let oldCard = app.buttons.containing(
+            NSPredicate(format: "label CONTAINS %@", "GEDCOM 5.5.1")
+        ).firstMatch
+        XCTAssertTrue(oldCard.waitForExistence(timeout: 10), "A 5.5.1 file's card should say 5.5.1")
+        XCTAssertTrue(
+            app.buttons.containing(NSPredicate(format: "label CONTAINS %@", "GEDCOM 7.0")).firstMatch.exists,
+            "Both versions should be visible side by side"
+        )
+    }
+
     func testArchivedTreeAppearsInRecovery() {
         createInitialTree()
         app.buttons["К списку деревьев"].click()

@@ -93,9 +93,10 @@ public final class FamilyTree: Identifiable, Codable {
     /// app-owned record and therefore cannot live in `unknownRecords`.
     public var headUnknownBranches: [[String]] = []
     /// The specification version this tree was read from, and the one a plain save
-    /// writes back. A 7.0 file must not silently downgrade itself to 5.5.1 the first
-    /// time the app saves it; export is where the user gets to choose a version.
-    public var sourceVersion: GEDCOMVersion = .v551
+    /// writes back. A file keeps whatever it declared — a 7.0 file must not silently
+    /// downgrade itself, and a 5.5.1 file must not be rewritten behind the user's back.
+    /// A tree that has never been saved has no file to protect, so it starts at 7.0.
+    public var sourceVersion: GEDCOMVersion = .v70
     /// Extension tag declarations (`HEAD.SCHMA.TAG`) a 7.0 file arrived with, kept so
     /// re-export can restate the ones Swarm didn't author.
     public var foreignSchemaTags: [String: String] = [:]
@@ -512,7 +513,7 @@ public final class FamilyTree: Identifiable, Codable {
         if !sourceRecords.isEmpty { try c.encode(sourceRecords, forKey: .sourceRecords) }
         if !parentLinks.isEmpty { try c.encode(parentLinks, forKey: .parentLinks) }
         if !headUnknownBranches.isEmpty { try c.encode(headUnknownBranches, forKey: .headUnknownBranches) }
-        if sourceVersion != .v551 { try c.encode(sourceVersion, forKey: .sourceVersion) }
+        try c.encode(sourceVersion, forKey: .sourceVersion)
         if !foreignSchemaTags.isEmpty { try c.encode(foreignSchemaTags, forKey: .foreignSchemaTags) }
         try c.encodeIfPresent(gedcomDocument, forKey: .gedcomDocument)
         try c.encodeIfPresent(importReport, forKey: .importReport)
