@@ -682,8 +682,10 @@ public final class TreeStore {
         let previousAttachmentNames = { [weak self] () -> [String: String] in
             guard let self, let current, let previousGEDCOM = gedFile(in: current),
                   let previous = try? GEDCOMCodec.parse(previousGEDCOM) else { return [:] }
+            // Two people can attach the same file, so a stored name is not a unique key.
             return Dictionary(
-                uniqueKeysWithValues: previous.tree.people.flatMap(\.attachments).map { ($0.storedName, $0.originalName) }
+                previous.tree.people.flatMap(\.attachments).map { ($0.storedName, $0.originalName) },
+                uniquingKeysWith: { first, _ in first }
             )
         }
         try moveUnreferencedFilesToTrash(

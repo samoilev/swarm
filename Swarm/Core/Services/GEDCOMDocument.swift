@@ -389,7 +389,13 @@ public enum GEDCOMCodec {
     /// model's preservation branches and therefore remain part of the replacement.
     private static func patchOwnedRecords(in original: GEDCOMDocument, with canonical: GEDCOMDocument) -> GEDCOMDocument {
         let ownedTags: Set = ["HEAD", "INDI", "FAM", "SOUR", "TRLR"]
-        let canonicalByKey = Dictionary(uniqueKeysWithValues: canonical.records.map { (recordKey($0), $0) })
+        // Only owned records are ever looked up here. Unmodeled records pass through from
+        // `original` verbatim and share a key whenever a file repeats a tag (two NOTEs,
+        // two OBJEs), which is common and must not trap.
+        let canonicalByKey = Dictionary(
+            canonical.records.filter { ownedTags.contains($0.tag) }.map { (recordKey($0), $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
         var emitted = Set<String>()
         var records: [GEDCOMNode] = []
 

@@ -645,4 +645,72 @@ struct DefectRegressionTests {
         #expect(person.sources.isEmpty)
         #expect(person.citations.map(\.sourceID) == [first.id])
     }
+
+    /// Ancestry and FTM both write several top-level NOTE and OBJE records. The save
+    /// path keyed every unmodeled record on its bare tag, so the second one collided
+    /// with the first and killed the app partway through an import.
+    @Test func serializeSurvivesRepeatedUnmodeledTopLevelTags() throws {
+        let gedcom = """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        0 @I1@ INDI
+        1 NAME Иван /Петров/
+        0 @N1@ NOTE Первая заметка
+        0 @N2@ NOTE Вторая заметка
+        0 @O1@ OBJE
+        1 FILE scan.jpg
+        0 @O2@ OBJE
+        1 FILE deed.jpg
+        0 TRLR
+        """
+        let imported = try GEDCOMCodec.parse(gedcom)
+
+        let out = try GEDCOMCodec.serialize(tree: imported.tree, document: imported.document).gedcom
+
+        // Every foreign record survives, once each and in its original order.
+        for xref in ["@N1@ NOTE", "@N2@ NOTE", "@O1@ OBJE", "@O2@ OBJE"] {
+            #expect(out.components(separatedBy: "0 \(xref)").count - 1 == 1)
+        }
+        let first = try #require(out.range(of: "0 @N1@ NOTE"))
+        let second = try #require(out.range(of: "0 @N2@ NOTE"))
+        #expect(first.lowerBound < second.lowerBound)
+    }
+
+    /// One scanned document attached to two people is ordinary genealogy, and it gives
+    /// the two attachments one stored name. The save path indexed the previous archive
+    /// by stored name, so the second attachment collided with the first and trapped —
+    /// but only on a save that had something to move to the trash.
+    @Test func savingWithOneFileSharedByTwoPeopleSurvivesTheTrashSweep() async throws {
+        let library = try Temp()
+        let incoming = try Temp()
+        let sharedSource = incoming.url.appendingPathComponent("certificate.txt")
+        let staleSource = incoming.url.appendingPathComponent("draft.txt")
+        try Data("birth certificate".utf8).write(to: sharedSource)
+        try Data("superseded".utf8).write(to: staleSource)
+
+        let store = TreeStore(storageFolder: library.url)
+        let tree = FamilyTree(name: "Общий документ")
+        let anna = Person(givenNames: "Анна")
+        let boris = Person(givenNames: "Борис")
+        tree.people = [anna, boris]
+        _ = try await store.addTreeVerified(tree)
+
+        // One stored file, two attachment records — the shape an imported file has when
+        // two OBJE records point at one FILE. A second file exists only so the next save
+        // has something unreferenced to sweep.
+        let shared = try store.prepareAttachment(in: tree, sourceURL: sharedSource)
+        let stale = try store.prepareAttachment(in: tree, sourceURL: staleSource)
+        anna.attachments = [shared, stale]
+        boris.attachments = [Attachment(storedName: shared.storedName, originalName: shared.originalName)]
+        _ = try await store.saveTree(tree)
+
+        anna.attachments = [shared]
+        _ = try await store.saveTree(tree)
+
+        let reloaded = try #require(TreeStore(storageFolder: library.url).trees.first)
+        let names = reloaded.people.flatMap(\.attachments).map(\.storedName)
+        #expect(names.count == 2)
+        #expect(Set(names) == [shared.storedName])
+    }
 }
