@@ -686,13 +686,13 @@ struct TreeLibraryView: View {
                         .font(SepiaTheme.body(size: 13.5))
                         .foregroundColor(SepiaTheme.ink)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(L10n.tr("Обновите формат дерева, чтобы сохранять изменения. Сначала будет создана резервная копия."))
+                    Text(L10n.tr("Обновите структуру папки дерева, чтобы сохранять изменения. Сначала будет создана резервная копия."))
                         .font(SepiaType.label)
                         .foregroundColor(SepiaTheme.inkSoft)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 12)
-                Button(L10n.tr("Обновить формат…")) { recoveryScope = .allTrees }
+                Button(L10n.tr("Обновить структуру…")) { recoveryScope = .allTrees }
                     .buttonStyle(SepiaButtonStyle(isActive: true))
             }
             .padding(.horizontal, 24)
@@ -709,7 +709,7 @@ struct TreeLibraryView: View {
         case 1, 2: names.joined(separator: ", ")
         default: L10n.tr("\(names.prefix(2).joined(separator: ", ")) и ещё \(names.count - 2)")
         }
-        return L10n.tr("\(subject) — старый формат")
+        return L10n.tr("\(subject) — старая структура папки")
     }
 
     private var renameSheet: some View {

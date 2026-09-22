@@ -51,7 +51,7 @@ struct RecoveryView: View {
                             group(
                                 .migrationBackup,
                                 title: L10n.tr("Резервные копии"),
-                                explanation: L10n.tr("Копии дерева со всеми файлами. Создаются перед обновлением формата, объединением и восстановлением. Хранятся бессрочно.")
+                                explanation: L10n.tr("Копии дерева со всеми файлами. Создаются перед обновлением структуры, объединением и восстановлением. Хранятся бессрочно.")
                             )
                             group(
                                 .archivedTree,
@@ -142,8 +142,8 @@ struct RecoveryView: View {
     @ViewBuilder private var migrationSection: some View {
         if !store.pendingMigrations.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
-                sectionTitle(L10n.tr("Обновление формата"), count: store.pendingMigrations.count)
-                Text(L10n.tr("Это дерево можно просматривать. Чтобы сохранять изменения, обновите его формат."))
+                sectionTitle(L10n.tr("Обновление структуры"), count: store.pendingMigrations.count)
+                Text(L10n.tr("Это дерево можно просматривать. Чтобы сохранять изменения, обновите структуру его папки."))
                     .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -306,7 +306,7 @@ struct RecoveryView: View {
         Task { @MainActor in
             do {
                 let receipts = try store.performPendingMigrations()
-                statusMessage = L10n.tr("Формат дерева обновлён. Обновлено файлов: \(receipts.count). Резервные копии — ниже.")
+                statusMessage = L10n.tr("Структура папки обновлена. Обновлено файлов: \(receipts.count). Резервные копии — ниже.")
                 if selectedTreeID == nil { selectedTreeID = store.trees.first?.id }
                 refresh()
             } catch { errorMessage = error.localizedDescription }

@@ -88,7 +88,7 @@ public struct RecoveryItem: Identifiable, Hashable, Sendable {
         case .revision:
             return L10n.tr("Сохранение")
         case .migrationBackup:
-            if displayName.hasSuffix("pre-v2") { return L10n.tr("Перед обновлением формата") }
+            if displayName.hasSuffix("pre-v2") { return L10n.tr("Перед обновлением структуры") }
             if displayName.hasSuffix("pre-merge") { return L10n.tr("Перед объединением") }
             if displayName.hasSuffix("pre-restore") { return L10n.tr("Перед восстановлением") }
             return L10n.tr("Резервная копия")
@@ -112,8 +112,10 @@ public struct PendingMigration: Identifiable, Hashable, Sendable {
 
         public var label: String {
             switch self {
-            case .treeFolder: L10n.tr("Обновление формата папки дерева")
-            case .legacyFile: L10n.tr("Файл GEDCOM в старом формате")
+            case .treeFolder: L10n.tr("Обновление структуры папки")
+            // Not a GEDCOM version: this is a .ged sitting loose in the storage folder,
+            // from before trees had folders of their own.
+            case .legacyFile: L10n.tr("Файл GEDCOM вне папки дерева")
             case .legacyJSON: L10n.tr("Старая база данных trees.json")
             }
         }
@@ -157,7 +159,7 @@ public enum TreeStoreError: LocalizedError {
         case .recoveryItemMissing:
             L10n.tr("Этот файл или копия больше не доступны для восстановления.")
         case .migrationRequired:
-            L10n.tr("Чтобы сохранять изменения, откройте «Восстановление» и обновите формат дерева.")
+            L10n.tr("Чтобы сохранять изменения, откройте «Восстановление» и обновите структуру папки дерева.")
         case let .noGEDCOMInFolder(folder):
             L10n.tr("В папке «\(folder)» нет файла GEDCOM.")
         case let .ambiguousGEDCOMInFolder(folder):

@@ -24,6 +24,52 @@ struct LocalizationTests {
         #expect(L10n.tr("Проверка старого хранилища", language: .english) == "Check previous storage")
     }
 
+    /// The storage migration talks about a tree's folder layout; the GEDCOM specification
+    /// version is spelled "версия"/"GEDCOM x.y" and nothing else. They used to share the
+    /// word "формат", which made a user reasonably read "старый формат" as "GEDCOM 5.5.1"
+    /// — and then read a successful migration as a failure, because the card still said
+    /// 5.5.1 afterwards.
+    ///
+    /// A missing English entry is invisible at runtime: `L10n.tr` returns the Russian
+    /// literal unchanged. These assertions are what catches that.
+    @Test func folderLayoutCopyNeverBorrowsTheWordFormat() {
+        #expect(L10n.tr("Обновить структуру…", language: .english) == "Update layout…")
+        #expect(L10n.tr("Обновление структуры", language: .english) == "Layout update")
+        #expect(L10n.tr("Обновление структуры папки", language: .english) == "Folder layout update")
+        #expect(L10n.tr("Перед обновлением структуры", language: .english) == "Before the layout update")
+        // The one that used to read as a GEDCOM version: it names a .ged sitting loose in
+        // the storage folder, not a specification.
+        #expect(
+            L10n.tr("Файл GEDCOM вне папки дерева", language: .english)
+                == "GEDCOM file outside a tree folder"
+        )
+        #expect(
+            L10n.tr(
+                "Обновите структуру папки дерева, чтобы сохранять изменения. Сначала будет создана резервная копия.",
+                language: .english
+            ) == "Update the tree’s folder layout to save changes. A backup will be created first."
+        )
+        #expect(
+            L10n.tr(
+                "Это дерево можно просматривать. Чтобы сохранять изменения, обновите структуру его папки.",
+                language: .english
+            ) == "You can view this tree. To save changes, update its folder layout."
+        )
+        #expect(
+            L10n.tr(
+                "Чтобы сохранять изменения, откройте «Восстановление» и обновите структуру папки дерева.",
+                language: .english
+            ) == "To save changes, open Recovery and update the tree’s folder layout."
+        )
+    }
+
+    /// The banner headline interpolates the affected tree names.
+    @Test func theLayoutBannerHeadlineIsBilingual() {
+        let subject = "«Род»"
+        #expect(L10n.tr("\(subject) — старая структура папки", language: .english) == "«Род» — old folder layout")
+        #expect(L10n.tr("\(subject) — старая структура папки", language: .russian) == "«Род» — старая структура папки")
+    }
+
     @Test func systemLanguageFollowsTheMacAndFallsBackToEnglish() {
         #expect(AppLanguage.system(preferredLanguages: ["ru-RU", "en-GB"]) == .russian)
         #expect(AppLanguage.system(preferredLanguages: ["en-GB", "ru-GB"]) == .english)

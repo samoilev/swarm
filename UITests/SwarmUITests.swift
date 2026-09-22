@@ -280,6 +280,7 @@ final class SwarmUITests: XCTestCase {
         2 VERS 5.5.1
         2 FORM LINEAGE-LINKED
         1 CHAR UTF-8
+        1 _FTSVER 2
         1 _NAME Наследие
         0 @I1@ INDI
         1 NAME Анна /Иванова/

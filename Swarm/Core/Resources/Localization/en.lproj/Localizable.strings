@@ -88,7 +88,7 @@
 "Удалить дерево «%@»?" = "Delete the tree “%@”?";
 "%@ чел." = "%@ people";
 "%@ и ещё %@" = "%@ and %@ more";
-"%@ — старый формат" = "%@ — old format";
+"%@ — старая структура папки" = "%@ — old folder layout";
 
 /* Main workspace */
 "Добавьте первого человека" = "Add the first person";
@@ -353,7 +353,7 @@
 "Удалённые файлы" = "Deleted files";
 "Удалённые фотографии и документы из карточек. Их можно восстановить в течение 30 дней после удаления." = "Deleted photos and documents from profiles. You can restore them for 30 days after deletion.";
 "Резервные копии" = "Backups";
-"Копии дерева со всеми файлами. Создаются перед обновлением формата, объединением и восстановлением. Хранятся бессрочно." = "Copies of the tree and all its files, created before a format update, merge, or restore. Kept indefinitely.";
+"Копии дерева со всеми файлами. Создаются перед обновлением структуры, объединением и восстановлением. Хранятся бессрочно." = "Copies of the tree and all its files, created before a layout update, merge, or restore. Kept indefinitely.";
 "Архивированные деревья" = "Archived trees";
 "Деревья, перенесённые из библиотеки в архив, со всеми файлами. Хранятся до восстановления." = "Trees moved from the library to the archive, with all their files. Kept until restored.";
 "Не удалось восстановить" = "Couldn’t restore";
@@ -362,10 +362,10 @@
 "Архив" = "Archive";
 "Выберите дерево, чтобы посмотреть его файлы и копии." = "Choose a tree to see its files and backups.";
 "Выберите дерево" = "Choose a tree";
-"Обновление формата" = "Format update";
-"Это дерево можно просматривать. Чтобы сохранять изменения, обновите его формат." = "You can view this tree. To save changes, update its format.";
-"Обновите формат дерева, чтобы сохранять изменения. Сначала будет создана резервная копия." = "Update the tree’s format to save changes. A backup will be created first.";
-"Обновить формат…" = "Update format…";
+"Обновление структуры" = "Layout update";
+"Это дерево можно просматривать. Чтобы сохранять изменения, обновите структуру его папки." = "You can view this tree. To save changes, update its folder layout.";
+"Обновите структуру папки дерева, чтобы сохранять изменения. Сначала будет создана резервная копия." = "Update the tree’s folder layout to save changes. A backup will be created first.";
+"Обновить структуру…" = "Update layout…";
 "Обновить всё (%@)" = "Update all (%@)";
 "Копии исходных файлов будут доступны в разделе «Резервные копии»." = "Copies of the original files will be available in Backups.";
 "Выберите человека, в чью карточку нужно вернуть файл." = "Choose whose profile to restore the file to.";
@@ -464,17 +464,17 @@
 "Онлайн-карта." = "Online map.";
 "Карта без интернета." = "Offline map.";
 "Сохранение" = "Save";
-"Перед обновлением формата" = "Before format update";
+"Перед обновлением структуры" = "Before the layout update";
 "Перед объединением" = "Before merge";
 "Перед восстановлением" = "Before restore";
 "Резервная копия" = "Backup";
-"Обновление формата папки дерева" = "Update tree folder format";
-"Файл GEDCOM в старом формате" = "GEDCOM file in the old format";
+"Обновление структуры папки" = "Folder layout update";
+"Файл GEDCOM вне папки дерева" = "GEDCOM file outside a tree folder";
 "Старая база данных trees.json" = "Old trees.json database";
 "Папка дерева не найдена." = "The tree folder could not be found.";
 "Из-за ошибок в GEDCOM этот файл нельзя импортировать." = "Errors in this GEDCOM file prevent it from being imported.";
 "Этот файл или копия больше не доступны для восстановления." = "This file or backup is no longer available to restore.";
-"Чтобы сохранять изменения, откройте «Восстановление» и обновите формат дерева." = "To save changes, open Recovery and update the tree’s format.";
+"Чтобы сохранять изменения, откройте «Восстановление» и обновите структуру папки дерева." = "To save changes, open Recovery and update the tree’s folder layout.";
 "В папке «%@» нет файла GEDCOM." = "The “%@” folder contains no GEDCOM file.";
 "В папке «%@» несколько файлов GEDCOM. Выберите тот, который хотите открыть." = "The “%@” folder contains several GEDCOM files. Select the one you want to open.";
 "обнаружена ошибка данных" = "a data error was found";
@@ -772,7 +772,7 @@
 "Файлы (%@)" = "Files (%@)";
 "Пока нечего восстанавливать" = "Nothing to restore yet";
 "Дерево восстановлено из копии «%@»." = "The tree was restored from “%@”.";
-"Формат дерева обновлён. Обновлено файлов: %@. Резервные копии — ниже." = "Tree format updated. Files updated: %@. Backups are below.";
+"Структура папки обновлена. Обновлено файлов: %@. Резервные копии — ниже." = "Folder layout updated. Files updated: %@. Backups are below.";
 "Схема дерева и карточки людей" = "Tree diagram and profile cards";
 "Папка с деревом, фотографиями и вложениями" = "A folder with the tree, photos, and attachments";
 "Тип связи" = "Relationship type";
