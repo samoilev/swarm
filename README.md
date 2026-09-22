@@ -80,7 +80,9 @@ and licenses are included in the ZIP.
 - **GEDCOM 5.5.1 and 7.0 import and export** that works with Ancestry, Gramps and
   MyHeritage, including standard map coordinates. Files are read in whichever version
   they declare; new trees are created as 7.0, and export writes 7.0 by default and
-  5.5.1 on request. Structures Swarm doesn't model survive import → edit → export
+  5.5.1 on request. Trees travel as a single **GEDZIP** (`.gdz`) file — the GEDCOM 7.0
+  archive format, carrying photos and attachments inside it — or as a folder, if you
+  prefer. Structures Swarm doesn't model survive import → edit → export
   unchanged: event-level notes, source records, other programs' custom tags. The
   original file is kept verbatim as `original-import.ged`.
 - **Merge someone else's tree into yours.** Swarm combines matching people instead of

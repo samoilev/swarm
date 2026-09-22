@@ -13,6 +13,14 @@ single English record of what changed and when.
 
 ### Added
 
+- GEDZIP (`.gdz`) is how a tree now leaves and enters Swarm. It is the GEDCOM 7.0
+  packaging format: one file holding the GEDCOM beside its photos and attachments, so a
+  tree can be emailed without the media falling off it. Export writes `.gdz` by default,
+  with the folder bundle still available; opening or merging a `.gdz` works anywhere a
+  `.ged` did. Because GEDZIP is defined only by 7.0, an archive always carries 7.0.
+  Swarm's own integrity manifest sits in a folder beside the archive rather than inside
+  it, so the file stays readable by any other program.
+
 - New trees are created as GEDCOM 7.0. A tree that has never been saved has no file to
   protect, so there is nothing to gain from writing it in a 1999 specification. Trees
   already on disk are untouched and keep saving in whatever version they declare.

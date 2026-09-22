@@ -432,7 +432,7 @@ struct TrustCompletenessTests {
         try FileManager.default.createDirectory(at: exportFolder, withIntermediateDirectories: true)
         store.faultInjector = { if $0 == .exportCopy { throw CocoaError(.fileWriteUnknown) } }
         var exportFailed = false
-        do { _ = try await store.exportTree(tree, to: exportFolder) }
+        do { _ = try await store.exportTree(tree, to: exportFolder, packaging: .folder) }
         catch { exportFailed = true }
         #expect(exportFailed)
         #expect(try (FileManager.default.contentsOfDirectory(at: exportFolder, includingPropertiesForKeys: nil)).isEmpty)

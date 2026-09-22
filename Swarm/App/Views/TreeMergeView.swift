@@ -14,6 +14,7 @@ struct TreeMergeView: View {
     @State private var isApplying = false
 
     private var gedcomType: UTType { UTType(filenameExtension: "ged") ?? .plainText }
+    private var gedzipType: UTType { UTType(filenameExtension: "gdz") ?? .zip }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -111,7 +112,7 @@ struct TreeMergeView: View {
         }
         .frame(width: SepiaTheme.scaledPanel(760, axis: .horizontal), height: SepiaTheme.scaledPanel(620, axis: .vertical))
         .background(SepiaTheme.paper)
-        .fileImporter(isPresented: $showImporter, allowedContentTypes: [gedcomType]) { result in
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [gedcomType, gedzipType]) { result in
             if case let .success(url) = result { loadPreview(url) }
             if case let .failure(error) = result { errorMessage = error.localizedDescription }
         }

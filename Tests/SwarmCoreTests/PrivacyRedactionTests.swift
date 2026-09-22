@@ -164,7 +164,7 @@ struct PrivacyRedactionTests {
         deceased.photoData = Data("ancestor-portrait".utf8)
         _ = try await store.saveTree(tree)
 
-        let bundle = try await store.exportTree(tree, to: exports.url, hidingLivingPeople: true).finalURL
+        let bundle = try await store.exportTree(tree, to: exports.url, hidingLivingPeople: true, packaging: .folder).finalURL
         let fm = FileManager.default
         let ged = try #require(try fm.contentsOfDirectory(at: bundle, includingPropertiesForKeys: nil)
             .first { $0.pathExtension == "ged" })
@@ -195,7 +195,7 @@ struct PrivacyRedactionTests {
         living.photoData = Data("living-portrait".utf8)
         _ = try await store.saveTree(tree)
 
-        let bundle = try await store.exportTree(tree, to: exports.url).finalURL
+        let bundle = try await store.exportTree(tree, to: exports.url, packaging: .folder).finalURL
         let ged = try #require(try FileManager.default
             .contentsOfDirectory(at: bundle, includingPropertiesForKeys: nil)
             .first { $0.pathExtension == "ged" })

@@ -41,6 +41,12 @@ struct ContentView: View {
         UTType(filenameExtension: "ged") ?? .plainText
     }
 
+    /// GEDZIP has no system-declared type, so fall back to a plain zip when Launch
+    /// Services has not seen the app's own declaration yet.
+    private var gedzipType: UTType {
+        UTType(filenameExtension: "gdz") ?? .zip
+    }
+
     var body: some View {
         // A ZStack rather than a Group: the outgoing and incoming screens have to be in the
         // hierarchy together for one beat, or the card opening into a tree has nothing to
@@ -140,7 +146,10 @@ struct ContentView: View {
         // Folders are selectable too: an exported archive is a folder, and choosing it —
         // rather than the .ged buried inside — is what lets macOS read the photos and
         // attachments stored beside the file.
-        .fileImporter(isPresented: $showGEDCOMImporter, allowedContentTypes: [gedcomType, .folder]) { result in
+        .fileImporter(
+            isPresented: $showGEDCOMImporter,
+            allowedContentTypes: [gedcomType, gedzipType, .folder]
+        ) { result in
             switch result {
             case .success(let url): previewGEDCOM(from: url)
             case .failure(let error): importError = error.localizedDescription

@@ -1180,17 +1180,22 @@ public final class TreeStore {
     /// only the files the redacted tree still references.
     /// `version: nil` exports the tree in whatever specification it is already stored
     /// in, which is what a plain "give me a copy" export means.
+    /// `version: nil` exports the tree in whatever specification it is already stored
+    /// in. GEDZIP overrides that: it is defined only by GEDCOM 7.0, so a `.gdz` always
+    /// carries 7.0 whatever the caller asked for.
     public func exportTree(
         _ tree: FamilyTree,
         to directory: URL,
         hidingLivingPeople: Bool = false,
-        version: GEDCOMVersion? = nil
+        version: GEDCOMVersion? = nil,
+        packaging: TreeExportPackaging = .gedzip
     ) async throws -> SaveReceipt {
         try exportTreeVerified(
             tree,
             toDirectory: directory,
             hidingLivingPeople: hidingLivingPeople,
-            version: version ?? tree.sourceVersion
+            version: packaging == .gedzip ? .v70 : (version ?? tree.sourceVersion),
+            packaging: packaging
         )
     }
 
@@ -1198,7 +1203,8 @@ public final class TreeStore {
         _ tree: FamilyTree,
         toDirectory directory: URL,
         hidingLivingPeople: Bool,
-        version: GEDCOMVersion
+        version: GEDCOMVersion,
+        packaging: TreeExportPackaging
     ) throws -> SaveReceipt {
         let fm = FileManager.default
         guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
@@ -1212,7 +1218,9 @@ public final class TreeStore {
 
         // The committed GEDCOM and active file folders are copied without private
         // revision history or deleted-file Trash.
-        let gedDest = staging.appendingPathComponent("\(bundle.lastPathComponent).ged")
+        let gedDest = staging.appendingPathComponent(
+            packaging == .gedzip ? GEDZIPArchive.gedcomEntryName : "\(bundle.lastPathComponent).ged"
+        )
         // A privacy export is re-serialized from the redacted tree even when a committed
         // .ged is sitting right there: copying that file is a byte-for-byte copy of the
         // data the export exists to remove. `document: nil` for the same reason — the
@@ -1254,12 +1262,66 @@ public final class TreeStore {
         if fm.fileExists(atPath: original.path), !hidingLivingPeople {
             try fm.copyItem(at: original, to: staging.appendingPathComponent(Self.originalImportName))
         }
+        if packaging == .gedzip {
+            return try packageAsGEDZIP(
+                staging: staging,
+                directory: directory,
+                name: name,
+                generationID: generationID
+            )
+        }
         let exportHashes = try hashes(in: staging, includeRecoveryData: false)
         try writeManifest(generationID: generationID, hashes: exportHashes, in: staging)
         try verify(hashes: exportHashes, in: staging)
         try fm.moveItem(at: staging, to: bundle)
         return SaveReceipt(
             finalURL: bundle,
+            generationID: generationID,
+            fileCount: exportHashes.count,
+            hashes: exportHashes
+        )
+    }
+
+    /// Zip a staged export into one `.gdz`, keeping Swarm's own bookkeeping in a sidecar
+    /// so the archive stays spec-clean.
+    ///
+    /// Verification is stronger here than for a folder: the written archive is extracted
+    /// again and re-hashed, so the receipt attests that the file reads back — not merely
+    /// that the staging folder was correct before it was zipped.
+    private func packageAsGEDZIP(
+        staging: URL,
+        directory: URL,
+        name: String,
+        generationID: UUID
+    ) throws -> SaveReceipt {
+        let fm = FileManager.default
+        let archive = uniqueURL(directory.appendingPathComponent("\(name).gdz"))
+        let sidecar = directory.appendingPathComponent(
+            "\(archive.deletingPathExtension().lastPathComponent).swarm-manifest",
+            isDirectory: true
+        )
+        // The verbatim import leaves before hashing, so the manifest describes exactly
+        // what ends up inside the archive.
+        try GEDZIPArchive.moveAside(
+            [staging.appendingPathComponent(Self.originalImportName)],
+            to: sidecar
+        )
+        let exportHashes = try hashes(in: staging, includeRecoveryData: false)
+        try GEDZIPArchive.write(contentsOf: staging, to: archive)
+
+        let readback = directory.appendingPathComponent(".verify-\(generationID.uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: readback) }
+        try GEDZIPArchive.extract(archive, to: readback)
+        try verify(hashes: exportHashes, in: readback)
+
+        try fm.createDirectory(at: sidecar, withIntermediateDirectories: true)
+        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: exportHashes)
+        try JSONEncoder.pretty.encode(manifest).write(
+            to: sidecar.appendingPathComponent(Self.manifestName),
+            options: .atomic
+        )
+        return SaveReceipt(
+            finalURL: archive,
             generationID: generationID,
             fileCount: exportHashes.count,
             hashes: exportHashes
@@ -1274,6 +1336,17 @@ public final class TreeStore {
     /// the selected item alone. Files are returned unchanged.
     public func resolveImportSource(_ selection: URL) throws -> URL {
         let fm = FileManager.default
+        // A GEDZIP is the folder case wearing a different coat: unpack it into the same
+        // private area an import already stages through, then resolve it by the rules
+        // below. `gedcom.ged` is the only GEDCOM a conforming archive holds, so the
+        // single-candidate rule settles it without a special case.
+        if GEDZIPArchive.isArchive(selection) {
+            let unpacked = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+                .appendingPathComponent("Unpacked-\(UUID().uuidString)", isDirectory: true)
+            try fm.createDirectory(at: unpacked, withIntermediateDirectories: true)
+            try GEDZIPArchive.extract(selection, to: unpacked)
+            return try resolveImportSource(unpacked)
+        }
         var isDirectory: ObjCBool = false
         guard fm.fileExists(atPath: selection.path, isDirectory: &isDirectory), isDirectory.boolValue else {
             return selection

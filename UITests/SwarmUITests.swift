@@ -300,6 +300,31 @@ final class SwarmUITests: XCTestCase {
         )
     }
 
+    /// GEDZIP is defined only by GEDCOM 7.0, so choosing the one-file packaging must
+    /// take the version choice away rather than let someone ask for a 5.5.1 archive.
+    func testExportSheetLocksTheVersionForGEDZIP() {
+        createInitialTree()
+        app.typeKey("e", modifierFlags: .command)
+        let row = app.buttons.containing(
+            NSPredicate(format: "label BEGINSWITH %@", "GEDCOM с файлами")
+        ).firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+
+        let packaging = app.popUpButtons.containing(
+            NSPredicate(format: "value CONTAINS %@", ".gdz")
+        ).firstMatch
+        XCTAssertTrue(packaging.waitForExistence(timeout: 3), "The packaging picker should default to .gdz")
+
+        let version = app.popUpButtons.containing(
+            NSPredicate(format: "value CONTAINS %@", "GEDCOM 7.0")
+        ).firstMatch
+        XCTAssertTrue(version.waitForExistence(timeout: 3))
+        XCTAssertFalse(version.isEnabled, "GEDZIP implies 7.0, so the version must be locked")
+
+        // The row's own description has to agree with the packaging above it.
+        XCTAssertTrue(row.label.contains("Один файл"))
+    }
+
     func testArchivedTreeAppearsInRecovery() {
         createInitialTree()
         app.buttons["К списку деревьев"].click()

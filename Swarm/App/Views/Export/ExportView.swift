@@ -23,6 +23,10 @@ struct ExportView: View {
     /// it is the current standard and what a file handed to another program should be;
     /// the tree's own storage is unaffected either way.
     @State private var exportVersion: GEDCOMVersion = .v70
+    /// One file or a folder. GEDZIP is the default because it is the only shape that
+    /// survives being emailed: a folder loses its photos the moment it is detached
+    /// from the .ged beside them.
+    @State private var packaging: TreeExportPackaging = .gedzip
 
     var body: some View {
         VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
@@ -67,7 +71,7 @@ struct ExportView: View {
                     Button { exportVerifiedTree() } label: {
                         exportRowLabel(
                             title: L10n.tr("GEDCOM с файлами"),
-                            detail: L10n.tr("Папка с деревом, фотографиями и вложениями"),
+                            detail: gedcomRowDetail,
                             systemImage: "archivebox",
                             style: .secondary(SepiaTheme.accent2)
                         )
@@ -76,6 +80,7 @@ struct ExportView: View {
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
 
                     versionPicker
+                    packagingPicker
                     privacyToggle
                 }
             }
@@ -107,13 +112,11 @@ struct ExportView: View {
         }
     }
 
-    /// Applies to whichever of the three exports is used next. Deliberately per-export
-    /// and unremembered: who a file is going to is what decides this, not a preference.
-    /// What it removes is left to the footer's counts rather than spelled out — the
-    /// label carries it, and a paragraph here pushed the three rows off their rhythm.
-    /// Applies to the GEDCOM bundle only — a PDF has no specification version. Kept
-    /// next to the privacy checkbox because both answer the same question: what shape
-    /// should the file leaving this app have.
+    /// Applies to the GEDCOM export only — a PDF has no specification version.
+    ///
+    /// Disabled for GEDZIP: that format is defined only by GEDCOM 7.0, so offering 5.5.1
+    /// alongside it would let the user ask for a file no other program is obliged to
+    /// read. Same move the privacy checkbox makes when there is nobody living to hide.
     private var versionPicker: some View {
         Picker(selection: $exportVersion) {
             ForEach([GEDCOMVersion.v70, .v551], id: \.self) { version in
@@ -125,11 +128,43 @@ struct ExportView: View {
                 .foregroundStyle(SepiaTheme.ink)
         }
         .pickerStyle(.menu)
+        .disabled(packaging == .gedzip)
         .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
         .padding(.vertical, SepiaTheme.scaled(SepiaLayout.xs))
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    /// The GEDCOM row describes what the packaging picker below it will actually
+    /// produce; saying "folder" under a one-file export is the kind of small lie that
+    /// makes people distrust the rest of the sheet.
+    private var gedcomRowDetail: String {
+        switch packaging {
+        case .gedzip: L10n.tr("Один файл с деревом, фотографиями и вложениями")
+        case .folder: L10n.tr("Папка с деревом, фотографиями и вложениями")
+        }
+    }
+
+    /// Whether the tree leaves as one file or as a folder. Applies to the GEDCOM export
+    /// only; the PDF rows are unaffected.
+    private var packagingPicker: some View {
+        Picker(selection: $packaging) {
+            Text(L10n.tr("Один файл (.gdz)")).tag(TreeExportPackaging.gedzip)
+            Text(L10n.tr("Папка с файлами")).tag(TreeExportPackaging.folder)
+        } label: {
+            Text(L10n.tr("Упаковка"))
+                .font(SepiaType.control)
+                .foregroundStyle(SepiaTheme.ink)
+        }
+        .pickerStyle(.menu)
+        .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
+        .padding(.vertical, SepiaTheme.scaled(SepiaLayout.xs))
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Applies to whichever of the three exports is used next. Deliberately per-export
+    /// and unremembered: who a file is going to is what decides this, not a preference.
+    /// What it removes is left to the footer's counts rather than spelled out — the
+    /// label carries it, and a paragraph here pushed the three rows off their rhythm.
     private var privacyToggle: some View {
         Toggle(isOn: $hideLivingPII) {
             Text(L10n.tr("Скрыть данные живых людей"))
@@ -310,7 +345,8 @@ struct ExportView: View {
                         tree,
                         to: directory,
                         hidingLivingPeople: hideLivingPII,
-                        version: exportVersion
+                        version: exportVersion,
+                        packaging: packaging
                     )
                     NSWorkspace.shared.activateFileViewerSelecting([receipt.finalURL])
                     dismiss()

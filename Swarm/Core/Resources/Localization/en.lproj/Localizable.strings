@@ -470,6 +470,12 @@
 "Резервная копия" = "Backup";
 "Обновление структуры папки" = "Folder layout update";
 "Файл GEDCOM вне папки дерева" = "GEDCOM file outside a tree folder";
+"Не удалось упаковать архив GEDZIP." = "Couldn’t package the GEDZIP archive.";
+"Упаковка" = "Packaging";
+"Один файл (.gdz)" = "One file (.gdz)";
+"Папка с файлами" = "Folder with files";
+"Один файл с деревом, фотографиями и вложениями" = "One file with the tree, photos, and attachments";
+"Не удалось распаковать архив GEDZIP. Возможно, файл повреждён." = "Couldn’t open the GEDZIP archive. The file may be damaged.";
 "Старая база данных trees.json" = "Old trees.json database";
 "Папка дерева не найдена." = "The tree folder could not be found.";
 "Из-за ошибок в GEDCOM этот файл нельзя импортировать." = "Errors in this GEDCOM file prevent it from being imported.";

@@ -129,6 +129,40 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
                 <string>public.gedcom</string>
             </array>
         </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>GEDZIP Archive</string>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>gdz</string>
+            </array>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>org.gedcom.gedzip</string>
+            </array>
+        </dict>
+    </array>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>org.gedcom.gedzip</string>
+            <key>UTTypeDescription</key>
+            <string>GEDZIP Archive</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.zip-archive</string>
+            </array>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>gdz</string>
+                </array>
+            </dict>
+        </dict>
     </array>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>

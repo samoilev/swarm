@@ -38,7 +38,7 @@ struct ArchiveRoundTripTests {
         person.attachments = [attachment]
         _ = try await store.saveTree(tree)
 
-        return try await store.exportTree(tree, to: exports.url).finalURL
+        return try await store.exportTree(tree, to: exports.url, packaging: .folder).finalURL
     }
 
     @Test func exportedArchiveReimportsWithPhotosAndAttachments() async throws {
@@ -109,7 +109,7 @@ struct ArchiveRoundTripTests {
         let store = TreeStore(storageFolder: library.url)
         let staged = try store.prepareImportPreview(from: gedcom)
         let imported: ImportResult = try await store.importGEDCOM(from: staged)
-        let firstExport = try await store.exportTree(imported.tree, to: exports.url)
+        let firstExport = try await store.exportTree(imported.tree, to: exports.url, packaging: .folder)
         for (path, bytes) in files {
             #expect(try Data(contentsOf: firstExport.finalURL.appendingPathComponent(path)) == bytes)
         }
@@ -130,12 +130,12 @@ struct ArchiveRoundTripTests {
         let tree = try #require(reopened.trees.first)
         tree.people.first?.givenNames = "Anna edited"
         _ = try await reopened.saveTree(tree)
-        let exported = try await reopened.exportTree(tree, to: exports.url)
+        let exported = try await reopened.exportTree(tree, to: exports.url, packaging: .folder)
         let otherStore = TreeStore(storageFolder: destination.url)
         let otherSource = try otherStore.resolveImportSource(exported.finalURL)
         let otherStaged = try otherStore.prepareImportPreview(from: otherSource)
         let roundTrip: ImportResult = try await otherStore.importGEDCOM(from: otherStaged)
-        let finalExport = try await otherStore.exportTree(roundTrip.tree, to: exports.url)
+        let finalExport = try await otherStore.exportTree(roundTrip.tree, to: exports.url, packaging: .folder)
         #expect(roundTrip.tree.people.first?.givenNames == "Anna edited")
         for (path, bytes) in files {
             #expect(try Data(contentsOf: finalExport.finalURL.appendingPathComponent(path)) == bytes)
