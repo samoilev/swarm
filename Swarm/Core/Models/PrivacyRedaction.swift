@@ -60,8 +60,6 @@ public extension FamilyTree {
         copy.rootUnionId = rootUnionId
         copy.createdAt = createdAt
         copy.updatedAt = updatedAt
-        copy.sourceRecords = sourceRecords
-        copy.parentLinks = parentLinks
         copy.sourceVersion = sourceVersion
         copy.foreignSchemaTags = foreignSchemaTags
         copy.layoutVersion = layoutVersion
@@ -72,6 +70,19 @@ public extension FamilyTree {
         copy.unions = unions.map { union in
             union.partnerIds.contains(where: livingIds.contains) ? union.redactedForPrivacy() : union
         }
+        // A link to a living parent or child keeps its shape; its evidence — a birth
+        // certificate cited, an adoption note — describes the living person.
+        copy.parentLinks = parentLinks.map { link in
+            guard livingIds.contains(link.parentID) || livingIds.contains(link.childID) else { return link }
+            var redacted = link
+            redacted.citations = []
+            redacted.notes = nil
+            return redacted
+        }
+        // A source travels only while someone still in the export cites it. Copying them
+        // all shipped the title, URL and notes of a source only a living person cited.
+        let cited = Set(copy.allCitations().map(\.sourceID))
+        copy.sourceRecords = sourceRecords.filter { cited.contains($0.id) }
 
         // Everything preserved verbatim from an import is dropped rather than filtered.
         // `gedcomDocument` re-emits foreign records untouched on serialization, the raw

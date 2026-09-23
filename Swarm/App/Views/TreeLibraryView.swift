@@ -117,7 +117,7 @@ struct TreeLibraryView: View {
     /// Shown on both import buttons: the file dialog gives no sign that a folder is a
     /// valid choice, and it is the only choice that brings the media along.
     private static var importHint: String {
-        L10n.tr("Выберите файл GEDCOM. Чтобы перенести дерево вместе с фотографиями и вложениями, выберите всю папку архива.")
+        L10n.tr("Выберите файл .gdz — в нём уже есть фотографии и вложения. Для GEDCOM (.ged) выберите всю папку архива, чтобы перенести файлы.")
     }
 
     @Environment(TreeStore.self) private var store
@@ -369,7 +369,7 @@ struct TreeLibraryView: View {
                 // survived into the middle of the bar — keeping the row narrow is the only
                 // way New Tree stays where it belongs, against the trailing edge.
                 Button(action: { onImport?() }) {
-                    Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                    Label(L10n.tr("Импорт GEDCOM / GEDZIP"), systemImage: "square.and.arrow.down")
                         .labelStyle(.iconOnly)
                         .font(SepiaTheme.icon(size: 13, weight: .semibold))
                         .foregroundColor(SepiaTheme.ink)
@@ -379,7 +379,7 @@ struct TreeLibraryView: View {
                 }
                 .buttonStyle(.plain)
                 .help(Self.importHint)
-                .accessibilityLabel(L10n.tr("Импорт GEDCOM"))
+                .accessibilityLabel(L10n.tr("Импорт GEDCOM / GEDZIP"))
 
                 // Toolbars drop a Label's title by default. This is the front door of the
                 // app, and a bare + does not name itself.
@@ -625,7 +625,7 @@ struct TreeLibraryView: View {
                     .tint(SepiaTheme.accent)
 
                     Button(action: { onImport?() }) {
-                        Label(L10n.tr("Импорт GEDCOM"), systemImage: "square.and.arrow.down")
+                        Label(L10n.tr("Импорт GEDCOM / GEDZIP"), systemImage: "square.and.arrow.down")
                             .font(SepiaTheme.ui(size: 14.5))
                             .fontWeight(.semibold)
                             .frame(height: 40)
@@ -640,9 +640,9 @@ struct TreeLibraryView: View {
 
             VStack(spacing: 4) {
                 Text(L10n.tr("Открывает файлы из Ancestry, Gramps и MyHeritage."))
-                // Choosing the folder is what carries the photos and attachments across,
-                // and nothing in the file dialog says so.
-                Text(L10n.tr("Чтобы перенести фотографии и вложения, выберите всю папку архива."))
+                // A .gdz carries its files inside; for a .ged, choosing the folder is what
+                // carries them across, and nothing in the file dialog says so.
+                Text(L10n.tr("Файл .gdz переносит фотографии и вложения сам; для .ged выберите всю папку архива."))
             }
             .font(SepiaType.control)
             .foregroundColor(SepiaTheme.inkSoft)

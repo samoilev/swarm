@@ -221,8 +221,7 @@ struct ContentView: View {
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
-            let source = try store.resolveImportSource(url)
-            let localCopy = try store.prepareImportPreview(from: source)
+            let localCopy = try store.stageImport(from: url)
             let stagedDiagnostics = store.stagedImportDiagnostics(for: localCopy)
             // The staged copy needs no security scope, so the parse — the slow part
             // of previewing a large archive — runs off the main thread instead of
@@ -256,7 +255,7 @@ struct ContentView: View {
             (nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
         if denied {
             return L10n.tr(
-                "Нет доступа к файлу. Выберите всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n\(error.localizedDescription)"
+                "Нет доступа к файлу. Выберите файл .gdz или всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n\(error.localizedDescription)"
             )
         }
         return L10n.tr("Файл повреждён или Swarm не поддерживает его формат.\n\n\(error.localizedDescription)")

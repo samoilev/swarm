@@ -118,7 +118,11 @@ struct ExportView: View {
     /// alongside it would let the user ask for a file no other program is obliged to
     /// read. Same move the privacy checkbox makes when there is nobody living to hide.
     private var versionPicker: some View {
-        Picker(selection: $exportVersion) {
+        // Shows what will be written, not the folder choice it is holding on to.
+        Picker(selection: Binding(
+            get: { packaging == .gedzip ? .v70 : exportVersion },
+            set: { exportVersion = $0 }
+        )) {
             ForEach([GEDCOMVersion.v70, .v551], id: \.self) { version in
                 Text(verbatim: "GEDCOM \(version.displayName)").tag(version)
             }

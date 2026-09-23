@@ -295,7 +295,7 @@
 "Медиа (%@)" = "Media (%@)";
 
 /* Import, merge, and export */
-"Импорт GEDCOM" = "Import GEDCOM";
+"Импорт GEDCOM / GEDZIP" = "Import GEDCOM / GEDZIP";
 "Предпросмотр импорта" = "Import preview";
 "Импортировать" = "Import";
 "Копия исходного файла сохранится под именем original-import.ged." = "A copy of the original file will be saved as original-import.ged.";
@@ -306,7 +306,7 @@
 "Продолжить с этими предупреждениями. Данные, которые нельзя редактировать в Swarm, сохранятся в GEDCOM." = "Continue with these warnings. Data you can’t edit in Swarm will stay in the GEDCOM file.";
 "Не удалось импортировать файл" = "Couldn’t import file";
 "Файл повреждён или Swarm не поддерживает его формат.\n\n%@" = "The file is damaged or Swarm doesn’t support its format.\n\n%@";
-"Нет доступа к файлу. Выберите всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n%@" = "Swarm can’t read this file. Select the whole archive folder to open the tree with its photos and attachments.\n\n%@";
+"Нет доступа к файлу. Выберите файл .gdz или всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n%@" = "Swarm can’t read this file. Select the .gdz file or the whole archive folder to open the tree with its photos and attachments.\n\n%@";
 "Нет доступа к папке «%@» рядом с файлом. Дерево будет импортировано без файлов из неё. Чтобы добавить их, выберите всю папку архива. Подробнее: %@" = "Swarm can’t read the “%@” folder beside this file. The tree will be imported without its files. To include them, select the whole archive folder. Details: %@";
 "Объединение деревьев" = "Merge trees";
 "Сначала проверьте, что будет добавлено. Дерево изменится только после вашего подтверждения." = "Review what will be added first. Your tree will only change after you confirm.";
@@ -483,6 +483,7 @@
 "Чтобы сохранять изменения, откройте «Восстановление» и обновите структуру папки дерева." = "To save changes, open Recovery and update the tree’s folder layout.";
 "В папке «%@» нет файла GEDCOM." = "The “%@” folder contains no GEDCOM file.";
 "В папке «%@» несколько файлов GEDCOM. Выберите тот, который хотите открыть." = "The “%@” folder contains several GEDCOM files. Select the one you want to open.";
+"«%@» не является корректным архивом GEDZIP: в его корне должен быть один файл gedcom.ged." = "“%@” isn’t a valid GEDZIP archive: it must contain a single gedcom.ged at its root.";
 "обнаружена ошибка данных" = "a data error was found";
 "Этот список изменений подготовлен для другого дерева." = "This merge preview is for a different tree.";
 "Не удалось создать резервную копию перед объединением." = "Couldn’t create a backup before merging.";
@@ -663,8 +664,8 @@
 "Деревьев в архиве: %@" = "Trees in the archive: %@";
 "Здесь будут ваши деревья" = "No trees yet";
 "Каждое дерево хранится на этом Mac: файл GEDCOM, фотографии и вложения." = "Each tree is stored on this Mac, with its GEDCOM file, photos, and attachments.";
-"Чтобы перенести фотографии и вложения, выберите всю папку архива." = "Select the whole archive folder to include photos and attachments.";
-"Выберите файл GEDCOM. Чтобы перенести дерево вместе с фотографиями и вложениями, выберите всю папку архива." = "Select a GEDCOM file. To include photos and attachments, select the whole archive folder.";
+"Файл .gdz переносит фотографии и вложения сам; для .ged выберите всю папку архива." = "A .gdz brings its photos and attachments along; for a .ged, select the whole archive folder.";
+"Выберите файл .gdz — в нём уже есть фотографии и вложения. Для GEDCOM (.ged) выберите всю папку архива, чтобы перенести файлы." = "Select a .gdz file — it already includes photos and attachments. For a GEDCOM (.ged), select the whole archive folder to bring its files along.";
 "Открывает файлы из Ancestry, Gramps и MyHeritage." = "Opens files from Ancestry, Gramps, and MyHeritage.";
 "Ничего не найдено" = "Nothing found";
 "Открыть дерево" = "Open this tree";

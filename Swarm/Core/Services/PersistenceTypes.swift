@@ -7,6 +7,8 @@ public enum PersistenceFaultPoint: String, CaseIterable, Sendable {
     case directorySwap
     case originalImportCopy
     case historyPrune
+    case gedzipReadback
+    case gedzipFinalize
 }
 
 public struct SaveReceipt: Codable, Hashable, Sendable {
@@ -143,6 +145,7 @@ public enum TreeStoreError: LocalizedError {
     case migrationRequired
     case noGEDCOMInFolder(folder: String)
     case ambiguousGEDCOMInFolder(folder: String)
+    case invalidGEDZIP(archive: String)
 
     public var errorDescription: String? {
         switch self {
@@ -164,6 +167,8 @@ public enum TreeStoreError: LocalizedError {
             L10n.tr("В папке «\(folder)» нет файла GEDCOM.")
         case let .ambiguousGEDCOMInFolder(folder):
             L10n.tr("В папке «\(folder)» несколько файлов GEDCOM. Выберите тот, который хотите открыть.")
+        case let .invalidGEDZIP(archive):
+            L10n.tr("«\(archive)» не является корректным архивом GEDZIP: в его корне должен быть один файл gedcom.ged.")
         }
     }
 }

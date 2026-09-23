@@ -323,6 +323,21 @@ final class SwarmUITests: XCTestCase {
 
         // The row's own description has to agree with the packaging above it.
         XCTAssertTrue(row.label.contains("Один файл"))
+
+        // Folder + 5.5.1, then back to one file: the locked picker must show the 7.0
+        // that will be written, not the 5.5.1 still remembered for the folder.
+        packaging.click()
+        app.menuItems["Папка с файлами"].click()
+        XCTAssertTrue(version.isEnabled)
+        version.click()
+        app.menuItems["GEDCOM 5.5.1"].click()
+        app.popUpButtons.containing(NSPredicate(format: "value CONTAINS %@", "Папка")).firstMatch.click()
+        app.menuItems["Один файл (.gdz)"].click()
+        let lockedVersion = app.popUpButtons.containing(
+            NSPredicate(format: "value CONTAINS %@", "GEDCOM 7.0")
+        ).firstMatch
+        XCTAssertTrue(lockedVersion.waitForExistence(timeout: 3), "GEDZIP must show the 7.0 it writes")
+        XCTAssertFalse(lockedVersion.isEnabled)
     }
 
     func testArchivedTreeAppearsInRecovery() {
@@ -457,14 +472,14 @@ final class SwarmUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Редактировать"].firstMatch.waitForExistence(timeout: 3))
     }
 
-    /// Imports a file the way a reader does: the library's Import GEDCOM button, then
+    /// Imports a file the way a reader does: the library's Import GEDCOM / GEDZIP button, then
     /// the open panel, addressed by path through Go to Folder.
     ///
     /// Not through Finder: Launch Services routes a `.ged` to whichever application it
     /// has registered for the type, which is never this unregistered test bundle, so
     /// the document event never arrives.
     private func openImportPanel(for file: URL) {
-        app.buttons["Импорт GEDCOM"].firstMatch.click()
+        app.buttons["Импорт GEDCOM / GEDZIP"].firstMatch.click()
         let panel = app.windows["open"].firstMatch
         XCTAssertTrue(panel.waitForExistence(timeout: 10), "The open panel did not appear")
         app.typeKey("g", modifierFlags: [.command, .shift])
@@ -509,7 +524,7 @@ final class SwarmEnglishUITests: XCTestCase {
 
     func testEnglishCoreJourneyAndWorkspaceParity() {
         app.buttons["New tree"].click()
-        let title = app.textFields["FAMILY NAME"]
+        let title = app.textFields["Tree name"]
         XCTAssertTrue(title.waitForExistence(timeout: 3))
         title.click(); title.typeText("Smith Archive")
         let given = app.textFields["GIVEN NAMES"]
@@ -597,7 +612,7 @@ final class SwarmEnglishUITests: XCTestCase {
         // ⌘N must not open the new-tree flow behind the chooser.
         app.typeKey("n", modifierFlags: .command)
         XCTAssertTrue(app.staticTexts["Choose your language\nВыберите язык"].exists)
-        XCTAssertFalse(app.textFields["FAMILY NAME"].exists)
+        XCTAssertFalse(app.textFields["Tree name"].exists)
     }
 
 }

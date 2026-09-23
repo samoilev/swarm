@@ -396,7 +396,7 @@ public final class TreeStore {
             try receipts.append(persistTree(tree))
             if !trees.contains(where: { $0 === tree }) { trees.append(tree) }
 
-            let destination = uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-\(stem)", isDirectory: true), isDirectory: true)
+            let destination = FileNaming.uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-\(stem)", isDirectory: true), isDirectory: true)
             try fm.createDirectory(at: destination, withIntermediateDirectories: true)
             try fm.moveItem(at: ged, to: destination.appendingPathComponent(ged.lastPathComponent))
             if fm.fileExists(atPath: oldMedia.path) {
@@ -414,7 +414,7 @@ public final class TreeStore {
                 trees.append(tree)
             }
             try fm.createDirectory(at: legacyRoot, withIntermediateDirectories: true)
-            try fm.moveItem(at: json, to: uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-trees.json")))
+            try fm.moveItem(at: json, to: FileNaming.uniqueURL(legacyRoot.appendingPathComponent("\(timestamp())-trees.json")))
         }
 
         load()
@@ -447,12 +447,12 @@ public final class TreeStore {
         let fm = FileManager.default
         let source = folder(for: tree)
         guard fm.fileExists(atPath: source.path) else { throw TreeStoreError.treeFolderMissing }
-        let safeLabel = sanitizedFileName(label).replacingOccurrences(of: " ", with: "-")
+        let safeLabel = FileNaming.sanitizedFileName(label).replacingOccurrences(of: " ", with: "-")
         let recovery = storageFolder
             .appendingPathComponent(Self.recoveryName, isDirectory: true)
             .appendingPathComponent(tree.id.uuidString, isDirectory: true)
         try fm.createDirectory(at: recovery, withIntermediateDirectories: true)
-        let destination = uniqueURL(
+        let destination = FileNaming.uniqueURL(
             recovery.appendingPathComponent("\(timestamp())-\(safeLabel)", isDirectory: true),
             isDirectory: true
         )
@@ -626,7 +626,7 @@ public final class TreeStore {
         ))
         let blocking = validation.filter(\.isBlocking)
         guard blocking.isEmpty else { throw TreeStoreError.validationFailed(issues: blocking) }
-        let target = uniqueFolderURL(named: sanitizedFileName(tree.name), excluding: current)
+        let target = uniqueFolderURL(named: FileNaming.sanitizedFileName(tree.name), excluding: current)
         let staging = storageFolder.appendingPathComponent(".staging-\(generationID.uuidString)", isDirectory: true)
         var committed = false
         defer {
@@ -803,7 +803,7 @@ public final class TreeStore {
             .appendingPathComponent(Self.metadataName, isDirectory: true)
             .appendingPathComponent(Self.historyName, isDirectory: true)
         try fm.createDirectory(at: history, withIntermediateDirectories: true)
-        let destination = uniqueURL(history.appendingPathComponent("\(timestamp()).ged"))
+        let destination = FileNaming.uniqueURL(history.appendingPathComponent("\(timestamp()).ged"))
         let sourceHash = try sha256(sourceGEDCOM)
         let latest = try fm.contentsOfDirectory(at: history, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension.lowercased() == "ged" }
@@ -954,7 +954,7 @@ public final class TreeStore {
             if let original = names[file.lastPathComponent] {
                 base += "--Original--\(Base64Filename.encode(original))"
             }
-            let destination = uniqueURL(trash.appendingPathComponent(base))
+            let destination = FileNaming.uniqueURL(trash.appendingPathComponent(base))
             try fm.moveItem(at: file, to: destination)
         }
     }
@@ -1158,7 +1158,7 @@ public final class TreeStore {
         let fm = FileManager.default
         let archiveFolder = storageFolder.appendingPathComponent(Self.archivedName, isDirectory: true)
         let src = folder(for: tree)
-        let dest = uniqueURL(archiveFolder.appendingPathComponent(sanitizedFileName(tree.name), isDirectory: true), isDirectory: true)
+        let dest = FileNaming.uniqueURL(archiveFolder.appendingPathComponent(FileNaming.sanitizedFileName(tree.name), isDirectory: true), isDirectory: true)
         do {
             try fm.createDirectory(at: archiveFolder, withIntermediateDirectories: true)
             try fm.moveItem(at: src, to: dest)
@@ -1208,8 +1208,8 @@ public final class TreeStore {
     ) throws -> SaveReceipt {
         let fm = FileManager.default
         guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
-        let name = sanitizedFileName(tree.name)
-        let bundle = uniqueURL(directory.appendingPathComponent(name, isDirectory: true), isDirectory: true)
+        let name = FileNaming.sanitizedFileName(tree.name)
+        let bundle = FileNaming.uniqueURL(directory.appendingPathComponent(name, isDirectory: true), isDirectory: true)
         let generationID = UUID()
         let staging = directory.appendingPathComponent(".export-\(generationID.uuidString)", isDirectory: true)
         defer { if fm.fileExists(atPath: staging.path) { try? fm.removeItem(at: staging) } }
@@ -1287,7 +1287,9 @@ public final class TreeStore {
     ///
     /// Verification is stronger here than for a folder: the written archive is extracted
     /// again and re-hashed, so the receipt attests that the file reads back — not merely
-    /// that the staging folder was correct before it was zipped.
+    /// that the staging folder was correct before it was zipped. Both files are built
+    /// under hidden names and the archive takes its final name last, so a failure never
+    /// leaves a `.gdz` that looks like a finished export.
     private func packageAsGEDZIP(
         staging: URL,
         directory: URL,
@@ -1295,31 +1297,35 @@ public final class TreeStore {
         generationID: UUID
     ) throws -> SaveReceipt {
         let fm = FileManager.default
-        let archive = uniqueURL(directory.appendingPathComponent("\(name).gdz"))
-        let sidecar = directory.appendingPathComponent(
-            "\(archive.deletingPathExtension().lastPathComponent).swarm-manifest",
-            isDirectory: true
-        )
+        let (archive, sidecar) = FileNaming.uniqueGEDZIPPair(in: directory, name: name)
+        let tempArchive = directory.appendingPathComponent(".export-\(generationID.uuidString).gdz")
+        let tempSidecar = directory.appendingPathComponent(".sidecar-\(generationID.uuidString)", isDirectory: true)
+        let readback = directory.appendingPathComponent(".verify-\(generationID.uuidString)", isDirectory: true)
+        defer { for temp in [tempArchive, tempSidecar, readback] { try? fm.removeItem(at: temp) } }
         // The verbatim import leaves before hashing, so the manifest describes exactly
         // what ends up inside the archive.
-        try GEDZIPArchive.moveAside(
-            [staging.appendingPathComponent(Self.originalImportName)],
-            to: sidecar
-        )
+        try GEDZIPArchive.moveAside([staging.appendingPathComponent(Self.originalImportName)], to: tempSidecar)
         let exportHashes = try hashes(in: staging, includeRecoveryData: false)
-        try GEDZIPArchive.write(contentsOf: staging, to: archive)
+        try GEDZIPArchive.write(contentsOf: staging, to: tempArchive)
 
-        let readback = directory.appendingPathComponent(".verify-\(generationID.uuidString)", isDirectory: true)
-        defer { try? fm.removeItem(at: readback) }
-        try GEDZIPArchive.extract(archive, to: readback)
+        try inject(.gedzipReadback)
+        try GEDZIPArchive.extract(tempArchive, to: readback)
         try verify(hashes: exportHashes, in: readback)
 
-        try fm.createDirectory(at: sidecar, withIntermediateDirectories: true)
+        try fm.createDirectory(at: tempSidecar, withIntermediateDirectories: true)
         let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: exportHashes)
         try JSONEncoder.pretty.encode(manifest).write(
-            to: sidecar.appendingPathComponent(Self.manifestName),
+            to: tempSidecar.appendingPathComponent(Self.manifestName),
             options: .atomic
         )
+        try inject(.gedzipFinalize)
+        try fm.moveItem(at: tempSidecar, to: sidecar)
+        do {
+            try fm.moveItem(at: tempArchive, to: archive)
+        } catch {
+            try? fm.removeItem(at: sidecar)
+            throw error
+        }
         return SaveReceipt(
             finalURL: archive,
             generationID: generationID,
@@ -1330,23 +1336,42 @@ public final class TreeStore {
 
     // MARK: - Import external .ged file
 
+    /// Turn what the user picked — a .ged, an exported folder or a .gdz — into a private
+    /// staged copy ready to preview, import or merge. Discard it with
+    /// `discardImportPreview(at:)`.
+    ///
+    /// A GEDZIP is the folder case wearing a different coat: it is unpacked into the
+    /// private area, staged by the folder rules, and the unpacked copy removed on every
+    /// path — staging has already copied everything the import needs out of it.
+    public func stageImport(from selection: URL) throws -> URL {
+        guard GEDZIPArchive.isArchive(selection) else {
+            return try prepareImportPreview(from: resolveImportSource(selection))
+        }
+        let fm = FileManager.default
+        let unpacked = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
+            .appendingPathComponent("Unpacked-\(UUID().uuidString)", isDirectory: true)
+        defer {
+            try? fm.removeItem(at: unpacked)
+            cleanupPendingFolderIfEmpty()
+        }
+        try fm.createDirectory(at: unpacked, withIntermediateDirectories: true)
+        try GEDZIPArchive.extract(selection, to: unpacked)
+        let gedcom = unpacked.appendingPathComponent(GEDZIPArchive.gedcomEntryName)
+        do {
+            // The spec names the archive's GEDCOM; any other lone .ged is accepted too.
+            let source = fm.fileExists(atPath: gedcom.path) ? gedcom : try resolveImportSource(unpacked)
+            return try prepareImportPreview(from: source)
+        } catch TreeStoreError.noGEDCOMInFolder, TreeStoreError.ambiguousGEDCOMInFolder {
+            throw TreeStoreError.invalidGEDZIP(archive: selection.lastPathComponent)
+        }
+    }
+
     /// Resolve what the user picked into the GEDCOM to read. An exported archive is a
     /// *folder* — its .ged sits beside Media/ and Attachments/ — and picking that folder
     /// is what grants access to the siblings, because the file picker grants access to
     /// the selected item alone. Files are returned unchanged.
     public func resolveImportSource(_ selection: URL) throws -> URL {
         let fm = FileManager.default
-        // A GEDZIP is the folder case wearing a different coat: unpack it into the same
-        // private area an import already stages through, then resolve it by the rules
-        // below. `gedcom.ged` is the only GEDCOM a conforming archive holds, so the
-        // single-candidate rule settles it without a special case.
-        if GEDZIPArchive.isArchive(selection) {
-            let unpacked = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
-                .appendingPathComponent("Unpacked-\(UUID().uuidString)", isDirectory: true)
-            try fm.createDirectory(at: unpacked, withIntermediateDirectories: true)
-            try GEDZIPArchive.extract(selection, to: unpacked)
-            return try resolveImportSource(unpacked)
-        }
         var isDirectory: ObjCBool = false
         guard fm.fileExists(atPath: selection.path, isDirectory: &isDirectory), isDirectory.boolValue else {
             return selection
@@ -1611,33 +1636,6 @@ public final class TreeStore {
         while true {
             let candidate = storageFolder.appendingPathComponent("\(base) \(i)", isDirectory: true)
             if isFree(candidate) { return candidate }
-            i += 1
-        }
-    }
-
-    /// Strip filesystem-illegal characters so a tree name can be used as a file/folder name.
-    private func sanitizedFileName(_ raw: String) -> String {
-        let illegal = CharacterSet(charactersIn: "/\\:?%*|\"<>")
-        let cleaned = raw.components(separatedBy: illegal)
-            .joined(separator: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? L10n.tr("Дерево") : cleaned
-    }
-
-    /// Append " 2", " 3", … to `url`'s name until it points at a non-existent path.
-    /// For directories pass `isDirectory: true` so a dot in the name (e.g. "Family v1.2")
-    /// isn't mistaken for a file extension.
-    private func uniqueURL(_ url: URL, isDirectory: Bool = false) -> URL {
-        let fm = FileManager.default
-        guard fm.fileExists(atPath: url.path) else { return url }
-        let dir = url.deletingLastPathComponent()
-        let base = isDirectory ? url.lastPathComponent : url.deletingPathExtension().lastPathComponent
-        let ext = isDirectory ? "" : url.pathExtension
-        var i = 2
-        while true {
-            let candidateName = ext.isEmpty ? "\(base) \(i)" : "\(base) \(i).\(ext)"
-            let candidate = dir.appendingPathComponent(candidateName)
-            if !fm.fileExists(atPath: candidate.path) { return candidate }
             i += 1
         }
     }

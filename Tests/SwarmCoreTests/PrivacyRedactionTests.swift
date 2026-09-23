@@ -146,6 +146,52 @@ struct PrivacyRedactionTests {
         #expect(gedcom.contains("Пётр"))
     }
 
+    /// E350-02: a source only a living person cites is their data — its title, URL and
+    /// note named them in a "private" archive. One the deceased also cite still travels.
+    @Test func aSourceCitedOnlyByTheLivingDoesNotTravel() {
+        let (tree, living, deceased) = makeTree()
+        let privateSource = SourceRecord(
+            title: "PRIVATE-CANARY-ALPHA",
+            url: "https://example.invalid/private-ada",
+            notes: "PRIVATE-CANARY-GAMMA"
+        )
+        let sharedSource = SourceRecord(title: "Метрическая книга 1901")
+        living.citations = [Citation(sourceID: privateSource.id), Citation(sourceID: sharedSource.id)]
+        deceased.citations = [Citation(sourceID: sharedSource.id)]
+        tree.sourceRecords = [privateSource, sharedSource]
+
+        let redacted = tree.redactingLivingPeople(language: .russian)
+        #expect(redacted.sourceRecords.map(\.id) == [sharedSource.id])
+        let gedcom = GEDCOMSerializer.serialize(tree: redacted).gedcom
+        for canary in ["PRIVATE-CANARY-ALPHA", "example.invalid", "PRIVATE-CANARY-GAMMA"] {
+            #expect(!gedcom.contains(canary), "GEDCOM leaked \(canary)")
+        }
+        #expect(gedcom.contains("Метрическая книга 1901"))
+    }
+
+    /// Same leak one step over: a parent link's citations and note describe the living
+    /// child it points at. The link itself stays, so the shape survives.
+    @Test func parentLinkEvidenceOnALivingChildIsDropped() throws {
+        let (tree, living, deceased) = makeTree()
+        let source = SourceRecord(title: "PRIVATE-BIRTH-CERT")
+        tree.sourceRecords = [source]
+        tree.parentLinks = [ParentLink(
+            parentID: deceased.id,
+            childID: living.id,
+            kind: .adoptive,
+            citations: [Citation(sourceID: source.id)],
+            notes: "PRIVATE-ADOPTION-NOTE"
+        )]
+
+        let redacted = tree.redactingLivingPeople(language: .russian)
+        let link = try #require(redacted.parentLinks.first)
+        #expect(link.childID == living.id && link.kind == .adoptive)
+        #expect(link.citations.isEmpty)
+        #expect(link.notes == nil)
+        #expect(redacted.sourceRecords.isEmpty)
+        #expect(tree.parentLinks.first?.notes == "PRIVATE-ADOPTION-NOTE")
+    }
+
     @Test func exportedArchiveOmitsLivingFilesAndTheRawImport() async throws {
         let library = try Temp()
         let exports = try Temp()

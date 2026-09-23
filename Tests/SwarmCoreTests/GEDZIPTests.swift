@@ -188,13 +188,97 @@ struct GEDZIPTests {
         try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
         let receipt = try await store.exportTree(tree, to: destination)
 
-        let resolved = try store.resolveImportSource(receipt.finalURL)
-        #expect(resolved.lastPathComponent == GEDZIPArchive.gedcomEntryName)
-        let reread = try GEDCOMCodec.parse(resolved)
+        // E350-01: merge parses whatever staging hands it, so staging must unpack.
+        let staged = try store.stageImport(from: receipt.finalURL)
+        #expect(staged.lastPathComponent == GEDZIPArchive.gedcomEntryName)
+        let reread = try GEDCOMCodec.parse(staged)
         #expect(reread.report.blockingErrors.isEmpty)
         #expect(reread.tree.people.count == tree.people.count)
         #expect(Set(reread.tree.people.map(\.id)) == Set(tree.people.map(\.id)))
         #expect(reread.tree.sourceVersion == .v70)
+    }
+
+    @MainActor
+    private func pendingEntries(in root: URL) -> [String] {
+        let pending = root.appendingPathComponent(".Pending", isDirectory: true)
+        return (try? FileManager.default.contentsOfDirectory(atPath: pending.path)) ?? []
+    }
+
+    /// E350-03: the unpacked archive is only a stepping stone into the staged copy; it
+    /// must be gone once staging returns, and nothing may be left after cancel or commit.
+    @MainActor
+    @Test func stagingAnArchiveLeavesNoExtractionBehind() async throws {
+        let (store, tree, root) = try storeWithTree()
+        _ = try await store.addTreeVerified(tree)
+        let destination = root.appendingPathComponent("out", isDirectory: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        let receipt = try await store.exportTree(tree, to: destination)
+
+        let cancelled = try store.stageImport(from: receipt.finalURL)
+        #expect(!pendingEntries(in: root).contains { $0.hasPrefix("Unpacked-") })
+        store.discardImportPreview(at: cancelled)
+        #expect(pendingEntries(in: root).isEmpty)
+
+        let committed = try store.stageImport(from: receipt.finalURL)
+        _ = try await store.importGEDCOM(from: committed)
+        store.discardImportPreview(at: committed)
+        #expect(pendingEntries(in: root).isEmpty)
+    }
+
+    /// E350-06/E350-03: an archive with two GEDCOMs and no `gedcom.ged` is refused by
+    /// its own name — never a temporary folder's — and leaves nothing unpacked.
+    @MainActor
+    @Test func anAmbiguousArchiveNamesTheArchiveNotATempFolder() throws {
+        let (store, _, root) = try storeWithTree()
+        let source = try temporaryDirectory()
+        for name in ["a.ged", "b.ged"] {
+            try "0 HEAD\n0 TRLR".write(to: source.appendingPathComponent(name), atomically: true, encoding: .utf8)
+        }
+        let archive = try temporaryDirectory().appendingPathComponent("Двойной.gdz")
+        try GEDZIPArchive.write(contentsOf: source, to: archive)
+
+        do {
+            _ = try store.stageImport(from: archive)
+            Issue.record("An archive without gedcom.ged and two candidates must be refused")
+        } catch let error as TreeStoreError {
+            guard case let .invalidGEDZIP(name) = error else { throw error }
+            #expect(name == "Двойной.gdz")
+            #expect(error.errorDescription?.contains("Unpacked") == false)
+        }
+        #expect(pendingEntries(in: root).isEmpty)
+    }
+
+    /// E350-04: a sidecar already sitting under the archive's name belongs to someone
+    /// else. The export takes the next free *pair* and leaves it alone.
+    @MainActor
+    @Test func anOrphanSidecarIsNeverAdopted() async throws {
+        let (store, tree, root) = try storeWithTree()
+        _ = try await store.addTreeVerified(tree)
+        let destination = root.appendingPathComponent("out", isDirectory: true)
+        let orphan = destination.appendingPathComponent("Род Ивановых.swarm-manifest", isDirectory: true)
+        try FileManager.default.createDirectory(at: orphan, withIntermediateDirectories: true)
+        try Data("stale".utf8).write(to: orphan.appendingPathComponent("orphan-marker.txt"))
+
+        let receipt = try await store.exportTree(tree, to: destination)
+        #expect(receipt.finalURL.lastPathComponent == "Род Ивановых 2.gdz")
+        let sidecar = destination.appendingPathComponent("Род Ивановых 2.swarm-manifest", isDirectory: true)
+        #expect(try FileManager.default.contentsOfDirectory(atPath: sidecar.path) == ["manifest.json"])
+        #expect(try FileManager.default.contentsOfDirectory(atPath: orphan.path) == ["orphan-marker.txt"])
+    }
+
+    /// E350-08: a failure after the archive is written must not leave a final-named
+    /// `.gdz` (or sidecar) that looks like a finished export.
+    @MainActor
+    @Test(arguments: [PersistenceFaultPoint.gedzipReadback, .gedzipFinalize])
+    func aFailedPackagingLeavesNothingBehind(_ point: PersistenceFaultPoint) async throws {
+        let (store, tree, root) = try storeWithTree()
+        _ = try await store.addTreeVerified(tree)
+        let destination = root.appendingPathComponent("out", isDirectory: true)
+        try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
+        store.faultInjector = { if $0 == point { throw CocoaError(.fileWriteUnknown) } }
+
+        await #expect(throws: (any Error).self) { try await store.exportTree(tree, to: destination) }
+        #expect(try FileManager.default.contentsOfDirectory(atPath: destination.path).isEmpty)
     }
 
     /// The folder bundle must keep behaving exactly as it did before GEDZIP existed.

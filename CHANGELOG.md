@@ -44,6 +44,10 @@ single English record of what changed and when.
 
 - A GEDCOM file that opened with a UTF-8 byte-order mark failed to import: the mark
   attached itself to the first line, leaving the header unreadable.
+- An export with living people hidden still carried every source in the tree, so the
+  title, web address and note of a source only a living person cited went out with it.
+  Citations and notes on a living person's parent links went out too. Both are now
+  left behind; a source a deceased relative also cites still travels.
 
 ## [3.5.7] — 2026-09-21
 

@@ -216,11 +216,16 @@ struct TreeMergeView: View {
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         do {
             if let pendingURL { store.discardImportPreview(at: pendingURL) }
-            let localCopy = try store.prepareImportPreview(from: url)
-            let imported = try GEDCOMCodec.parse(localCopy)
-            guard imported.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: imported.report) }
-            pendingURL = localCopy
-            preview = TreeMergeEngine(store: store).preview(local: localTree, incoming: imported.tree)
+            let localCopy = try store.stageImport(from: url)
+            do {
+                let imported = try GEDCOMCodec.parse(localCopy)
+                guard imported.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: imported.report) }
+                pendingURL = localCopy
+                preview = TreeMergeEngine(store: store).preview(local: localTree, incoming: imported.tree)
+            } catch {
+                store.discardImportPreview(at: localCopy)
+                throw error
+            }
         } catch { errorMessage = error.localizedDescription }
     }
 
