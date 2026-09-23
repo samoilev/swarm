@@ -11,22 +11,18 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.6.0] — 2026-09-23
+
+**Security: a GEDCOM archive exported with living people hidden could still carry their
+sources.** The privacy option introduced in 3.5.7 left every source record in the
+exported tree, so the title, web address and note of a source cited only by a living
+person went out with the file, along with citations and notes on a living person's
+parent links. If you shared a GEDCOM archive exported with that option in 3.5.7, it may
+have included that material. PDF exports were not affected: they do not include sources.
+This release leaves that material behind; a source a deceased relative also cites still
+travels.
+
 ### Added
-
-- GEDZIP (`.gdz`) is how a tree now leaves and enters Swarm. It is the GEDCOM 7.0
-  packaging format: one file holding the GEDCOM beside its photos and attachments, so a
-  tree can be emailed without the media falling off it. Export writes `.gdz` by default,
-  with the folder bundle still available; opening or merging a `.gdz` works anywhere a
-  `.ged` did. Because GEDZIP is defined only by 7.0, an archive always carries 7.0.
-  Swarm's own integrity manifest sits in a folder beside the archive rather than inside
-  it, so the file stays readable by any other program.
-
-- New trees are created as GEDCOM 7.0. A tree that has never been saved has no file to
-  protect, so there is nothing to gain from writing it in a 1999 specification. Trees
-  already on disk are untouched and keep saving in whatever version they declare.
-- Each library card shows which GEDCOM version that tree is stored in, opposite the
-  generations label, so a library holding both is readable at a glance. The version is
-  also part of the card's accessibility description.
 
 - FamilySearch GEDCOM 7.0 support. Swarm read and wrote only GEDCOM 5.5.1, a
   specification from 1999; files from programs that have moved to 7.0 imported badly,
@@ -34,20 +30,46 @@ single English record of what changed and when.
   version a file declares and read either one, including 7.0's shared notes, schema
   declarations, translations, external identifiers and media types. The export sheet
   has a version choice and writes 7.0 by default.
+- GEDZIP (`.gdz`) is how a tree now leaves and enters Swarm. It is the GEDCOM 7.0
+  packaging format: one file holding the GEDCOM beside its photos and attachments, so a
+  tree can be emailed without the media falling off it. Export writes `.gdz` by default,
+  with the folder bundle still available; opening or merging a `.gdz` works anywhere a
+  `.ged` did. Because GEDZIP is defined only by 7.0, an archive always carries 7.0.
+  Swarm's own integrity manifest sits in a folder beside the archive rather than inside
+  it, so the file stays readable by any other program, and every archive is extracted
+  again and re-hashed after writing to prove it reads back.
+- New trees are created as GEDCOM 7.0. A tree that has never been saved has no file to
+  protect, so there is nothing to gain from writing it in a 1999 specification. Trees
+  already on disk are untouched and keep saving in whatever version they declare.
+- Each library card shows which GEDCOM version that tree is stored in, opposite the
+  generations label, so a library holding both is readable at a glance. The version is
+  also part of the card's accessibility description.
 
 ### Changed
 
 - A tree is saved in the version it was read from, so opening a 7.0 file no longer
   silently rewrites it as 5.5.1.
+- The library no longer describes its storage migration as a format change. The GEDCOM
+  specification and Swarm's own folder layout were both called a “version” or “format”,
+  so a legacy tree could show GEDCOM 5.5.1 on its card and an “old format” banner above
+  it; updating left the card at 5.5.1 — correctly, since the migration keeps the tree's
+  existing version — and a successful update read as a failure. The storage side now
+  names what it actually changes, the tree's folder structure, and a loose `.ged` in the
+  storage folder is labelled as sitting outside a tree folder rather than as an old
+  format.
 
 ### Fixed
 
+- The privacy export's source leak described above.
+- Importing a file with two unmodelled top-level records of the same kind — two `NOTE` or
+  two `OBJE` records, which Ancestry and Family Tree Maker both write — no longer crashes.
+  Every such record was keyed by its bare tag, so the second one repeated a key and
+  trapped mid-import; two media records pointing at one file crashed the next save that
+  had something to sweep into the trash, the same way. This is the second duplicate-key
+  crash reported against 3.5.6 and 3.5.7 imports: fixing the first in 3.5.7 let the same
+  file reach this one.
 - A GEDCOM file that opened with a UTF-8 byte-order mark failed to import: the mark
   attached itself to the first line, leaving the header unreadable.
-- An export with living people hidden still carried every source in the tree, so the
-  title, web address and note of a source only a living person cited went out with it.
-  Citations and notes on a living person's parent links went out too. Both are now
-  left behind; a source a deceased relative also cites still travels.
 
 ## [3.5.7] — 2026-09-21
 
@@ -1222,7 +1244,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.5.7...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.6.0...HEAD
+[3.6.0]: https://github.com/samoilev/swarm/compare/v3.5.7...v3.6.0
 [3.5.7]: https://github.com/samoilev/swarm/compare/v3.5.6...v3.5.7
 [3.5.6]: https://github.com/samoilev/swarm/compare/v3.5.5...v3.5.6
 [3.5.5]: https://github.com/samoilev/swarm/compare/v3.5.4...v3.5.5
