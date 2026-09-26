@@ -5,6 +5,9 @@ struct ImportPreviewView: View {
     let result: ImportResult
     let onCancel: () -> Void
     let onImport: () -> Void
+    /// Set while the import is being saved: both buttons are disabled and a spinner
+    /// sits beside Import, so a second click cannot start a second import.
+    var isImporting = false
     @State private var confirmedWarnings = false
 
     /// Anything the reader should see before committing. Errors that do not refuse
@@ -75,13 +78,15 @@ struct ImportPreviewView: View {
                     .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .keyboardShortcut(.cancelAction)
+                    .disabled(isImporting)
                 Spacer()
+                if isImporting { ProgressView().controlSize(.small) }
                 Button(L10n.tr("Импортировать"), action: onImport)
                     .sepiaGlassProminentButton(.capsule)
                     .buttonBorderShape(.capsule)
                     .tint(SepiaTheme.accent)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!result.report.blockingErrors.isEmpty || (needsConfirmation && !confirmedWarnings))
+                    .disabled(isImporting || !result.report.blockingErrors.isEmpty || (needsConfirmation && !confirmedWarnings))
             }.padding(16)
         }
         .frame(width: SepiaTheme.scaledPanel(680, axis: .horizontal), height: SepiaTheme.scaledPanel(560, axis: .vertical))

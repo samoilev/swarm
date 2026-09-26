@@ -361,7 +361,7 @@ public struct ImportResult {
     }
 }
 
-public struct SerializedTree: Equatable {
+public struct SerializedTree: Equatable, Sendable {
     public var gedcom: String
     public var photos: [GEDCOMSerializer.Photo]
 

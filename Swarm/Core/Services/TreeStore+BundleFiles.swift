@@ -101,7 +101,7 @@ extension TreeStore {
     /// `keepingOnly` filters the files copied at this level by name; nil copies them all.
     /// Sub-folders are still walked whole — the media and attachment folders the filter
     /// is used on are flat.
-    func copyDirectoryContents(
+    nonisolated func copyDirectoryContents(
         from source: URL,
         to destination: URL,
         keepingOnly: Set<String>? = nil
@@ -123,7 +123,7 @@ extension TreeStore {
 
     /// Read in 16 MB pieces: a video attachment read whole doubled the app's memory
     /// for the length of a save, while a photo still takes a single read.
-    func sha256(_ url: URL) throws -> String {
+    nonisolated func sha256(_ url: URL) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
         var hasher = SHA256()
@@ -135,13 +135,13 @@ extension TreeStore {
 
     // MARK: - Manifest
 
-    struct BundleManifest: Codable {
+    struct BundleManifest: Codable, Sendable {
         let generationID: UUID
         let createdAt: Date
         let hashes: [String: String]
     }
 
-    func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
+    nonisolated func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
         let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
         try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
         let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes)
@@ -155,7 +155,7 @@ extension TreeStore {
     /// size and modification date at the same path is the same file — a clone keeps
     /// both, and any write changes the date — so its hash comes from the committed
     /// manifest instead of reading the bytes again.
-    func hashes(in folder: URL, includeRecoveryData: Bool, reusingFrom committed: URL? = nil) throws -> [String: String] {
+    nonisolated func hashes(in folder: URL, includeRecoveryData: Bool, reusingFrom committed: URL? = nil) throws -> [String: String] {
         let fm = FileManager.default
         guard let enumerator = fm.enumerator(
             at: folder,
@@ -187,7 +187,7 @@ extension TreeStore {
         return result
     }
 
-    func verify(hashes expected: [String: String], in folder: URL, reusingFrom committed: URL? = nil) throws {
+    nonisolated func verify(hashes expected: [String: String], in folder: URL, reusingFrom committed: URL? = nil) throws {
         let actual = try hashes(in: folder, includeRecoveryData: false, reusingFrom: committed)
         for (path, digest) in expected where actual[path] != digest {
             throw TreeStoreError.verificationFailed(path: path)
@@ -200,7 +200,7 @@ extension TreeStore {
 
     /// The committed manifest's hashes; empty when there is none to trust (a bundle
     /// from before manifests, or one that fails to decode), which just means hashing.
-    private func committedHashes(in folder: URL) -> [String: String] {
+    private nonisolated func committedHashes(in folder: URL) -> [String: String] {
         let url = folder
             .appendingPathComponent(Self.metadataName, isDirectory: true)
             .appendingPathComponent(Self.manifestName)
@@ -209,7 +209,7 @@ extension TreeStore {
         return (try? decoder.decode(BundleManifest.self, from: Data(contentsOf: url)))?.hashes ?? [:]
     }
 
-    private static func isUnchanged(_ file: URL, since committed: URL) -> Bool {
+    private nonisolated static func isUnchanged(_ file: URL, since committed: URL) -> Bool {
         let keys: Set<URLResourceKey> = [.fileSizeKey, .contentModificationDateKey]
         guard let now = try? file.resourceValues(forKeys: keys),
               let then = try? committed.resourceValues(forKeys: keys),

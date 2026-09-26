@@ -16,7 +16,7 @@ public struct GEDCOMSerializer {
 
     /// A person portrait the GEDCOM references, paired with the filename used in its
     /// `OBJE`/`FILE` line. The caller persists the bytes — serialization stays pure.
-    public struct Photo: Equatable {
+    public struct Photo: Equatable, Sendable {
         public let personID: UUID
         public let filename: String
         public let data: Data

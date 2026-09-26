@@ -54,7 +54,7 @@ public final class TreeStore {
     public private(set) var pendingMigrations: [PendingMigration] = []
     /// Production leaves this nil. Integration tests inject failures at transaction
     /// boundaries to prove the previously committed bundle remains usable.
-    @ObservationIgnored public var faultInjector: ((PersistenceFaultPoint) throws -> Void)?
+    @ObservationIgnored public var faultInjector: (@Sendable (PersistenceFaultPoint) throws -> Void)?
 
     /// Card diagrams, keyed on the tree and the moment it was last written. A diagram is
     /// a walk over the top three generations, which is cheap — but the library rebuilds
@@ -82,37 +82,37 @@ public final class TreeStore {
     private var folderMap: [UUID: URL] = [:]
     private var legacyFileMap: [UUID: URL] = [:]
 
-    private static let mediaName = "Media"
-    private static let attachmentsName = "Attachments"
-    static let archivedName = "Archived"
-    static let recoveryName = "Recovery"
-    static let pendingName = ".Pending"
-    static let metadataName = ".Swarm"
+    nonisolated static let mediaName = "Media"
+    nonisolated static let attachmentsName = "Attachments"
+    nonisolated static let archivedName = "Archived"
+    nonisolated static let recoveryName = "Recovery"
+    nonisolated static let pendingName = ".Pending"
+    nonisolated static let metadataName = ".Swarm"
     private static let legacyMetadataName = ".FamilyTreeStudio"
     private static let appFolderName = "Swarm"
     private static let legacyAppFolderName = "FamilyTreeStudio"
-    static let historyName = "History"
-    static let trashName = "Trash"
-    static let manifestName = "manifest.json"
+    nonisolated static let historyName = "History"
+    nonisolated static let trashName = "Trash"
+    nonisolated static let manifestName = "manifest.json"
     /// Verbatim copy of an imported file, kept as a safety net and never treated as
     /// the tree's own working .ged (excluded from load/save/reconcile).
-    static let originalImportName = "original-import.ged"
+    nonisolated static let originalImportName = "original-import.ged"
 
     private struct PendingAttachment {
         let temporaryURL: URL
         let storedName: String
     }
 
-    private struct PendingImport {
+    struct PendingImport {
         let originalGEDCOM: URL
         let mediaFolder: URL
         let attachmentsFolder: URL
     }
 
     private var pendingAttachmentAdds: [UUID: [PendingAttachment]] = [:]
-    private var pendingImports: [UUID: PendingImport] = [:]
+    var pendingImports: [UUID: PendingImport] = [:]
     /// Keyed by staged GEDCOM path: what an import preview could not bring across.
-    private var pendingImportDiagnostics: [String: [ImportDiagnostic]] = [:]
+    var pendingImportDiagnostics: [String: [ImportDiagnostic]] = [:]
     private var pendingBundleRestores: [UUID: URL] = [:]
     private var pendingTrashRemovals: [UUID: Set<String>] = [:]
 
@@ -609,7 +609,7 @@ public final class TreeStore {
         }
     }
 
-    private func persistTree(_ tree: FamilyTree) throws -> SaveReceipt {
+    func persistTree(_ tree: FamilyTree) throws -> SaveReceipt {
         let fm = FileManager.default
         let generationID = UUID()
         let previousUpdatedAt = tree.updatedAt
@@ -714,9 +714,12 @@ public final class TreeStore {
         // Files carried over unchanged from `current` keep their committed hash; only
         // what this save wrote is read back. Re-hashing every photo made a one-word edit
         // cost seconds per gigabyte of media.
-        let activeHashes = try hashes(in: staging, includeRecoveryData: false, reusingFrom: current)
+        // A first save of an import has no committed folder, but staging hashed the
+        // imported photos and attachments off the main actor and left a manifest.
+        let hashSource = current ?? pendingImports[tree.id]?.originalGEDCOM.deletingLastPathComponent()
+        let activeHashes = try hashes(in: staging, includeRecoveryData: false, reusingFrom: hashSource)
         try writeManifest(generationID: generationID, hashes: activeHashes, in: staging)
-        try verify(hashes: activeHashes, in: staging, reusingFrom: current)
+        try verify(hashes: activeHashes, in: staging, reusingFrom: hashSource)
 
         var warnings: [String] = []
         try commitStaging(staging, replacing: current, at: target, warnings: &warnings)
@@ -754,6 +757,11 @@ public final class TreeStore {
     private func writePhotos(_ photos: [GEDCOMSerializer.Photo], to mediaFolder: URL) throws {
         guard !photos.isEmpty else { return }
         try inject(.portraitWrite)
+        try Self.writePhotoFiles(photos, to: mediaFolder)
+    }
+
+    nonisolated static func writePhotoFiles(_ photos: [GEDCOMSerializer.Photo], to mediaFolder: URL) throws {
+        guard !photos.isEmpty else { return }
         let fm = FileManager.default
         try fm.createDirectory(at: mediaFolder, withIntermediateDirectories: true)
         for photo in photos {
@@ -1038,7 +1046,7 @@ public final class TreeStore {
         Self.timestampFormatter.string(from: Date())
     }
 
-    private func inject(_ point: PersistenceFaultPoint) throws {
+    func inject(_ point: PersistenceFaultPoint) throws {
         try faultInjector?(point)
     }
 
@@ -1110,324 +1118,6 @@ public final class TreeStore {
             return nil
         }
         return dest
-    }
-
-    /// Export a faithful copy of a tree (.ged + photos + attachments) into a `<name>/`
-    /// bundle inside the chosen directory, so it can be re-imported later. Does not
-    /// remove the tree — the caller decides whether to follow with `deleteTree`.
-    ///
-    /// `hidingLivingPeople` exports `tree.redactingLivingPeople()` instead, and carries
-    /// only the files the redacted tree still references.
-    /// `version: nil` exports the tree in whatever specification it is already stored
-    /// in. GEDZIP overrides that: it is defined only by GEDCOM 7.0, so a `.gdz` always
-    /// carries 7.0 whatever the caller asked for.
-    public func exportTree(
-        _ tree: FamilyTree,
-        to directory: URL,
-        hidingLivingPeople: Bool = false,
-        version: GEDCOMVersion? = nil,
-        packaging: TreeExportPackaging = .gedzip
-    ) async throws -> SaveReceipt {
-        try exportTreeVerified(
-            tree,
-            toDirectory: directory,
-            hidingLivingPeople: hidingLivingPeople,
-            version: packaging == .gedzip ? .v70 : (version ?? tree.sourceVersion),
-            packaging: packaging
-        )
-    }
-
-    private func exportTreeVerified(
-        _ tree: FamilyTree,
-        toDirectory directory: URL,
-        hidingLivingPeople: Bool,
-        version: GEDCOMVersion,
-        packaging: TreeExportPackaging
-    ) throws -> SaveReceipt {
-        let fm = FileManager.default
-        guard fm.fileExists(atPath: folder(for: tree).path) else { throw TreeStoreError.treeFolderMissing }
-        let name = FileNaming.sanitizedFileName(tree.name)
-        let bundle = FileNaming.uniqueURL(directory.appendingPathComponent(name, isDirectory: true), isDirectory: true)
-        let generationID = UUID()
-        let staging = directory.appendingPathComponent(".export-\(generationID.uuidString)", isDirectory: true)
-        defer { if fm.fileExists(atPath: staging.path) { try? fm.removeItem(at: staging) } }
-        try fm.createDirectory(at: staging, withIntermediateDirectories: true)
-        let srcFolder = folder(for: tree)
-
-        // The committed GEDCOM and active file folders are copied without private
-        // revision history or deleted-file Trash.
-        let gedDest = staging.appendingPathComponent(
-            packaging == .gedzip ? GEDZIPArchive.gedcomEntryName : "\(bundle.lastPathComponent).ged"
-        )
-        // A privacy export is re-serialized from the redacted tree even when a committed
-        // .ged is sitting right there: copying that file is a byte-for-byte copy of the
-        // data the export exists to remove. `document: nil` for the same reason — the
-        // imported syntax tree carries foreign records through untouched.
-        // Exporting into another specification rules out the copy for the same reason:
-        // the committed file is written in the version the tree is stored in.
-        let exported = hidingLivingPeople ? tree.redactingLivingPeople() : tree
-        let reserializes = hidingLivingPeople || version != tree.sourceVersion
-        if let gedSrc = gedFile(in: srcFolder), fm.fileExists(atPath: gedSrc.path), !reserializes {
-            try inject(.exportCopy)
-            try fm.copyItem(at: gedSrc, to: gedDest)
-        } else {
-            let result = try GEDCOMCodec.serialize(
-                tree: exported,
-                document: hidingLivingPeople ? nil : tree.gedcomDocument,
-                options: .init(version: version)
-            )
-            try result.gedcom.write(to: gedDest, atomically: true, encoding: .utf8)
-            try writePhotos(result.photos, to: staging.appendingPathComponent(Self.mediaName))
-        }
-
-        // In a privacy export only the files the redacted tree still names travel; a
-        // living person's portrait and attachments are their personal data as much as
-        // their birth date is. nil ⇒ copy the folder whole, as before.
-        let keptFiles: [String: Set<String>]? = hidingLivingPeople ? [
-            Self.mediaName: Set(exported.people.compactMap(\.photoFilename)),
-            Self.attachmentsName: Set(exported.people.flatMap(\.attachments).map(\.storedName)),
-        ] : nil
-        for sub in [Self.mediaName, Self.attachmentsName] {
-            let src = srcFolder.appendingPathComponent(sub, isDirectory: true)
-            if fm.fileExists(atPath: src.path) {
-                let destination = staging.appendingPathComponent(sub, isDirectory: true)
-                try copyDirectoryContents(from: src, to: destination, keepingOnly: keptFiles?[sub])
-            }
-        }
-        // The untouched import is the pre-redaction file itself, so a privacy export
-        // must not carry it.
-        let original = srcFolder.appendingPathComponent(Self.originalImportName)
-        if fm.fileExists(atPath: original.path), !hidingLivingPeople {
-            try fm.copyItem(at: original, to: staging.appendingPathComponent(Self.originalImportName))
-        }
-        if packaging == .gedzip {
-            return try packageAsGEDZIP(
-                staging: staging,
-                directory: directory,
-                name: name,
-                generationID: generationID
-            )
-        }
-        let exportHashes = try hashes(in: staging, includeRecoveryData: false)
-        try writeManifest(generationID: generationID, hashes: exportHashes, in: staging)
-        try verify(hashes: exportHashes, in: staging)
-        try fm.moveItem(at: staging, to: bundle)
-        return SaveReceipt(
-            finalURL: bundle,
-            generationID: generationID,
-            fileCount: exportHashes.count,
-            hashes: exportHashes
-        )
-    }
-
-    /// Zip a staged export into one `.gdz`, keeping Swarm's own bookkeeping in a sidecar
-    /// so the archive stays spec-clean.
-    ///
-    /// Verification is stronger here than for a folder: the written archive is extracted
-    /// again and re-hashed, so the receipt attests that the file reads back — not merely
-    /// that the staging folder was correct before it was zipped. Both files are built
-    /// under hidden names and the archive takes its final name last, so a failure never
-    /// leaves a `.gdz` that looks like a finished export.
-    private func packageAsGEDZIP(
-        staging: URL,
-        directory: URL,
-        name: String,
-        generationID: UUID
-    ) throws -> SaveReceipt {
-        let fm = FileManager.default
-        let (archive, sidecar) = FileNaming.uniqueGEDZIPPair(in: directory, name: name)
-        let tempArchive = directory.appendingPathComponent(".export-\(generationID.uuidString).gdz")
-        let tempSidecar = directory.appendingPathComponent(".sidecar-\(generationID.uuidString)", isDirectory: true)
-        let readback = directory.appendingPathComponent(".verify-\(generationID.uuidString)", isDirectory: true)
-        defer { for temp in [tempArchive, tempSidecar, readback] { try? fm.removeItem(at: temp) } }
-        // The verbatim import leaves before hashing, so the manifest describes exactly
-        // what ends up inside the archive.
-        try GEDZIPArchive.moveAside([staging.appendingPathComponent(Self.originalImportName)], to: tempSidecar)
-        let exportHashes = try hashes(in: staging, includeRecoveryData: false)
-        try GEDZIPArchive.write(contentsOf: staging, to: tempArchive)
-
-        try inject(.gedzipReadback)
-        try GEDZIPArchive.extract(tempArchive, to: readback)
-        try verify(hashes: exportHashes, in: readback)
-
-        try fm.createDirectory(at: tempSidecar, withIntermediateDirectories: true)
-        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: exportHashes)
-        try JSONEncoder.pretty.encode(manifest).write(
-            to: tempSidecar.appendingPathComponent(Self.manifestName),
-            options: .atomic
-        )
-        try inject(.gedzipFinalize)
-        try fm.moveItem(at: tempSidecar, to: sidecar)
-        do {
-            try fm.moveItem(at: tempArchive, to: archive)
-        } catch {
-            try? fm.removeItem(at: sidecar)
-            throw error
-        }
-        return SaveReceipt(
-            finalURL: archive,
-            generationID: generationID,
-            fileCount: exportHashes.count,
-            hashes: exportHashes
-        )
-    }
-
-    // MARK: - Import external .ged file
-
-    /// Turn what the user picked — a .ged, an exported folder or a .gdz — into a private
-    /// staged copy ready to preview, import or merge. Discard it with
-    /// `discardImportPreview(at:)`.
-    ///
-    /// A GEDZIP is the folder case wearing a different coat: it is unpacked into the
-    /// private area, staged by the folder rules, and the unpacked copy removed on every
-    /// path — staging has already copied everything the import needs out of it.
-    public func stageImport(from selection: URL) throws -> URL {
-        guard GEDZIPArchive.isArchive(selection) else {
-            return try prepareImportPreview(from: resolveImportSource(selection))
-        }
-        let fm = FileManager.default
-        let unpacked = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
-            .appendingPathComponent("Unpacked-\(UUID().uuidString)", isDirectory: true)
-        defer {
-            try? fm.removeItem(at: unpacked)
-            cleanupPendingFolderIfEmpty()
-        }
-        try fm.createDirectory(at: unpacked, withIntermediateDirectories: true)
-        try GEDZIPArchive.extract(selection, to: unpacked)
-        let gedcom = unpacked.appendingPathComponent(GEDZIPArchive.gedcomEntryName)
-        do {
-            // The spec names the archive's GEDCOM; any other lone .ged is accepted too.
-            let source = fm.fileExists(atPath: gedcom.path) ? gedcom : try resolveImportSource(unpacked)
-            return try prepareImportPreview(from: source)
-        } catch TreeStoreError.noGEDCOMInFolder, TreeStoreError.ambiguousGEDCOMInFolder {
-            throw TreeStoreError.invalidGEDZIP(archive: selection.lastPathComponent)
-        }
-    }
-
-    /// Resolve what the user picked into the GEDCOM to read. An exported archive is a
-    /// *folder* — its .ged sits beside Media/ and Attachments/ — and picking that folder
-    /// is what grants access to the siblings, because the file picker grants access to
-    /// the selected item alone. Files are returned unchanged.
-    public func resolveImportSource(_ selection: URL) throws -> URL {
-        let fm = FileManager.default
-        var isDirectory: ObjCBool = false
-        guard fm.fileExists(atPath: selection.path, isDirectory: &isDirectory), isDirectory.boolValue else {
-            return selection
-        }
-        let candidates = try fm.contentsOfDirectory(at: selection, includingPropertiesForKeys: nil)
-            .filter { $0.pathExtension.lowercased() == "ged" && $0.lastPathComponent != Self.originalImportName }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
-        if candidates.count == 1 { return candidates[0] }
-        // An exported bundle names its GEDCOM after the folder, which settles the case
-        // where the user kept several .ged files side by side.
-        if let named = candidates.first(where: { $0.deletingPathExtension().lastPathComponent == selection.lastPathComponent }) {
-            return named
-        }
-        if candidates.isEmpty { throw TreeStoreError.noGEDCOMInFolder(folder: selection.lastPathComponent) }
-        throw TreeStoreError.ambiguousGEDCOMInFolder(folder: selection.lastPathComponent)
-    }
-
-    /// Copy an external GEDCOM and its sibling media folders into private temporary
-    /// storage before previewing it. The original is never edited in place.
-    ///
-    /// Only the GEDCOM itself is required. A sibling folder that cannot be read — the
-    /// file picker grants access to the selected item, not to its neighbours — is
-    /// reported through `stagedImportDiagnostics(for:)` and leaves the import standing,
-    /// because a tree without its photos is worth far more than no tree at all.
-    public func prepareImportPreview(from source: URL) throws -> URL {
-        let fm = FileManager.default
-        let root = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
-            .appendingPathComponent("Import-\(UUID().uuidString)", isDirectory: true)
-        try fm.createDirectory(at: root, withIntermediateDirectories: true)
-        do {
-            let destination = root.appendingPathComponent(source.lastPathComponent)
-            try fm.copyItem(at: source, to: destination)
-            guard try sha256(source) == sha256(destination) else {
-                throw TreeStoreError.verificationFailed(path: source.lastPathComponent)
-            }
-            let base = source.deletingLastPathComponent()
-            var diagnostics: [ImportDiagnostic] = []
-            for name in [Self.mediaName, Self.attachmentsName] {
-                let sibling = base.appendingPathComponent(name, isDirectory: true)
-                guard fm.fileExists(atPath: sibling.path) else { continue }
-                do {
-                    try fm.copyItem(at: sibling, to: root.appendingPathComponent(name, isDirectory: true))
-                } catch {
-                    diagnostics.append(ImportDiagnostic(
-                        id: "import.sibling-unreadable.\(name)",
-                        severity: .warning,
-                        message: L10n.tr(
-                            "Нет доступа к папке «\(name)» рядом с файлом. Дерево будет импортировано без файлов из неё. Чтобы добавить их, выберите всю папку архива. Подробнее: \(error.localizedDescription)"
-                        )
-                    ))
-                }
-            }
-            pendingImportDiagnostics[destination.standardizedFileURL.path] = diagnostics
-            return destination
-        } catch {
-            try? fm.removeItem(at: root)
-            throw error
-        }
-    }
-
-    /// What could not be staged alongside a previewed GEDCOM. Empty when everything the
-    /// archive carried came across.
-    public func stagedImportDiagnostics(for gedcom: URL) -> [ImportDiagnostic] {
-        pendingImportDiagnostics[gedcom.standardizedFileURL.path] ?? []
-    }
-
-    public func discardImportPreview(at gedcom: URL) {
-        let pendingRoot = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true).standardizedFileURL
-        let folder = gedcom.deletingLastPathComponent().standardizedFileURL
-        guard folder.path.hasPrefix(pendingRoot.path + "/") else { return }
-        pendingImportDiagnostics[gedcom.standardizedFileURL.path] = nil
-        try? FileManager.default.removeItem(at: folder)
-        cleanupPendingFolderIfEmpty()
-    }
-
-    public func importGEDCOM(from url: URL) async throws -> ImportResult {
-        try importGEDCOMVerified(from: url)
-    }
-
-    private func importGEDCOMVerified(from url: URL) throws -> ImportResult {
-        var result = try GEDCOMCodec.parse(url)
-        guard result.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: result.report) }
-        // Anything the staging step could not bring across belongs in the tree's own
-        // permanent import report, not only in the preview the user already dismissed.
-        result.report.diagnostics.append(contentsOf: stagedImportDiagnostics(for: url))
-        let tree = result.tree
-        if trees.contains(where: { $0.id == tree.id }) {
-            tree.id = UUID()
-            result.report.diagnostics.append(ImportDiagnostic(
-                id: "import.duplicate-tree-id",
-                severity: .warning,
-                message: L10n.tr("Дерево с таким идентификатором уже есть в библиотеке. Импортированной копии присвоен новый идентификатор.")
-            ))
-        }
-        let importedIssues = TreeValidator.validate(tree)
-        tree.acceptedBaselineIssueIDs = Set(importedIssues.filter { $0.severity == .error }.map(\.id))
-        for issue in importedIssues where issue.severity == .error {
-            result.report.diagnostics.append(ImportDiagnostic(
-                id: "import.validation.\(issue.id)",
-                severity: .warning,
-                message: L10n.tr("В импортированных данных есть ошибка. Она сохранена для проверки: \(issue.message)")
-            ))
-        }
-        tree.importReport = result.report
-        let base = url.deletingLastPathComponent()
-        pendingImports[tree.id] = PendingImport(
-            originalGEDCOM: url,
-            mediaFolder: base.appendingPathComponent(Self.mediaName, isDirectory: true),
-            attachmentsFolder: base.appendingPathComponent(Self.attachmentsName, isDirectory: true)
-        )
-        do {
-            _ = try persistTree(tree)
-            if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
-            return result
-        } catch {
-            pendingImports[tree.id] = nil
-            throw error
-        }
     }
 
     /// Re-point every person's lazy portrait loader at the tree's Media/ folder. Undo/redo
@@ -1543,7 +1233,7 @@ public final class TreeStore {
         return gedFile(in: folder) ?? folder
     }
 
-    private func folder(for tree: FamilyTree) -> URL {
+    func folder(for tree: FamilyTree) -> URL {
         if let existing = folderMap[tree.id] { return existing }
         return storageFolder.appendingPathComponent(tree.id.uuidString, isDirectory: true)
     }

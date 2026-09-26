@@ -12,6 +12,7 @@ struct TreeMergeView: View {
     @State private var preview: MergePreview?
     @State private var errorMessage: String?
     @State private var isApplying = false
+    @State private var isLoading = false
 
     private var gedcomType: UTType { UTType(filenameExtension: "ged") ?? .plainText }
     private var gedzipType: UTType { UTType(filenameExtension: "gdz") ?? .zip }
@@ -80,10 +81,14 @@ struct TreeMergeView: View {
                     Text(L10n.tr("Выберите файл для объединения")).font(SepiaTheme.body(size: 16)).foregroundStyle(SepiaTheme.ink)
                     Text(L10n.tr("Сначала проверьте, что будет добавлено. Дерево изменится только после вашего подтверждения."))
                         .font(SepiaType.label).foregroundStyle(SepiaTheme.inkSoft)
-                    Button(L10n.tr("Выбрать файл…")) { showImporter = true }
-                        .sepiaGlassProminentButton(.capsule)
-                        .buttonBorderShape(.capsule)
-                        .tint(SepiaTheme.accent)
+                    if isLoading {
+                        ProgressView().controlSize(.small)
+                    } else {
+                        Button(L10n.tr("Выбрать файл…")) { showImporter = true }
+                            .sepiaGlassProminentButton(.capsule)
+                            .buttonBorderShape(.capsule)
+                            .tint(SepiaTheme.accent)
+                    }
                 }
                 Spacer()
             }
@@ -211,22 +216,34 @@ struct TreeMergeView: View {
         preview = value
     }
 
+    /// Staging and parsing run off the main thread; only the comparison with the open
+    /// tree, which reads it, stays on the main actor.
     private func loadPreview(_ url: URL) {
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        do {
-            if let pendingURL { store.discardImportPreview(at: pendingURL) }
-            let localCopy = try store.stageImport(from: url)
+        guard !isLoading else { return }
+        isLoading = true
+        Task { @MainActor in
+            defer { isLoading = false }
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
             do {
-                let imported = try GEDCOMCodec.parse(localCopy)
-                guard imported.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: imported.report) }
-                pendingURL = localCopy
-                preview = TreeMergeEngine(store: store).preview(local: localTree, incoming: imported.tree)
-            } catch {
-                store.discardImportPreview(at: localCopy)
-                throw error
-            }
-        } catch { errorMessage = error.localizedDescription }
+                if let pendingURL {
+                    store.discardImportPreview(at: pendingURL)
+                    self.pendingURL = nil
+                }
+                let localCopy = try await store.stageImportAsync(from: url)
+                do {
+                    let imported = try await Task.detached(priority: .userInitiated) {
+                        try GEDCOMCodec.parse(localCopy)
+                    }.value
+                    guard imported.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: imported.report) }
+                    pendingURL = localCopy
+                    preview = TreeMergeEngine(store: store).preview(local: localTree, incoming: imported.tree)
+                } catch {
+                    store.discardImportPreview(at: localCopy)
+                    throw error
+                }
+            } catch { errorMessage = error.localizedDescription }
+        }
     }
 
     private func applyMerge() {

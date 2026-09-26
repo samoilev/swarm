@@ -16,7 +16,19 @@ struct PersonCardsPDFExporter {
 
     /// `selectedIds` nil or empty → the whole tree. Otherwise only those people are
     /// included (cards) and the diagram page is limited to that subset.
-    static func render(tree: FamilyTree, selectedIds: Set<UUID>? = nil, showPhotos: Bool = true, attachmentsFolder: URL? = nil) -> Data? {
+    ///
+    /// Main actor, because the diagram page is drawn by SwiftUI's `ImageRenderer`. It
+    /// rendered the whole document in one call and froze the window on a large tree;
+    /// the card pages now pause every few people so the window keeps responding, and
+    /// `progress` reports cards done out of the total.
+    @MainActor
+    static func render(
+        tree: FamilyTree,
+        selectedIds: Set<UUID>? = nil,
+        showPhotos: Bool = true,
+        attachmentsFolder: URL? = nil,
+        progress: (_ done: Int, _ total: Int) -> Void = { _, _ in }
+    ) async -> Data? {
         let scopeIds = (selectedIds?.isEmpty == false) ? selectedIds : nil
         let scoped = scopeIds.map { ids in tree.people.filter { ids.contains($0.id) } } ?? tree.people
         let people = scoped.sorted {
@@ -36,14 +48,27 @@ struct PersonCardsPDFExporter {
         drawTreePoster(tree: tree, scopeIds: scopeIds, showPhotos: showPhotos, ctx: ctx, box: box)
 
         // Following pages: one alphabetical card per person in scope.
-        drawPersonCards(people: people, idx: idx, ctx: ctx, box: box, contentW: contentW, attachmentsFolder: attachmentsFolder)
+        await drawPersonCards(
+            people: people, idx: idx, ctx: ctx, box: box, contentW: contentW,
+            attachmentsFolder: attachmentsFolder, progress: progress
+        )
 
         ctx.closePDF()
         return pdfData as Data
     }
 
-    private static func drawPersonCards(people: [Person], idx: FamilyIndex, ctx: CGContext, box: CGRect, contentW: CGFloat, attachmentsFolder: URL?) {
-        for person in people {
+    @MainActor
+    private static func drawPersonCards(
+        people: [Person], idx: FamilyIndex, ctx: CGContext, box: CGRect, contentW: CGFloat,
+        attachmentsFolder: URL?, progress: (_ done: Int, _ total: Int) -> Void
+    ) async {
+        for (done, person) in people.enumerated() {
+            if done.isMultiple(of: 10) {
+                progress(done, people.count)
+                // A sleep rather than `Task.yield()`: it lets the run loop turn, so the
+                // progress text draws and input is handled between batches.
+                try? await Task.sleep(for: .milliseconds(1))
+            }
             let body = makeBody(for: person, idx: idx)
             let framesetter = CTFramesetterCreateWithAttributedString(body)
             let total = body.length
@@ -96,6 +121,7 @@ struct PersonCardsPDFExporter {
             renderImages(loadImages(for: person, in: attachmentsFolder),
                          ctx: ctx, box: box, person: person, contentW: contentW)
         }
+        progress(people.count, people.count)
     }
 
     // MARK: - Tree diagram (page 1)

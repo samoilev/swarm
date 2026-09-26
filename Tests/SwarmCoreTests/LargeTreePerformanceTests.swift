@@ -59,24 +59,84 @@ struct LargeTreePerformanceTests {
         return result
     }
 
-    @Test func largeTreeTimings() async throws {
+    /// The synthetic tree as an archive folder: `Source/<name>.ged` beside `Media/`.
+    private static func makeSource(in root: URL) throws -> URL {
         let fm = FileManager.default
-        let root = fm.temporaryDirectory.appendingPathComponent("swarm-perf-\(UUID().uuidString)", isDirectory: true)
-        defer { try? fm.removeItem(at: root) }
         let source = root.appendingPathComponent("Source", isDirectory: true)
         let media = source.appendingPathComponent("Media", isDirectory: true)
         try fm.createDirectory(at: media, withIntermediateDirectories: true)
 
         let portraitBytes = 2 * 1024 * 1024
-        let portraits = min(Self.people, Self.mediaMB / 2)
+        let portraits = min(people, mediaMB / 2)
         let bytes = Data((0 ..< portraitBytes).map { UInt8(truncatingIfNeeded: $0) })
         for p in stride(from: 1, through: portraits, by: 1) {
             try bytes.write(to: media.appendingPathComponent("portrait-\(p).jpg"))
         }
-        let text = Self.gedcom(people: Self.people, portraits: portraits)
         let ged = source.appendingPathComponent("Большое дерево.ged")
-        try text.write(to: ged, atomically: true, encoding: .utf8)
-        print("⏱ tree: \(Self.people) people, \(portraits) portraits of 2 MB")
+        try gedcom(people: people, portraits: portraits).write(to: ged, atomically: true, encoding: .utf8)
+        print("⏱ tree: \(people) people, \(portraits) portraits of 2 MB")
+        return ged
+    }
+
+    private final class Heartbeat {
+        var longest = Duration.zero
+        var running = true
+    }
+
+    /// The longest the main actor went without running while `body` was awaited. A
+    /// heartbeat on the main actor sleeps 10 ms at a time; any stretch the main actor
+    /// spends blocked shows up as a gap between its beats.
+    private func longestStall<T>(_ label: String, _ body: () async throws -> T) async rethrows -> T {
+        let beat = Heartbeat()
+        let heartbeat = Task { @MainActor in
+            var last = ContinuousClock.now
+            while beat.running {
+                try? await Task.sleep(for: .milliseconds(10))
+                let now = ContinuousClock.now
+                beat.longest = max(beat.longest, last.duration(to: now))
+                last = now
+            }
+        }
+        try? await Task.sleep(for: .milliseconds(30))
+        let start = ContinuousClock.now
+        let result = try await body()
+        let total = start.duration(to: .now)
+        beat.running = false
+        await heartbeat.value
+        print("⏱ \(label): \(total) total, longest main-thread stall \(beat.longest)")
+        return result
+    }
+
+    /// How long each import and export step blocks the main actor. Compare before and
+    /// after moving work off it; the aim is no stall over 250 ms outside serialization.
+    @Test func mainThreadStalls() async throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("swarm-perf-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: root) }
+        let ged = try Self.makeSource(in: root)
+        let store = TreeStore(storageFolder: root.appendingPathComponent("Library", isDirectory: true))
+        let exports = root.appendingPathComponent("Exports", isDirectory: true)
+        try fm.createDirectory(at: exports, withIntermediateDirectories: true)
+
+        // The app's own path: staging and the preview parse off the main actor, then the
+        // commit from the result the preview already holds.
+        let staged = try await longestStall("stage folder") { try await store.stageImportAsync(from: ged.deletingLastPathComponent()) }
+        let preview = try await longestStall("preview parse") {
+            try await Task.detached { try GEDCOMCodec.preview(staged) }.value
+        }
+        let tree = try await longestStall("import commit") { try store.importGEDCOM(preview, stagedAt: staged).tree }
+        store.discardImportPreview(at: staged)
+        let archive = try await longestStall("export GEDZIP") { try await store.exportTree(tree, to: exports) }
+        _ = try await longestStall("export folder") { try await store.exportTree(tree, to: exports, packaging: .folder) }
+        let restaged = try await longestStall("stage GEDZIP") { try await store.stageImportAsync(from: archive.finalURL) }
+        store.discardImportPreview(at: restaged)
+    }
+
+    @Test func largeTreeTimings() async throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("swarm-perf-\(UUID().uuidString)", isDirectory: true)
+        defer { try? fm.removeItem(at: root) }
+        let ged = try Self.makeSource(in: root)
 
         let parsed = try time("parse") { try GEDCOMCodec.parse(ged) }
         _ = try time("serialize") {

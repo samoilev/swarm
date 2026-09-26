@@ -27,6 +27,14 @@ struct ExportView: View {
     /// survives being emailed: a folder loses its photos the moment it is detached
     /// from the .ged beside them.
     @State private var packaging: TreeExportPackaging = .gedzip
+    /// What is being produced right now, if anything. Every control is disabled while
+    /// it runs, and the row doing the work says how far along it is.
+    @State private var work: Work?
+
+    private enum Work: Equatable {
+        case pdf(selected: Bool, done: Int, total: Int)
+        case archive
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.m)) {
@@ -37,7 +45,7 @@ struct ExportView: View {
                     Button { exportPDF(selected: false) } label: {
                         exportRowLabel(
                             title: L10n.tr("PDF — всё дерево"),
-                            detail: L10n.tr("Схема дерева и карточки людей"),
+                            detail: pdfProgress(selected: false) ?? L10n.tr("Схема дерева и карточки людей"),
                             systemImage: "tree",
                             style: .primary
                         )
@@ -57,9 +65,9 @@ struct ExportView: View {
                     Button { exportPDF(selected: true) } label: {
                         exportRowLabel(
                             title: L10n.tr("PDF — выделенная часть"),
-                            detail: selectedIds.isEmpty
+                            detail: pdfProgress(selected: true) ?? (selectedIds.isEmpty
                                 ? L10n.tr("Выделите ветвь на схеме, удерживая ⌘.")
-                                : L10n.count(selectedIds.count, .person),
+                                : L10n.count(selectedIds.count, .person)),
                             systemImage: "scope",
                             style: selectedIds.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
                         )
@@ -71,7 +79,7 @@ struct ExportView: View {
                     Button { exportVerifiedTree() } label: {
                         exportRowLabel(
                             title: L10n.tr("GEDCOM с файлами"),
-                            detail: gedcomRowDetail,
+                            detail: work == .archive ? L10n.tr("Экспорт и проверка…") : gedcomRowDetail,
                             systemImage: "archivebox",
                             style: .secondary(SepiaTheme.accent2)
                         )
@@ -83,6 +91,7 @@ struct ExportView: View {
                     packagingPicker
                     privacyToggle
                 }
+                .disabled(work != nil)
             }
 
             contentsSummary
@@ -317,21 +326,39 @@ struct ExportView: View {
         tree.name.replacingOccurrences(of: " ", with: "-").lowercased()
     }
 
+    /// The detail line of the PDF row that is rendering, or nil to show its usual one.
+    private func pdfProgress(selected: Bool) -> String? {
+        guard case let .pdf(rendering, done, total) = work, rendering == selected else { return nil }
+        return total == 0 ? L10n.tr("Подготовка файла…") : L10n.tr("Карточка \(done) из \(total)")
+    }
+
     private func exportPDF(selected: Bool) {
+        guard work == nil else { return }
         let ids: Set<UUID>? = selected ? selectedIds : nil
         // The renderer knows nothing about privacy — it draws whatever tree it is given,
         // so the redacted names reach the cards, the relatives named on *other* people's
         // cards and the poster alike. The attachments folder is still the real tree's:
         // the redaction removed the references, not the files.
         let source = hideLivingPII ? tree.redactingLivingPeople() : tree
-        guard let data = PersonCardsPDFExporter.render(tree: source, selectedIds: ids, showPhotos: showPhotos, attachmentsFolder: store.attachmentsFolderURL(for: tree)) else {
-            exportError = L10n.tr("Чтобы создать PDF, сначала добавьте людей в дерево.")
-            return
+        work = .pdf(selected: selected, done: 0, total: 0)
+        Task { @MainActor in
+            defer { work = nil }
+            let rendered = await PersonCardsPDFExporter.render(
+                tree: source,
+                selectedIds: ids,
+                showPhotos: showPhotos,
+                attachmentsFolder: store.attachmentsFolderURL(for: tree),
+                progress: { done, total in work = .pdf(selected: selected, done: done, total: total) }
+            )
+            guard let data = rendered else {
+                exportError = L10n.tr("Чтобы создать PDF, сначала добавьте людей в дерево.")
+                return
+            }
+            exportDoc = RenderedFileDocument(data: data, type: .pdf)
+            let suffix = hideLivingPII ? "-private" : ""
+            exportName = selected ? "\(fileSlug)-selection\(suffix).pdf" : "\(fileSlug)-tree\(suffix).pdf"
+            showExporter = true
         }
-        exportDoc = RenderedFileDocument(data: data, type: .pdf)
-        let suffix = hideLivingPII ? "-private" : ""
-        exportName = selected ? "\(fileSlug)-selection\(suffix).pdf" : "\(fileSlug)-tree\(suffix).pdf"
-        showExporter = true
     }
 
     private func exportVerifiedTree() {
@@ -343,7 +370,9 @@ struct ExportView: View {
         panel.prompt = L10n.tr("Экспортировать")
         panel.begin { r in
             guard r == .OK, let directory = panel.url else { return }
+            work = .archive
             Task { @MainActor in
+                defer { work = nil }
                 do {
                     let receipt = try await store.exportTree(
                         tree,

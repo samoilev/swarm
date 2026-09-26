@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 @testable import SwarmCore
 import Testing
@@ -364,5 +365,77 @@ struct GEDZIPTests {
         #expect(GEDZIPArchive.isArchive(URL(fileURLWithPath: "/tmp/Род.GDZ")))
         #expect(!GEDZIPArchive.isArchive(URL(fileURLWithPath: "/tmp/Род.ged")))
         #expect(!GEDZIPArchive.isArchive(URL(fileURLWithPath: "/tmp/Род")))
+    }
+
+    // MARK: - Off the main actor
+
+    /// Every file under `root` by relative path, with its SHA-256; `.Swarm/` left out.
+    private func digests(under root: URL) throws -> [String: String] {
+        var result: [String: String] = [:]
+        let base = root.resolvingSymlinksInPath().path
+        for case let file as URL in FileManager.default.enumerator(at: root, includingPropertiesForKeys: [.isRegularFileKey])! {
+            guard try file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
+            let relative = String(file.resolvingSymlinksInPath().path.dropFirst(base.count + 1))
+            guard !relative.hasPrefix(".Swarm/") else { continue }
+            result[relative] = try SHA256.hash(data: Data(contentsOf: file)).map { String(format: "%02x", $0) }.joined()
+        }
+        return result
+    }
+
+    private func manifestHashes(in folder: URL) throws -> [String: String] {
+        let data = try Data(contentsOf: folder.appendingPathComponent(".Swarm/manifest.json"))
+        let manifest = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return try #require(manifest?["hashes"] as? [String: String])
+    }
+
+    /// Staging now runs off the main actor. It must leave exactly what the synchronous
+    /// path leaves, plus a manifest of the staged files that matches their bytes — the
+    /// first save takes its hashes from there.
+    @MainActor
+    @Test func stagingOffTheMainActorMatchesAndLeavesAManifest() async throws {
+        let (store, tree, root) = try storeWithTree()
+        tree.people[0].photoData = Data(repeating: 7, count: 4096)
+        _ = try await store.addTreeVerified(tree)
+        let out = root.appendingPathComponent("out", isDirectory: true)
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let archive = try await store.exportTree(tree, to: out).finalURL
+
+        let synchronous = try store.stageImport(from: archive)
+        let detached = try await store.stageImportAsync(from: archive)
+
+        let stagedRoot = detached.deletingLastPathComponent()
+        let staged = try digests(under: stagedRoot)
+        #expect(try staged == digests(under: synchronous.deletingLastPathComponent()))
+        #expect(staged.keys.contains { $0.hasPrefix("Media/") })
+        #expect(store.stagedImportDiagnostics(for: detached) == store.stagedImportDiagnostics(for: synchronous))
+        #expect(try manifestHashes(in: stagedRoot) == staged)
+    }
+
+    /// Committing from the result the preview already parsed gives the same tree as
+    /// parsing the file again, and the first save's manifest — whose photo hashes now
+    /// come from staging — still matches the bytes on disk.
+    @MainActor
+    @Test func importingThePreviewedResultMatchesImportingTheFile() async throws {
+        let (store, tree, root) = try storeWithTree()
+        tree.people[0].photoData = Data(repeating: 9, count: 4096)
+        _ = try await store.addTreeVerified(tree)
+        let out = root.appendingPathComponent("out", isDirectory: true)
+        try FileManager.default.createDirectory(at: out, withIntermediateDirectories: true)
+        let archive = try await store.exportTree(tree, to: out).finalURL
+
+        let first = TreeStore(storageFolder: root.appendingPathComponent("First", isDirectory: true))
+        let firstStaged = try await first.stageImportAsync(from: archive)
+        let preview = try GEDCOMCodec.preview(firstStaged)
+        let fromPreview = try first.importGEDCOM(preview, stagedAt: firstStaged)
+
+        let second = TreeStore(storageFolder: root.appendingPathComponent("Second", isDirectory: true))
+        let secondStaged = try await second.stageImportAsync(from: archive)
+        let fromFile = try await second.importGEDCOM(from: secondStaged)
+
+        #expect(fromPreview.tree.people.map(\.fullName).sorted() == fromFile.tree.people.map(\.fullName).sorted())
+        // Messages, not ids: an event's id is minted on every parse, and some ids carry it.
+        #expect(fromPreview.report.diagnostics.map(\.message).sorted() == fromFile.report.diagnostics.map(\.message).sorted())
+        let committed = first.gedFileURL(for: fromPreview.tree).deletingLastPathComponent()
+        #expect(try manifestHashes(in: committed) == digests(under: committed))
     }
 }

@@ -31,6 +31,10 @@ struct ContentView: View {
     @State private var importError: String?
     @State private var pendingImportURL: URL?
     @State private var importPreview: ImportResult?
+    /// A picked file is being copied, unzipped and checked, off the main thread.
+    @State private var isStagingImport = false
+    /// The previewed import is being saved into the library.
+    @State private var isCommittingImport = false
     @State private var queuedOpenURL: URL?
     /// Confirmation the workspace shows once, on arrival, for a tree that was just
     /// written. Creating a whole family record used to be the app's only silent write.
@@ -143,6 +147,9 @@ struct ContentView: View {
             queuedOpenURL = nil
             previewGEDCOM(from: url)
         }
+        .overlay(alignment: .bottom) {
+            if isStagingImport { stagingIndicator }
+        }
         // Folders are selectable too: an exported archive is a folder, and choosing it —
         // rather than the .ged buried inside — is what lets macOS read the photos and
         // attachments stored beside the file.
@@ -160,7 +167,12 @@ struct ContentView: View {
             set: { if !$0 { cancelImportPreview() } }
         )) {
             if let importPreview {
-                ImportPreviewView(result: importPreview, onCancel: cancelImportPreview, onImport: commitImportPreview)
+                ImportPreviewView(
+                    result: importPreview,
+                    onCancel: cancelImportPreview,
+                    onImport: commitImportPreview,
+                    isImporting: isCommittingImport
+                )
             }
         }
         .onOpenURL { url in
@@ -215,33 +227,53 @@ struct ContentView: View {
         }
     }
 
+    /// Everything between picking a file and seeing its preview — copying, unzipping a
+    /// GEDZIP, hashing, parsing — runs off the main thread, so a large archive no longer
+    /// freezes the window inside the file-importer callback.
     private func previewGEDCOM(from url: URL) {
-        // The scope has to stay open across staging, not just the read of the .ged
-        // itself: a folder selection is what carries access to Media/ and Attachments/.
-        let scoped = url.startAccessingSecurityScopedResource()
-        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-        do {
-            let localCopy = try store.stageImport(from: url)
-            let stagedDiagnostics = store.stagedImportDiagnostics(for: localCopy)
-            // The staged copy needs no security scope, so the parse — the slow part
-            // of previewing a large archive — runs off the main thread instead of
-            // freezing the UI inside the file-importer callback.
-            Task { @MainActor in
-                do {
-                    var result = try await Task.detached(priority: .userInitiated) {
-                        try GEDCOMCodec.preview(localCopy)
-                    }.value
-                    result.report.diagnostics.append(contentsOf: stagedDiagnostics)
-                    pendingImportURL = localCopy
-                    importPreview = result
-                } catch {
-                    store.discardImportPreview(at: localCopy)
-                    importError = importFailureMessage(error)
-                }
+        guard !isStagingImport else { return }
+        isStagingImport = true
+        Task { @MainActor in
+            defer { isStagingImport = false }
+            // The scope has to stay open across staging, not just the read of the .ged
+            // itself: a folder selection is what carries access to Media/ and Attachments/.
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+            let localCopy: URL
+            do {
+                localCopy = try await store.stageImportAsync(from: url)
+            } catch {
+                importError = importFailureMessage(error)
+                return
             }
-        } catch {
-            importError = importFailureMessage(error)
+            let stagedDiagnostics = store.stagedImportDiagnostics(for: localCopy)
+            do {
+                var result = try await Task.detached(priority: .userInitiated) {
+                    try GEDCOMCodec.preview(localCopy)
+                }.value
+                result.report.diagnostics.append(contentsOf: stagedDiagnostics)
+                pendingImportURL = localCopy
+                importPreview = result
+            } catch {
+                store.discardImportPreview(at: localCopy)
+                importError = importFailureMessage(error)
+            }
         }
+    }
+
+    private var stagingIndicator: some View {
+        HStack(spacing: SepiaTheme.scaled(SepiaLayout.s)) {
+            ProgressView().controlSize(.small)
+            Text(L10n.tr("Подготовка файла…"))
+                .font(SepiaType.label)
+                .foregroundStyle(SepiaTheme.ink)
+        }
+        .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.m))
+        .padding(.vertical, SepiaTheme.scaled(SepiaLayout.s))
+        .background(SepiaTheme.paper, in: Capsule())
+        .overlay(Capsule().stroke(SepiaTheme.toolbarLine))
+        .padding(.bottom, SepiaTheme.scaled(SepiaLayout.l))
+        .accessibilityElement(children: .combine)
     }
 
     /// A file the app was not allowed to read is not a damaged file, and saying so sends
@@ -262,10 +294,17 @@ struct ContentView: View {
     }
 
     private func commitImportPreview() {
-        guard let url = pendingImportURL else { return }
+        guard let url = pendingImportURL, let preview = importPreview, !isCommittingImport else { return }
+        isCommittingImport = true
         Task { @MainActor in
+            defer { isCommittingImport = false }
+            // The save itself still runs on the main actor; a moment's pause lets the
+            // spinner draw before it starts.
+            try? await Task.sleep(for: .milliseconds(30))
             do {
-                let result = try await store.importGEDCOM(from: url)
+                // The preview already parsed the file; parsing it again was most of
+                // what the Import button cost on a large tree.
+                let result = try store.importGEDCOM(preview, stagedAt: url)
                 store.discardImportPreview(at: url)
                 pendingImportURL = nil
                 importPreview = nil
