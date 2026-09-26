@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 @testable import SwarmCore
 import Testing
@@ -533,5 +534,49 @@ struct TreeStoreTests {
         let reloaded = TreeStore(storageFolder: temp.url)
         #expect(reloaded.trees.map(\.id) == [tree.id])
         #expect(FileManager.default.fileExists(atPath: rollback.path))
+    }
+
+    /// A save reuses the committed hash of every file it carried over unchanged. The
+    /// manifest must still describe the bytes on disk — including a portrait rewritten
+    /// in place at the same size, the case a size-only check would get wrong.
+    @Test func theManifestMatchesTheBytesAfterAnInPlacePortraitChange() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        tree.people[0].photoData = Data(repeating: 1, count: 4096)
+        tree.people[1].photoData = Data(repeating: 2, count: 4096)
+        try await store.addTreeVerified(tree)
+
+        tree.people[0].photoData = Data(repeating: 3, count: 4096)
+        let receipt = try await store.saveTree(tree)
+
+        let folder = receipt.finalURL
+        let manifest = try JSONSerialization.jsonObject(
+            with: Data(contentsOf: folder.appendingPathComponent(".Swarm/manifest.json"))
+        ) as? [String: Any]
+        let recorded = try #require(manifest?["hashes"] as? [String: String])
+        #expect(recorded.keys.contains { $0.hasPrefix("Media/") })
+        for (path, digest) in recorded {
+            let bytes = try Data(contentsOf: folder.appendingPathComponent(path))
+            #expect(SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined() == digest, "\(path)")
+        }
+    }
+
+    /// Staged imports and attachments left in `.Pending` by a crash were never removed.
+    /// Launch clears the ones older than the cutoff and leaves recent ones alone.
+    @Test func stalePendingItemsAreClearedAndRecentOnesKept() throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let pending = temp.url.appendingPathComponent(".Pending", isDirectory: true)
+        let preview = pending.appendingPathComponent("Import-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: preview, withIntermediateDirectories: true)
+        try Data("0 HEAD".utf8).write(to: preview.appendingPathComponent("tree.ged"))
+        try Data("scan".utf8).write(to: pending.appendingPathComponent("\(UUID().uuidString).pdf"))
+
+        store.discardStalePendingItems()
+        #expect(try FileManager.default.contentsOfDirectory(atPath: pending.path).count == 2)
+
+        store.discardStalePendingItems(addedBefore: Date().addingTimeInterval(60))
+        #expect(!FileManager.default.fileExists(atPath: pending.path))
     }
 }

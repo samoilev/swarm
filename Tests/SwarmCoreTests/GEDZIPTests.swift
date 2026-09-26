@@ -102,6 +102,27 @@ struct GEDZIPTests {
         }
     }
 
+    /// `ditto` recreates stored symbolic links, so an archive could carry
+    /// `Media/portrait.jpg -> /any/file/on/the/Mac`. Staging refuses it and leaves
+    /// nothing unpacked in the library.
+    @MainActor
+    @Test func anArchiveCarryingASymbolicLinkIsRefused() throws {
+        let outside = try temporaryDirectory().appendingPathComponent("secret.txt")
+        try "private".write(to: outside, atomically: true, encoding: .utf8)
+        let source = try temporaryDirectory()
+        try "0 HEAD\n0 TRLR".write(to: source.appendingPathComponent("gedcom.ged"), atomically: true, encoding: .utf8)
+        let media = source.appendingPathComponent("Media", isDirectory: true)
+        try FileManager.default.createDirectory(at: media, withIntermediateDirectories: true)
+        try FileManager.default.createSymbolicLink(at: media.appendingPathComponent("portrait.jpg"), withDestinationURL: outside)
+        let archive = try temporaryDirectory().appendingPathComponent("Род.gdz")
+        try GEDZIPArchive.write(contentsOf: source, to: archive)
+
+        let root = try temporaryDirectory()
+        let store = TreeStore(storageFolder: root)
+        #expect(throws: GEDZIPArchive.Failure.self) { _ = try store.stageImport(from: archive) }
+        #expect(pendingEntries(in: root).isEmpty)
+    }
+
     // MARK: - Export and round trip
 
     @MainActor

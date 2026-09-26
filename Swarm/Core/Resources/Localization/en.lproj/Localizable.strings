@@ -496,6 +496,7 @@
 "GEDCOM-файл пуст." = "The GEDCOM file is empty.";
 "Первая запись GEDCOM должна начинаться с уровня 0." = "The first GEDCOM record must start at level 0.";
 "Пропущен уровень вложенности" = "A nesting level was skipped";
+"Слишком глубокая вложенность" = "Nesting is too deep";
 "Строка GEDCOM не относится ни к одной записи уровня 0." = "This GEDCOM line doesn’t belong to a level 0 record.";
 "В файле GEDCOM нет заголовка HEAD." = "The GEDCOM file has no HEAD header.";
 "В файле нет завершающей записи TRLR. Данные сохранены." = "The file has no closing TRLR record. The data has been kept.";

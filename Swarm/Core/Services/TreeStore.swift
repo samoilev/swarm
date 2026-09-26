@@ -86,14 +86,14 @@ public final class TreeStore {
     private static let attachmentsName = "Attachments"
     static let archivedName = "Archived"
     static let recoveryName = "Recovery"
-    private static let pendingName = ".Pending"
-    private static let metadataName = ".Swarm"
+    static let pendingName = ".Pending"
+    static let metadataName = ".Swarm"
     private static let legacyMetadataName = ".FamilyTreeStudio"
     private static let appFolderName = "Swarm"
     private static let legacyAppFolderName = "FamilyTreeStudio"
-    private static let historyName = "History"
-    private static let trashName = "Trash"
-    private static let manifestName = "manifest.json"
+    static let historyName = "History"
+    static let trashName = "Trash"
+    static let manifestName = "manifest.json"
     /// Verbatim copy of an imported file, kept as a safety net and never treated as
     /// the tree's own working .ged (excluded from load/save/reconcile).
     static let originalImportName = "original-import.ged"
@@ -144,6 +144,7 @@ public final class TreeStore {
             return
         }
         self.storageFolder = appFolder
+        discardStalePendingItems()
         load()
     }
 
@@ -716,9 +717,12 @@ public final class TreeStore {
         }
         try pruneRecoveryData(in: staging)
 
-        let activeHashes = try hashes(in: staging, includeRecoveryData: false)
+        // Files carried over unchanged from `current` keep their committed hash; only
+        // what this save wrote is read back. Re-hashing every photo made a one-word edit
+        // cost seconds per gigabyte of media.
+        let activeHashes = try hashes(in: staging, includeRecoveryData: false, reusingFrom: current)
         try writeManifest(generationID: generationID, hashes: activeHashes, in: staging)
-        try verify(hashes: activeHashes, in: staging)
+        try verify(hashes: activeHashes, in: staging, reusingFrom: current)
 
         var warnings: [String] = []
         try commitStaging(staging, replacing: current, at: target, warnings: &warnings)
@@ -768,12 +772,6 @@ public final class TreeStore {
             }
             try photo.data.write(to: dest, options: .atomic)
         }
-    }
-
-    private struct BundleManifest: Codable {
-        let generationID: UUID
-        let createdAt: Date
-        let hashes: [String: String]
     }
 
     private func createPreMigrationBackupIfNeeded(tree: FamilyTree, currentFolder: URL?) throws -> URL? {
@@ -908,10 +906,18 @@ public final class TreeStore {
         guard fm.fileExists(atPath: trash.path) else { return }
         let trashFiles = try fm.contentsOfDirectory(at: trash, includingPropertiesForKeys: nil)
             .sorted { $0.lastPathComponent > $1.lastPathComponent }
+        // Trash names are `<stamp>--<category>--<name>[--Original--<encoded>]`. A substring
+        // match let `x.jp` claim the trashed `x.jpg`.
+        let marker = "--\(category)--"
+        func holds(_ name: String, _ file: URL) -> Bool {
+            guard let range = file.lastPathComponent.range(of: marker) else { return false }
+            let stored = file.lastPathComponent[range.upperBound...]
+            return stored == name || stored.hasPrefix(name + "--Original--")
+        }
         for name in names {
             let active = activeFolder.appendingPathComponent(name)
             guard !fm.fileExists(atPath: active.path),
-                  let recovery = trashFiles.first(where: { $0.lastPathComponent.contains("--\(category)--\(name)") }) else { continue }
+                  let recovery = trashFiles.first(where: { holds(name, $0) }) else { continue }
             try fm.createDirectory(at: activeFolder, withIntermediateDirectories: true)
             try fm.moveItem(at: recovery, to: active)
         }
@@ -989,51 +995,6 @@ public final class TreeStore {
         }
     }
 
-    private func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
-        let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
-        try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
-        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes)
-        let data = try JSONEncoder.pretty.encode(manifest)
-        try data.write(to: metadata.appendingPathComponent(Self.manifestName), options: .atomic)
-    }
-
-    private func hashes(in folder: URL, includeRecoveryData: Bool) throws -> [String: String] {
-        let fm = FileManager.default
-        guard let enumerator = fm.enumerator(
-            at: folder,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsPackageDescendants]
-        ) else { throw TreeStoreError.treeFolderMissing }
-
-        var result: [String: String] = [:]
-        let basePath = folder.resolvingSymlinksInPath().path
-        for case let file as URL in enumerator {
-            guard try file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
-            let filePath = file.resolvingSymlinksInPath().path
-            guard filePath.hasPrefix(basePath + "/") else {
-                throw TreeStoreError.verificationFailed(path: file.lastPathComponent)
-            }
-            let relative = String(filePath.dropFirst(basePath.count + 1))
-            if relative == "\(Self.metadataName)/\(Self.manifestName)" { continue }
-            if !includeRecoveryData,
-               relative.hasPrefix("\(Self.metadataName)/\(Self.historyName)/") ||
-               relative.hasPrefix("\(Self.metadataName)/\(Self.trashName)/") { continue }
-            result[relative] = try sha256(file)
-        }
-        return result
-    }
-
-    private func verify(hashes expected: [String: String], in folder: URL) throws {
-        let actual = try hashes(in: folder, includeRecoveryData: false)
-        for (path, digest) in expected where actual[path] != digest {
-            throw TreeStoreError.verificationFailed(path: path)
-        }
-        guard Set(actual.keys) == Set(expected.keys) else {
-            let path = Set(actual.keys).symmetricDifference(Set(expected.keys)).sorted().first ?? folder.path
-            throw TreeStoreError.verificationFailed(path: path)
-        }
-    }
-
     private func commitStaging(
         _ staging: URL,
         replacing current: URL?,
@@ -1087,7 +1048,7 @@ public final class TreeStore {
         try faultInjector?(point)
     }
 
-    private func cleanupPendingFolderIfEmpty() {
+    func cleanupPendingFolderIfEmpty() {
         let folder = storageFolder.appendingPathComponent(Self.pendingName, isDirectory: true)
         guard let items = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil),
               items.isEmpty else { return }
@@ -1593,13 +1554,4 @@ public final class TreeStore {
         return storageFolder.appendingPathComponent(tree.id.uuidString, isDirectory: true)
     }
 
-}
-
-private extension JSONEncoder {
-    static var pretty: JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        encoder.dateEncodingStrategy = .iso8601
-        return encoder
-    }
 }

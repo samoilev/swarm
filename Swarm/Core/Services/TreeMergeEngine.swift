@@ -97,9 +97,12 @@ public final class TreeMergeEngine {
         var matchedLocal = Set<UUID>()
         var matchedIncoming = Set<UUID>()
         var automatic: [MergePersonMatch] = []
+        // Indexed once: every lookup below used to scan the whole tree per person.
+        let localByID = Dictionary(local.people.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let incomingByID = Dictionary(incoming.people.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
 
         for candidate in incoming.people {
-            if let localPerson = local.people.first(where: { $0.id == candidate.id }) {
+            if let localPerson = localByID[candidate.id] {
                 automatic.append(MergePersonMatch(
                     localPersonID: localPerson.id,
                     incomingPersonID: candidate.id,
@@ -112,9 +115,10 @@ public final class TreeMergeEngine {
         }
 
         if local.id == incoming.id {
+            let localByXref = Dictionary(grouping: local.people.filter { $0.gedcomXref != nil }) { $0.gedcomXref ?? "" }
             for candidate in incoming.people where !matchedIncoming.contains(candidate.id) {
                 guard let xref = candidate.gedcomXref,
-                      let localPerson = local.people.first(where: { !matchedLocal.contains($0.id) && $0.gedcomXref == xref }) else { continue }
+                      let localPerson = localByXref[xref]?.first(where: { !matchedLocal.contains($0.id) }) else { continue }
                 automatic.append(MergePersonMatch(
                     localPersonID: localPerson.id,
                     incomingPersonID: candidate.id,
@@ -167,8 +171,8 @@ public final class TreeMergeEngine {
         // `activeConflicts`.
         var conflicts: [MergeConflict] = []
         for match in automatic + suggestions {
-            guard let left = local.person(byId: match.localPersonID),
-                  let right = incoming.person(byId: match.incomingPersonID) else { continue }
+            guard let left = localByID[match.localPersonID],
+                  let right = incomingByID[match.incomingPersonID] else { continue }
             conflicts += factConflicts(local: left, incoming: right)
         }
 
@@ -201,10 +205,15 @@ public final class TreeMergeEngine {
             matches = matches.filter { personMap.updateValue($0.localPersonID, forKey: $0.incomingPersonID) == nil }
             let sourceMap = mergeSources(from: incoming, into: local)
             var attachmentIDMap: [String: String] = [:]
+            // Indexed once and kept current as records are appended: each lookup below
+            // used to scan the whole tree, per person, family and link merged.
+            let localByID = Dictionary(local.people.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            let incomingByID = Dictionary(incoming.people.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            var localPersonIDs = Set(localByID.keys)
 
             for match in matches {
-                guard let left = local.person(byId: match.localPersonID),
-                      let right = incoming.person(byId: match.incomingPersonID) else { continue }
+                guard let left = localByID[match.localPersonID],
+                      let right = incomingByID[match.incomingPersonID] else { continue }
                 preparedAttachments += try mergeFiles(
                     from: right,
                     into: left,
@@ -224,7 +233,7 @@ public final class TreeMergeEngine {
             for incomingPerson in incoming.people where personMap[incomingPerson.id] == nil {
                 let copied = try clone(incomingPerson)
                 let originalID = incomingPerson.id
-                if local.people.contains(where: { $0.id == copied.id }) { copied.id = UUID() }
+                if localPersonIDs.contains(copied.id) { copied.id = UUID() }
                 personMap[originalID] = copied.id
                 remapEvidence(in: copied, sourceMap: sourceMap)
                 preparedAttachments += try stageFiles(
@@ -235,38 +244,49 @@ public final class TreeMergeEngine {
                 )
                 remapMediaIDs(in: copied, attachmentIDMap: attachmentIDMap)
                 local.people.append(copied)
+                localPersonIDs.insert(copied.id)
             }
 
-            var existingUnionSignatures = Set(local.unions.map(unionSignature))
+            // `mergeUnion` never changes partners or children, so a signature, once
+            // indexed, stays true. First union wins, as the scan it replaces did.
+            var unionBySignature = Dictionary(local.unions.map { (unionSignature($0), $0) }, uniquingKeysWith: { first, _ in first })
+            var localUnionIDs = Set(local.unions.map(\.id))
             var unionMap: [UUID: UUID] = [:]
             for incomingUnion in incoming.unions {
                 let copied = try clone(incomingUnion)
-                copied.id = local.unions.contains(where: { $0.id == copied.id }) ? UUID() : copied.id
+                copied.id = localUnionIDs.contains(copied.id) ? UUID() : copied.id
                 copied.partner1Id = copied.partner1Id.flatMap { personMap[$0] }
                 copied.partner2Id = copied.partner2Id.flatMap { personMap[$0] }
                 copied.childrenIds = copied.childrenIds.compactMap { personMap[$0] }
                 remapEvidence(in: copied, sourceMap: sourceMap)
                 remapMediaIDs(in: copied, attachmentIDMap: attachmentIDMap)
                 let signature = unionSignature(copied)
-                if let existing = local.unions.first(where: { unionSignature($0) == signature }) {
+                if let existing = unionBySignature[signature] {
                     mergeUnion(copied, into: existing)
                     unionMap[incomingUnion.id] = existing.id
-                } else if !existingUnionSignatures.contains(signature) {
+                } else {
                     local.unions.append(copied)
-                    existingUnionSignatures.insert(signature)
+                    unionBySignature[signature] = copied
+                    localUnionIDs.insert(copied.id)
                     unionMap[incomingUnion.id] = copied.id
                 }
             }
 
+            struct LinkKey: Hashable { let parent: UUID, child: UUID, union: UUID?, kind: ParentageKind }
+            func key(_ link: ParentLink) -> LinkKey {
+                LinkKey(parent: link.parentID, child: link.childID, union: link.unionID, kind: link.kind)
+            }
+            var linkIndex = Dictionary(local.parentLinks.enumerated().map { (key($0.element), $0.offset) }, uniquingKeysWith: { first, _ in first })
+            var localLinkIDs = Set(local.parentLinks.map(\.id))
             for link in incoming.parentLinks {
                 guard let parentID = personMap[link.parentID], let childID = personMap[link.childID] else { continue }
                 var copied = link
-                copied.id = local.parentLinks.contains(where: { $0.id == copied.id }) ? UUID() : copied.id
+                copied.id = localLinkIDs.contains(copied.id) ? UUID() : copied.id
                 copied.parentID = parentID
                 copied.childID = childID
                 copied.unionID = link.unionID.flatMap { unionMap[$0] }
                 copied.citations = remap(copied.citations, sourceMap: sourceMap)
-                if let index = local.parentLinks.firstIndex(where: { $0.parentID == parentID && $0.childID == childID && $0.unionID == copied.unionID && $0.kind == copied.kind }) {
+                if let index = linkIndex[key(copied)] {
                     // Preserve a recorded doubt without adding a duplicate parent edge.
                     if copied.hasUncertainParentage { local.parentLinks[index].isUncertain = true }
                     local.parentLinks[index].citations = choose(
@@ -276,6 +296,8 @@ public final class TreeMergeEngine {
                     )
                     if local.parentLinks[index].notes?.isEmpty != false { local.parentLinks[index].notes = copied.notes }
                 } else {
+                    linkIndex[key(copied)] = local.parentLinks.count
+                    localLinkIDs.insert(copied.id)
                     local.parentLinks.append(copied)
                 }
             }

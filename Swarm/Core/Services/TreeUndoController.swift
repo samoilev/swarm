@@ -22,7 +22,9 @@ public final class TreeUndoController {
     public var lastError: String?
 
     /// Every entry is a full-tree JSON snapshot, so the stacks are the memory cost
-    /// driver; beyond this the oldest entry is dropped.
+    /// driver; beyond this the oldest entry is dropped. Entries are stored compressed:
+    /// a 20,000-person import snapshots to about 54 MB of JSON, and two full stacks of
+    /// those ran to gigabytes.
     private static let maxEntries = 50
 
     /// True while a mutation session (an open add/edit sheet) is in flight. Undo/redo
@@ -74,7 +76,7 @@ public final class TreeUndoController {
     public func cancel(_ tree: FamilyTree) {
         guard let base = sessionBase else { return }
         sessionBase = nil
-        if let snapshot = decodeOrReport(base) { tree.applyContent(of: snapshot) }
+        if let snapshot = decodeOrReport(base, packed: false) { tree.applyContent(of: snapshot) }
     }
 
     /// Restore the previous state into the live tree. Returns false when nothing is
@@ -101,18 +103,32 @@ public final class TreeUndoController {
     }
 
     private func push(_ data: Data, onto stack: inout [Data]) {
-        stack.append(data)
+        stack.append(Self.pack(data))
         if stack.count > Self.maxEntries { stack.removeFirst(stack.count - Self.maxEntries) }
     }
 
     /// Decode a snapshot; on failure set `lastError` instead of silently consuming
     /// the entry — `applyContent` bumps `layoutVersion` so canvases recompute.
-    private func decodeOrReport(_ data: Data) -> FamilyTree? {
+    private func decodeOrReport(_ data: Data, packed: Bool = true) -> FamilyTree? {
         do {
-            return try Self.decoder.decode(FamilyTree.self, from: data)
+            return try Self.decoder.decode(FamilyTree.self, from: packed ? Self.unpack(data) : data)
         } catch {
             lastError = L10n.tr("Не удалось отменить изменение: данные для отмены повреждены.")
             return nil
         }
+    }
+
+    /// LZ4: about a third of the size in tens of milliseconds for that 54 MB snapshot.
+    /// LZFSE packs tighter but took two seconds, on the main actor, per edit. Falls back
+    /// to the raw bytes if compression fails; `unpack` tells them apart by the tag byte.
+    static func pack(_ data: Data) -> Data {
+        guard let packed = try? (data as NSData).compressed(using: .lz4) as Data else { return Data([0]) + data }
+        return Data([1]) + packed
+    }
+
+    static func unpack(_ data: Data) throws -> Data {
+        guard let tag = data.first else { return data }
+        let body = data.dropFirst()
+        return tag == 1 ? try (Data(body) as NSData).decompressed(using: .lz4) as Data : Data(body)
     }
 }

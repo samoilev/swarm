@@ -713,4 +713,25 @@ struct DefectRegressionTests {
         #expect(names.count == 2)
         #expect(Set(names) == [shared.storedName])
     }
+
+    /// A trashed file comes back only under its own name. The lookup matched by
+    /// substring, so a portrait named `x.jp` claimed the trashed `x.jpg`.
+    @Test func trashRestoreMatchesTheWholeFileName() async throws {
+        let temp = try Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = FamilyTree(name: "Корзина")
+        let person = Person(givenNames: "Анна")
+        tree.people = [person]
+        try await store.addTreeVerified(tree)
+        let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
+        let trashed = folder.appendingPathComponent(".Swarm/Trash/20250101-000000-000--Media--x.jpg")
+        try Data("someone else's portrait".utf8).write(to: trashed)
+
+        person.photoFilename = "x.jp"
+        _ = try await store.saveTree(tree)
+
+        let saved = store.gedFileURL(for: tree).deletingLastPathComponent()
+        #expect(!FileManager.default.fileExists(atPath: saved.appendingPathComponent("Media/x.jp").path))
+        #expect(FileManager.default.fileExists(atPath: saved.appendingPathComponent(".Swarm/Trash/20250101-000000-000--Media--x.jpg").path))
+    }
 }

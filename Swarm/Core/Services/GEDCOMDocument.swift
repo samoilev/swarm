@@ -101,50 +101,65 @@ public struct GEDCOMNode: Identifiable, Codable, Hashable, Sendable {
         // indented foreign files. Trailing spaces and tabs are a different matter: they
         // belong to the value, and trimming them here used to eat the indentation and
         // trailing spaces of every note line on each save/reload cycle.
-        let trimmed = String(
-            raw.drop(while: { $0 == " " || $0 == "\t" })
-                .reversed().drop(while: { $0 == "\r" || $0 == "\n" }).reversed()
-        )
-        guard let firstSpace = trimmed.firstIndex(of: " "),
-              let level = Int(trimmed[..<firstSpace]) else { return nil }
-        var rest = String(trimmed[trimmed.index(after: firstSpace)...]).drop(while: { $0 == " " })
+        //
+        // Bytes, not Characters: every delimiter here is ASCII, so byte offsets always
+        // fall on scalar boundaries. This runs many times per line, and grapheme-aware
+        // slicing of Cyrillic text made it most of the cost of opening a large tree.
+        let bytes = Array(raw.utf8)
+        let space = UInt8(ascii: " "), at = UInt8(ascii: "@")
+        var first = 0, last = bytes.count
+        while first < last, bytes[first] == space || bytes[first] == UInt8(ascii: "\t") { first += 1 }
+        while last > first, bytes[last - 1] == UInt8(ascii: "\r") || bytes[last - 1] == UInt8(ascii: "\n") { last -= 1 }
+        let start = first, end = last
+        func text(_ from: Int, _ to: Int) -> String {
+            String(decoding: bytes[from ..< to], as: UTF8.self)
+        }
+        func afterSpaces(_ index: Int) -> Int {
+            var index = index
+            while index < end, bytes[index] == space { index += 1 }
+            return index
+        }
+
+        guard let firstSpace = bytes[start ..< end].firstIndex(of: space),
+              let level = Int(text(start, firstSpace)) else { return nil }
+        var cursor = afterSpaces(firstSpace + 1)
 
         var xref: String?
-        if rest.first == "@", let closing = rest.dropFirst().firstIndex(of: "@") {
-            xref = String(rest[rest.index(after: rest.startIndex) ..< closing])
-            rest = rest[rest.index(after: closing)...].drop(while: { $0 == " " })
+        if cursor < end, bytes[cursor] == at, let closing = bytes[(cursor + 1) ..< end].firstIndex(of: at) {
+            xref = text(cursor + 1, closing)
+            cursor = afterSpaces(closing + 1)
         }
-        guard !rest.isEmpty else { return nil }
+        guard cursor < end else { return nil }
 
+        // Exactly one space delimits the tag from its value; everything after it,
+        // whitespace included, is the value.
         let tag: String
-        let tail: String
-        if let space = rest.firstIndex(of: " ") {
-            tag = String(rest[..<space])
-            // Exactly one space delimits the tag from its value; everything after it,
-            // whitespace included, is the value.
-            tail = String(rest[rest.index(after: space)...])
+        var tailStart = end
+        if let tagEnd = bytes[cursor ..< end].firstIndex(of: space) {
+            tag = text(cursor, tagEnd)
+            tailStart = tagEnd + 1
         } else {
-            tag = String(rest)
-            tail = ""
+            tag = text(cursor, end)
         }
+        let tail = bytes[tailStart ..< end]
 
         // A value that is exactly "@X@" is a pointer, not free text.
         let pointer: String?
         let value: String
-        if tail.count >= 2, tail.first == "@", tail.last == "@", !tail.dropFirst().dropLast().contains("@") {
-            pointer = String(tail.dropFirst().dropLast())
+        if tail.count >= 2, tail.first == at, tail.last == at, !tail.dropFirst().dropLast().contains(at) {
+            pointer = text(tailStart + 1, end - 1)
             value = ""
         } else {
             pointer = nil
             // A doubled delimiter is how text shaped like a pointer gets escaped.
             // 5.5.1 doubles both ends, 7.0 only the leading one; accept either so a
             // file from any writer reads back exactly as it was typed.
-            if tail.hasPrefix("@@") {
-                var unescaped = String(tail.dropFirst())
-                if unescaped.count >= 3, unescaped.hasSuffix("@@") { unescaped.removeLast() }
-                value = unescaped
+            if tail.starts(with: [at, at]) {
+                var unescapedEnd = end
+                if end - (tailStart + 1) >= 3, bytes[end - 1] == at, bytes[end - 2] == at { unescapedEnd -= 1 }
+                value = text(tailStart + 1, unescapedEnd)
             } else {
-                value = tail
+                value = text(tailStart, end)
             }
         }
         self.init(level: level, xref: xref, tag: tag, pointer: pointer, value: value, rawLine: raw)
@@ -196,6 +211,8 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
         return declared?.hasPrefix("7.") == true ? .v70 : .v551
     }
 
+    static let maximumLevel = 99
+
     public static func parse(_ text: String) throws -> GEDCOMDocument {
         let lineEnding = text.contains("\r\n") ? "\r\n" : "\n"
         let rawLines = text.components(separatedBy: .newlines)
@@ -213,6 +230,11 @@ public struct GEDCOMDocument: Codable, Hashable, Sendable {
             }
             if index > 0, node.level > previousLevel + 1 {
                 throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Пропущен уровень вложенности"))
+            }
+            // The grammar allows two-digit levels. Deeper is no real file, and nesting
+            // is built recursively: a crafted file 10,000 levels deep overflowed the stack.
+            if node.level > Self.maximumLevel {
+                throw GEDCOMCodecError.invalidStructure(line: index + 1, reason: L10n.tr("Слишком глубокая вложенность"))
             }
             previousLevel = node.level
             flat.append(node)

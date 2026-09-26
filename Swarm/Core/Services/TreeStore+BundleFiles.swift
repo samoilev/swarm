@@ -5,8 +5,8 @@ import os
 private let log = Logger(subsystem: "com.samoilev.swarm", category: "TreeStore")
 
 /// File-level helpers for tree bundles on disk, kept out of `TreeStore.swift`: locating
-/// a tree's GEDCOM, naming its folder, copying and hashing, and putting back a folder an
-/// interrupted save left hidden.
+/// a tree's GEDCOM, naming its folder, copying, hashing and manifests, and putting back
+/// a folder an interrupted save left hidden.
 extension TreeStore {
     /// A save swaps folders with two renames: the committed folder to `.rollback-<id>`,
     /// then the staged one into place. A crash between them left no visible folder, and
@@ -32,6 +32,23 @@ extension TreeStore {
                 log.error("Could not restore \(rollback.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
+    }
+
+    /// Import previews and attachments waiting for a save are staged in `.Pending` and
+    /// removed once committed or discarded. After a crash nothing removed them, so the
+    /// folder only grew; each launch now clears whatever has sat there for a week.
+    func discardStalePendingItems(addedBefore cutoff: Date = Date().addingTimeInterval(-7 * 24 * 60 * 60)) {
+        let fm = FileManager.default
+        let pending = storageFolderURL.appendingPathComponent(Self.pendingName, isDirectory: true)
+        guard let items = try? fm.contentsOfDirectory(at: pending, includingPropertiesForKeys: [.addedToDirectoryDateKey]) else { return }
+        for item in items {
+            // When it arrived here, not its own dates: a copied attachment keeps the
+            // modification date of a file that may be years old.
+            guard let added = try? item.resourceValues(forKeys: [.addedToDirectoryDateKey]).addedToDirectoryDate,
+                  added < cutoff else { continue }
+            try? fm.removeItem(at: item)
+        }
+        cleanupPendingFolderIfEmpty()
     }
 
     /// The `_TREEID` a GEDCOM declares, read from the text alone: recovery only needs the
@@ -104,8 +121,108 @@ extension TreeStore {
         }
     }
 
+    /// Read in 16 MB pieces: a video attachment read whole doubled the app's memory
+    /// for the length of a save, while a photo still takes a single read.
     func sha256(_ url: URL) throws -> String {
-        let digest = try SHA256.hash(data: Data(contentsOf: url))
-        return digest.map { String(format: "%02x", $0) }.joined()
+        let handle = try FileHandle(forReadingFrom: url)
+        defer { try? handle.close() }
+        var hasher = SHA256()
+        while let chunk = try handle.read(upToCount: 16 << 20), !chunk.isEmpty {
+            hasher.update(data: chunk)
+        }
+        return hasher.finalize().map { String(format: "%02x", $0) }.joined()
+    }
+
+    // MARK: - Manifest
+
+    struct BundleManifest: Codable {
+        let generationID: UUID
+        let createdAt: Date
+        let hashes: [String: String]
+    }
+
+    func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
+        let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
+        try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
+        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes)
+        let data = try JSONEncoder.pretty.encode(manifest)
+        try data.write(to: metadata.appendingPathComponent(Self.manifestName), options: .atomic)
+    }
+
+    /// SHA-256 of every file in `folder`, keyed by relative path.
+    ///
+    /// `committed` is the folder `folder` was cloned from. A file there with the same
+    /// size and modification date at the same path is the same file — a clone keeps
+    /// both, and any write changes the date — so its hash comes from the committed
+    /// manifest instead of reading the bytes again.
+    func hashes(in folder: URL, includeRecoveryData: Bool, reusingFrom committed: URL? = nil) throws -> [String: String] {
+        let fm = FileManager.default
+        guard let enumerator = fm.enumerator(
+            at: folder,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsPackageDescendants]
+        ) else { throw TreeStoreError.treeFolderMissing }
+
+        let known = committed.map(committedHashes) ?? [:]
+        var result: [String: String] = [:]
+        let basePath = folder.resolvingSymlinksInPath().path
+        for case let file as URL in enumerator {
+            guard try file.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
+            let filePath = file.resolvingSymlinksInPath().path
+            guard filePath.hasPrefix(basePath + "/") else {
+                throw TreeStoreError.verificationFailed(path: file.lastPathComponent)
+            }
+            let relative = String(filePath.dropFirst(basePath.count + 1))
+            if relative == "\(Self.metadataName)/\(Self.manifestName)" { continue }
+            if !includeRecoveryData,
+               relative.hasPrefix("\(Self.metadataName)/\(Self.historyName)/") ||
+               relative.hasPrefix("\(Self.metadataName)/\(Self.trashName)/") { continue }
+            if let digest = known[relative], let committed,
+               Self.isUnchanged(file, since: committed.appendingPathComponent(relative)) {
+                result[relative] = digest
+            } else {
+                result[relative] = try sha256(file)
+            }
+        }
+        return result
+    }
+
+    func verify(hashes expected: [String: String], in folder: URL, reusingFrom committed: URL? = nil) throws {
+        let actual = try hashes(in: folder, includeRecoveryData: false, reusingFrom: committed)
+        for (path, digest) in expected where actual[path] != digest {
+            throw TreeStoreError.verificationFailed(path: path)
+        }
+        guard Set(actual.keys) == Set(expected.keys) else {
+            let path = Set(actual.keys).symmetricDifference(Set(expected.keys)).sorted().first ?? folder.path
+            throw TreeStoreError.verificationFailed(path: path)
+        }
+    }
+
+    /// The committed manifest's hashes; empty when there is none to trust (a bundle
+    /// from before manifests, or one that fails to decode), which just means hashing.
+    private func committedHashes(in folder: URL) -> [String: String] {
+        let url = folder
+            .appendingPathComponent(Self.metadataName, isDirectory: true)
+            .appendingPathComponent(Self.manifestName)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return (try? decoder.decode(BundleManifest.self, from: Data(contentsOf: url)))?.hashes ?? [:]
+    }
+
+    private static func isUnchanged(_ file: URL, since committed: URL) -> Bool {
+        let keys: Set<URLResourceKey> = [.fileSizeKey, .contentModificationDateKey]
+        guard let now = try? file.resourceValues(forKeys: keys),
+              let then = try? committed.resourceValues(forKeys: keys),
+              let size = now.fileSize, let date = now.contentModificationDate else { return false }
+        return size == then.fileSize && date == then.contentModificationDate
+    }
+}
+
+extension JSONEncoder {
+    static var pretty: JSONEncoder {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
     }
 }

@@ -48,8 +48,18 @@ public enum GEDZIPArchive {
         )
     }
 
+    /// `ditto` confines `..` entries to `directory` but recreates symbolic links as they
+    /// were stored, so an archive could plant `Media/photo.jpg -> /any/file`. No tree
+    /// needs one, and an archive carrying one is refused here instead of failing later
+    /// as an unexplained checksum mismatch.
     public static func extract(_ archive: URL, to directory: URL) throws {
         try run(["-x", "-k", archive.path, directory.path], failure: Failure.extractFailed)
+        let entries = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: [.isSymbolicLinkKey])
+        while let entry = entries?.nextObject() as? URL {
+            if (try? entry.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink == true {
+                throw Failure.extractFailed("symbolic link: \(entry.lastPathComponent)")
+            }
+        }
     }
 
     /// Whether a URL names a GEDZIP by extension. Content is not sniffed: the picker and

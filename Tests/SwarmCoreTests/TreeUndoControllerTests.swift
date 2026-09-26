@@ -186,4 +186,14 @@ struct TreeUndoControllerTests {
         tree.sourceRecords = [SourceRecord(title: "Метрическая книга")]
         return tree
     }
+
+    /// Undo entries are stored compressed, tagged so an entry kept raw (compression
+    /// failed) still reads back.
+    @Test func packedSnapshotsReadBackEitherWay() throws {
+        let json = Data(String(repeating: "{\"name\":\"Иван\"}", count: 1000).utf8)
+        let packed = TreeUndoController.pack(json)
+        #expect(packed.count < json.count)
+        #expect(try TreeUndoController.unpack(packed) == json)
+        #expect(try TreeUndoController.unpack(Data([0]) + json) == json)
+    }
 }
