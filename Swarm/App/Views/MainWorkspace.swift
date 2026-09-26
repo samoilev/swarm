@@ -1293,37 +1293,13 @@ struct MainWorkspace: View {
         guard let person = personToDelete else { return }
         let name = person.displayName(language: .current)
         undo.begin(tree)
-
-        // Remove from all unions
-        for union in tree.unions {
-            union.childrenIds.removeAll { $0 == person.id }
-            if union.partner1Id == person.id { union.partner1Id = nil }
-            if union.partner2Id == person.id { union.partner2Id = nil }
-        }
-        // Remove unions that are now truly empty. A partner-less union that still has
-        // children is a valid sibling grouping (possibly for unrelated people), so keep
-        // it — only drop unions with no partners AND no children.
-        tree.unions.removeAll { $0.partner1Id == nil && $0.partner2Id == nil && $0.childrenIds.isEmpty }
-
-        // Update homePersonId if needed
-        if tree.homePersonId == person.id {
-            tree.homePersonId = tree.people.first(where: { $0.id != person.id })?.id
-        }
-        // Update rootUnionId if needed
-        if let ruid = tree.rootUnionId, tree.unions.first(where: { $0.id == ruid }) == nil {
-            tree.rootUnionId = tree.unions.first?.id
-        }
-
-        // Remove person
-        tree.people.removeAll { $0.id == person.id }
-        tree.parentLinks.removeAll { $0.parentID == person.id || $0.childID == person.id }
+        tree.deletePerson(person.id)
 
         // Clear selection and highlight
         selectedPerson = nil
         highlightedBranch = []
         personToDelete = nil
 
-        tree.optimizeRoot()
         tree.updatedAt = Date()
         Task { @MainActor in
             do {

@@ -92,7 +92,8 @@ public extension FamilyTree {
         copy.headUnknownBranches = []
         copy.unknownRecords = []
         copy.importReport = nil
-        copy.acceptedBaselineIssueIDs = acceptedBaselineIssueIDs
+        // Not carried: accepted issue ids are written into HEAD, and some are built
+        // from names and titles. Nothing reads them back from an export.
         return copy
     }
 

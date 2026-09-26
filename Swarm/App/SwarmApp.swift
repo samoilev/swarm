@@ -23,6 +23,13 @@ struct SwarmApp: App {
             guard arguments.indices.contains(index + 1) else { return nil }
             return URL(fileURLWithPath: arguments[index + 1], isDirectory: true)
         }
+        // The UI-test host must never open the real library. Its launch arguments have
+        // been lost before (Xcode 27 launching it by URL), and the fallback below is the
+        // user's own ~/Library/Application Support/Swarm, where the tests then created
+        // trees. Stop instead.
+        if Bundle.main.bundleIdentifier == "com.samoilev.swarm.uitesthost", storageFolder == nil {
+            fatalError("UI-test host launched without --storage-folder; refusing to open the real library.")
+        }
         let initialStore = TreeStore(storageFolder: storageFolder)
         AppLanguage.prepareInitialChoice(hasExistingLibrary: !initialStore.trees.isEmpty)
         _store = State(initialValue: initialStore)

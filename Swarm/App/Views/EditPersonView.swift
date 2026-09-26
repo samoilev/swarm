@@ -646,34 +646,11 @@ struct EditPersonView: View {
     // MARK: - Relationship Actions
 
     private func removeParent(_ parent: Person) {
-        let editPerson = editingPerson
-        for union in editingTree.unions {
-            if union.childrenIds.contains(editPerson.id) && union.partnerIds.contains(parent.id) {
-                if union.partnerIds.count <= 1 && union.childrenIds.count <= 1 {
-                    editingTree.unions.removeAll { $0.id == union.id }
-                } else if union.partnerIds.count > 1 {
-                    if union.partner1Id == parent.id { union.partner1Id = nil }
-                    else if union.partner2Id == parent.id { union.partner2Id = nil }
-                } else {
-                    union.childrenIds.removeAll { $0 == editPerson.id }
-                }
-                break
-            }
-        }
-        editingTree.optimizeRoot()
-        editingTree.reconcileParentLinks()
+        editingTree.removeParent(parent.id, of: editingPerson.id)
     }
 
     private func removeSibling(_ sibling: Person) {
-        let editPerson = editingPerson
-        for union in editingTree.unions {
-            if union.childrenIds.contains(editPerson.id) && union.childrenIds.contains(sibling.id) {
-                union.childrenIds.removeAll { $0 == sibling.id }
-                break
-            }
-        }
-        editingTree.optimizeRoot()
-        editingTree.reconcileParentLinks()
+        editingTree.removeSibling(sibling.id, of: editingPerson.id)
     }
 
     private func addRelationship() {

@@ -188,40 +188,40 @@ public final class FamilyTree: Identifiable, Codable {
     }
 
     /// Merge unions that share the same partner pair, and remove empty unions.
+    ///
+    /// This runs after every structural edit, so it must never lose anything. It used to
+    /// keep only the children and marriage date/place of the union it dropped, taking
+    /// divorce and partnership events, citations, notes and imported GEDCOM detail with
+    /// it, and its parent links then fell to `reconcileParentLinks` and came back as
+    /// plain biological links. Now the survivor takes everything, the links follow it,
+    /// and two unions whose details disagree are left as they are.
     private func deduplicateUnions() {
-        // Remove unions with no partners and no children
-        unions.removeAll { $0.partnerIds.isEmpty && $0.childrenIds.isEmpty }
+        // Remove unions with nothing in them at all
+        unions.removeAll { $0.partnerIds.isEmpty && $0.childrenIds.isEmpty && !Self.carriesDetail($0) }
 
-        // Group unions by their partner pair (sorted to make order-independent)
         var merged: [Union] = []
         var seen: [Set<UUID>: Int] = [:] // partner set → index in merged
+        var redirect: [UUID: UUID] = [:] // dropped union → the one it folded into
 
         for union in unions {
             let partnerSet = Set(union.partnerIds)
 
-            // Skip lone-partner unions that carry nothing worth keeping. A single
-            // partner is still meaningful when they have children (a single parent)
-            // or recorded marriage data (a widow/widower whose spouse was removed) —
-            // dropping the latter would silently lose the marriage date/place.
-            let hasMarriageData = union.marriageDate != nil || union.marriagePlace != nil
-            if partnerSet.count < 2 && union.childrenIds.isEmpty && !hasMarriageData {
+            // A lone partner with no children and no recorded detail is an empty stub.
+            // Any detail — a widow's marriage, a note, a citation — keeps it.
+            if partnerSet.count < 2 && union.childrenIds.isEmpty && !Self.carriesDetail(union) {
                 continue
             }
 
-            if partnerSet.count == 2, let existingIdx = seen[partnerSet] {
-                // Merge into existing: combine children, keep marriage data from whichever has it
-                let existing = merged[existingIdx]
-                for cid in union.childrenIds where !existing.childrenIds.contains(cid) {
-                    existing.childrenIds.append(cid)
-                }
-                if existing.marriageDate == nil { existing.marriageDate = union.marriageDate }
-                if existing.marriagePlace == nil { existing.marriagePlace = union.marriagePlace }
+            if partnerSet.count == 2, let existingIdx = seen[partnerSet],
+               Self.canFold(union, into: merged[existingIdx]) {
+                Self.fold(union, into: merged[existingIdx])
+                redirect[union.id] = merged[existingIdx].id
             } else {
                 // Deduplicate children within a single union
                 var seenChildren = Set<UUID>()
                 union.childrenIds = union.childrenIds.filter { seenChildren.insert($0).inserted }
 
-                seen[partnerSet] = merged.count
+                if partnerSet.count == 2, seen[partnerSet] == nil { seen[partnerSet] = merged.count }
                 merged.append(union)
             }
         }
@@ -236,10 +236,75 @@ public final class FamilyTree: Identifiable, Codable {
         for u in merged where u.partnerIds.isEmpty {
             u.childrenIds.removeAll { childrenInPartnerUnions.contains($0) }
         }
-        // Remove now-empty partner-less unions
-        merged.removeAll { $0.partnerIds.isEmpty && $0.childrenIds.isEmpty }
+        // Remove partner-less unions that are now empty
+        merged.removeAll { $0.partnerIds.isEmpty && $0.childrenIds.isEmpty && !Self.carriesDetail($0) }
 
         unions = merged
+        redirectParentLinks(redirect)
+    }
+
+    private static func carriesDetail(_ union: Union) -> Bool {
+        !union.events.isEmpty || !union.citations.isEmpty || !union.unknownBranches.isEmpty || !union.marriageExtras.isEmpty
+    }
+
+    /// Whether `other` can fold into `union` without losing anything: where both record
+    /// the same kind of event, every detail both of them state has to agree.
+    private static func canFold(_ other: Union, into union: Union) -> Bool {
+        func agree<T: Equatable>(_ a: T?, _ b: T?) -> Bool {
+            a == nil || b == nil || a == b
+        }
+        for event in other.events {
+            guard let mine = union.event(ofKind: event.kind) else { continue }
+            guard agree(mine.date, event.date), agree(mine.place, event.place), agree(mine.value, event.value),
+                  agree(mine.notes, event.notes), agree(mine.typeName, event.typeName) else { return false }
+        }
+        return union.marriageExtras.isEmpty || other.marriageExtras.isEmpty || union.marriageExtras == other.marriageExtras
+    }
+
+    private static func fold(_ other: Union, into union: Union) {
+        for cid in other.childrenIds where !union.childrenIds.contains(cid) {
+            union.childrenIds.append(cid)
+        }
+        for event in other.events {
+            guard var mine = union.event(ofKind: event.kind) else {
+                union.events.append(event)
+                continue
+            }
+            mine.date = mine.date ?? event.date
+            mine.place = mine.place ?? event.place
+            mine.value = mine.value ?? event.value
+            mine.notes = mine.notes ?? event.notes
+            mine.typeName = mine.typeName ?? event.typeName
+            mine.citations += event.citations.filter { citation in !mine.citations.contains { $0.id == citation.id } }
+            mine.mediaIDs += event.mediaIDs.filter { !mine.mediaIDs.contains($0) }
+            mine.rawGEDCOMBranches += event.rawGEDCOMBranches.filter { !mine.rawGEDCOMBranches.contains($0) }
+            union.replaceEvent(mine)
+        }
+        union.citations += other.citations.filter { citation in !union.citations.contains { $0.id == citation.id } }
+        union.unknownBranches += other.unknownBranches.filter { !union.unknownBranches.contains($0) }
+        if union.marriageExtras.isEmpty { union.marriageExtras = other.marriageExtras }
+    }
+
+    /// Point the parent links of folded unions at the union they folded into. A child
+    /// listed in both leaves two links for one parent; those become one when they say
+    /// the same kind of parentage, and both stay when they disagree.
+    private func redirectParentLinks(_ redirect: [UUID: UUID]) {
+        guard !redirect.isEmpty else { return }
+        var kept: [ParentLink] = []
+        var index: [ParentLinkKey: Int] = [:]
+        for var link in parentLinks {
+            if let unionID = link.unionID, let target = redirect[unionID] { link.unionID = target }
+            let key = ParentLinkKey(parentID: link.parentID, childID: link.childID, unionID: link.unionID)
+            if let i = index[key], kept[i].kind == link.kind {
+                kept[i].citations += link.citations.filter { citation in !kept[i].citations.contains { $0.id == citation.id } }
+                kept[i].notes = kept[i].notes ?? link.notes
+                if link.isUncertain == true { kept[i].isUncertain = true }
+            } else {
+                if index[key] == nil { index[key] = kept.count }
+                kept.append(link)
+            }
+        }
+        parentLinks = kept
     }
 
     /// Link `targetId` to `person` in the given role (read from `person`'s point of

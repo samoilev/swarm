@@ -734,4 +734,64 @@ struct DefectRegressionTests {
         #expect(!FileManager.default.fileExists(atPath: saved.appendingPathComponent("Media/x.jp").path))
         #expect(FileManager.default.fileExists(atPath: saved.appendingPathComponent(".Swarm/Trash/20250101-000000-000--Media--x.jpg").path))
     }
+
+    private static let acceptedPersonID = "5B0C3A1E-2222-4333-8444-955566677788"
+    private static let deathBeforeBirth = "person.\(acceptedPersonID).chronology.death-before-birth"
+
+    private static func fileWithAnError(head: String) -> String {
+        """
+        0 HEAD
+        \(head)0 @I1@ INDI
+        1 _FTSID \(acceptedPersonID)
+        1 NAME Иван /Петров/
+        1 BIRT
+        2 DATE 1950
+        1 DEAT
+        2 DATE 1900
+        0 TRLR
+        """
+    }
+
+    /// Every load used to accept every error the file held, so an error the app wrote
+    /// itself stopped blocking saves after a relaunch. What the user accepted now
+    /// travels in the file; only a file without that record falls back to accepting all.
+    @Test func acceptedErrorsFollowTheFileNotTheLaunch() throws {
+        let legacy = try GEDCOMCodec.parse(Self.fileWithAnError(head: "")).tree
+        #expect(legacy.acceptedBaselineIssueIDs.contains(Self.deathBeforeBirth))
+
+        let listed = try GEDCOMCodec.parse(Self.fileWithAnError(head: "1 _ACCEPTED\n2 _ISSUE \(Self.deathBeforeBirth)\n")).tree
+        #expect(listed.acceptedBaselineIssueIDs.contains(Self.deathBeforeBirth))
+
+        let unlisted = try GEDCOMCodec.parse(Self.fileWithAnError(head: "1 _ACCEPTED\n")).tree
+        #expect(unlisted.acceptedBaselineIssueIDs.isEmpty)
+        let issues = TreeValidator.validate(unlisted, context: .init(acceptedBaselineIssueIDs: unlisted.acceptedBaselineIssueIDs))
+        #expect(issues.contains { $0.id == Self.deathBeforeBirth && $0.isBlocking })
+    }
+
+    /// An error accepted at import stays accepted through save and relaunch, and is
+    /// written into the file rather than recomputed.
+    @Test func anErrorAcceptedAtImportSurvivesSaveAndRelaunch() async throws {
+        let temp = try Temp()
+        let source = temp.url.appendingPathComponent("Импорт.ged")
+        try Self.fileWithAnError(head: "1 GEDC\n2 VERS 5.5.1\n").write(to: source, atomically: true, encoding: .utf8)
+        let library = temp.url.appendingPathComponent("Library", isDirectory: true)
+        let store = TreeStore(storageFolder: library)
+        let staged = try store.stageImport(from: source)
+        let tree = try await store.importGEDCOM(from: staged).tree
+        store.discardImportPreview(at: staged)
+        _ = try await store.saveTree(tree)
+
+        let saved = try String(contentsOf: store.gedFileURL(for: tree), encoding: .utf8)
+        #expect(saved.contains("2 _ISSUE \(Self.deathBeforeBirth)"))
+        let reloaded = try #require(TreeStore(storageFolder: library).trees.first)
+        #expect(reloaded.acceptedBaselineIssueIDs == [Self.deathBeforeBirth])
+    }
+
+    /// Issue ids can be built from names and titles, and they are written into HEAD,
+    /// so a privacy export must not carry them.
+    @Test func aPrivacyExportCarriesNoAcceptedIssueIDs() throws {
+        let tree = try GEDCOMCodec.parse(Self.fileWithAnError(head: "")).tree
+        #expect(!tree.acceptedBaselineIssueIDs.isEmpty)
+        #expect(tree.redactingLivingPeople().acceptedBaselineIssueIDs.isEmpty)
+    }
 }

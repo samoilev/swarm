@@ -36,6 +36,9 @@ public struct GEDCOMParser {
         /// Xrefs of records that repeated an earlier record's xref or stable id and were
         /// given a fresh id instead. Surfaced as import warnings.
         public var reassignedXrefs: [String] = []
+        /// Validation errors the user accepted, from `HEAD._ACCEPTED`. Nil when the file
+        /// has no such block: written by another program or before Swarm recorded it.
+        public var acceptedIssueIDs: Set<String>?
     }
 
     /// Level-1 tags the parser fully models inside an INDI record. Anything else at
@@ -56,7 +59,7 @@ public struct GEDCOMParser {
     private static let modeledRecordTags: Set<String> = ["HEAD", "INDI", "FAM", "TRLR"]
     private static let modeledHeadTags: Set<String> = [
         "_TREEID", "_FTSVER", "_NAME", "_SUBTITLE", "_HOME", "_ROOT",
-        "_CREATED", "_UPDATED", "SCHMA",
+        "_CREATED", "_UPDATED", "SCHMA", "_ACCEPTED",
     ]
 
     /// ISO-8601 for the `_CREATED`/`_UPDATED` HEAD stamps. GEDCOM's own DATE is
@@ -89,6 +92,7 @@ public struct GEDCOMParser {
         var treeUpdatedAt: Date? = nil
         var schemaVersion = 1
         var homeXref: String? = nil
+        var acceptedIssueIDs: Set<String>?
         var rootFamXref: String? = nil
 
         // Maps: GEDCOM xref → UUID
@@ -137,9 +141,16 @@ public struct GEDCOMParser {
             guard let head = parseLine(record[0]) else { continue }
 
             if head.tag == "HEAD" {
+                var level1Tag = ""
                 for raw in record.dropFirst() {
-                    guard let line = parseLine(raw), line.level == 1 else { continue }
+                    guard let line = parseLine(raw) else { continue }
+                    if line.level == 2, level1Tag == "_ACCEPTED", line.tag == "_ISSUE" {
+                        acceptedIssueIDs?.insert(line.value)
+                    }
+                    guard line.level == 1 else { continue }
+                    level1Tag = line.tag
                     switch line.tag {
+                    case "_ACCEPTED": acceptedIssueIDs = acceptedIssueIDs ?? []
                     case "_NAME": treeName = line.value
                     case "_SUBTITLE": treeSubtitle = line.value
                     case "_TREEID": treeId = UUID(uuidString: line.value.trimmingCharacters(in: .whitespaces))
@@ -210,7 +221,8 @@ public struct GEDCOMParser {
             updatedAt: treeUpdatedAt,
             unknownRecords: unknownRecords,
             schemaTags: schemaTags,
-            reassignedXrefs: reassignedXrefs
+            reassignedXrefs: reassignedXrefs,
+            acceptedIssueIDs: acceptedIssueIDs
         )
     }
 

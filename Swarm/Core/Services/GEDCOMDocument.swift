@@ -651,10 +651,12 @@ public enum GEDCOMCodec {
         // Only errors need baselining: a warning never blocks a save (see
         // TreeValidator's isBlocking rule), so accepting warnings here only widened
         // the set with ids that mean nothing. Matches what the import path records.
-        // ponytail: this baselines on every parse, including a plain load, so damage
-        // the app itself wrote is forgiven on the next launch. Narrowing that needs
-        // the load path to tell an imported tree from an app-written one.
-        tree.acceptedBaselineIssueIDs = Set(validation.filter { $0.severity == .error }.map(\.id))
+        // A file Swarm saved lists what the user accepted, and only those errors that
+        // still exist stay accepted: an error the app itself wrote keeps blocking.
+        // Without that list — a foreign file, or one saved before Swarm kept it — every
+        // current error is accepted once, as before, and the next save records it.
+        let errorIDs = Set(validation.filter { $0.severity == .error }.map(\.id))
+        tree.acceptedBaselineIssueIDs = parsed.acceptedIssueIDs.map { $0.intersection(errorIDs) } ?? errorIDs
         return ImportResult(tree: tree, document: document, report: report)
     }
 

@@ -104,6 +104,12 @@ public struct GEDCOMSerializer {
         if let rootId = tree.rootUnionId, let xref = famXref[rootId] {
             lines.append("1 _ROOT @\(xref)@")
         }
+        // The validation errors the user accepted. Written even when empty: a file
+        // without the block predates it, and loading one accepts its current errors.
+        lines.append("1 _ACCEPTED")
+        for id in tree.acceptedBaselineIssueIDs.sorted() {
+            lines.append("2 _ISSUE \(singleLineValue(id))")
+        }
 
         // INDI records
         for p in tree.people {

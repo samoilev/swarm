@@ -206,4 +206,114 @@ struct FamilyTreeTests {
         #expect(FirstRelative.spouse.inheritsSurname == false)
         #expect(FirstRelative.allCases.filter(\.inheritsSurname).count == 3)
     }
+
+    // MARK: - Lossless family merging
+
+    private static func couple(_ families: String) -> String {
+        """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        0 @I1@ INDI
+        1 NAME Иван /Петров/
+        1 SEX M
+        0 @I2@ INDI
+        1 NAME Анна /Петрова/
+        1 SEX F
+        0 @I3@ INDI
+        1 NAME Пётр /Петров/
+        1 FAMC @F1@
+        0 @I4@ INDI
+        1 NAME Ольга /Петрова/
+        1 FAMC @F2@
+        2 PEDI adopted
+        0 @S1@ SOUR
+        1 TITL Метрическая книга
+        \(families)
+        0 TRLR
+        """
+    }
+
+    /// Two FAM records for one couple are folded into one after every edit. The one
+    /// dropped used to take its divorce, citation, custom tags and the adoption of its
+    /// child with it; everything now moves to the family that stays.
+    @Test func foldingDuplicateFamiliesKeepsEverythingTheyRecorded() throws {
+        let imported = try GEDCOMCodec.parse(Self.couple("""
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I3@
+        1 MARR
+        2 DATE 1901
+        0 @F2@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I4@
+        1 DIV
+        2 DATE 1920
+        1 SOUR @S1@
+        2 PAGE 12
+        1 _CUSTOM keep me
+        """))
+        let tree = imported.tree
+        let olga = try #require(tree.people.first { $0.givenNames == "Ольга" })
+
+        tree.optimizeRoot()
+        tree.reconcileParentLinks()
+
+        #expect(tree.unions.count == 1)
+        let family = try #require(tree.unions.first)
+        #expect(family.event(ofKind: .marriage)?.date?.year == 1901)
+        #expect(family.event(ofKind: .divorce)?.date?.year == 1920)
+        #expect(family.citations.map(\.page) == ["12"])
+        #expect(family.unknownBranches.contains { $0.first?.contains("_CUSTOM keep me") == true })
+        let olgasLinks = tree.parentLinks.filter { $0.childID == olga.id }
+        #expect(olgasLinks.count == 2)
+        #expect(olgasLinks.allSatisfy { $0.kind == .adoptive && $0.unionID == family.id })
+
+        let saved = try GEDCOMCodec.serialize(tree: tree, document: imported.document).gedcom
+        let reread = try GEDCOMCodec.parse(saved).tree
+        #expect(reread.unions.first?.event(ofKind: .divorce)?.date?.year == 1920)
+        #expect(saved.contains("_CUSTOM keep me"))
+        #expect(saved.contains("PEDI adopted"))
+    }
+
+    /// When both records state the same event differently, folding would have to throw
+    /// one version away, so both families stay.
+    @Test func duplicateFamiliesThatDisagreeAreLeftApart() throws {
+        let tree = try GEDCOMCodec.parse(Self.couple("""
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I3@
+        1 DIV
+        2 DATE 1920
+        0 @F2@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I4@
+        1 DIV
+        2 DATE 1925
+        """)).tree
+
+        tree.optimizeRoot()
+
+        #expect(tree.unions.count == 2)
+        #expect(Set(tree.unions.compactMap { $0.event(ofKind: .divorce)?.date?.year }) == [1920, 1925])
+    }
+
+    /// A single-partner family with no children used to survive only if it held a
+    /// marriage date or place. A citation or any other recorded detail keeps it too.
+    @Test func aLonePartnerFamilyWithOnlyACitationIsKept() throws {
+        let tree = try GEDCOMCodec.parse(Self.couple("""
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 SOUR @S1@
+        2 PAGE 7
+        """)).tree
+
+        tree.optimizeRoot()
+
+        #expect(tree.unions.contains { $0.citations.map(\.page) == ["7"] })
+    }
 }

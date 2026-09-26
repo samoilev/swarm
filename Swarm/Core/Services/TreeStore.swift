@@ -272,12 +272,6 @@ public final class TreeStore {
                 let imported = try GEDCOMCodec.parse(ged)
                 let parsed = imported.tree
                 let tree = parsed
-                let originalImport = folder.appendingPathComponent(Self.originalImportName)
-                if fm.fileExists(atPath: originalImport.path) {
-                    tree.acceptedBaselineIssueIDs = Set(
-                        TreeValidator.validate(tree).filter { $0.severity == .error }.map(\.id)
-                    )
-                }
                 // Identity: the embedded _TREEID is authoritative; fall back to a UUID
                 // folder name (old layout) and finally to the freshly-generated id.
                 if let folderID = UUID(uuidString: folder.lastPathComponent),

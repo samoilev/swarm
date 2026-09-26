@@ -288,16 +288,7 @@ struct AddPersonView: View {
             person.setStructuredPlace(selectedBurialPlace.placeReference, for: .burial)
         }
 
-        tree.people.append(person)
-
-        // Apply all chosen relationships (parents before siblings, spouses before
-        // children) so multiple relatives merge into shared unions correctly.
-        for rel in pendingRels.sorted(by: { $0.kind.applyOrder < $1.kind.applyOrder }) {
-            guard let targetId = rel.personId else { continue }
-            tree.addRelation(rel.kind, person: person, target: targetId)
-        }
-
-        tree.optimizeRoot()
+        tree.addPerson(person, relations: pendingRels.compactMap { rel in rel.personId.map { (rel.kind, $0) } })
         tree.updatedAt = Date()
         isSaving = true
         Task { @MainActor in
