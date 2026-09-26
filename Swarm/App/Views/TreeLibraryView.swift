@@ -348,22 +348,27 @@ struct TreeLibraryView: View {
 
         sepiaToolbarSpacer(.flexible)
 
+        // Each control is its own item with a fixed spacer after it — the same gap the
+        // workspace toolbar puts between its groups. Packed as one group they sat almost
+        // touching, which read as one crowded strip rather than five controls.
         if showsFilter {
             sepiaToolbarItem(placement: .automatic, sharedBackground: .hidden) {
                 filterField()
             }
+            sepiaToolbarSpacer(.fixed)
         }
 
         if trees.count > 1 {
             sepiaToolbarItem(placement: .automatic, sharedBackground: .hidden) {
                 sortMenu
             }
+            sepiaToolbarSpacer(.fixed)
         }
 
-        sepiaToolbarItemGroup(placement: .primaryAction, sharedBackground: .hidden) {
-            // On an empty library these two live in the empty state itself, 300pt below.
-            // Showing them twice on one screen is noise, not reinforcement.
-            if !trees.isEmpty {
+        // On an empty library these two live in the empty state itself, 300pt below.
+        // Showing them twice on one screen is noise, not reinforcement.
+        if !trees.isEmpty {
+            sepiaToolbarItem(placement: .primaryAction, sharedBackground: .hidden) {
                 // Icon only, so the row still fits a ~600pt window. Once the toolbar
                 // overflows, AppKit collapses the flexible spacer and left-packs whatever
                 // survived into the middle of the bar — keeping the row narrow is the only
@@ -380,7 +385,10 @@ struct TreeLibraryView: View {
                 .buttonStyle(.plain)
                 .help(Self.importHint)
                 .accessibilityLabel(L10n.tr("Импорт GEDCOM / GEDZIP"))
+            }
+            sepiaToolbarSpacer(.fixed, placement: .primaryAction)
 
+            sepiaToolbarItem(placement: .primaryAction, sharedBackground: .hidden) {
                 // Toolbars drop a Label's title by default. This is the front door of the
                 // app, and a bare + does not name itself.
                 Button(action: onCreate) {
@@ -397,7 +405,10 @@ struct TreeLibraryView: View {
                 }
                 .buttonStyle(.plain)
             }
+            sepiaToolbarSpacer(.fixed, placement: .primaryAction)
+        }
 
+        sepiaToolbarItem(placement: .primaryAction, sharedBackground: .hidden) {
             // Recovery is a once-a-year rescue tool. It stays reachable, but it no
             // longer sits at the front door with the same weight as creating a tree.
             Menu {
