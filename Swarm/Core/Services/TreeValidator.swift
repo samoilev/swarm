@@ -407,7 +407,8 @@ public enum TreeValidator {
     /// a parent or long after that parent died. All warnings — each has a legitimate
     /// (if rare) explanation, and a research file should never be blocked over one.
     private static func validateRelativeChronology(_ tree: FamilyTree, into issues: inout [TreeIssue]) {
-        let byID = Dictionary(uniqueKeysWithValues: tree.people.map { ($0.id, $0) })
+        // Duplicate ids are reported by `addDuplicateIDs`; this lookup must not trap on them.
+        let byID = Dictionary(tree.people.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         func year(_ person: Person, _ kind: GenealogyEvent.Kind) -> Int? {
             person.event(ofKind: kind)?.date?.year
         }

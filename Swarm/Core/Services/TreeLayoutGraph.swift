@@ -41,7 +41,7 @@ struct LayoutGraph {
             union.partnerIds.contains { index.byId[$0] != nil }
         }
 
-        let fileOrder = Dictionary(uniqueKeysWithValues: rawUnions.enumerated().map { ($0.element.id, $0.offset) })
+        let fileOrder = Dictionary(rawUnions.enumerated().map { ($0.element.id, $0.offset) }, uniquingKeysWith: { first, _ in first })
         let sortedUnions = rawUnions.sorted { lhs, rhs in
             let l = Self.marriageKey(lhs), r = Self.marriageKey(rhs)
             if l != r { return l < r }

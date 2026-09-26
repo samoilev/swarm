@@ -541,6 +541,7 @@
 "Ошибка в строке GEDCOM: %@." = "Error in GEDCOM line: %@.";
 "Ошибка в структуре GEDCOM, строка %@: %@." = "GEDCOM structure error at line %@: %@.";
 "Не найдена запись @%@@." = "Record @%@@ was not found.";
+"Запись @%@@ повторяет идентификатор другой записи. Ей присвоен новый идентификатор, а ссылки на @%@@ ведут к первой такой записи." = "Record @%@@ repeats another record’s identifier. It was given a new one, and links to @%@@ point to the first such record.";
 "Связанный файл не найден: %@." = "Linked file not found: %@.";
 "«%@» не будет показано на карте." = "“%@” will not be shown on the map.";
 "Не найден файл портрета «%@»." = "Portrait file “%@” not found.";

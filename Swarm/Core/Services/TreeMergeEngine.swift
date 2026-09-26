@@ -422,9 +422,9 @@ public final class TreeMergeEngine {
         attachmentIDMap: [String: String],
         conflicts: [MergeConflict]
     ) {
-        let choices = Dictionary(uniqueKeysWithValues: conflicts
+        let choices = Dictionary(conflicts
             .filter { $0.localPersonID == local.id && $0.incomingPersonID == incoming.id }
-            .map { ($0.field, $0.choice) })
+            .map { ($0.field, $0.choice) }, uniquingKeysWith: { first, _ in first })
 
         local.names = choose(local.names, incoming.names, choice: choices["names"] ?? .both)
         let incomingEvents = incoming.events.map { value in

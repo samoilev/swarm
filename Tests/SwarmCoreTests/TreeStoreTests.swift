@@ -472,4 +472,66 @@ struct TreeStoreTests {
         #expect(summary.people == 3)
         #expect(revisions.count == 2)
     }
+
+    /// `load()` skips `Archived`, `Recovery` and hidden folders, so a tree whose name
+    /// became one of those folder names was saved and then never listed again.
+    @Test(arguments: ["Archived", "recovery", ".Семья", "..."])
+    func treesNamedLikeReservedFoldersStayInTheLibrary(_ name: String) async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = FamilyTree(name: name)
+        tree.people = [Person(givenNames: "Анна")]
+        try await store.addTreeVerified(tree)
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        #expect(reloaded.trees.map(\.id) == [tree.id])
+        #expect(reloaded.trees.first?.name == name)
+        #expect(reloaded.lastLoadError == nil)
+    }
+
+    /// A library folder that cannot be listed used to load as an empty library, which
+    /// reads as every tree having been lost.
+    @Test func anUnreadableLibraryReportsInsteadOfLookingEmpty() async throws {
+        let temp = Temp()
+        try await TreeStore(storageFolder: temp.url).addTreeVerified(makeTree())
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: temp.url.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: temp.url.path) }
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        #expect(reloaded.trees.isEmpty)
+        #expect(reloaded.lastLoadError != nil)
+    }
+
+    /// A save swaps folders with two renames. A crash between them leaves the committed
+    /// tree only in a hidden `.rollback-*` folder, which the next launch must put back.
+    @Test func aTreeLeftHiddenByAnInterruptedSaveIsRestoredOnLaunch() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
+        let rollback = temp.url.appendingPathComponent(".rollback-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.moveItem(at: folder, to: rollback)
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        #expect(reloaded.trees.map(\.id) == [tree.id])
+        #expect(Set(reloaded.trees.first?.people.map(\.givenNames) ?? []) == ["Иван", "Мария"])
+        #expect(!FileManager.default.fileExists(atPath: rollback.path))
+    }
+
+    /// When the swap completed and only the cleanup failed, the live tree is current and
+    /// the leftover is a recovery copy: it is neither restored as a duplicate nor deleted.
+    @Test func rollbackDebrisBesideItsLiveTreeIsLeftAlone() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
+        let rollback = temp.url.appendingPathComponent(".rollback-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.copyItem(at: folder, to: rollback)
+
+        let reloaded = TreeStore(storageFolder: temp.url)
+        #expect(reloaded.trees.map(\.id) == [tree.id])
+        #expect(FileManager.default.fileExists(atPath: rollback.path))
+    }
 }

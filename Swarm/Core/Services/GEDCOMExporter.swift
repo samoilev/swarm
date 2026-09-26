@@ -45,7 +45,15 @@ public struct GEDCOMSerializer {
             existing: tree.sourceRecords.map(\.gedcomXref),
             prefix: "S"
         )
-        let attachmentByID = Dictionary(uniqueKeysWithValues: tree.people.flatMap(\.attachments).map { ($0.id.uuidString, $0) })
+        let attachmentByID = Dictionary(
+            tree.people.flatMap(\.attachments).map { ($0.id.uuidString, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
+        // Grouped once: filtering every link per person per family made each save
+        // quadratic in the size of the tree. Grouping keeps each group in link order.
+        struct LinkKey: Hashable { let child: UUID; let union: UUID? }
+        let linksByChildAndUnion = Dictionary(grouping: tree.parentLinks) { LinkKey(child: $0.childID, union: $0.unionID) }
 
         var lines: [String] = []
         var photos: [Photo] = []
@@ -220,7 +228,7 @@ public struct GEDCOMSerializer {
             for pu in idx.childOfAll[p.id] ?? [] {
                 guard let fx = famXref[pu.id] else { continue }
                 lines.append("1 FAMC @\(fx)@")
-                let links = tree.parentLinks.filter { $0.childID == p.id && $0.unionID == pu.id }
+                let links = linksByChildAndUnion[LinkKey(child: p.id, union: pu.id)] ?? []
                 let kinds = Set(links.map(\.kind))
                 let kind = kinds.count == 1 ? kinds.first! : (kinds.isEmpty ? .biological : .uncertain)
                 switch kind {

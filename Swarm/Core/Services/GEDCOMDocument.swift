@@ -481,9 +481,11 @@ public enum GEDCOMCodec {
             if record.tag == "TRLR" {
                 appendNewOwnedRecords()
                 if let replacement = canonicalByKey[key] { records.append(replacement); emitted.insert(key) }
-            } else if let replacement = canonicalByKey[key] {
+            } else if let replacement = canonicalByKey[key], emitted.insert(key).inserted {
+                // Once per key: a file that repeats an xref has two originals for it, and
+                // emitting the replacement for both wrote the first record twice. The
+                // repeat was re-numbered by the serializer and is appended before TRLR.
                 records.append(replacement)
-                emitted.insert(key)
             }
             // An original app-owned record absent from the canonical document was
             // intentionally deleted and is therefore omitted.
@@ -554,6 +556,15 @@ public enum GEDCOMCodec {
                 severity: .warning,
                 message: L10n.tr("Не найдена запись @\(pointer)@."),
                 recordXref: pointer
+            ))
+        }
+
+        for (occurrence, xref) in parsed.reassignedXrefs.enumerated() {
+            diagnostics.append(ImportDiagnostic(
+                id: "gedcom.reassigned-id.\(xref).\(occurrence)",
+                severity: .warning,
+                message: L10n.tr("Запись @\(xref)@ повторяет идентификатор другой записи. Ей присвоен новый идентификатор, а ссылки на @\(xref)@ ведут к первой такой записи."),
+                recordXref: xref
             ))
         }
 

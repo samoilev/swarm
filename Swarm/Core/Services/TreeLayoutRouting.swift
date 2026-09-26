@@ -316,7 +316,7 @@ struct LayoutRouting {
     /// the assignment allows.
     private mutating func compactLanes(_ indices: [Int]) {
         let used = Set(indices.map { runs[$0].lane }).sorted()
-        let rank = Dictionary(uniqueKeysWithValues: used.enumerated().map { ($0.element, $0.offset) })
+        let rank = Dictionary(used.enumerated().map { ($0.element, $0.offset) }, uniquingKeysWith: { first, _ in first })
         for index in indices { runs[index].lane = rank[runs[index].lane]! }
     }
 

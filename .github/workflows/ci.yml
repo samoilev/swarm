@@ -58,13 +58,16 @@ jobs:
           restore-keys: |
             spm-${{ runner.os }}-
 
+      # Warnings fail the build. The one warning CI carried for months was a Swift 6
+      # language-mode error in waiting. Both steps pass the same flags so `swift test`
+      # reuses the build instead of compiling everything a second time.
       - name: Build (all targets)
-        run: swift build
+        run: swift build -Xswiftc -warnings-as-errors
 
       # Full Xcode on the runner provides the Swift Testing frameworks, so plain
       # `swift test` works here (locally, Scripts/run-tests.sh adds the paths).
       - name: Test
-        run: swift test
+        run: swift test -Xswiftc -warnings-as-errors
 
   # Formatting is a text check with no Apple dependency, so it runs on Ubuntu at
   # the 1x rate instead of macOS at 10x.
@@ -135,3 +138,33 @@ jobs:
             echo "::error::macOS 26 API outside Swarm/App/Theme/SepiaGlass.swift (see the shims there)." >&2
             exit 1
           fi
+
+      # `Dictionary(uniqueKeysWithValues:)` traps on a repeated key, and the keys Swarm
+      # builds dictionaries from trace back to files other programs wrote. It killed
+      # the app mid-import four times; choose the winner with `uniquingKeysWith:`.
+      - name: No trapping dictionary initializers
+        run: |
+          if grep -rn --include='*.swift' 'uniqueKeysWithValues' Swarm/; then
+            echo "::error::Dictionary(uniqueKeysWithValues:) traps on a duplicate key; use Dictionary(_:uniquingKeysWith:)." >&2
+            exit 1
+          fi
+
+      # These four files are already too big to change comfortably. New behaviour goes
+      # into a new type, and a cap only ever moves down: lower it in the same commit
+      # that shrinks its file.
+      - name: Oversized files do not grow
+        run: |
+          fail=0
+          while read -r cap file; do
+            lines=$(wc -l < "$file" | tr -d " ")
+            if [ "$lines" -gt "$cap" ]; then
+              echo "::error file=$file::$lines lines, over its cap of $cap. Put new behaviour in a new type." >&2
+              fail=1
+            fi
+          done <<'CAPS'
+          1605 Swarm/Core/Services/TreeStore.swift
+          1461 Swarm/App/Views/MainWorkspace.swift
+          1438 Swarm/App/Views/EditPersonView.swift
+          1413 Swarm/App/Views/Canvas/TreeCanvasView.swift
+          CAPS
+          exit $fail

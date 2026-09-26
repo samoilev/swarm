@@ -33,6 +33,9 @@ public struct GEDCOMParser {
         public var unknownRecords: [[String]] = []
         /// `HEAD.SCHMA.TAG` extension declarations a 7.0 file arrived with, tag to URI.
         public var schemaTags: [String: String] = [:]
+        /// Xrefs of records that repeated an earlier record's xref or stable id and were
+        /// given a fresh id instead. Surfaced as import warnings.
+        public var reassignedXrefs: [String] = []
     }
 
     /// Level-1 tags the parser fully models inside an INDI record. Anything else at
@@ -59,7 +62,9 @@ public struct GEDCOMParser {
     /// ISO-8601 for the `_CREATED`/`_UPDATED` HEAD stamps. GEDCOM's own DATE is
     /// day-granular and, once imported, is re-emitted verbatim from the preserved
     /// HEAD — neither of which can say when the user last saved this tree.
-    static let timestampFormatter: ISO8601DateFormatter = {
+    /// `nonisolated(unsafe)`: ISO8601DateFormatter is documented thread-safe, and this
+    /// instance is never mutated after it is built.
+    nonisolated(unsafe) static let timestampFormatter: ISO8601DateFormatter = {
         let f = ISO8601DateFormatter()
         f.formatOptions = [.withInternetDateTime]
         return f
@@ -91,12 +96,34 @@ public struct GEDCOMParser {
         var famUUIDs: [String: UUID] = [:]
         var sourceUUIDs: [String: UUID] = [:]
 
-        // Pre-scan: assign UUIDs to all INDI and FAM records (exact tag match).
-        for record in records {
-            guard let head = parseLine(record[0]), let xref = head.xref else { continue }
-            if head.tag == "INDI" { indiUUIDs[xref] = stableUUID(in: record) ?? UUID() }
-            else if head.tag == "FAM" { famUUIDs[xref] = stableUUID(in: record) ?? UUID() }
-            else if head.tag == "SOUR" { sourceUUIDs[xref] = stableUUID(in: record) ?? UUID() }
+        // Pre-scan: assign a UUID to every INDI/FAM/SOUR record, per record rather than
+        // per xref. A file that repeats an xref, or gives two records one UID/_FTSID,
+        // used to hand both records the same id and trap in a keyed dictionary further
+        // down. The repeat gets a fresh id; pointers keep resolving to the first record.
+        var recordUUIDs: [Int: UUID] = [:]
+        var usedIDs = Set<UUID>()
+        var reassignedXrefs: [String] = []
+        for (index, record) in records.enumerated() {
+            guard let head = parseLine(record[0]), let xref = head.xref,
+                  ["INDI", "FAM", "SOUR"].contains(head.tag) else { continue }
+            var id = stableUUID(in: record) ?? UUID()
+            let repeatsXref = switch head.tag {
+            case "INDI": indiUUIDs[xref] != nil
+            case "FAM": famUUIDs[xref] != nil
+            default: sourceUUIDs[xref] != nil
+            }
+            if repeatsXref || usedIDs.contains(id) {
+                id = UUID()
+                reassignedXrefs.append(xref)
+            }
+            usedIDs.insert(id)
+            recordUUIDs[index] = id
+            guard !repeatsXref else { continue }
+            switch head.tag {
+            case "INDI": indiUUIDs[xref] = id
+            case "FAM": famUUIDs[xref] = id
+            default: sourceUUIDs[xref] = id
+            }
         }
 
         var people: [Person] = []
@@ -106,7 +133,7 @@ public struct GEDCOMParser {
         var headUnknownBranches: [[String]] = []
         var schemaTags: [String: String] = [:]
 
-        for record in records {
+        for (index, record) in records.enumerated() {
             guard let head = parseLine(record[0]) else { continue }
 
             if head.tag == "HEAD" {
@@ -129,7 +156,7 @@ public struct GEDCOMParser {
                     guard let line = branch.first.flatMap(parseLine) else { return false }
                     return !modeledHeadTags.contains(line.tag)
                 }
-            } else if head.tag == "INDI", let xref = head.xref, let uuid = indiUUIDs[xref] {
+            } else if head.tag == "INDI", let xref = head.xref, let uuid = recordUUIDs[index] {
                 people.append(parseIndividual(
                     record: record,
                     uuid: uuid,
@@ -137,7 +164,7 @@ public struct GEDCOMParser {
                     sourceUUIDs: sourceUUIDs,
                     mediaFolder: mediaFolder
                 ))
-            } else if head.tag == "FAM", let xref = head.xref, let uuid = famUUIDs[xref] {
+            } else if head.tag == "FAM", let xref = head.xref, let uuid = recordUUIDs[index] {
                 unions.append(parseFamily(
                     record: record,
                     uuid: uuid,
@@ -145,7 +172,7 @@ public struct GEDCOMParser {
                     indiUUIDs: indiUUIDs,
                     sourceUUIDs: sourceUUIDs
                 ))
-            } else if head.tag == "SOUR", let xref = head.xref, let uuid = sourceUUIDs[xref] {
+            } else if head.tag == "SOUR", let xref = head.xref, let uuid = recordUUIDs[index] {
                 sourceRecords.append(parseSource(record: record, uuid: uuid, xref: xref))
                 // Keep the exact source record in the preservation collection until
                 // every supported source substructure is modeled by the editor.
@@ -161,8 +188,8 @@ public struct GEDCOMParser {
         let rootUnionId = rootFamXref.flatMap { famUUIDs[$0] }
         let parentLinks = parseParentLinks(
             records: records,
+            recordUUIDs: recordUUIDs,
             indiUUIDs: indiUUIDs,
-            famUUIDs: famUUIDs,
             unions: unions,
             sourceUUIDs: sourceUUIDs
         )
@@ -182,7 +209,8 @@ public struct GEDCOMParser {
             createdAt: treeCreatedAt,
             updatedAt: treeUpdatedAt,
             unknownRecords: unknownRecords,
-            schemaTags: schemaTags
+            schemaTags: schemaTags,
+            reassignedXrefs: reassignedXrefs
         )
     }
 
@@ -590,8 +618,8 @@ public struct GEDCOMParser {
 
     private static func parseParentLinks(
         records: [[String]],
+        recordUUIDs: [Int: UUID],
         indiUUIDs: [String: UUID],
-        famUUIDs: [String: UUID],
         unions: [Union],
         sourceUUIDs: [String: UUID]
     ) -> [ParentLink] {
@@ -602,12 +630,13 @@ public struct GEDCOMParser {
             var citations: [Citation]
             var notes: String?
         }
-        let unionsByID = Dictionary(uniqueKeysWithValues: unions.map { ($0.id, $0) })
+        // Keyed on the child's id, not its xref: looking the xref back up from the id
+        // was a scan of every individual per child, quadratic on every load.
         var explicitKinds: [String: ParentageKind] = [:]
         var evidence: [String: Evidence] = [:]
-        for record in records {
+        for (index, record) in records.enumerated() {
             guard let head = record.first.flatMap(parseLine), head.tag == "INDI",
-                  let indiXref = head.xref, let childID = indiUUIDs[indiXref] else { continue }
+                  let childID = recordUUIDs[index] else { continue }
             for branch in level1Branches(of: record) {
                 guard let famLine = branch.first.flatMap(parseLine), famLine.tag == "FAMC",
                       let famXref = famLine.pointer else { continue }
@@ -616,7 +645,7 @@ public struct GEDCOMParser {
                     guard let line = parseLine(raw), line.tag == "PEDI" || line.tag == "_PEDI" else { continue }
                     kind = ParentageKind(gedcomValue: line.value)
                 }
-                explicitKinds["\(indiXref)|\(famXref)"] = kind
+                explicitKinds["\(childID)|\(famXref)"] = kind
                 for linkBranch in branches(in: branch, atLevel: 2) {
                     guard let linkLine = linkBranch.first.flatMap(parseLine), linkLine.tag == "_PLINK",
                           let parentXref = linkLine.pointer, let parentID = indiUUIDs[parentXref] else { continue }
@@ -640,12 +669,14 @@ public struct GEDCOMParser {
             }
         }
 
+        // File order, not dictionary order, so the links (and the `_PLINK` lines written
+        // from them) come out the same on every launch.
         var result: [ParentLink] = []
-        for (famXref, unionID) in famUUIDs {
-            guard let union = unionsByID[unionID] else { continue }
+        for union in unions {
+            let unionID = union.id
+            let famXref = union.gedcomXref ?? ""
             for childID in union.childrenIds {
-                let childXref = indiUUIDs.first(where: { $0.value == childID })?.key
-                let kind = childXref.flatMap { explicitKinds["\($0)|\(famXref)"] } ?? .biological
+                let kind = explicitKinds["\(childID)|\(famXref)"] ?? .biological
                 for parentID in union.partnerIds {
                     let parsed = evidence["\(childID)|\(famXref)|\(parentID)"]
                     result.append(ParentLink(

@@ -417,7 +417,7 @@ struct TrustCompletenessTests {
         let gedcomURL = store.gedFileURL(for: tree)
         let committed = try Data(contentsOf: gedcomURL)
 
-        for point in [PersistenceFaultPoint.gedcomWrite, .historyPrune, .directorySwap] {
+        for point in [PersistenceFaultPoint.gedcomWrite, .historyPrune, .directorySwap, .directorySwapMidpoint] {
             person.givenNames = "После \(point.rawValue)"
             store.faultInjector = { if $0 == point { throw CocoaError(.fileWriteUnknown) } }
             var saveFailed = false

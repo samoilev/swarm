@@ -8,7 +8,10 @@ enum FileNaming {
         let cleaned = raw.components(separatedBy: illegal)
             .joined(separator: "-")
             .trimmingCharacters(in: .whitespacesAndNewlines)
-        return cleaned.isEmpty ? L10n.tr("Дерево") : cleaned
+        // A leading dot hides the folder, and `load()` skips hidden folders: a tree
+        // named ".Семья" was saved and then never seen again.
+        let visible = cleaned.drop(while: { $0 == "." }).trimmingCharacters(in: .whitespaces)
+        return visible.isEmpty ? L10n.tr("Дерево") : visible
     }
 
     /// Append " 2", " 3", … to `url`'s name until it points at a non-existent path.

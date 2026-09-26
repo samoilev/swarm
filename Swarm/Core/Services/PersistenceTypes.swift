@@ -5,6 +5,8 @@ public enum PersistenceFaultPoint: String, CaseIterable, Sendable {
     case portraitWrite
     case exportCopy
     case directorySwap
+    /// After the committed folder moved aside, before the staged one takes its place.
+    case directorySwapMidpoint
     case originalImportCopy
     case historyPrune
     case gedzipReadback

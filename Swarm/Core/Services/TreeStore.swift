@@ -1,4 +1,3 @@
-import CryptoKit
 import Foundation
 import Observation
 import os
@@ -85,8 +84,8 @@ public final class TreeStore {
 
     private static let mediaName = "Media"
     private static let attachmentsName = "Attachments"
-    private static let archivedName = "Archived"
-    private static let recoveryName = "Recovery"
+    static let archivedName = "Archived"
+    static let recoveryName = "Recovery"
     private static let pendingName = ".Pending"
     private static let metadataName = ".Swarm"
     private static let legacyMetadataName = ".FamilyTreeStudio"
@@ -97,7 +96,7 @@ public final class TreeStore {
     private static let manifestName = "manifest.json"
     /// Verbatim copy of an imported file, kept as a safety net and never treated as
     /// the tree's own working .ged (excluded from load/save/reconcile).
-    private static let originalImportName = "original-import.ged"
+    static let originalImportName = "original-import.ged"
 
     private struct PendingAttachment {
         let temporaryURL: URL
@@ -243,10 +242,18 @@ public final class TreeStore {
         pendingMigrations = []
 
         let fm = FileManager.default
+        recoverInterruptedCommits()
 
         // Discovery is read-only. Legacy files are listed and migrated only through
         // the explicit, backup-protected `performPendingMigrations()` operation.
-        guard let entries = try? fm.contentsOfDirectory(at: storageFolder, includingPropertiesForKeys: [.isDirectoryKey]) else { return }
+        let entries: [URL]
+        do {
+            entries = try fm.contentsOfDirectory(at: storageFolder, includingPropertiesForKeys: [.isDirectoryKey])
+        } catch {
+            // An unreadable library must not pass for an empty one.
+            lastLoadError = L10n.tr("Не удалось открыть папку с данными: \(error.localizedDescription)")
+            return
+        }
 
         // A tree folder is any directory (other than Archived) containing a .ged file.
         let treeFolders = entries.filter { url in
@@ -720,7 +727,7 @@ public final class TreeStore {
         tree.acceptedBaselineIssueIDs.formIntersection(Set(validation.map(\.id)))
 
         let mediaFolder = target.appendingPathComponent(Self.mediaName, isDirectory: true)
-        let newPhotoNames = Dictionary(uniqueKeysWithValues: serialized.photos.map { ($0.personID, $0.filename) })
+        let newPhotoNames = Dictionary(serialized.photos.map { ($0.personID, $0.filename) }, uniquingKeysWith: { first, _ in first })
         for person in tree.people {
             if person.photoFilename == nil, let filename = newPhotoNames[person.id] { person.photoFilename = filename }
             person.mediaFolderURL = mediaFolder
@@ -1043,9 +1050,15 @@ public final class TreeStore {
         let rollback = storageFolder.appendingPathComponent(".rollback-\(UUID().uuidString)", isDirectory: true)
         try fm.moveItem(at: current, to: rollback)
         do {
+            try inject(.directorySwapMidpoint)
             try fm.moveItem(at: staging, to: target)
         } catch {
-            try? fm.moveItem(at: rollback, to: current)
+            do {
+                try fm.moveItem(at: rollback, to: current)
+            } catch {
+                // The committed tree is intact at `rollback`; `load()` puts it back.
+                log.error("Rollback of \(current.lastPathComponent, privacy: .public) failed: \(error.localizedDescription, privacy: .public)")
+            }
             throw TreeStoreError.commitFailed(reason: error.localizedDescription)
         }
         do {
@@ -1053,34 +1066,6 @@ public final class TreeStore {
         } catch {
             warnings.append(L10n.tr("Не удалось удалить старую папку резервной копии: \(rollback.lastPathComponent)"))
         }
-    }
-
-    /// `keepingOnly` filters the files copied at this level by name; nil copies them all.
-    /// Sub-folders are still walked whole — the media and attachment folders the filter
-    /// is used on are flat.
-    private func copyDirectoryContents(
-        from source: URL,
-        to destination: URL,
-        keepingOnly: Set<String>? = nil
-    ) throws {
-        let fm = FileManager.default
-        try fm.createDirectory(at: destination, withIntermediateDirectories: true)
-        for item in try fm.contentsOfDirectory(at: source, includingPropertiesForKeys: [.isDirectoryKey]) {
-            let target = destination.appendingPathComponent(item.lastPathComponent)
-            let isDirectory = try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true
-            if isDirectory {
-                try copyDirectoryContents(from: item, to: target)
-            } else {
-                if let keepingOnly, !keepingOnly.contains(item.lastPathComponent) { continue }
-                if fm.fileExists(atPath: target.path) { try fm.removeItem(at: target) }
-                try fm.copyItem(at: item, to: target)
-            }
-        }
-    }
-
-    private func sha256(_ url: URL) throws -> String {
-        let digest = try SHA256.hash(data: Data(contentsOf: url))
-        return digest.map { String(format: "%02x", $0) }.joined()
     }
 
     /// Sortable UTC stamp used as the filename prefix of every history revision and
@@ -1178,8 +1163,6 @@ public final class TreeStore {
     ///
     /// `hidingLivingPeople` exports `tree.redactingLivingPeople()` instead, and carries
     /// only the files the redacted tree still references.
-    /// `version: nil` exports the tree in whatever specification it is already stored
-    /// in, which is what a plain "give me a copy" export means.
     /// `version: nil` exports the tree in whatever specification it is already stored
     /// in. GEDZIP overrides that: it is defined only by GEDCOM 7.0, so a `.gdz` always
     /// carries 7.0 whatever the caller asked for.
@@ -1608,36 +1591,6 @@ public final class TreeStore {
     private func folder(for tree: FamilyTree) -> URL {
         if let existing = folderMap[tree.id] { return existing }
         return storageFolder.appendingPathComponent(tree.id.uuidString, isDirectory: true)
-    }
-
-    /// The canonical .ged path inside a tree folder: "<folder name>.ged".
-    private func gedURL(in folder: URL) -> URL {
-        folder.appendingPathComponent("\(folder.lastPathComponent).ged")
-    }
-
-    /// The first .ged file inside a folder, if any (its name may differ pre-migration).
-    /// The preserved `original-import.ged` is never the tree's working file.
-    private func gedFile(in folder: URL) -> URL? {
-        guard let files = try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil) else { return nil }
-        return files.first { $0.pathExtension.lowercased() == "ged" && $0.lastPathComponent != Self.originalImportName }
-    }
-
-    /// A storage-folder URL named `base`, suffixed " 2", " 3", … to avoid colliding
-    /// with any folder other than `excluding` (the tree's own current folder).
-    private func uniqueFolderURL(named base: String, excluding current: URL?) -> URL {
-        let fm = FileManager.default
-        func isFree(_ url: URL) -> Bool {
-            if let c = current, url.standardizedFileURL == c.standardizedFileURL { return true }
-            return !fm.fileExists(atPath: url.path)
-        }
-        let first = storageFolder.appendingPathComponent(base, isDirectory: true)
-        if isFree(first) { return first }
-        var i = 2
-        while true {
-            let candidate = storageFolder.appendingPathComponent("\(base) \(i)", isDirectory: true)
-            if isFree(candidate) { return candidate }
-            i += 1
-        }
     }
 
 }
