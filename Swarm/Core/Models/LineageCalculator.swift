@@ -86,29 +86,26 @@ public struct LineageCalculator {
         descriptors: inout [UUID: KinshipDescriptor],
         connections: inout Set<FamilyConnection>
     ) {
-        for edge in index.parentEdges(of: personID) {
+        // An explicit stack, not recursion: an imported pedigree can be deep enough to
+        // overflow the call stack. Edges are pushed reversed and claimed when popped,
+        // which visits them in the order recursion did, so pedigree collapse keeps the
+        // label of the first path that reaches a person.
+        var pending = index.parentEdges(of: personID).reversed().map { ($0, generation, parentage) }
+        while let (edge, generation, parentage) = pending.popLast() {
             guard let parent = index.byId[edge.parentID],
                   visited.insert(parent.id).inserted else { continue }
             let pathKinds = ParentageKind.unique(
                 parentage + edge.qualifiers
             )
             ids.insert(parent.id)
-            connections.insert(FamilyConnection(parent.id, personID))
+            connections.insert(FamilyConnection(parent.id, edge.childID))
             descriptors[parent.id] = generation == 1
                 ? edge.qualifying(.parent(sex: parent.sex, kind: edge.kind))
                 : qualified(
                     .ancestor(generation: generation, sex: parent.sex),
                     by: pathKinds
                 )
-            computeAncestors(
-                personID: parent.id,
-                generation: generation + 1,
-                parentage: pathKinds,
-                visited: &visited,
-                ids: &ids,
-                descriptors: &descriptors,
-                connections: &connections
-            )
+            pending += index.parentEdges(of: parent.id).reversed().map { ($0, generation + 1, pathKinds) }
         }
     }
 
@@ -121,14 +118,16 @@ public struct LineageCalculator {
         descriptors: inout [UUID: KinshipDescriptor],
         connections: inout Set<FamilyConnection>
     ) {
-        for edge in index.childEdges(of: personID) {
+        // Same explicit stack and visiting order as `computeAncestors`.
+        var pending = index.childEdges(of: personID).reversed().map { ($0, generation, parentage) }
+        while let (edge, generation, parentage) = pending.popLast() {
             guard let child = index.byId[edge.childID],
                   visited.insert(child.id).inserted else { continue }
             let pathKinds = ParentageKind.unique(
                 parentage + edge.qualifiers
             )
             ids.insert(child.id)
-            connections.insert(FamilyConnection(personID, child.id))
+            connections.insert(FamilyConnection(edge.parentID, child.id))
             descriptors[child.id] = generation == 1
                 ? edge.qualifying(.child(sex: child.sex, kind: edge.kind))
                 : qualified(
@@ -149,15 +148,7 @@ public struct LineageCalculator {
                 )
             }
 
-            computeDescendants(
-                personID: child.id,
-                generation: generation + 1,
-                parentage: pathKinds,
-                visited: &visited,
-                ids: &ids,
-                descriptors: &descriptors,
-                connections: &connections
-            )
+            pending += index.childEdges(of: child.id).reversed().map { ($0, generation + 1, pathKinds) }
         }
     }
 

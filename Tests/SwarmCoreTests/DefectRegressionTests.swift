@@ -724,7 +724,9 @@ struct DefectRegressionTests {
         tree.people = [person]
         try await store.addTreeVerified(tree)
         let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
-        let trashed = folder.appendingPathComponent(".Swarm/Trash/20250101-000000-000--Media--x.jpg")
+        // Stamped now: trash older than 30 days is pruned on save.
+        let name = "\(TreeStore.timestampFormatter.string(from: Date()))--Media--x.jpg"
+        let trashed = folder.appendingPathComponent(".Swarm/Trash/\(name)")
         try Data("someone else's portrait".utf8).write(to: trashed)
 
         person.photoFilename = "x.jp"
@@ -732,7 +734,7 @@ struct DefectRegressionTests {
 
         let saved = store.gedFileURL(for: tree).deletingLastPathComponent()
         #expect(!FileManager.default.fileExists(atPath: saved.appendingPathComponent("Media/x.jp").path))
-        #expect(FileManager.default.fileExists(atPath: saved.appendingPathComponent(".Swarm/Trash/20250101-000000-000--Media--x.jpg").path))
+        #expect(FileManager.default.fileExists(atPath: saved.appendingPathComponent(".Swarm/Trash/\(name)").path))
     }
 
     private static let acceptedPersonID = "5B0C3A1E-2222-4333-8444-955566677788"
@@ -793,5 +795,29 @@ struct DefectRegressionTests {
         let tree = try GEDCOMCodec.parse(Self.fileWithAnError(head: "")).tree
         #expect(!tree.acceptedBaselineIssueIDs.isEmpty)
         #expect(tree.redactingLivingPeople().acceptedBaselineIssueIDs.isEmpty)
+    }
+
+    /// A single-parent chain, youngest first: `people[0]` is the child of `people[1]`.
+    private static func chain(_ count: Int) -> FamilyTree {
+        let tree = FamilyTree(name: "Chain")
+        tree.people = (0 ..< count).map { Person(givenNames: "P\($0)", surname: "Chain") }
+        tree.unions = (0 ..< count - 1).map {
+            Union(partner1Id: tree.people[$0 + 1].id, childrenIds: [tree.people[$0].id])
+        }
+        return tree
+    }
+
+    /// Cycle detection and lineage highlighting recursed once per generation, so a
+    /// crafted pedigree deep enough overflowed the stack on preview or selection.
+    @Test func deepPedigreesDoNotExhaustTheStack() {
+        let depth = 100_000
+        let tree = Self.chain(depth)
+        let issues = TreeValidator.validate(tree)
+        #expect(!issues.contains { $0.code.contains("cycle") })
+
+        let calculator = LineageCalculator(index: FamilyIndex(tree: tree))
+        for person in [tree.people[0], tree.people[depth - 1]] {
+            #expect(calculator.compute(for: person).ids.count == depth)
+        }
     }
 }

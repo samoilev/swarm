@@ -103,6 +103,25 @@ struct GEDZIPTests {
         }
     }
 
+    /// A few hundred kilobytes of zeros expand to any size, and `ditto` has no limit of
+    /// its own, so extraction stops once the unpacked folder outgrows its budget.
+    @Test func anArchiveThatExpandsPastItsBudgetIsRefused() throws {
+        let source = try temporaryDirectory()
+        let zeros = source.appendingPathComponent(GEDZIPArchive.gedcomEntryName)
+        FileManager.default.createFile(atPath: zeros.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: zeros)
+        try handle.truncate(atOffset: 128 << 20)
+        try handle.close()
+        let archive = try temporaryDirectory().appendingPathComponent("bomb.gdz")
+        try GEDZIPArchive.write(contentsOf: source, to: archive)
+
+        #expect(throws: GEDZIPArchive.Failure.self) {
+            try GEDZIPArchive.extract(archive, to: temporaryDirectory(), budget: 16 << 20)
+        }
+        // The default budget is generous for a normal archive.
+        try GEDZIPArchive.extract(archive, to: temporaryDirectory())
+    }
+
     /// `ditto` recreates stored symbolic links, so an archive could carry
     /// `Media/portrait.jpg -> /any/file/on/the/Mac`. Staging refuses it and leaves
     /// nothing unpacked in the library.

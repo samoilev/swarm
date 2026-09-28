@@ -194,4 +194,22 @@ struct LayoutEngineTests {
             #expect(layout.nodes.allSatisfy { node in t.people.contains { $0.id == node.person.id } })
         }
     }
+
+    /// The seed ordering kept a copy of the whole root path per block, so a long
+    /// single-parent chain seeded from one end held N²/2 integers.
+    @Test func longChainsLayOutFromEitherEndOrTheMiddle() {
+        func chain(_ count: Int) -> FamilyTree {
+            let tree = FamilyTree(name: "Chain")
+            tree.people = (0 ..< count).map { Person(givenNames: "P\($0)") }
+            tree.unions = (0 ..< count - 1).map {
+                Union(partner1Id: tree.people[$0 + 1].id, childrenIds: [tree.people[$0].id])
+            }
+            return tree
+        }
+        let tree = chain(60)
+        for home in [0, 30, 59] {
+            tree.homePersonId = tree.people[home].id
+            #expect(LayoutInvariants.check(tree: tree, direction: .topDown).isEmpty)
+        }
+    }
 }

@@ -58,7 +58,8 @@ public struct GenealogyDate: Codable, Hashable, Sendable {
         }
 
         public var isValid: Bool {
-            guard year > 0 else { return false }
+            // The bound every parser branch applies; `sortKey`'s `year * 10000` relies on it.
+            guard (1 ... 9999).contains(year) else { return false }
             guard let month else { return day == nil }
             guard (1 ... 12).contains(month) else { return false }
             guard let day else { return true }

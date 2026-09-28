@@ -101,4 +101,39 @@ struct FamilyDateTests {
         let r = FamilyDate.calculateAge(birth: "12.2000", death: "06.2020")
         #expect(r?.years == 19)
     }
+
+    /// "MONTH YYYY" skipped the 1…9999 bound every other form has, so an Int-sized
+    /// year reached `year * 10000` and `endYear - birthYear` and trapped.
+    @Test func namedMonthYearsOutsideTheSupportedRangeAreRejected() throws {
+        let huge = "JAN 9223372036854775807", tiny = "JAN -9223372036854775808"
+        #expect(FamilyDate.parseExact(huge) == nil)
+        #expect(FamilyDate.parseExact(tiny) == nil)
+        #expect(FamilyDate.parseExact("JAN 9999")?.year == 9999)
+        #expect(!GenealogyDate(rawGEDCOM: "BET \(huge) AND FEB 9223372036854775807").isValid)
+        #expect(!GenealogyDate.PartialDate(year: 10000).isValid)
+        #expect(FamilyDate.calculateAge(birth: tiny, death: nil) == nil)
+
+        let text = """
+        0 HEAD
+        1 GEDC
+        2 VERS 7.0
+        0 @I1@ INDI
+        1 BIRT
+        2 DATE \(huge)
+        1 DEAT
+        2 DATE \(huge)
+        1 FAMS @F1@
+        0 @I2@ INDI
+        1 BIRT
+        2 DATE BET \(huge) AND FEB 9223372036854775807
+        1 FAMC @F1@
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 CHIL @I2@
+        0 TRLR
+        """
+        let tree = try GEDCOMCodec.parse(text).tree
+        _ = TreeValidator.validate(tree)
+        _ = TreeLayoutEngine(config: LayoutConfig()).layout(tree: tree, direction: .topDown)
+    }
 }

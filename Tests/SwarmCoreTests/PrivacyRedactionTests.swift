@@ -249,4 +249,38 @@ struct PrivacyRedactionTests {
         #expect(text.contains("Анна"))
         #expect(text.contains("Садовая"))
     }
+
+    /// The file filter applied to Media/ and Attachments/ themselves, but a folder inside
+    /// them — say an imported `Media/.private/` — was copied whole into the export.
+    @Test func privacyExportLeavesNestedFoldersBehind() async throws {
+        let library = try Temp()
+        let exports = try Temp()
+        let store = TreeStore(storageFolder: library.url)
+        let (tree, _, deceased) = makeTree()
+        _ = try await store.addTreeVerified(tree)
+        deceased.photoData = Data("ancestor-portrait".utf8)
+        _ = try await store.saveTree(tree)
+
+        let fm = FileManager.default
+        let folder = store.folder(for: tree)
+        for nested in ["Media/.private", "Attachments/sub"] {
+            let dir = folder.appendingPathComponent(nested, isDirectory: true)
+            try fm.createDirectory(at: dir, withIntermediateDirectories: true)
+            try Data("secret".utf8).write(to: dir.appendingPathComponent("secret.jpg"))
+        }
+
+        let unpacked = exports.url.appendingPathComponent("unpacked", isDirectory: true)
+        for packaging in [TreeExportPackaging.folder, .gedzip] {
+            var bundle = try await store.exportTree(
+                tree, to: exports.url, hidingLivingPeople: true, packaging: packaging
+            ).finalURL
+            if packaging == .gedzip {
+                try GEDZIPArchive.extract(bundle, to: unpacked)
+                bundle = unpacked
+            }
+            let files = try #require(fm.enumerator(atPath: bundle.path)?.allObjects as? [String])
+            #expect(!files.contains { $0.contains("secret") }, "\(packaging): \(files)")
+            #expect(try fm.contentsOfDirectory(atPath: bundle.appendingPathComponent("Media").path).count == 1)
+        }
+    }
 }

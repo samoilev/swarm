@@ -294,6 +294,36 @@ struct TreeStoreTests {
         #expect(person.photoData == nil)
     }
 
+    /// Trash retention read the file's own modification date, so an old photo was
+    /// pruned in the very save that deleted it. It counts from the deletion instead.
+    @Test func trashKeepsOldFilesForThirtyDaysAfterDeletion() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        tree.people[0].photoData = Data([0xFF, 0xD8, 0xFF, 0xD9])
+        _ = try await store.saveTree(tree)
+        let fm = FileManager.default
+        let folder = store.folder(for: tree)
+        let photo = try folder.appendingPathComponent("Media/\(#require(tree.people[0].photoFilename))")
+        let longAgo = Date().addingTimeInterval(-400 * 24 * 60 * 60)
+        try fm.setAttributes([.modificationDate: longAgo], ofItemAtPath: photo.path)
+
+        tree.people[0].photoData = nil
+        _ = try await store.saveTree(tree)
+        #expect(store.recoveryItems(for: tree).filter { $0.kind == .deletedFile }.count == 1)
+
+        // A file trashed 31 days ago goes on the next save, whatever its own dates say.
+        let trash = folder.appendingPathComponent(".Swarm/Trash", isDirectory: true)
+        let expired = trash.appendingPathComponent("\(TreeStore.timestampFormatter.string(from: Date().addingTimeInterval(-31 * 24 * 60 * 60)))--Media--old.jpg")
+        try Data([1]).write(to: expired)
+        tree.people[1].notes = "touch"
+        _ = try await store.saveTree(tree)
+        let kept = try fm.contentsOfDirectory(atPath: folder.appendingPathComponent(".Swarm/Trash").path)
+        #expect(kept.count == 1)
+        #expect(!kept.contains { $0.hasSuffix("--old.jpg") })
+    }
+
     @Test func migratesLegacyFlatLayout() throws {
         let temp = Temp()
         let fm = FileManager.default

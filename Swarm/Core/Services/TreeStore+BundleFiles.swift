@@ -99,8 +99,9 @@ extension TreeStore {
     }
 
     /// `keepingOnly` filters the files copied at this level by name; nil copies them all.
-    /// Sub-folders are still walked whole — the media and attachment folders the filter
-    /// is used on are flat.
+    /// A filtered copy skips sub-folders: a tree names flat files only, so anything
+    /// nested — an imported `Media/.private/`, say — is exactly what a privacy export
+    /// must leave behind.
     nonisolated func copyDirectoryContents(
         from source: URL,
         to destination: URL,
@@ -112,11 +113,40 @@ extension TreeStore {
             let target = destination.appendingPathComponent(item.lastPathComponent)
             let isDirectory = try item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory == true
             if isDirectory {
+                if keepingOnly != nil { continue }
                 try copyDirectoryContents(from: item, to: target)
             } else {
                 if let keepingOnly, !keepingOnly.contains(item.lastPathComponent) { continue }
                 if fm.fileExists(atPath: target.path) { try fm.removeItem(at: target) }
                 try fm.copyItem(at: item, to: target)
+            }
+        }
+    }
+
+    /// Keeps the newest 50 revisions and 30 days of trash. A trashed file's age is
+    /// read from the deletion stamp its name starts with: its own modification date
+    /// is the original file's, so an old photo would otherwise be pruned by the very
+    /// save that deleted it.
+    func pruneRecoveryData(in staging: URL) throws {
+        try inject(.historyPrune)
+        let fm = FileManager.default
+        let metadata = staging.appendingPathComponent(Self.metadataName, isDirectory: true)
+        let history = metadata.appendingPathComponent(Self.historyName, isDirectory: true)
+        if fm.fileExists(atPath: history.path) {
+            let revisions = try fm.contentsOfDirectory(at: history, includingPropertiesForKeys: nil)
+                .filter { $0.pathExtension.lowercased() == "ged" }
+                .sorted { $0.lastPathComponent > $1.lastPathComponent }
+            for old in revisions.dropFirst(50) { try fm.removeItem(at: old) }
+        }
+
+        let trash = metadata.appendingPathComponent(Self.trashName, isDirectory: true)
+        if fm.fileExists(atPath: trash.path) {
+            let cutoff = Date().addingTimeInterval(-30 * 24 * 60 * 60)
+            let files = try fm.contentsOfDirectory(at: trash, includingPropertiesForKeys: [.contentModificationDateKey])
+            for file in files {
+                let deleted = Self.timestampFormatter.date(from: String(file.lastPathComponent.prefix(19)))
+                let date = try deleted ?? file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate ?? .distantFuture
+                if date < cutoff { try fm.removeItem(at: file) }
             }
         }
     }

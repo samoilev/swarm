@@ -480,22 +480,30 @@ public enum TreeValidator {
 
         var visiting = Set<UUID>()
         var visited = Set<UUID>()
-        var stack: [UUID] = []
         var signatures = Set<String>()
         var cycles: [[UUID]] = []
-        func visit(_ node: UUID) {
-            if visiting.contains(node), let start = stack.firstIndex(of: node) {
-                let cycle = Array(stack[start...])
-                let signature = cycle.map(\.uuidString).sorted().joined(separator: ".")
-                if signatures.insert(signature).inserted { cycles.append(cycle) }
-                return
+        // An explicit stack, not recursion: an imported pedigree can be deep enough to
+        // overflow the call stack. `stack[i].next` is the next parent of `stack[i].node` to try.
+        var stack: [(node: UUID, next: Int)] = []
+        for person in tree.people where !visited.contains(person.id) {
+            visiting.insert(person.id); stack.append((person.id, 0))
+            while let (node, next) = stack.last {
+                let parents = parentsByChild[node] ?? []
+                guard next < parents.count else {
+                    stack.removeLast(); visiting.remove(node); visited.insert(node)
+                    continue
+                }
+                stack[stack.count - 1].next += 1
+                let parent = parents[next]
+                if visiting.contains(parent), let start = stack.firstIndex(where: { $0.node == parent }) {
+                    let cycle = stack[start...].map(\.node)
+                    let signature = cycle.map(\.uuidString).sorted().joined(separator: ".")
+                    if signatures.insert(signature).inserted { cycles.append(cycle) }
+                } else if !visited.contains(parent) {
+                    visiting.insert(parent); stack.append((parent, 0))
+                }
             }
-            guard !visited.contains(node) else { return }
-            visiting.insert(node); stack.append(node)
-            for parent in parentsByChild[node] ?? [] { visit(parent) }
-            _ = stack.popLast(); visiting.remove(node); visited.insert(node)
         }
-        for person in tree.people { visit(person.id) }
         return cycles
     }
 

@@ -974,29 +974,6 @@ public final class TreeStore {
         }
     }
 
-    private func pruneRecoveryData(in staging: URL) throws {
-        try inject(.historyPrune)
-        let fm = FileManager.default
-        let metadata = staging.appendingPathComponent(Self.metadataName, isDirectory: true)
-        let history = metadata.appendingPathComponent(Self.historyName, isDirectory: true)
-        if fm.fileExists(atPath: history.path) {
-            let revisions = try fm.contentsOfDirectory(at: history, includingPropertiesForKeys: nil)
-                .filter { $0.pathExtension.lowercased() == "ged" }
-                .sorted { $0.lastPathComponent > $1.lastPathComponent }
-            for old in revisions.dropFirst(50) { try fm.removeItem(at: old) }
-        }
-
-        let trash = metadata.appendingPathComponent(Self.trashName, isDirectory: true)
-        if fm.fileExists(atPath: trash.path) {
-            let cutoff = Date().addingTimeInterval(-30 * 24 * 60 * 60)
-            let files = try fm.contentsOfDirectory(at: trash, includingPropertiesForKeys: [.contentModificationDateKey])
-            for file in files {
-                let date = try file.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate ?? .distantFuture
-                if date < cutoff { try fm.removeItem(at: file) }
-            }
-        }
-    }
-
     private func commitStaging(
         _ staging: URL,
         replacing current: URL?,
@@ -1034,7 +1011,7 @@ public final class TreeStore {
     /// Sortable UTC stamp used as the filename prefix of every history revision and
     /// trashed file. The format is load-bearing — recovery lists sort on it — so it
     /// stays exactly as written. Built once: this is called per file in a sweep.
-    private static let timestampFormatter: DateFormatter = {
+    static let timestampFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.timeZone = TimeZone(secondsFromGMT: 0)

@@ -52,8 +52,16 @@ public enum GEDZIPArchive {
     /// were stored, so an archive could plant `Media/photo.jpg -> /any/file`. No tree
     /// needs one, and an archive carrying one is refused here instead of failing later
     /// as an unexplained checksum mismatch.
-    public static func extract(_ archive: URL, to directory: URL) throws {
-        try run(["-x", "-k", archive.path, directory.path], failure: Failure.extractFailed)
+    ///
+    /// `ditto` has no size limit either, and a small archive can expand to fill the disk,
+    /// so the unpacked folder is held to `budget` bytes — by default 50 times the archive,
+    /// at least 1 GiB, and never more than half the volume's free space.
+    public static func extract(_ archive: URL, to directory: URL, budget: Int64? = nil) throws {
+        let size = Int64((try? archive.resourceValues(forKeys: [.fileSizeKey]))?.fileSize ?? 0)
+        let free = (try? directory.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
+            .volumeAvailableCapacityForImportantUsage ?? .max
+        let limit = budget ?? min(max(size * 50, 1 << 30), free / 2)
+        try run(["-x", "-k", archive.path, directory.path], failure: Failure.extractFailed, limit: (directory, limit))
         let entries = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: [.isSymbolicLinkKey])
         while let entry = entries?.nextObject() as? URL {
             if (try? entry.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink == true {
@@ -85,23 +93,51 @@ public enum GEDZIPArchive {
         }
     }
 
-    private static func run(_ arguments: [String], failure: (String) -> Failure) throws {
+    /// `limit` stops the process once `folder` holds more than `bytes`, checked every
+    /// 0.2 s while it runs and once more after it exits.
+    private static func run(
+        _ arguments: [String],
+        failure: (String) -> Failure,
+        limit: (folder: URL, bytes: Int64)? = nil
+    ) throws {
+        let fm = FileManager.default
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/ditto")
         process.arguments = arguments
-        let errors = Pipe()
-        process.standardError = errors
-        process.standardOutput = Pipe()
+        // A file, not a pipe: nothing has to drain it while this thread watches the size.
+        let errors = fm.temporaryDirectory.appendingPathComponent("ditto-\(UUID().uuidString).log")
+        fm.createFile(atPath: errors.path, contents: nil)
+        let errorHandle = try FileHandle(forWritingTo: errors)
+        defer {
+            try? errorHandle.close()
+            try? fm.removeItem(at: errors)
+        }
+        process.standardError = errorHandle
+        process.standardOutput = FileHandle.nullDevice
+        let exited = DispatchSemaphore(value: 0)
+        process.terminationHandler = { _ in exited.signal() }
         do {
             try process.run()
         } catch {
             throw failure(error.localizedDescription)
         }
-        // Read before waiting: a full pipe buffer would deadlock a chatty failure.
-        let stderrData = errors.fileHandleForReading.readDataToEndOfFile()
+        func overLimit() -> Bool {
+            guard let limit else { return false }
+            var total: Int64 = 0
+            let walker = fm.enumerator(at: limit.folder, includingPropertiesForKeys: [.totalFileAllocatedSizeKey])
+            while let url = walker?.nextObject() as? URL {
+                total += Int64((try? url.resourceValues(forKeys: [.totalFileAllocatedSizeKey]))?.totalFileAllocatedSize ?? 0)
+                if total > limit.bytes { return true }
+            }
+            return false
+        }
+        while exited.wait(timeout: .now() + 0.2) == .timedOut {
+            if overLimit() { process.terminate() }
+        }
         process.waitUntilExit()
+        if overLimit() { throw failure("expanded past \(limit?.bytes ?? 0) bytes") }
         guard process.terminationStatus == 0 else {
-            throw failure(String(decoding: stderrData, as: UTF8.self))
+            throw failure((try? String(contentsOf: errors, encoding: .utf8)) ?? "")
         }
     }
 }

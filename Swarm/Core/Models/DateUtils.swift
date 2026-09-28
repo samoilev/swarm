@@ -179,7 +179,7 @@ public enum FamilyDate {
                 }
             }
             // "MONTH YYYY"
-            if wordParts.count == 2, let y = Int(wordParts[1]) {
+            if wordParts.count == 2, let y = Int(wordParts[1]), (1 ... 9999).contains(y) {
                 if let m = monthNumber(wordParts[0]) {
                     return Components(day: nil, month: m, year: y)
                 }

@@ -244,25 +244,29 @@ struct LayoutOrdering {
             return result
         }
 
-        var key: [Int: [Int]] = [:]
+        // A block's key is its position in a preorder walk of the breadth-first tree
+        // grown from each root — the order its root path would sort in, without storing
+        // the path, which on a long chain cost N²/2 integers.
+        var key: [Int: Int] = [:]
         var visited = Set<Int>()
-        var component = 0
 
         func walk(from root: Int) {
-            key[root] = [component]
             visited.insert(root)
+            var children: [Int: [Int]] = [:]
             var queue = [root]
             var head = 0
             while head < queue.count {
                 let node = queue[head]; head += 1
-                var rank = 0
                 for neighbour in neighbours(of: node) where visited.insert(neighbour).inserted {
-                    key[neighbour] = key[node]! + [rank]
-                    rank += 1
+                    children[node, default: []].append(neighbour)
                     queue.append(neighbour)
                 }
             }
-            component += 1
+            var pending = [root]
+            while let node = pending.popLast() {
+                key[node] = key.count
+                pending += (children[node] ?? []).reversed()
+            }
         }
 
         // Start from the home couple so the drawing fans out around the person the reader
@@ -270,19 +274,15 @@ struct LayoutOrdering {
         if let homePersonId, let home = blockOf[homePersonId] { walk(from: home) }
         for index in blocks.indices where !visited.contains(index) { walk(from: index) }
 
-        func rank(_ vertex: Vertex) -> [Int] {
+        func rank(_ vertex: Vertex) -> Int {
             switch vertex {
             case let .block(index):
-                key[index] ?? [Int.max]
+                key[index] ?? Int.max
             case let .dummy(index):
                 // Sit with the branch the edge belongs to.
                 key[blockOf[graph.unions[longEdges[dummies[index].edgeIndex].unionIndex].partners[0]] ?? -1]
-                    ?? [Int.max]
+                    ?? Int.max
             }
-        }
-        func precedes(_ lhs: [Int], _ rhs: [Int]) -> Bool {
-            for (l, r) in zip(lhs, rhs) where l != r { return l < r }
-            return lhs.count < rhs.count
         }
 
         for (index, block) in blocks.enumerated() where block.generation < layerCount {
@@ -292,7 +292,7 @@ struct LayoutOrdering {
             layers[dummy.generation].append(.dummy(index))
         }
         for layer in layers.indices {
-            layers[layer].sort { precedes(rank($0), rank($1)) }
+            layers[layer].sort { rank($0) < rank($1) }
         }
     }
 
