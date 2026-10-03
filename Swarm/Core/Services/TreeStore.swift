@@ -868,52 +868,6 @@ public final class TreeStore {
         }
     }
 
-    /// Foreign records and family-level attachments survive in GEDCOM even when the
-    /// person model cannot edit them. Their files must survive the same transaction.
-    /// Read the final serialization so deleting a modeled attachment still trashes it.
-    private struct ReferencedFileNames {
-        var media = Set<String>()
-        var attachments = Set<String>()
-    }
-
-    private func referencedFileNames(in gedcom: String) -> ReferencedFileNames {
-        var names = ReferencedFileNames()
-        // One pass over contiguous UTF-8. Splitting into Characters, or even walking the
-        // `utf8` view, cost a quarter of a second or more of every save of a large tree,
-        // nearly all of it on the lines that hold no FILE at all.
-        let marker = Array(" FILE ".utf8)
-        var text = gedcom
-        let fileLines: [String] = text.withUTF8 { bytes in
-            var found: [String] = []
-            var start = 0
-            for end in 0 ... bytes.count where end == bytes.count || bytes[end] == 0x0A || bytes[end] == 0x0D {
-                let line = UnsafeBufferPointer(rebasing: bytes[start ..< end])
-                start = end + 1
-                guard line.count >= marker.count else { continue }
-                if (0 ... line.count - marker.count).contains(where: { i in marker.indices.allSatisfy { line[i + $0] == marker[$0] } }) {
-                    found.append(String(decoding: line, as: UTF8.self))
-                }
-            }
-            return found
-        }
-        for line in fileLines {
-            guard let node = GEDCOMNode(rawLine: line), node.tag == "FILE" else { continue }
-            let parts = node.value.replacingOccurrences(of: "\\", with: "/").split(separator: "/")
-            // Keep only single path components: imported paths must never let Trash
-            // recovery write outside the active Media/ or Attachments/ directory.
-            guard let last = parts.last, last != ".", last != ".." else { continue }
-            let name = String(last)
-            if parts.first?.caseInsensitiveCompare(Substring(Self.attachmentsName)) == .orderedSame {
-                names.attachments.insert(name)
-            } else {
-                // GEDCOM commonly stores portraits as bare filenames. Import resolves
-                // every other FILE path's basename against Media/ before Attachments/.
-                names.media.insert(name)
-            }
-        }
-        return names
-    }
-
     private func restoreReferencedFilesFromTrash(
         tree: FamilyTree,
         referencedFiles: ReferencedFileNames,
