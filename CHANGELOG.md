@@ -11,6 +11,87 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.7.0] — 2026-10-03
+
+### Security
+
+- A privacy export could leak files kept in sub-folders. When living people were hidden,
+  the media and attachments copied into the export were filtered by name at the top
+  level, but any sub-folder inside the tree's Media or Attachments folder was copied in
+  full. Swarm only ever stores flat files there, so this affects trees imported from an
+  archive folder that brought nested folders with it — an imported `Media/.private/`, for
+  example. Present since the privacy option arrived in 3.5.7. A filtered copy now skips
+  sub-folders entirely.
+- A crafted GEDZIP could reach files outside the archive. Unpacking recreated any symbolic
+  links the archive carried, so a `.gdz` could point its Media folder at any file on the
+  Mac and have it read into the tree on import. Archives carrying symbolic links are now
+  refused. Present since GEDZIP arrived in 3.6.0.
+- A crafted GEDZIP could fill the disk. Unpacking now stops once the extracted size passes
+  fifty times the archive's size (at least 1 GiB, at most half the free space), and an
+  archive whose declared sizes already exceed that budget is refused before extraction.
+- Crafted GEDCOM input could crash Swarm. A file nested past level 99, a pedigree deep
+  enough to exhaust the stack during validation or selection, and dates with years far
+  outside 1–9999 all trapped; each is now refused or bounded.
+
+### Added
+
+- File ▸ Restore from a backup… and File ▸ Show the storage folder.
+
+### Changed
+
+- Large trees are far faster. On a 20,000-person tree in a release build, parsing drops
+  from 14.1 s to 2.4 s and relaunching from 37.7 s to 5.3 s; the line tokenizer had been
+  slicing Cyrillic by grapheme many times per line, and now works on bytes, checked
+  against the old one on every fixture line. Committing an import there drops from 4.2 s
+  to 1.10 s, and a save after one edit from 1.32 s to 1.06 s. Trees over 1,200 cards draw
+  through one window-sized canvas culled to the view; a canvas sized to the whole layout
+  — 17 million points for 50,000 unrelated people — kept the window busy for minutes.
+- Import, export and PDF rendering no longer freeze the window. They ran on the main
+  actor, whose methods never suspend; staging, unzipping, hashing and export file work now
+  run detached, with busy states while they do. With 2 GB of media, a GEDZIP export that
+  stalled the window for 7.3 s now stalls it for 0.06 s, and a save after an edit rehashes
+  in 0.4 s instead of 2.8 s by reusing the committed hash of any file whose size and
+  modification time are unchanged.
+- Undo snapshots are compressed, cutting each entry from about 54 MB to 18 MB on a large
+  tree.
+- Validation errors you accept on import are stored in the file, and a reload keeps only
+  the ones still present. Files saved before this accept everything once, as before.
+- The library toolbar's search, sort, import, New Tree and actions controls each get their
+  own space instead of reading as one strip.
+
+### Fixed
+
+- Folding duplicate families no longer loses data. The clean-up that runs after every
+  structural edit kept only the children and marriage date and place of the family it
+  dropped; divorce and partnership events, citations, notes and imported GEDCOM detail
+  went with it, and its parent links came back as plain biological links. Everything now
+  folds into the surviving family, parent links are repointed rather than reset, and two
+  families whose details disagree are left apart.
+- Removing a parent moves only that child, into a family with the other parent, instead of
+  taking the parent away from every sibling.
+- A file with repeated record ids or UIDs no longer crashes on import. Repeats get a fresh
+  id and an import warning, and pointers resolve to the first. A repeated id also used to
+  write its first record twice on every save, adding a phantom person each time. Every
+  remaining use of the dictionary initializer that traps on duplicate keys has been
+  replaced, and CI now refuses new ones.
+- A save interrupted between its two renames is recovered on the next launch instead of
+  leaving the tree on its rollback copy.
+- Tree folders whose names start with a dot, or are named Archived or Recovery, no longer
+  vanish from the library; an unreadable library is reported instead of shown as empty.
+- Trash retention read a file's modification date, so restoring an old file and deleting
+  it again had it pruned in the same save. It now reads the deletion date stamped in the
+  file name. Restoring a trashed file also matches its exact name — `x.jp` no longer
+  claims `x.jpg`.
+- A person or family with several notes keeps all of them instead of only the last, and
+  families are no longer merged when their shared parent links carry different notes.
+- A file edited outside Swarm is rehashed rather than trusted from a cached checksum.
+- No age is computed from an impossible calendar date such as 31 FEB 1900.
+- Undo and redo redraw the cards and the open profile.
+- Closing the merge sheet cancels its preview and discards the staged copy.
+- Export memory no longer grows with the size of the file being hashed.
+- Import is disabled while a file is being staged, a permission error names the file that
+  could not be read, and PDF progress text stays readable while an export is busy.
+
 ## [3.6.0] — 2026-09-23
 
 **Security: a GEDCOM archive exported with living people hidden could still carry their
@@ -1244,7 +1325,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.6.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.7.0...HEAD
+[3.7.0]: https://github.com/samoilev/swarm/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/samoilev/swarm/compare/v3.5.7...v3.6.0
 [3.5.7]: https://github.com/samoilev/swarm/compare/v3.5.6...v3.5.7
 [3.5.6]: https://github.com/samoilev/swarm/compare/v3.5.5...v3.5.6
