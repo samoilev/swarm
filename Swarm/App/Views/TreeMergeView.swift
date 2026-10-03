@@ -13,6 +13,8 @@ struct TreeMergeView: View {
     @State private var errorMessage: String?
     @State private var isApplying = false
     @State private var isLoading = false
+    /// Closing mid-load cancels it, so what it staged is removed instead of orphaned.
+    @State private var loadTask: Task<Void, Never>?
 
     private var gedcomType: UTType { UTType(filenameExtension: "ged") ?? .plainText }
     private var gedzipType: UTType { UTType(filenameExtension: "gdz") ?? .zip }
@@ -125,7 +127,10 @@ struct TreeMergeView: View {
             get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }
         )) { Button("OK", role: .cancel) {} } message: { Text(errorMessage ?? "") }
         .tracksUnsavedDraft()
-        .onDisappear { if let pendingURL { store.discardImportPreview(at: pendingURL) } }
+        .onDisappear {
+            loadTask?.cancel()
+            if let pendingURL { store.discardImportPreview(at: pendingURL) }
+        }
     }
 
     private func summary(_ preview: MergePreview) -> some View {
@@ -221,7 +226,7 @@ struct TreeMergeView: View {
     private func loadPreview(_ url: URL) {
         guard !isLoading else { return }
         isLoading = true
-        Task { @MainActor in
+        loadTask = Task { @MainActor in
             defer { isLoading = false }
             let scoped = url.startAccessingSecurityScopedResource()
             defer { if scoped { url.stopAccessingSecurityScopedResource() } }
@@ -232,9 +237,12 @@ struct TreeMergeView: View {
                 }
                 let localCopy = try await store.stageImportAsync(from: url)
                 do {
+                    // The sheet may have closed while staging; its copy goes with it.
+                    try Task.checkCancellation()
                     let imported = try await Task.detached(priority: .userInitiated) {
                         try GEDCOMCodec.parse(localCopy)
                     }.value
+                    try Task.checkCancellation()
                     guard imported.report.blockingErrors.isEmpty else { throw TreeStoreError.invalidImport(report: imported.report) }
                     pendingURL = localCopy
                     preview = TreeMergeEngine(store: store).preview(local: localTree, incoming: imported.tree)
@@ -242,6 +250,7 @@ struct TreeMergeView: View {
                     store.discardImportPreview(at: localCopy)
                     throw error
                 }
+            } catch is CancellationError {
             } catch { errorMessage = error.localizedDescription }
         }
     }
@@ -259,6 +268,7 @@ struct TreeMergeView: View {
     }
 
     private func close() {
+        loadTask?.cancel()
         if let pendingURL { store.discardImportPreview(at: pendingURL) }
         pendingURL = nil
         dismiss()

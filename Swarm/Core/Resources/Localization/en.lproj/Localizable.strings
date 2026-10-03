@@ -306,8 +306,8 @@
 "Продолжить с этими предупреждениями. Данные, которые нельзя редактировать в Swarm, сохранятся в GEDCOM." = "Continue with these warnings. Data you can’t edit in Swarm will stay in the GEDCOM file.";
 "Не удалось импортировать файл" = "Couldn’t import file";
 "Файл повреждён или Swarm не поддерживает его формат.\n\n%@" = "The file is damaged or Swarm doesn’t support its format.\n\n%@";
-"Нет доступа к файлу. Выберите файл .gdz или всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n%@" = "Swarm can’t read this file. Select the .gdz file or the whole archive folder to open the tree with its photos and attachments.\n\n%@";
-"Нет доступа к папке «%@» рядом с файлом. Дерево будет импортировано без файлов из неё. Чтобы добавить их, выберите всю папку архива. Подробнее: %@" = "Swarm can’t read the “%@” folder beside this file. The tree will be imported without its files. To include them, select the whole archive folder. Details: %@";
+"Нет доступа к «%@». Проверьте права доступа в Finder (Файл ▸ Свойства) и попробуйте ещё раз." = "Swarm can’t read “%@”. Check its permissions in Finder (File ▸ Get Info) and try again.";
+"Нет доступа к папке «%@» рядом с файлом. Дерево будет импортировано без файлов из неё. Чтобы добавить их, проверьте права доступа к папке в Finder и импортируйте снова." = "Swarm can’t read the “%@” folder beside this file. The tree will be imported without its files. To include them, check the folder’s permissions in Finder and import again.";
 "Объединение деревьев" = "Merge trees";
 "Сначала проверьте, что будет добавлено. Дерево изменится только после вашего подтверждения." = "Review what will be added first. Your tree will only change after you confirm.";
 "Выберите файл для объединения" = "Choose a file to merge";

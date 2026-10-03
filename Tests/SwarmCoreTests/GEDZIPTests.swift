@@ -115,9 +115,13 @@ struct GEDZIPTests {
         let archive = try temporaryDirectory().appendingPathComponent("bomb.gdz")
         try GEDZIPArchive.write(contentsOf: source, to: archive)
 
+        // Refused from what the archive declares, before anything is written: watching
+        // the folder grow let a fast expansion run the whole 128 MiB past a 16 MiB budget.
+        let refused = try temporaryDirectory()
         #expect(throws: GEDZIPArchive.Failure.self) {
-            try GEDZIPArchive.extract(archive, to: temporaryDirectory(), budget: 16 << 20)
+            try GEDZIPArchive.extract(archive, to: refused, budget: 16 << 20)
         }
+        #expect(try FileManager.default.contentsOfDirectory(atPath: refused.path).isEmpty)
         // The default budget is generous for a normal archive.
         try GEDZIPArchive.extract(archive, to: temporaryDirectory())
     }

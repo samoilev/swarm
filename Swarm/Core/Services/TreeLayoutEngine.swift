@@ -19,8 +19,11 @@ public struct TreeNode: Equatable {
         self.person = person; self.x = x; self.y = y
     }
 
+    /// The same `Person` instance, not just the same id. Undo swaps in fresh instances
+    /// with the old ids; equal by id, the canvas kept drawing — and handing out on tap —
+    /// the instance from before the undo.
     public static func == (lhs: TreeNode, rhs: TreeNode) -> Bool {
-        lhs.person.id == rhs.person.id && lhs.x == rhs.x && lhs.y == rhs.y
+        lhs.person === rhs.person && lhs.x == rhs.x && lhs.y == rhs.y
     }
 }
 

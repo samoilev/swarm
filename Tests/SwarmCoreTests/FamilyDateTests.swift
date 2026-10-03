@@ -96,6 +96,25 @@ struct FamilyDateTests {
         #expect(r?.approximate == true)
     }
 
+    /// `31 FEB 1900` names no real day. Its year still shows, but the card used to add
+    /// an age counted from it, "b. 1900 (~126)", as if the date were merely vague.
+    @Test func anImpossibleDateGivesNoAge() {
+        for impossible in ["31 FEB 1900", "31.02.1900", "1900-02-31", "30 фев 1900"] {
+            #expect(FamilyDate.calculateAge(birth: impossible, death: nil) == nil, "\(impossible)")
+            #expect(FamilyDate.calculateAge(birth: "1850", death: impossible) == nil, "\(impossible)")
+        }
+        for usable in ["1900", "ABT 1900", "1 JAN 1900", "29 FEB 1904"] {
+            #expect(FamilyDate.calculateAge(birth: usable, death: "1950") != nil, "\(usable)")
+        }
+    }
+
+    @Test func anImportedImpossibleBirthDateShowsItsYearWithoutAnAge() throws {
+        let gedcom = "0 HEAD\n0 @I1@ INDI\n1 NAME BadDay /Person/\n1 BIRT\n2 DATE 31 FEB 1900\n0 TRLR"
+        let person = try #require(GEDCOMCodec.parse(gedcom).tree.people.first)
+        #expect(person.lifespan.contains("1900"))
+        #expect(!person.lifespan.contains("("))
+    }
+
     @Test func ageSubtractsUnreachedBirthday() {
         // Birthday not yet reached in the death year → one year younger.
         let r = FamilyDate.calculateAge(birth: "12.2000", death: "06.2020")

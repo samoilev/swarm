@@ -14,15 +14,23 @@ extension TreeStore {
     /// committed folder goes back whenever no visible folder holds the same tree. A
     /// rollback whose tree is still present is debris of a cleanup that failed, and a
     /// recovery copy is never deleted here, so it is left alone.
-    func recoverInterruptedCommits() {
+    ///
+    /// Returns the rollbacks it could neither read nor put back. Each may hold the only
+    /// copy of a tree, and skipping one quietly looked exactly like a tree that was lost.
+    func recoverInterruptedCommits() -> [String] {
         let fm = FileManager.default
-        guard let entries = try? fm.contentsOfDirectory(at: storageFolderURL, includingPropertiesForKeys: nil) else { return }
+        guard let entries = try? fm.contentsOfDirectory(at: storageFolderURL, includingPropertiesForKeys: nil) else { return [] }
         let rollbacks = entries.filter { $0.lastPathComponent.hasPrefix(".rollback-") }
-        guard !rollbacks.isEmpty else { return }
+        guard !rollbacks.isEmpty else { return [] }
         let liveIDs = Set(entries
             .filter { !$0.lastPathComponent.hasPrefix(".") }
             .compactMap { gedFile(in: $0).flatMap(Self.declaredTreeID) })
+        var unrecovered: [String] = []
         for rollback in rollbacks {
+            guard (try? fm.contentsOfDirectory(at: rollback, includingPropertiesForKeys: nil)) != nil else {
+                unrecovered.append(rollback.lastPathComponent)
+                continue
+            }
             guard let ged = gedFile(in: rollback) else { continue }
             if let id = Self.declaredTreeID(in: ged), liveIDs.contains(id) { continue }
             let name = FileNaming.sanitizedFileName(ged.deletingPathExtension().lastPathComponent)
@@ -30,8 +38,10 @@ extension TreeStore {
                 try fm.moveItem(at: rollback, to: uniqueFolderURL(named: name, excluding: nil))
             } catch {
                 log.error("Could not restore \(rollback.lastPathComponent, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                unrecovered.append(rollback.lastPathComponent)
             }
         }
+        return unrecovered
     }
 
     /// Import previews and attachments waiting for a save are staged in `.Pending` and
@@ -152,14 +162,18 @@ extension TreeStore {
     }
 
     /// Read in 16 MB pieces: a video attachment read whole doubled the app's memory
-    /// for the length of a save, while a photo still takes a single read.
+    /// for the length of a save, while a photo still takes a single read. Each piece
+    /// is released before the next: the reads are autoreleased, and on a detached
+    /// task nothing drained them until the whole file had been held at once anyway.
     nonisolated func sha256(_ url: URL) throws -> String {
         let handle = try FileHandle(forReadingFrom: url)
         defer { try? handle.close() }
         var hasher = SHA256()
-        while let chunk = try handle.read(upToCount: 16 << 20), !chunk.isEmpty {
+        while try autoreleasepool(invoking: {
+            guard let chunk = try handle.read(upToCount: 16 << 20), !chunk.isEmpty else { return false }
             hasher.update(data: chunk)
-        }
+            return true
+        }) {}
         return hasher.finalize().map { String(format: "%02x", $0) }.joined()
     }
 
@@ -169,22 +183,47 @@ extension TreeStore {
         let generationID: UUID
         let createdAt: Date
         let hashes: [String: String]
+        /// Each file as it stood when the manifest was written. Absent from manifests
+        /// written before stamps existed, which only means hashing those files again.
+        var stamps: [String: FileStamp]? = nil
+    }
+
+    /// Size and both change dates of a file. The status-change date moves on every
+    /// write and cannot be set back, so a file rewritten with its old modification
+    /// date still reads as changed.
+    struct FileStamp: Codable, Equatable, Sendable {
+        let size: Int
+        let modified: Double
+        let changed: Double
+
+        init?(_ url: URL) {
+            let keys: Set<URLResourceKey> = [.fileSizeKey, .contentModificationDateKey, .attributeModificationDateKey]
+            guard let values = try? url.resourceValues(forKeys: keys), let size = values.fileSize,
+                  let modified = values.contentModificationDate, let changed = values.attributeModificationDate else { return nil }
+            self.size = size
+            self.modified = modified.timeIntervalSinceReferenceDate
+            self.changed = changed.timeIntervalSinceReferenceDate
+        }
     }
 
     nonisolated func writeManifest(generationID: UUID, hashes: [String: String], in folder: URL) throws {
         let metadata = folder.appendingPathComponent(Self.metadataName, isDirectory: true)
         try FileManager.default.createDirectory(at: metadata, withIntermediateDirectories: true)
-        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes)
+        let stamps = hashes.keys.reduce(into: [String: FileStamp]()) { stamps, path in
+            stamps[path] = FileStamp(folder.appendingPathComponent(path))
+        }
+        let manifest = BundleManifest(generationID: generationID, createdAt: Date(), hashes: hashes, stamps: stamps)
         let data = try JSONEncoder.pretty.encode(manifest)
         try data.write(to: metadata.appendingPathComponent(Self.manifestName), options: .atomic)
     }
 
     /// SHA-256 of every file in `folder`, keyed by relative path.
     ///
-    /// `committed` is the folder `folder` was cloned from. A file there with the same
-    /// size and modification date at the same path is the same file — a clone keeps
-    /// both, and any write changes the date — so its hash comes from the committed
-    /// manifest instead of reading the bytes again.
+    /// `committed` is the folder `folder` was cloned from. Its manifest's hash is reused
+    /// only for a file that is still exactly as that manifest stamped it, and whose copy
+    /// here has the same size and modification date — a clone keeps both, and any write
+    /// changes the date. Matching the copy alone missed an edit made to the committed
+    /// file itself, and the manifest went on certifying bytes no longer there.
     nonisolated func hashes(in folder: URL, includeRecoveryData: Bool, reusingFrom committed: URL? = nil) throws -> [String: String] {
         let fm = FileManager.default
         guard let enumerator = fm.enumerator(
@@ -193,7 +232,7 @@ extension TreeStore {
             options: [.skipsPackageDescendants]
         ) else { throw TreeStoreError.treeFolderMissing }
 
-        let known = committed.map(committedHashes) ?? [:]
+        let known = committed.flatMap(committedManifest)
         var result: [String: String] = [:]
         let basePath = folder.resolvingSymlinksInPath().path
         for case let file as URL in enumerator {
@@ -207,7 +246,8 @@ extension TreeStore {
             if !includeRecoveryData,
                relative.hasPrefix("\(Self.metadataName)/\(Self.historyName)/") ||
                relative.hasPrefix("\(Self.metadataName)/\(Self.trashName)/") { continue }
-            if let digest = known[relative], let committed,
+            if let digest = known?.hashes[relative], let stamp = known?.stamps?[relative], let committed,
+               FileStamp(committed.appendingPathComponent(relative)) == stamp,
                Self.isUnchanged(file, since: committed.appendingPathComponent(relative)) {
                 result[relative] = digest
             } else {
@@ -228,15 +268,15 @@ extension TreeStore {
         }
     }
 
-    /// The committed manifest's hashes; empty when there is none to trust (a bundle
-    /// from before manifests, or one that fails to decode), which just means hashing.
-    private nonisolated func committedHashes(in folder: URL) -> [String: String] {
+    /// The committed manifest; nil when there is none to trust (a bundle from before
+    /// manifests, or one that fails to decode), which just means hashing.
+    private nonisolated func committedManifest(in folder: URL) -> BundleManifest? {
         let url = folder
             .appendingPathComponent(Self.metadataName, isDirectory: true)
             .appendingPathComponent(Self.manifestName)
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
-        return (try? decoder.decode(BundleManifest.self, from: Data(contentsOf: url)))?.hashes ?? [:]
+        return try? decoder.decode(BundleManifest.self, from: Data(contentsOf: url))
     }
 
     private nonisolated static func isUnchanged(_ file: URL, since committed: URL) -> Bool {

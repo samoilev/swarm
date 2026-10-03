@@ -566,6 +566,30 @@ struct TreeStoreTests {
         #expect(FileManager.default.fileExists(atPath: rollback.path))
     }
 
+    /// A rollback the app cannot read was skipped without a word, so a tree left hidden
+    /// by an interrupted save looked lost. It is now named among the load failures,
+    /// and comes back on the next launch once it can be read.
+    @Test func anUnreadableRollbackIsReportedAndRecoveredLater() async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        try await store.addTreeVerified(tree)
+        let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
+        let rollback = temp.url.appendingPathComponent(".rollback-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.moveItem(at: folder, to: rollback)
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: rollback.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: rollback.path) }
+
+        let blocked = TreeStore(storageFolder: temp.url)
+        #expect(blocked.trees.isEmpty)
+        #expect(blocked.lastLoadError?.contains(rollback.lastPathComponent) == true)
+
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: rollback.path)
+        let recovered = TreeStore(storageFolder: temp.url)
+        #expect(recovered.trees.map(\.id) == [tree.id])
+        #expect(recovered.lastLoadError == nil)
+    }
+
     /// A save reuses the committed hash of every file it carried over unchanged. The
     /// manifest must still describe the bytes on disk — including a portrait rewritten
     /// in place at the same size, the case a size-only check would get wrong.
@@ -590,6 +614,39 @@ struct TreeStoreTests {
             let bytes = try Data(contentsOf: folder.appendingPathComponent(path))
             #expect(SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined() == digest, "\(path)")
         }
+    }
+
+    /// A portrait changed on disk behind the app's back — same size, its modification
+    /// date put back or moved on — kept its old hash through the next save, because
+    /// the save only compared its own copy with the committed file. The manifest now
+    /// matches the bytes either way.
+    @Test(arguments: [false, true])
+    func theManifestMatchesAPortraitChangedOutsideTheApp(restoringModificationDate: Bool) async throws {
+        let temp = Temp()
+        let store = TreeStore(storageFolder: temp.url)
+        let tree = makeTree()
+        tree.people[0].photoData = Data(repeating: 1, count: 70)
+        try await store.addTreeVerified(tree)
+        let folder = store.gedFileURL(for: tree).deletingLastPathComponent()
+        let media = try #require(FileManager.default.contentsOfDirectory(
+            at: folder.appendingPathComponent("Media"), includingPropertiesForKeys: nil
+        ).first)
+
+        let date = try #require(media.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+        let handle = try FileHandle(forWritingTo: media)
+        try handle.write(contentsOf: Data(repeating: 2, count: 70))
+        try handle.close()
+        var values = URLResourceValues()
+        values.contentModificationDate = restoringModificationDate ? date : date.addingTimeInterval(10)
+        var url = media
+        try url.setResourceValues(values)
+
+        tree.people[1].notes = "unrelated edit"
+        let receipt = try await store.saveTree(tree)
+        let path = "Media/\(media.lastPathComponent)"
+        let bytes = try Data(contentsOf: receipt.finalURL.appendingPathComponent(path))
+        let digest = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
+        #expect(receipt.hashes[path] == digest)
     }
 
     /// Staged imports and attachments left in `.Pending` by a crash were never removed.

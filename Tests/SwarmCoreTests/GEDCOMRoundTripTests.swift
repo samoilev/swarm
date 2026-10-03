@@ -504,4 +504,39 @@ struct GEDCOMRoundTripTests {
         #expect(reparsed.unknownRecords.contains { $0.contains { $0.contains("@S1@ SOUR") } })
         #expect(reparsed.unions.first?.marriageExtras.contains { $0.contains("Венчание") } == true)
     }
+
+    /// A record with several NOTEs kept only the last one: each replaced the one before.
+    /// Every note's text now survives import and a save.
+    @Test func repeatedNotesAreAllKept() throws {
+        let gedcom = """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        0 @I1@ INDI
+        1 NAME Анна /Иванова/
+        1 NOTE Первая 🌳 заметка
+        1 NOTE email me@example.com
+        1 BIRT
+        2 DATE 1900
+        2 NOTE event one
+        2 NOTE event two
+        1 SOUR @S1@
+        2 PAGE 3
+        2 NOTE citation one
+        2 NOTE citation two
+        0 @S1@ SOUR
+        1 TITL Register
+        1 NOTE source one
+        1 NOTE source two
+        0 TRLR
+        """
+        let first = try GEDCOMCodec.parse(gedcom)
+        let saved = try GEDCOMCodec.serialize(tree: first.tree, document: first.document).gedcom
+        let tree = try GEDCOMCodec.parse(saved).tree
+        let person = try #require(tree.people.first)
+        #expect(person.notes == "Первая 🌳 заметка\nemail me@example.com")
+        #expect(person.event(ofKind: .birth)?.notes == "event one\nevent two")
+        #expect(tree.sourceRecords.first?.notes == "source one\nsource two")
+        #expect(saved.contains("citation one") && saved.contains("citation two"))
+    }
 }

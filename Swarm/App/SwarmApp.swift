@@ -107,6 +107,7 @@ struct SwarmApp: App {
                 }
                 .keyboardShortcut("e")
             }
+            LibraryCommands(storageFolder: store.storageFolderURL)
             CommandGroup(after: .textEditing) {
                 Button(L10n.tr("Найти человека")) {
                     NotificationCenter.default.post(name: .findPersonRequested, object: nil)
@@ -161,6 +162,38 @@ struct SwarmApp: App {
     }
 }
 
+/// The library's own menu for these sits in the toolbar and drops out of the overflow
+/// the same way Export did. Restore opens a panel the library owns, so it is live only
+/// while the library is on screen.
+private struct LibraryCommands: Commands {
+    let storageFolder: URL
+    @FocusedValue(\.libraryIsShown) private var libraryIsShown
+
+    var body: some Commands {
+        CommandGroup(after: .importExport) {
+            Divider()
+            Button(L10n.tr("Восстановить из резервной копии…")) {
+                NotificationCenter.default.post(name: .restoreBackupRequested, object: nil)
+            }
+            .disabled(libraryIsShown != true)
+            Button(L10n.tr("Показать папку хранилища")) {
+                NSWorkspace.shared.activateFileViewerSelecting([storageFolder])
+            }
+        }
+    }
+}
+
+private struct LibraryIsShownKey: FocusedValueKey {
+    typealias Value = Bool
+}
+
+extension FocusedValues {
+    var libraryIsShown: Bool? {
+        get { self[LibraryIsShownKey.self] }
+        set { self[LibraryIsShownKey.self] = newValue }
+    }
+}
+
 private struct AboutCommands: Commands {
     @Environment(\.openWindow) private var openWindow
 
@@ -187,5 +220,6 @@ extension Notification.Name {
     static let redoRequested = Notification.Name("redoRequested")
     static let findPersonRequested = Notification.Name("findPersonRequested")
     static let exportRequested = Notification.Name("exportRequested")
+    static let restoreBackupRequested = Notification.Name("restoreBackupRequested")
     static let helpRequested = Notification.Name("helpRequested")
 }

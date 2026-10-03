@@ -108,6 +108,8 @@ struct TreeLibraryView: View {
     let onSelect: (FamilyTree) -> Void
     let onCreate: () -> Void
     var onImport: (() -> Void)?
+    /// A file is being prepared. A second pick would be dropped, so Import waits.
+    var isImportBusy = false
     var onRevealInFinder: ((FamilyTree) -> Void)?
     /// Handed down by `ContentView` for the one card that is opening, so its diagram nodes
     /// can hand their geometry to the real cards on the canvas.
@@ -311,6 +313,11 @@ struct TreeLibraryView: View {
             showStorageMigrationWarning = (newValue != nil)
         }
         .sheet(item: $recoveryScope) { recoverySheet(for: $0) }
+        .onReceive(NotificationCenter.default.publisher(for: .restoreBackupRequested)) { _ in
+            recoveryScope = .allTrees
+        }
+        // File ▸ Restore from a Backup… is live only while this is on screen.
+        .focusedSceneValue(\.libraryIsShown, true)
         .sheet(item: $versionsTree) { versionHistorySheet(for: $0) }
     }
 
@@ -383,6 +390,7 @@ struct TreeLibraryView: View {
                         .sepiaGlass(.regular.interactive(), in: Capsule())
                 }
                 .buttonStyle(.plain)
+                .disabled(isImportBusy)
                 .help(Self.importHint)
                 .accessibilityLabel(L10n.tr("Импорт GEDCOM / GEDZIP"))
             }
@@ -644,6 +652,7 @@ struct TreeLibraryView: View {
                     }
                     .sepiaGlassButton(.capsule)
                     .buttonBorderShape(.capsule)
+                    .disabled(isImportBusy)
                     .help(Self.importHint)
                 }
             }

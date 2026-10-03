@@ -359,7 +359,7 @@ public struct GEDCOMParser {
                 if childHead.tag == "SOUR", let pointer = childHead.pointer, let sourceID = sourceUUIDs[pointer] {
                     result.events[eventKind, default: []].append(parseCitation(branch: child, sourceID: sourceID))
                 } else if childHead.tag == "NOTE", childHead.pointer == nil {
-                    result.eventNotes[eventKind] = joinedText(branch: child)
+                    result.eventNotes[eventKind] = appending(joinedText(branch: child), to: result.eventNotes[eventKind])
                 }
             }
         }
@@ -478,7 +478,7 @@ public struct GEDCOMParser {
             case "PAGE": page = line.value.isEmpty ? nil : line.value
             case "EVEN": detail = line.value.isEmpty ? nil : line.value
             case "TEXT": transcription = line.value.isEmpty ? nil : line.value
-            case "NOTE": notes = line.value.isEmpty ? nil : line.value
+            case "NOTE": if !line.value.isEmpty { notes = appending(line.value, to: notes) }
             case "CONT":
                 if notes != nil { notes = (notes ?? "") + "\n" + line.value }
                 else if transcription != nil { transcription = (transcription ?? "") + "\n" + line.value }
@@ -575,7 +575,7 @@ public struct GEDCOMParser {
                 switch line.tag {
                 case "FILE": file = (line.value as NSString).lastPathComponent
                 case "TITL": title = joinedText(branch: child)
-                case "NOTE": notes = joinedText(branch: child)
+                case "NOTE": notes = appending(joinedText(branch: child), to: notes)
                 case "SOUR":
                     if let pointer = line.pointer, let sourceID = sourceUUIDs[pointer] {
                         citations.append(parseCitation(branch: child, sourceID: sourceID))
@@ -609,7 +609,7 @@ public struct GEDCOMParser {
                 else { repository = head.value.isEmpty ? nil : head.value }
             case "CALN": callNumber = head.value
             case "_URL", "WWW": url = joinedText(branch: branch)
-            case "NOTE": notes = joinedText(branch: branch)
+            case "NOTE": notes = appending(joinedText(branch: branch), to: notes)
             case "_FTSID", "UID", "CHAN", "RIN":
                 if head.tag != "_FTSID", head.tag != "UID" { rawBranches.append(branch) }
             default: rawBranches.append(branch)
@@ -668,7 +668,7 @@ public struct GEDCOMParser {
                         case "_FTSID", "UID": parsed.id = UUID(uuidString: childLine.value.trimmingCharacters(in: .whitespaces))
                         case "PEDI", "_PEDI": parsed.kind = ParentageKind(gedcomValue: childLine.value)
                         case "_UNCERTAIN": parsed.isUncertain = childLine.value == "Y"
-                        case "NOTE": parsed.notes = joinedText(branch: child)
+                        case "NOTE": parsed.notes = appending(joinedText(branch: child), to: parsed.notes)
                         case "SOUR":
                             if let pointer = childLine.pointer, let sourceID = sourceUUIDs[pointer] {
                                 parsed.citations.append(parseCitation(branch: child, sourceID: sourceID))
@@ -721,6 +721,13 @@ public struct GEDCOMParser {
         }
         if !current.isEmpty { result.append(current) }
         return result
+    }
+
+    /// A record may carry several NOTEs, and the model holds one. Each NOTE used to
+    /// replace the one before it, so only the last survived the import.
+    private static func appending(_ note: String, to notes: String?) -> String {
+        guard let notes, !notes.isEmpty else { return note }
+        return note.isEmpty ? notes : notes + "\n" + note
     }
 
     private static func joinedText(branch: [String]) -> String {
@@ -882,7 +889,7 @@ public struct GEDCOMParser {
                 case "BURI": break
                 case "OCCU": occupation = value.isEmpty ? nil : value
                 case "EDUC": education = value.isEmpty ? nil : value
-                case "NOTE": notes = value.isEmpty ? nil : value
+                case "NOTE": if !value.isEmpty { notes = appending(value, to: notes) }
                 case "SOUR": if !value.isEmpty { sources.append(value) }
                 case "_PATR": patronymic = value.isEmpty ? nil : value
                 case "_MARNM":

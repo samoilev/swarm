@@ -40,6 +40,17 @@ struct LayoutEngineTests {
         #expect(engine.layout(tree: t, direction: .topDown) == engine.layout(tree: t, direction: .topDown))
     }
 
+    /// Undo restores a snapshot as new `Person` instances under the same ids. A layout
+    /// of the restored tree compared equal to the one before, so the canvas kept the old
+    /// cards — showing, and selecting, the record from before the undo.
+    @Test func aLayoutOfRestoredPeopleIsNotEqualToTheStaleOne() throws {
+        let (t, _) = familyTree()
+        let engine = TreeLayoutEngine(config: config)
+        let before = engine.layout(tree: t, direction: .topDown)
+        try t.applyContent(of: t.deepCopy())
+        #expect(engine.layout(tree: t, direction: .topDown) != before)
+    }
+
     @Test func cardsDoNotOverlap() {
         let (t, _) = familyTree()
         let nodes = TreeLayoutEngine(config: config).layout(tree: t, direction: .topDown).nodes

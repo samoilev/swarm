@@ -61,6 +61,13 @@ public enum GEDZIPArchive {
         let free = (try? directory.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]))?
             .volumeAvailableCapacityForImportantUsage ?? .max
         let limit = budget ?? min(max(size * 50, 1 << 30), free / 2)
+        // Watching the folder grow stops `ditto` only at the next look, by which time a
+        // fast expansion has already written far past the budget. The size the archive
+        // declares is refused before anything is written; the watch stays for an
+        // archive whose directory understates it.
+        if let declared = declaredExpandedSize(of: archive), declared > limit {
+            throw Failure.extractFailed("declares \(declared) bytes, past \(limit)")
+        }
         try run(["-x", "-k", archive.path, directory.path], failure: Failure.extractFailed, limit: (directory, limit))
         let entries = FileManager.default.enumerator(at: directory, includingPropertiesForKeys: [.isSymbolicLinkKey])
         while let entry = entries?.nextObject() as? URL {
@@ -68,6 +75,57 @@ public enum GEDZIPArchive {
                 throw Failure.extractFailed("symbolic link: \(entry.lastPathComponent)")
             }
         }
+    }
+
+    /// The total uncompressed size the ZIP central directory declares, ZIP64 included;
+    /// nil when there is no directory to read, which `ditto` then reports as damage.
+    static func declaredExpandedSize(of archive: URL) -> UInt64? {
+        guard let handle = try? FileHandle(forReadingFrom: archive) else { return nil }
+        defer { try? handle.close() }
+        func read(_ offset: UInt64, _ count: UInt64) -> [UInt8]? {
+            guard (try? handle.seek(toOffset: offset)) != nil,
+                  let data = try? handle.read(upToCount: Int(count)), data.count == count else { return nil }
+            return [UInt8](data)
+        }
+        func number(_ bytes: [UInt8], _ at: Int, _ width: Int) -> UInt64 {
+            (0 ..< width).reduce(0) { $0 | UInt64(bytes[at + $1]) << (8 * $1) }
+        }
+        // The end record sits in the last 22 bytes plus a comment of up to 64 KiB.
+        guard let end = try? handle.seekToEnd(), end >= 22 else { return nil }
+        let tailLength = min(end, 22 + 0xFFFF)
+        guard let tail = read(end - tailLength, tailLength),
+              let eocd = stride(from: tail.count - 22, through: 0, by: -1)
+              .first(where: { number(tail, $0, 4) == 0x0605_4B50 }) else { return nil }
+        var directorySize = number(tail, eocd + 12, 4)
+        var directoryOffset = number(tail, eocd + 16, 4)
+        if directorySize == 0xFFFF_FFFF || directoryOffset == 0xFFFF_FFFF {
+            guard eocd >= 20, number(tail, eocd - 20, 4) == 0x0706_4B50,
+                  let zip64 = read(number(tail, eocd - 20 + 8, 8), 56),
+                  number(zip64, 0, 4) == 0x0606_4B50 else { return nil }
+            directorySize = number(zip64, 40, 8)
+            directoryOffset = number(zip64, 48, 8)
+        }
+        guard directoryOffset <= end, directorySize <= end - directoryOffset,
+              let directory = read(directoryOffset, directorySize) else { return nil }
+        var total: UInt64 = 0
+        var at = 0
+        while at + 46 <= directory.count, number(directory, at, 4) == 0x0201_4B50 {
+            var size = number(directory, at + 24, 4)
+            let nameLength = Int(number(directory, at + 28, 2))
+            let extraLength = Int(number(directory, at + 30, 2))
+            let commentLength = Int(number(directory, at + 32, 2))
+            var extra = at + 46 + nameLength
+            let extraEnd = min(extra + extraLength, directory.count)
+            // A ZIP64 entry keeps its real size in extra field 1, uncompressed size first.
+            while size == 0xFFFF_FFFF, extra + 4 <= extraEnd {
+                let fieldLength = Int(number(directory, extra + 2, 2))
+                if number(directory, extra, 2) == 1, extra + 12 <= extraEnd { size = number(directory, extra + 4, 8) }
+                extra += 4 + fieldLength
+            }
+            total = total.addingReportingOverflow(size).overflow ? .max : total + size
+            at += 46 + nameLength + extraLength + commentLength
+        }
+        return total
     }
 
     /// Whether a URL names a GEDZIP by extension. Content is not sniffed: the picker and

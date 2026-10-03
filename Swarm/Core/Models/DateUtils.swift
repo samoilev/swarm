@@ -202,6 +202,7 @@ public enum FamilyDate {
     /// Calculate age with day-level precision
     /// Returns (years, isApproximate) where isApproximate means only year was available
     public static func calculateAge(birth: String?, death: String?) -> (years: Int, approximate: Bool)? {
+        guard !isImpossibleDate(birth), !isImpossibleDate(death) else { return nil }
         let birthComp = parse(birth)
         guard let birthYear = birthComp.year else { return nil }
 
@@ -243,6 +244,20 @@ public enum FamilyDate {
 
         guard age >= 0 && age < 200 else { return nil }
         return (age, !birthComp.isComplete || !endComp.isComplete)
+    }
+
+    /// A whole date naming a day that does not exist, like `31 FEB 1900`. `parse` still
+    /// reads its year for display, but an age counted from it would be made up.
+    static func isImpossibleDate(_ string: String?) -> Bool {
+        guard let str = string?.trimmingCharacters(in: .whitespacesAndNewlines), !str.isEmpty,
+              parseExact(str) == nil else { return false }
+        let parts = str.components(separatedBy: CharacterSet(charactersIn: " ./-")).filter { !$0.isEmpty }
+        guard parts.count == 3 else { return false }
+        // ISO puts the year first; every other full form puts it last.
+        let (dayPart, monthPart, yearPart) = parts[0].count == 4 ? (parts[2], parts[1], parts[0]) : (parts[0], parts[1], parts[2])
+        guard let day = Int(dayPart), let year = Int(yearPart),
+              let month = Int(monthPart) ?? monthNumber(monthPart) else { return false }
+        return !isValid(day: day, month: month, year: year)
     }
 
     // MARK: - GEDCOM Format

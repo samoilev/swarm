@@ -52,7 +52,11 @@ struct InspectorPanel: View {
     private let panelShape = RoundedRectangle(cornerRadius: 22, style: .continuous)
 
     var body: some View {
-        if let person {
+        // Undo swaps in new instances under the same ids, and `Person ==` compares ids,
+        // so the binding never reports the swap and the card went on showing the record
+        // from before the undo. The tree's own instance is the current one.
+        if let selected = person {
+            let person = tree.person(byId: selected.id) ?? selected
             HStack(spacing: 0) {
                 resizeGutter
                 panel(person)

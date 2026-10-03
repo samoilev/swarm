@@ -213,7 +213,8 @@ public final class FamilyTree: Identifiable, Codable {
             }
 
             if partnerSet.count == 2, let existingIdx = seen[partnerSet],
-               Self.canFold(union, into: merged[existingIdx]) {
+               Self.canFold(union, into: merged[existingIdx]),
+               linkNotesAgree(union.id, merged[existingIdx].id, redirect: redirect) {
                 Self.fold(union, into: merged[existingIdx])
                 redirect[union.id] = merged[existingIdx].id
             } else {
@@ -283,6 +284,25 @@ public final class FamilyTree: Identifiable, Codable {
         union.citations += other.citations.filter { citation in !union.citations.contains { $0.id == citation.id } }
         union.unknownBranches += other.unknownBranches.filter { !union.unknownBranches.contains($0) }
         if union.marriageExtras.isEmpty { union.marriageExtras = other.marriageExtras }
+    }
+
+    /// Folding joins the parent links both unions hold for one child and parent, and a
+    /// joined link keeps a single note: two different notes there would lose one, so
+    /// those unions stay apart like any others whose details disagree.
+    private func linkNotesAgree(_ other: UUID, _ survivor: UUID, redirect: [UUID: UUID]) -> Bool {
+        func key(_ link: ParentLink) -> ParentLinkKey {
+            ParentLinkKey(parentID: link.parentID, childID: link.childID, unionID: nil)
+        }
+        var kept: [ParentLinkKey: ParentLink] = [:]
+        for link in parentLinks where link.notes != nil {
+            guard let id = link.unionID, id == survivor || redirect[id] == survivor else { continue }
+            kept[key(link)] = link
+        }
+        return parentLinks.allSatisfy { link in
+            guard link.unionID == other, let note = link.notes, let mine = kept[key(link)],
+                  mine.kind == link.kind else { return true }
+            return mine.notes == note
+        }
     }
 
     /// Point the parent links of folded unions at the union they folded into. A child

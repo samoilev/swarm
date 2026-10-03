@@ -47,7 +47,9 @@ struct ExportView: View {
                             title: L10n.tr("PDF — всё дерево"),
                             detail: pdfProgress(selected: false) ?? L10n.tr("Схема дерева и карточки людей"),
                             systemImage: "tree",
-                            style: .primary
+                            // A disabled row loses its accent fill, and white type on the
+                            // bare glass was unreadable — the progress shown while busy most.
+                            style: work == nil && !tree.people.isEmpty ? .primary : .secondary(SepiaTheme.accent)
                         )
                     }
                     // `.glass` tinted, not `.glassProminent`: the two render the same

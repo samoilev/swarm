@@ -302,6 +302,59 @@ struct FamilyTreeTests {
         #expect(Set(tree.unions.compactMap { $0.event(ofKind: .divorce)?.date?.year }) == [1920, 1925])
     }
 
+    private static func sharedChild(noteA: String, noteB: String) -> String {
+        """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        0 @I1@ INDI
+        1 NAME Иван /Петров/
+        1 SEX M
+        0 @I2@ INDI
+        1 NAME Анна /Петрова/
+        1 SEX F
+        0 @I3@ INDI
+        1 NAME Пётр /Петров/
+        1 FAMC @F1@
+        2 _PLINK @I1@
+        3 NOTE \(noteA)
+        1 FAMC @F2@
+        2 _PLINK @I1@
+        3 NOTE \(noteB)
+        0 @F1@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I3@
+        0 @F2@ FAM
+        1 HUSB @I1@
+        1 WIFE @I2@
+        1 CHIL @I3@
+        0 TRLR
+        """
+    }
+
+    /// Folding joins the two links a child has to one parent, and the joined link kept
+    /// only the first note. Families whose links carry different notes now stay apart.
+    @Test func duplicateFamiliesWithDifferentLinkNotesAreLeftApart() throws {
+        let tree = try GEDCOMCodec.parse(Self.sharedChild(noteA: "LINK-NOTE-A", noteB: "LINK-NOTE-B")).tree
+
+        tree.optimizeRoot()
+        tree.reconcileParentLinks()
+
+        #expect(tree.unions.count == 2)
+        let saved = try GEDCOMCodec.serialize(tree: tree, document: nil).gedcom
+        #expect(saved.contains("LINK-NOTE-A"))
+        #expect(saved.contains("LINK-NOTE-B"))
+    }
+
+    @Test func duplicateFamiliesWithTheSameLinkNoteStillFold() throws {
+        let tree = try GEDCOMCodec.parse(Self.sharedChild(noteA: "LINK-NOTE", noteB: "LINK-NOTE")).tree
+
+        tree.optimizeRoot()
+
+        #expect(tree.unions.count == 1)
+    }
+
     /// A single-partner family with no children used to survive only if it held a
     /// marriage date or place. A citation or any other recorded detail keeps it too.
     @Test func aLonePartnerFamilyWithOnlyACitationIsKept() throws {

@@ -243,7 +243,7 @@ public final class TreeStore {
         pendingMigrations = []
 
         let fm = FileManager.default
-        recoverInterruptedCommits()
+        let unrecovered = recoverInterruptedCommits()
 
         // Discovery is read-only. Legacy files are listed and migrated only through
         // the explicit, backup-protected `performPendingMigrations()` operation.
@@ -265,7 +265,7 @@ public final class TreeStore {
         }
 
         var needsReconcile: [FamilyTree] = []
-        var failedFolders: [String] = []
+        var failedFolders = unrecovered
         for folder in treeFolders.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) {
             guard let ged = gedFile(in: folder) else { continue }
             do {
@@ -630,9 +630,17 @@ public final class TreeStore {
         guard blocking.isEmpty else { throw TreeStoreError.validationFailed(issues: blocking) }
         let target = uniqueFolderURL(named: FileNaming.sanitizedFileName(tree.name), excluding: current)
         let staging = storageFolder.appendingPathComponent(".staging-\(generationID.uuidString)", isDirectory: true)
+        // A resolved issue leaves the accepted list in the same save that resolves it;
+        // left until after the write, the file kept it one save longer, and a recurrence
+        // in between read as already accepted.
+        let previousAccepted = tree.acceptedBaselineIssueIDs
+        tree.acceptedBaselineIssueIDs.formIntersection(Set(validation.map(\.id)))
         var committed = false
         defer {
-            if !committed { tree.updatedAt = previousUpdatedAt }
+            if !committed {
+                tree.updatedAt = previousUpdatedAt
+                tree.acceptedBaselineIssueIDs = previousAccepted
+            }
             if fm.fileExists(atPath: staging.path) { try? fm.removeItem(at: staging) }
         }
 
@@ -725,7 +733,6 @@ public final class TreeStore {
         try commitStaging(staging, replacing: current, at: target, warnings: &warnings)
         committed = true
         folderMap[tree.id] = target
-        tree.acceptedBaselineIssueIDs.formIntersection(Set(validation.map(\.id)))
 
         let mediaFolder = target.appendingPathComponent(Self.mediaName, isDirectory: true)
         let newPhotoNames = Dictionary(serialized.photos.map { ($0.personID, $0.filename) }, uniquingKeysWith: { first, _ in first })

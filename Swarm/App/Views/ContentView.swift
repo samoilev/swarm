@@ -98,6 +98,7 @@ struct ContentView: View {
                         onSelect: { open($0) },
                         onCreate: { navigate(to: .creating) },
                         onImport: { showGEDCOMImporter = true },
+                        isImportBusy: isStagingImport,
                         onRevealInFinder: { tree in
                             let url = store.gedFileURL(for: tree)
                             NSWorkspace.shared.activateFileViewerSelecting([url])
@@ -243,7 +244,7 @@ struct ContentView: View {
             do {
                 localCopy = try await store.stageImportAsync(from: url)
             } catch {
-                importError = importFailureMessage(error)
+                importError = importFailureMessage(error, selection: url)
                 return
             }
             let stagedDiagnostics = store.stagedImportDiagnostics(for: localCopy)
@@ -256,7 +257,7 @@ struct ContentView: View {
                 importPreview = result
             } catch {
                 store.discardImportPreview(at: localCopy)
-                importError = importFailureMessage(error)
+                importError = importFailureMessage(error, selection: url)
             }
         }
     }
@@ -277,8 +278,10 @@ struct ContentView: View {
     }
 
     /// A file the app was not allowed to read is not a damaged file, and saying so sends
-    /// the reader off to repair an archive that is perfectly intact.
-    private func importFailureMessage(_ error: Error) -> String {
+    /// the reader off to repair an archive that is perfectly intact. The system's own
+    /// wording names the private staging copy, not anything the reader chose, so the
+    /// message names their selection instead.
+    private func importFailureMessage(_ error: Error, selection: URL) -> String {
         if let storeError = error as? TreeStoreError, let description = storeError.errorDescription {
             return description
         }
@@ -286,9 +289,7 @@ struct ContentView: View {
         let denied = nsError.domain == NSCocoaErrorDomain &&
             (nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
         if denied {
-            return L10n.tr(
-                "Нет доступа к файлу. Выберите файл .gdz или всю папку архива, чтобы открыть дерево вместе с фотографиями и вложениями.\n\n\(error.localizedDescription)"
-            )
+            return L10n.tr("Нет доступа к «\(selection.lastPathComponent)». Проверьте права доступа в Finder (Файл ▸ Свойства) и попробуйте ещё раз.")
         }
         return L10n.tr("Файл повреждён или Swarm не поддерживает его формат.\n\n\(error.localizedDescription)")
     }

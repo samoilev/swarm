@@ -789,6 +789,27 @@ struct DefectRegressionTests {
         #expect(reloaded.acceptedBaselineIssueIDs == [Self.deathBeforeBirth])
     }
 
+    /// The save that repairs an accepted error drops it from the file. It used to stay
+    /// one save longer, so the same error coming back read as already accepted.
+    @Test func aRepairedAcceptedErrorLeavesTheFileInTheSameSave() async throws {
+        let temp = try Temp()
+        let source = temp.url.appendingPathComponent("Импорт.ged")
+        try Self.fileWithAnError(head: "1 GEDC\n2 VERS 5.5.1\n").write(to: source, atomically: true, encoding: .utf8)
+        let store = TreeStore(storageFolder: temp.url.appendingPathComponent("Library", isDirectory: true))
+        let staged = try store.stageImport(from: source)
+        let tree = try await store.importGEDCOM(from: staged).tree
+        store.discardImportPreview(at: staged)
+        let person = try #require(tree.people.first)
+
+        person.deathDate = "2000"
+        _ = try await store.saveTree(tree)
+        let saved = try String(contentsOf: store.gedFileURL(for: tree), encoding: .utf8)
+        #expect(!saved.contains(Self.deathBeforeBirth))
+
+        person.deathDate = "1900"
+        await #expect(throws: TreeStoreError.self) { _ = try await store.saveTree(tree) }
+    }
+
     /// Issue ids can be built from names and titles, and they are written into HEAD,
     /// so a privacy export must not carry them.
     @Test func aPrivacyExportCarriesNoAcceptedIssueIDs() throws {
