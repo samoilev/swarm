@@ -609,7 +609,10 @@ public final class TreeStore {
         }
     }
 
-    func persistTree(_ tree: FamilyTree) throws -> SaveReceipt {
+    /// `validated` is this tree's validation when the caller has just run it on the
+    /// reconciled tree, as an import does; validating 20,000 people twice took a fifth
+    /// of a second more of a commit that blocks the window.
+    func persistTree(_ tree: FamilyTree, validated: [TreeIssue]? = nil) throws -> SaveReceipt {
         let fm = FileManager.default
         let generationID = UUID()
         let previousUpdatedAt = tree.updatedAt
@@ -622,11 +625,11 @@ public final class TreeStore {
             throw TreeStoreError.treeFolderMissing
         }
         let current = folderMap[tree.id]
-        let validation = TreeValidator.validate(tree, context: TreeValidationContext(
+        let validation = validated ?? TreeValidator.validate(tree, context: TreeValidationContext(
             acceptedBaselineIssueIDs: tree.acceptedBaselineIssueIDs,
             treeFolderURL: current
         ))
-        let blocking = validation.filter(\.isBlocking)
+        let blocking = validation.filter { $0.severity == .error && !tree.acceptedBaselineIssueIDs.contains($0.id) }
         guard blocking.isEmpty else { throw TreeStoreError.validationFailed(issues: blocking) }
         let target = uniqueFolderURL(named: FileNaming.sanitizedFileName(tree.name), excluding: current)
         let staging = storageFolder.appendingPathComponent(".staging-\(generationID.uuidString)", isDirectory: true)
@@ -875,8 +878,26 @@ public final class TreeStore {
 
     private func referencedFileNames(in gedcom: String) -> ReferencedFileNames {
         var names = ReferencedFileNames()
-        for line in gedcom.split(whereSeparator: \.isNewline) where line.contains(" FILE ") {
-            guard let node = GEDCOMNode(rawLine: String(line)), node.tag == "FILE" else { continue }
+        // One pass over contiguous UTF-8. Splitting into Characters, or even walking the
+        // `utf8` view, cost a quarter of a second or more of every save of a large tree,
+        // nearly all of it on the lines that hold no FILE at all.
+        let marker = Array(" FILE ".utf8)
+        var text = gedcom
+        let fileLines: [String] = text.withUTF8 { bytes in
+            var found: [String] = []
+            var start = 0
+            for end in 0 ... bytes.count where end == bytes.count || bytes[end] == 0x0A || bytes[end] == 0x0D {
+                let line = UnsafeBufferPointer(rebasing: bytes[start ..< end])
+                start = end + 1
+                guard line.count >= marker.count else { continue }
+                if (0 ... line.count - marker.count).contains(where: { i in marker.indices.allSatisfy { line[i + $0] == marker[$0] } }) {
+                    found.append(String(decoding: line, as: UTF8.self))
+                }
+            }
+            return found
+        }
+        for line in fileLines {
+            guard let node = GEDCOMNode(rawLine: line), node.tag == "FILE" else { continue }
             let parts = node.value.replacingOccurrences(of: "\\", with: "/").split(separator: "/")
             // Keep only single path components: imported paths must never let Trash
             // recovery write outside the active Media/ or Attachments/ directory.

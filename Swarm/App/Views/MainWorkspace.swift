@@ -145,7 +145,7 @@ struct MainWorkspace: View {
         self.morphNamespace = morphNamespace
         self.morphingTreeID = morphingTreeID
         self.onBack = onBack
-        _workspaceIndex = State(initialValue: TreeWorkspaceIndexes(tree: tree))
+        _workspaceIndex = State(initialValue: TreeWorkspaceIndexes()) // built once, on appear
     }
 
     private var workspaceSurface: some View {
@@ -235,7 +235,7 @@ struct MainWorkspace: View {
             } action: { newWidth in
                 workspaceWidth = newWidth
             }
-            .onAppear { showInitialToastIfNeeded() }
+            .onAppear { workspaceIndex.rebuild(tree: tree); showInitialToastIfNeeded() }
             .onChange(of: selectedPerson?.id) { _, newValue in handleSelectionChange(newValue) }
             .onChange(of: secondaryPerson?.id) { _, newValue in handleSecondarySelectionChange(newValue) }
             .onChange(of: store.lastSaveError) { _, newValue in showSaveError = (newValue != nil) }

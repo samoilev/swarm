@@ -366,6 +366,9 @@ public extension TreeStore {
                 message: L10n.tr("Дерево с таким идентификатором уже есть в библиотеке. Импортированной копии присвоен новый идентификатор.")
             ))
         }
+        // Reconciled before validating, as a save does, so the save can reuse the result.
+        tree.reconcileParentLinks()
+        tree.migrateLegacySources()
         let importedIssues = TreeValidator.validate(tree)
         tree.acceptedBaselineIssueIDs = Set(importedIssues.filter { $0.severity == .error }.map(\.id))
         for issue in importedIssues where issue.severity == .error {
@@ -383,7 +386,7 @@ public extension TreeStore {
             attachmentsFolder: base.appendingPathComponent(Self.attachmentsName, isDirectory: true)
         )
         do {
-            _ = try persistTree(tree)
+            _ = try persistTree(tree, validated: importedIssues)
             if !trees.contains(where: { $0.id == tree.id }) { trees.append(tree) }
             return result
         } catch {

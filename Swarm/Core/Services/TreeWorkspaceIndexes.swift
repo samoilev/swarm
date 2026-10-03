@@ -56,6 +56,11 @@ public final class TreeWorkspaceIndexes {
         rebuild(tree: tree)
     }
 
+    /// Empty, for a view to fill once it appears. A view's `init` runs again on every
+    /// redraw of its parent, so building here there cost a full rebuild each time —
+    /// over a second apiece for 50,000 people — for a value SwiftUI then discarded.
+    public init() {}
+
     /// `validationContext` defaults to the tree's own accepted baseline. Passing
     /// nothing used to mean "accept nothing", so the review screen marked imported
     /// problems as blocking while a save quietly allowed them — the opposite of what
