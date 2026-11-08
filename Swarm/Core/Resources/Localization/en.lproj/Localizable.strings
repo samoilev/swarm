@@ -412,6 +412,8 @@
 "Перетащите рамку. Чтобы изменить её размер, потяните за угол." = "Drag the frame to move it. Drag a corner to resize it.";
 "Не найдены файлы" = "Files not found";
 "Захоронение" = "Burial";
+"Скрыть подписи карты" = "Hide map labels";
+"Показать подписи карты" = "Show map labels";
 
 /* Miscellaneous labels */
 "Людей в файле" = "People in file";

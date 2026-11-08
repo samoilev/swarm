@@ -17,6 +17,7 @@ struct OfflineVectorMapView: View {
     /// retry, so even a reload that succeeded kept drawing the empty world it first read.
     var reloadToken: Int = 0
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @AppStorage("mapSimplified") private var simplified = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private let zoomSensitivity: CGFloat = 0.3 // <1 makes pinch-zoom softer (0 = no zoom, 1 = 1:1 with fingers)
 
@@ -187,6 +188,8 @@ struct OfflineVectorMapView: View {
                 if let bar = currentScaleBar {
                     Text(L10n.tr("Масштаб: \(scaleLabel(bar.kilometres))"))
                 }
+                // The legend is replaced too, and with it the only way to reach this switch.
+                MapSimplifyButton(isOn: $simplified)
                 ForEach(annotations) { annotation in
                     Button("\(annotation.personName): \(annotation.placeName), \(annotation.kind.label)") {
                         selectedPerson = tree.person(byId: annotation.personID)
@@ -269,7 +272,7 @@ struct OfflineVectorMapView: View {
 
     private func drawBackground(context: inout GraphicsContext, size: CGSize) {
         context.fill(Path(CGRect(origin: .zero, size: size)), with: .color(SepiaTheme.mapSea))
-        drawGraticule(context: &context, size: size)
+        if !simplified { drawGraticule(context: &context, size: size) }
 
         guard let vectors else { return }
         let bounds = OfflineMapProjection.visibleBounds(center: center, scale: mapScale, size: size)
@@ -283,7 +286,7 @@ struct OfflineVectorMapView: View {
             context.stroke(path, with: .color(SepiaTheme.inkSoft.opacity(0.28)), lineWidth: 0.45)
         }
 
-        drawPlaceLabels(context: &context, size: size)
+        if !simplified { drawPlaceLabels(context: &context, size: size) }
     }
 
     private func path(for ring: MapVectorRing, size: CGSize, closed: Bool) -> Path? {
@@ -649,6 +652,7 @@ struct OfflineVectorMapView: View {
             legendItem(L10n.tr("Рождение"), color: SepiaTheme.pinBirth)
             legendItem(L10n.tr("Смерть"), color: SepiaTheme.pinDeath)
             legendItem(L10n.tr("Захоронение"), color: SepiaTheme.pinBurial)
+            MapSimplifyButton(isOn: $simplified)
         }
         .padding(8)
         .background(SepiaTheme.paper.opacity(0.92))

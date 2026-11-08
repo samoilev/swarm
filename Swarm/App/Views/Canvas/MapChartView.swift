@@ -209,6 +209,7 @@ struct AppleMapChartView: View {
     @Binding var fitRequest: Int
     let focus: MapFocus
     @AppStorage(AppLanguage.storageKey) private var languageRaw = AppLanguage.default.rawValue
+    @AppStorage("mapSimplified") private var simplified = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var mapPosition: MapCameraPosition = .region(MKCoordinateRegion(
@@ -230,6 +231,7 @@ struct AppleMapChartView: View {
                 Annotation(group.label, coordinate: group.coordinate) {
                     pinButton(for: group)
                 }
+                .annotationTitles(simplified ? .hidden : .automatic)
             }
             // Connection lines: dashed birth→death life line, dotted death→grave burial line.
             ForEach(polylines) { line in
@@ -237,7 +239,8 @@ struct AppleMapChartView: View {
                     .stroke(lineColor(for: line), style: lineStroke(for: line))
             }
         }
-        .mapStyle(.standard(elevation: .flat, pointsOfInterest: .excludingAll))
+        // MapKit cannot drop the base map's own labels; muting is as far as it goes.
+        .mapStyle(.standard(elevation: .flat, emphasis: simplified ? .muted : .automatic, pointsOfInterest: .excludingAll))
         .animation(reduceMotion ? nil : SepiaMotion.select, value: focus)
         .mapControls {
             MapCompass()
@@ -447,6 +450,7 @@ struct AppleMapChartView: View {
                     .font(SepiaType.label)
                     .foregroundColor(SepiaTheme.inkSoft)
             }
+            MapSimplifyButton(isOn: $simplified)
         }
         .padding(8)
         .background(SepiaTheme.paper.opacity(0.9))
@@ -586,6 +590,31 @@ struct AppleMapChartView: View {
         withAnimation(reduceMotion ? nil : SepiaMotion.cameraLong) {
             mapPosition = .region(MKCoordinateRegion(center: center, span: span))
         }
+    }
+}
+
+/// Hides the map's own text so the family's pins carry the view. Shared by both
+/// renderers' legends; the setting is global, like the map provider.
+struct MapSimplifyButton: View {
+    @Binding var isOn: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        let title = isOn ? L10n.tr("Показать подписи карты") : L10n.tr("Скрыть подписи карты")
+        Button {
+            withAnimation(reduceMotion ? nil : SepiaMotion.select) { isOn.toggle() }
+        } label: {
+            // Fixed frame: `eye.slash` is taller than `eye`, and the legend jumped on toggle.
+            Image(systemName: isOn ? "eye.slash" : "eye")
+                .font(SepiaType.label)
+                .foregroundColor(SepiaTheme.inkSoft)
+                .frame(width: 18, height: 12)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(title)
+        .accessibilityLabel(title)
+        .accessibilityIdentifier("map.simplify")
     }
 }
 

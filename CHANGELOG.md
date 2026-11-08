@@ -11,6 +11,13 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Added
+
+- An eye button in the map legend hides the map's own labels so the family's pins
+  stand out. Apple Maps mutes the base map and drops the names under pins; the offline
+  map drops city names and grid lines. The choice is remembered
+  ([#8](https://github.com/samoilev/swarm/issues/8)).
+
 ### Fixed
 
 - An imported tree with an unreadable date (such as `DATE ?`) or coordinate could no
