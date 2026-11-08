@@ -11,6 +11,8 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.7.1] — 2026-11-08
+
 ### Added
 
 - An eye button in the map legend hides the map's own labels so the family's pins
@@ -1339,7 +1341,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.7.0...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.7.1...HEAD
+[3.7.1]: https://github.com/samoilev/swarm/compare/v3.7.0...v3.7.1
 [3.7.0]: https://github.com/samoilev/swarm/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/samoilev/swarm/compare/v3.5.7...v3.6.0
 [3.5.7]: https://github.com/samoilev/swarm/compare/v3.5.6...v3.5.7
