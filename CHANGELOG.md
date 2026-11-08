@@ -11,6 +11,13 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+### Fixed
+
+- An imported tree with an unreadable date (such as `DATE ?`) or coordinate could no
+  longer be saved after the app was relaunched: every save failed with "Check “?”: the
+  date doesn't exist". Errors accepted at import now stay accepted across relaunches
+  ([#8](https://github.com/samoilev/swarm/issues/8)).
+
 ## [3.7.0] — 2026-10-03
 
 ### Security

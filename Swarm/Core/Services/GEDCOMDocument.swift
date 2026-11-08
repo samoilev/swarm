@@ -655,8 +655,12 @@ public enum GEDCOMCodec {
         // still exist stay accepted: an error the app itself wrote keeps blocking.
         // Without that list — a foreign file, or one saved before Swarm kept it — every
         // current error is accepted once, as before, and the next save records it.
+        // Matched by `baselineKey`, which ignores the event ids a reload regenerates.
         let errorIDs = Set(validation.filter { $0.severity == .error }.map(\.id))
-        tree.acceptedBaselineIssueIDs = parsed.acceptedIssueIDs.map { $0.intersection(errorIDs) } ?? errorIDs
+        tree.acceptedBaselineIssueIDs = parsed.acceptedIssueIDs.map { accepted in
+            let keys = Set(accepted.map(TreeValidator.baselineKey))
+            return errorIDs.filter { keys.contains(TreeValidator.baselineKey($0)) }
+        } ?? errorIDs
         return ImportResult(tree: tree, document: document, report: report)
     }
 

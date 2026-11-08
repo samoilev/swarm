@@ -333,6 +333,15 @@ public enum TreeValidator {
         }
     }
 
+    // ponytail: two events of one owner with the same bad value share a key; harmless,
+    // write event ids to the file if that ever matters.
+    /// What an accepted issue id is matched on across a reload. Event ids are not
+    /// written to the file, so every load gives an event a new one, and an accepted
+    /// invalid date or coordinate would stop matching and block every later save.
+    static func baselineKey(_ issueID: String) -> String {
+        issueID.replacingOccurrences(of: #"\.event\.[0-9A-Fa-f-]{36}\."#, with: ".event.", options: .regularExpression)
+    }
+
     private static func validateDates(
         _ events: [GenealogyEvent],
         owner: String,

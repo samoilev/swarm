@@ -810,6 +810,59 @@ struct DefectRegressionTests {
         await #expect(throws: TreeStoreError.self) { _ = try await store.saveTree(tree) }
     }
 
+    /// Issue #8: an imported `DATE ?` is accepted, but its issue id names the event,
+    /// and event ids are new on every load. After a relaunch the accepted list matched
+    /// nothing, and every save in the tree was refused over that one date.
+    @Test func anAcceptedInvalidDateSurvivesRelaunchesWithoutBlockingSaves() async throws {
+        let temp = try Temp()
+        let source = temp.url.appendingPathComponent("Old.ged")
+        try """
+        0 HEAD
+        1 GEDC
+        2 VERS 5.5.1
+        0 @I1@ INDI
+        1 NAME Jean /Tholosan/
+        1 BIRT
+        2 DATE 3 MAR 1732
+        1 DEAT
+        2 DATE ?
+        0 TRLR
+        """.write(to: source, atomically: true, encoding: .utf8)
+        let library = temp.url.appendingPathComponent("Library", isDirectory: true)
+        let store = TreeStore(storageFolder: library)
+        let staged = try store.stageImport(from: source)
+        let tree = try await store.importGEDCOM(from: staged).tree
+        store.discardImportPreview(at: staged)
+        _ = try await store.saveTree(tree)
+
+        for birth in ["04.03.1732", "05.03.1732"] {
+            let relaunched = TreeStore(storageFolder: library)
+            let reloaded = try #require(relaunched.trees.first)
+            #expect(reloaded.acceptedBaselineIssueIDs.count == 1)
+            reloaded.people[0].birthDate = birth
+            _ = try await relaunched.saveTree(reloaded)
+        }
+    }
+
+    /// Ignoring the event id must not accept a different bad value on the same owner.
+    @Test func anUnlistedInvalidDateStillBlocksAfterReload() throws {
+        let personID = "6C1D4B2F-3333-4444-8555-A66677788899"
+        let tree = try GEDCOMCodec.parse("""
+        0 HEAD
+        1 _ACCEPTED
+        2 _ISSUE person.\(personID).event.00000000-0000-0000-0000-000000000000.invalid-date.?
+        0 @I1@ INDI
+        1 _FTSID \(personID)
+        1 NAME Jean /Tholosan/
+        1 DEAT
+        2 DATE ??
+        0 TRLR
+        """).tree
+        #expect(tree.acceptedBaselineIssueIDs.isEmpty)
+        let issues = TreeValidator.validate(tree, context: .init(acceptedBaselineIssueIDs: tree.acceptedBaselineIssueIDs))
+        #expect(issues.contains { $0.code == "date.invalid" && $0.isBlocking })
+    }
+
     /// Issue ids can be built from names and titles, and they are written into HEAD,
     /// so a privacy export must not carry them.
     @Test func aPrivacyExportCarriesNoAcceptedIssueIDs() throws {
