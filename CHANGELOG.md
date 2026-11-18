@@ -11,6 +11,18 @@ single English record of what changed and when.
 
 ## [Unreleased]
 
+## [3.7.2] — 2026-11-18
+
+### Added
+
+- The "PDF — selection" export lists everyone in the highlighted branch with a
+  checkbox, so a few people can be left out of the PDF (or put back) without redoing
+  the selection on the canvas.
+
+### Changed
+
+- The "Add relative" toolbar button sits a little further from the export button.
+
 ## [3.7.1] — 2026-11-08
 
 ### Added
@@ -1341,7 +1353,8 @@ First release. A macOS app for building a family tree.
 
 Requires macOS 14+ on Apple silicon.
 
-[Unreleased]: https://github.com/samoilev/swarm/compare/v3.7.1...HEAD
+[Unreleased]: https://github.com/samoilev/swarm/compare/v3.7.2...HEAD
+[3.7.2]: https://github.com/samoilev/swarm/compare/v3.7.1...v3.7.2
 [3.7.1]: https://github.com/samoilev/swarm/compare/v3.7.0...v3.7.1
 [3.7.0]: https://github.com/samoilev/swarm/compare/v3.6.0...v3.7.0
 [3.6.0]: https://github.com/samoilev/swarm/compare/v3.5.7...v3.6.0
