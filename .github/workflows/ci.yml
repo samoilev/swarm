@@ -163,7 +163,7 @@ jobs:
             fi
           done <<'CAPS'
           1200 Swarm/Core/Services/TreeStore.swift
-          1437 Swarm/App/Views/MainWorkspace.swift
+          1427 Swarm/App/Views/MainWorkspace.swift
           1415 Swarm/App/Views/EditPersonView.swift
           1381 Swarm/App/Views/Canvas/TreeCanvasView.swift
           CAPS

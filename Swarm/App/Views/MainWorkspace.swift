@@ -892,18 +892,7 @@ struct MainWorkspace: View {
             savedStatus
                 .padding(.trailing, 6)
 
-            Button { showAddSheet = true } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "plus")
-                    Text(L10n.tr("Добавить родственника"))
-                }
-                .fixedSize()
-            }
-            .sepiaGlassProminentButton()
-            .tint(SepiaTheme.accent)
-            .help(L10n.tr("Добавить человека"))
-            .accessibilityLabel(L10n.tr("Добавить человека"))
-            .padding(.trailing, 6)
+            AddRelativeToolbarButton { showAddSheet = true }
 
             Button { showExportModal = true } label: {
                 Image(systemName: "square.and.arrow.up")
