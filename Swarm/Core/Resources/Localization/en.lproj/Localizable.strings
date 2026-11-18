@@ -329,6 +329,7 @@
 "PDF — всё дерево" = "PDF — entire tree";
 "PDF — выделенная часть" = "PDF — selection";
 "Выделите ветвь на схеме, удерживая ⌘." = "Hold ⌘ and click to select a branch on the canvas.";
+"Выбрать людей: %@ из %@" = "Choose people: %@ of %@";
 "GEDCOM с файлами" = "GEDCOM with files";
 "Скрыть данные живых людей" = "Hide living people’s details";
 "Версия" = "Version";

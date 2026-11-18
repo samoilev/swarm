@@ -11,6 +11,12 @@ struct LocalizationTests {
         #expect(L10n.tr("Дерево: \(name)", language: .russian) == "Дерево: Anna")
     }
 
+    /// The selection-PDF checklist header interpolates two counts.
+    @Test func selectionPickerHeaderIsBilingual() {
+        let kept = 8, total = 10
+        #expect(L10n.tr("Выбрать людей: \(kept) из \(total)", language: .english) == "Choose people: 8 of 10")
+    }
+
     @Test func sexReadsAsAFullWordInBothLanguages() {
         #expect(Person.Sex.male.displayName(language: .russian) == "Мужской")
         #expect(Person.Sex.female.displayName(language: .russian) == "Женский")

@@ -903,6 +903,7 @@ struct MainWorkspace: View {
             .tint(SepiaTheme.accent)
             .help(L10n.tr("Добавить человека"))
             .accessibilityLabel(L10n.tr("Добавить человека"))
+            .padding(.trailing, 6)
 
             Button { showExportModal = true } label: {
                 Image(systemName: "square.and.arrow.up")

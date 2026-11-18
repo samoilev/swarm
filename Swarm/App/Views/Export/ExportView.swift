@@ -30,6 +30,13 @@ struct ExportView: View {
     /// What is being produced right now, if anything. Every control is disabled while
     /// it runs, and the row doing the work says how far along it is.
     @State private var work: Work?
+    /// People the user unticked from the highlighted selection for this PDF only.
+    /// Unremembered on purpose: the next highlight is a different set of people.
+    @State private var excludedIds: Set<UUID> = []
+
+    /// The selection PDF's actual scope. Never empty while the row is enabled — the
+    /// renderer reads an empty scope as "whole tree".
+    private var pdfSelection: Set<UUID> { selectedIds.subtracting(excludedIds) }
 
     private enum Work: Equatable {
         case pdf(selected: Bool, done: Int, total: Int)
@@ -69,14 +76,16 @@ struct ExportView: View {
                             title: L10n.tr("PDF — выделенная часть"),
                             detail: pdfProgress(selected: true) ?? (selectedIds.isEmpty
                                 ? L10n.tr("Выделите ветвь на схеме, удерживая ⌘.")
-                                : L10n.count(selectedIds.count, .person)),
+                                : L10n.count(pdfSelection.count, .person)),
                             systemImage: "scope",
-                            style: selectedIds.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
+                            style: pdfSelection.isEmpty ? .unavailable : .secondary(SepiaTheme.accent)
                         )
                     }
                     .sepiaGlassButton(.rounded(SepiaLayout.Radius.card))
                     .buttonBorderShape(.roundedRectangle(radius: SepiaLayout.Radius.card))
-                    .disabled(selectedIds.isEmpty)
+                    .disabled(pdfSelection.isEmpty)
+
+                    if !selectedIds.isEmpty { selectionPicker }
 
                     Button { exportVerifiedTree() } label: {
                         exportRowLabel(
@@ -121,6 +130,44 @@ struct ExportView: View {
         } message: {
             Text(exportError ?? "")
         }
+    }
+
+    /// Ticks for each highlighted person, so a few can be dropped from (or put back
+    /// into) the selection PDF without redoing the highlight on the canvas.
+    private var selectionPicker: some View {
+        let people = tree.people
+            .filter { selectedIds.contains($0.id) }
+            .sorted { $0.sortName(language: .current) < $1.sortName(language: .current) }
+        return DisclosureGroup {
+            ScrollView {
+                VStack(alignment: .leading, spacing: SepiaTheme.scaled(SepiaLayout.xs)) {
+                    ForEach(people) { person in
+                        Toggle(isOn: Binding(
+                            get: { !excludedIds.contains(person.id) },
+                            set: { if $0 { excludedIds.remove(person.id) } else { excludedIds.insert(person.id) } }
+                        )) {
+                            Text(person.lifespan.isEmpty
+                                ? person.displayName()
+                                : "\(person.displayName()), \(person.lifespan)")
+                                .font(SepiaType.control)
+                                .foregroundStyle(SepiaTheme.ink)
+                                .lineLimit(1)
+                        }
+                        .toggleStyle(.checkbox)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+            }
+            // ponytail: fixed cap, a long branch scrolls inside it rather than growing the sheet.
+            .frame(maxHeight: SepiaTheme.scaled(180))
+        } label: {
+            Text(L10n.tr("Выбрать людей: \(pdfSelection.count) из \(selectedIds.count)"))
+                .font(SepiaType.control)
+                .foregroundStyle(SepiaTheme.ink)
+        }
+        .padding(.horizontal, SepiaTheme.scaled(SepiaLayout.s))
+        .padding(.vertical, SepiaTheme.scaled(SepiaLayout.xs))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// Applies to the GEDCOM export only — a PDF has no specification version.
@@ -336,7 +383,9 @@ struct ExportView: View {
 
     private func exportPDF(selected: Bool) {
         guard work == nil else { return }
-        let ids: Set<UUID>? = selected ? selectedIds : nil
+        let ids: Set<UUID>? = selected ? pdfSelection : nil
+        // An empty scope renders the whole tree; never hand that to the selection row.
+        if selected, pdfSelection.isEmpty { return }
         // The renderer knows nothing about privacy — it draws whatever tree it is given,
         // so the redacted names reach the cards, the relatives named on *other* people's
         // cards and the poster alike. The attachments folder is still the real tree's:
